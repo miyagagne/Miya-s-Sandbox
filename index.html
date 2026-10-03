@@ -285,15 +285,23 @@ gsvg.addEventListener('keydown', e => {
 });
 
 /* ---------- connectors (Google Calendar, Notion) ---------- */
-let mcp = null;
-try { window.claude?.use?.('mcp').then(m => { mcp = m; if (cur) sheet(); }).catch(() => {}); } catch(e){}
+let mcp = null, mcpState = 'loading', perms = null;
+function initMcp(){
+  mcpState = 'loading';
+  try {
+    if (!window.claude || !window.claude.use){ mcpState = 'absent'; return; }
+    window.claude.use('mcp').then(m => { mcp = m; mcpState = m ? 'ready' : 'absent'; if (cur) sheet(); }).catch(() => { mcpState = 'absent'; if (cur) sheet(); });
+    window.claude.use('permissions').then(p => { perms = p; }).catch(() => {});
+  } catch(e){ mcpState = 'absent'; }
+}
+initMcp();
 const fail = e => {
   const c = e && e.code;
-  if (c === 'not_in_manifest' || c === 'consent_required') return 'Access was not allowed for this page. Reopen the page and allow it, or use the artifact’s Permissions menu.';
-  if (c === 'server_not_connected' || c === 'selection_required') return 'This connector is not connected. Add it in claude.ai Settings → Connectors.';
-  if (c === 'needs_reauth') return 'The connection expired. Reconnect it in claude.ai Settings → Connectors.';
+  if (c === 'not_in_manifest' || c === 'consent_required') return 'Access was not allowed for this page. Use “Allow access” on this tab, or the artifact’s Permissions menu. (' + c + ')';
+  if (c === 'server_not_connected' || c === 'selection_required') return 'This connector is not connected. Add it in claude.ai Settings → Connectors. (' + c + ')';
+  if (c === 'needs_reauth') return 'The connection expired. Reconnect it in claude.ai Settings → Connectors. (' + c + ')';
   if (c === 'server_unavailable' || c === 'upstream_error') return 'The service did not answer. Try again in a moment.';
-  return (e && e.message) || 'Something went wrong.';
+  return ((e && e.message) || 'Something went wrong.') + (c ? ` (${c})` : '');
 };
 async function tool(server, name, input){ const r = await mcp.callTool(server, name, input); return r.payload ?? r; }
 
@@ -418,11 +426,16 @@ let gcals = null, gmsg = '', nstate = { msg: '', results: [], sources: [], busy:
 function syncTab(){
   const r = cur;
   if (!mcp){
-    $('#body').innerHTML = `<div class="msg">Connecting to Google Calendar and Notion works when this page is opened inside Claude, with the connectors enabled. Everything else here works without them.</div>`;
+    $('#body').innerHTML = mcpState === 'loading'
+      ? `<div class="msg">Connecting…</div>`
+      : `<div class="msg err">This page can’t reach your connectors here. Syncing only works on the Claude artifact page (claude.ai/artifact/…), opened while signed in as the owner, not on GitHub Pages or the installed app. If you are on the artifact page, reload it and allow access when asked.</div><button class="ghost" id="mretry">Try again</button>`;
+    const rt = $('#mretry'); if (rt) rt.onclick = () => { initMcp(); syncTab(); };
     return;
   }
+  const status = `<div class="msg" id="mstatus">Checking connections…</div><div class="row" style="margin-bottom:6px"><button class="small" id="mallow">Allow access</button><button class="ghost small" id="mcheck">Check again</button></div>`;
   const linkRow = (kind, l) => `<li><span class="tag ${kind === 'google' ? 'g' : 'n'}">${kind === 'google' ? 'GOOGLE' : 'NOTION'}</span><span class="grow">${esc(l.name)}</span><button class="ghost small" data-unlink="${kind}|${esc(l.id || l.ds)}">Remove</button></li>`;
   $('#body').innerHTML = `
+    ${status}
     <p class="note" style="margin-top:0">Events from linked calendars show up in this rock’s calendar. They are read-only and never copied into your local events.</p>
     <h3>Google Calendar</h3>
     <ul class="list">${r.links.google.map(l => linkRow('google', l)).join('')}</ul>
@@ -437,6 +450,21 @@ function syncTab(){
     ${nstate.results.length ? `<div class="pick">${nstate.results.map((x, i) => `<label style="cursor:pointer"><span class="grow">${esc(x.title)}<small class="note">${esc(x.type)}</small></span><button class="ghost small" data-npick="${i}" type="button">Use</button></label>`).join('')}</div>` : ''}
     ${nstate.sources.length ? `<div class="pick"><div class="note">Choose a database from that page:</div>${nstate.sources.map((s, i) => `<label><span class="grow">${esc(s.name)}</span><button class="small" data-nlink="${i}" type="button">Link</button></label>`).join('')}</div>` : ''}`;
 
+  const check = async () => {
+    const el = $('#mstatus'); if (!el) return;
+    try {
+      const l = await mcp.listTools(), by = n => (l.servers || []).find(x => x.server === n);
+      const st = {}; if (perms) { try { Object.assign(st, await perms.state()); } catch(e){} }
+      const line = n => { const x = by(n); const p = st['mcp:' + n]; return `${n}: ${!x ? 'not connected in claude.ai' : x.authStatus === 'needs_reauth' ? 'needs reconnecting' : 'connected'}${p ? ' · access ' + p : ''}`; };
+      el.textContent = line(GOOGLE) + '   |   ' + line(NOTION);
+    } catch(e){ el.textContent = 'Could not check: ' + fail(e); el.classList.add('err'); }
+  };
+  check();
+  $('#mcheck').onclick = check;
+  $('#mallow').onclick = async () => {
+    try { if (perms) await perms.request(['mcp:' + GOOGLE, 'mcp:' + NOTION]); else await mcp.listTools(); } catch(e){}
+    check();
+  };
   document.querySelectorAll('[data-unlink]').forEach(b => b.onclick = () => {
     const [k, id] = b.dataset.unlink.split('|');
     r.links[k] = r.links[k].filter(l => (l.id || l.ds) !== id); save(); clearSync(r); syncTab();
