@@ -18,3 +18,15 @@ You can also double-click `index.html` to use it in a browser with no hosting. I
 
 - Each person creates a username and password on first open. Accounts and gardens are stored on that device only, and each garden is encrypted with its owner’s password (no reset is possible). They are not synced between devices.
 - Google Calendar and Notion sync only works when the page is opened inside Claude (the published artifact). The installed app shows the rest of the features without it.
+
+## Same garden on every device (cloud accounts)
+
+Out of the box, accounts live on one device. To sync across devices, connect a free Supabase project:
+
+1. Create a project at supabase.com.
+2. SQL Editor → paste `supabase-setup.sql` → Run.
+3. Authentication → Providers → Email: keep it enabled. To skip confirmation emails while testing, turn off "Confirm email".
+4. Authentication → URL Configuration: set **Site URL** to your app address (for example `https://miyagagne.github.io/Miya-s-Sandbox/`) so password-reset emails come back to the app.
+5. Project Settings → API: copy the **Project URL** and the **anon public key** into `CLOUD` near the top of the script in `index.html`.
+
+People then sign in with an email and password. Each person can only read and change their own garden (enforced by row-level security). Cloud mode runs on the standalone site and installed app, not inside the Claude artifact, which blocks outside network calls.

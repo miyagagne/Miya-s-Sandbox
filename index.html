@@ -112,13 +112,14 @@ textarea{min-height:260px;resize:vertical;line-height:1.55}
   <div class="sub">Sign in to open your garden.</div>
   <div class="seg" role="tablist"><button type="button" class="on" id="tin">Sign in</button><button type="button" id="tup">Create account</button></div>
   <form id="authform" autocomplete="on">
-    <label for="au">Username</label><input id="au" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <label for="au" id="aulabel">Username</label><input id="au" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
     <label for="ap">Password</label><input id="ap" name="password" type="password" autocomplete="current-password" required>
     <div id="apw2" hidden><label for="ap2">Repeat password</label><input id="ap2" type="password" autocomplete="new-password"></div>
     <div class="msg err" id="amsg" hidden></div>
+    <p style="margin:12px 0 0" id="aforgotrow" hidden><button class="ghost small" type="button" id="aforgot">Forgot password?</button></p>
     <button type="submit" id="asubmit">Sign in</button>
   </form>
-  <p class="note" style="margin-bottom:0">Accounts are stored on this device only. Your garden is encrypted with your password, so there is no way to reset it. If you forget it, the account has to be erased.</p>
+  <p class="note" style="margin-bottom:0" id="anote">Accounts are stored on this device only. Your garden is encrypted with your password, so there is no way to reset it. If you forget it, the account has to be erased.</p>
   <p style="margin:10px 0 0"><button class="ghost small" id="aerase" type="button" hidden>Erase this account</button></p>
 </div>
 
@@ -128,7 +129,7 @@ textarea{min-height:260px;resize:vertical;line-height:1.55}
       <h1>Rock Garden</h1>
       <div class="sub">Every activity is a stone in the sand pit. Heavier commitments weigh more.</div>
     </div>
-    <div class="who"><span id="who"></span><button class="ghost small" id="signout">Sign out</button><button id="add">+ New rock</button></div>
+    <div class="who"><span id="who"></span><span id="syncst" class="note"></span><button class="ghost small" id="signout">Sign out</button><button id="add">+ New rock</button></div>
   </header>
 
   <div class="garden-box"><svg id="garden" viewBox="0 0 700 700" role="img" aria-label="Sand garden of activity rocks"></svg></div>
@@ -181,10 +182,11 @@ async function unseal(key, blob){
   return JSON.parse(new TextDecoder().decode(pt));
 }
 async function persist(){
+  if (cloudOn() && sess && state){ try { localStorage.setItem(CCACHE(sess.user.id), JSON.stringify(state)); } catch(e){} return push(); }
   if (!state || !user || !dkey) return;
   try { localStorage.setItem(DATA(user), JSON.stringify(await seal(dkey, state))); } catch(e){}
 }
-function save(){ clearTimeout(saveT); saveT = setTimeout(persist, 150); }
+function save(){ clearTimeout(saveT); saveT = setTimeout(() => { saveT = null; persist(); }, cloudOn() ? 800 : 150); }
 document.addEventListener('visibilitychange', () => { if (document.hidden) { clearTimeout(saveT); persist(); } });
 window.addEventListener('pagehide', () => { clearTimeout(saveT); persist(); });
 
@@ -200,9 +202,90 @@ function enter(u, key, data){
 async function signOut(){
   clearTimeout(saveT); await persist();
   try { sessionStorage.removeItem(SES); } catch(e){}
+  if (cloudOn()){ saveSess(null); setSync(''); }
   cur = null; state = null; user = null; dkey = null; $('#overlay').classList.remove('open');
   showAuth();
 }
+
+/* ---------- cloud accounts (Supabase): same garden on every device ---------- */
+// Fill these in from Supabase → Project Settings → API. The anon key is meant to be public.
+const CLOUD = { url: '', key: '' };
+const cloudOn = () => !!(CLOUD.url && CLOUD.key) && window.top === window && /^https?:$/.test(location.protocol);
+const CS = 'rockGarden.cloud.session', CCACHE = id => 'rockGarden.cloud.cache.' + id;
+let sess = null, lastAt = 0, pushing = false;
+function saveSess(x){ sess = x; try { x ? localStorage.setItem(CS, JSON.stringify(x)) : localStorage.removeItem(CS); } catch(e){} }
+async function authCall(path, body, method = 'POST', tok){
+  const r = await fetch(CLOUD.url + path, { method, headers: { apikey: CLOUD.key, 'Content-Type': 'application/json', ...(tok ? { Authorization: 'Bearer ' + tok } : {}) }, body: body ? JSON.stringify(body) : undefined });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(j.msg || j.error_description || j.message || 'Request failed'), { status: r.status });
+  return j;
+}
+const toSess = j => ({ access_token: j.access_token, refresh_token: j.refresh_token, expires_at: Date.now() + (j.expires_in || 3600) * 1000, user: { id: j.user.id, email: j.user.email } });
+async function token(){
+  if (!sess) throw Object.assign(new Error('Signed out'), { status: 401 });
+  if (Date.now() > sess.expires_at - 60000) saveSess(toSess(await authCall('/auth/v1/token?grant_type=refresh_token', { refresh_token: sess.refresh_token })));
+  return sess.access_token;
+}
+async function rest(path, opts = {}){
+  const t = await token();
+  const r = await fetch(CLOUD.url + '/rest/v1' + path, { ...opts, headers: { apikey: CLOUD.key, Authorization: 'Bearer ' + t, 'Content-Type': 'application/json', ...(opts.headers || {}) } });
+  if (!r.ok) throw Object.assign(new Error('Sync failed (' + r.status + ')'), { status: r.status });
+  return r.status === 204 ? null : r.json();
+}
+const pull = async () => (await rest(`/gardens?select=data,updated_at&user_id=eq.${sess.user.id}`))[0] || null;
+const setSync = t => { const e = $('#syncst'); if (e) e.textContent = t; };
+async function push(){
+  pushing = true; setSync('Saving…');
+  try {
+    const at = new Date().toISOString();
+    await rest('/gardens?on_conflict=user_id', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ user_id: sess.user.id, data: state, updated_at: at }) });
+    lastAt = Date.parse(at); setSync('Synced');
+  } catch(e){ setSync('Offline, will retry'); } finally { pushing = false; }
+}
+async function enterCloud(){
+  let remote = null, offline = false;
+  try { remote = await pull(); } catch(e){ if (e.status === 401 || e.status === 403 || e.status === 400){ saveSess(null); showAuth(); amsg('Please sign in again.'); return; } offline = true; }
+  let data;
+  if (remote){ data = remote.data; lastAt = Date.parse(remote.updated_at); }
+  else { try { data = JSON.parse(localStorage.getItem(CCACHE(sess.user.id))); } catch(e){} if (!data){ try { const old = JSON.parse(localStorage.getItem(KEY)); if (old && old.rocks){ data = old; } } catch(e){} } data = data || seed(); }
+  enter(sess.user.email.split('@')[0], null, data);
+  setSync(offline ? 'Offline' : 'Synced');
+  if (!remote && !offline) push();
+}
+async function refreshFromCloud(){
+  if (!cloudOn() || !sess || !state || pushing || saveT || cur) return;
+  try { const r = await pull(); if (r && Date.parse(r.updated_at) > lastAt){ lastAt = Date.parse(r.updated_at); state = fixup(r.data); render(); setSync('Synced'); } } catch(e){}
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshFromCloud(); });
+setInterval(refreshFromCloud, 30000);
+
+async function cloudSubmit(){
+  const email = $('#au').value.trim().toLowerCase(), pw = $('#ap').value;
+  try {
+    if (authMode === 'reset'){
+      if (pw.length < 8) return amsg('Password needs at least 8 characters.');
+      if (pw !== $('#ap2').value) return amsg('The two passwords don’t match.');
+      const h = new URLSearchParams(location.hash.slice(1)), u = await authCall('/auth/v1/user', { password: pw }, 'PUT', h.get('access_token'));
+      saveSess({ access_token: h.get('access_token'), refresh_token: h.get('refresh_token'), expires_at: Date.now() + (+h.get('expires_in') || 3600) * 1000, user: { id: u.id, email: u.email } });
+      history.replaceState(null, '', location.pathname + location.search); setMode('in'); return enterCloud();
+    }
+    if (!/^\S+@\S+\.\S+$/.test(email)) return amsg('Enter a valid email address.');
+    if (authMode === 'up'){
+      if (pw.length < 8) return amsg('Password needs at least 8 characters.');
+      if (pw !== $('#ap2').value) return amsg('The two passwords don’t match.');
+      const j = await authCall('/auth/v1/signup', { email, password: pw });
+      if (j.access_token){ saveSess(toSess(j)); return enterCloud(); }
+      return amsg('Check your email to confirm your account, then sign in.', true);
+    }
+    saveSess(toSess(await authCall('/auth/v1/token?grant_type=password', { email, password: pw })));
+    return enterCloud();
+  } catch(e){ amsg(e.message || 'Something went wrong.'); }
+}
+$('#aforgot').onclick = async () => {
+  const email = $('#au').value.trim().toLowerCase();
+  if (!email) return amsg('Type your email first.');
+  try { await authCall('/auth/v1/recover', { email }); amsg('If that email has an account, a reset link is on its way.', true); } catch(e){ amsg(e.message); }
+};
 
 let authMode = 'in';
 function setMode(m){
@@ -210,12 +293,19 @@ function setMode(m){
   $('#tin').classList.toggle('on', m === 'in'); $('#tup').classList.toggle('on', m === 'up');
   $('#apw2').hidden = m !== 'up'; $('#asubmit').textContent = m === 'in' ? 'Sign in' : 'Create account';
   $('#ap').autocomplete = m === 'in' ? 'current-password' : 'new-password';
-  $('#aerase').hidden = m !== 'in'; $('#amsg').hidden = true;
+  $('#aerase').hidden = m !== 'in' || cloudOn(); $('#amsg').hidden = true;
+  const c = cloudOn();
+  $('#aulabel').textContent = c ? 'Email' : 'Username'; $('#au').type = c ? 'email' : 'text';
+  $('#aforgotrow').hidden = !(c && m === 'in');
+  if (m === 'reset'){ $('#apw2').hidden = false; $('#asubmit').textContent = 'Set new password'; $('#ap').autocomplete = 'new-password'; $('#au').hidden = true; $('#aulabel').hidden = true; }
+  else { $('#au').hidden = false; $('#aulabel').hidden = false; }
+  $('#anote').textContent = c ? 'Your garden is saved to your account, so it is the same on every device where you sign in.' : 'Accounts are stored on this device only. Your garden is encrypted with your password, so there is no way to reset it. If you forget it, the account has to be erased.';
 }
-const amsg = t => { const e = $('#amsg'); e.textContent = t; e.hidden = !t; };
+const amsg = (t, ok) => { const e = $('#amsg'); e.textContent = t; e.hidden = !t; e.classList.toggle('err', !ok); };
 $('#tin').onclick = () => setMode('in'); $('#tup').onclick = () => setMode('up');
 $('#authform').onsubmit = async e => {
   e.preventDefault(); amsg('');
+  if (cloudOn()){ const b = $('#asubmit'); b.disabled = true; try { await cloudSubmit(); } finally { b.disabled = false; } return; }
   if (!window.crypto || !crypto.subtle){ amsg('This browser can’t do secure sign-in here. Open the app over https.'); return; }
   const name = $('#au').value.trim().toLowerCase(), pw = $('#ap').value, btn = $('#asubmit');
   btn.disabled = true;
@@ -255,6 +345,14 @@ $('#aerase').onclick = () => {
 };
 $('#signout').onclick = signOut;
 async function boot(){
+  if (cloudOn()){
+    if (location.hash.includes('type=recovery') && location.hash.includes('access_token')){ showAuth(); setMode('reset'); return; }
+    showAuth(); setMode(authMode);
+    try { saveSess(JSON.parse(localStorage.getItem(CS) || 'null')); } catch(e){}
+    if (sess){ try { await token(); } catch(e){ if (e.status >= 400 && e.status < 500) saveSess(null); } }
+    if (sess) return enterCloud();
+    return;
+  }
   showAuth();
   if (!window.crypto || !crypto.subtle) return;
   if (!Object.keys(accounts()).length) setMode('up');
