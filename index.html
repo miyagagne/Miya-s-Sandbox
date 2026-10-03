@@ -1,118 +1,153 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Rock Garden Organizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+/* Layout: one calm column. A framed sand garden sits first, quick-add under it, and each rock opens a bottom sheet (centered dialog on desktop). */
 :root{
-  --bg:#2b2a28; --ink:#f4efe6; --muted:#b8b0a2; --panel:#3a3835; --line:#55514b;
-  --sand:#e8d5a8; --sand2:#d9c28c; --accent:#e07a5f; --ok:#81b29a;
+  --bg:#e8ebe4; --bg2:#dde2d7; --surface:#f6f7f3; --surface2:#eceee7; --ink:#1f2622; --muted:#667068; --line:#cbd1c5;
+  --accent:#4f6b3a; --accent-ink:#fff; --danger:#a23b3b; --google:#2f6db5; --notion:#5c5c58; --scrim:rgba(20,26,22,.5);
+  --display:"Shippori Mincho","Hiragino Mincho ProN",Georgia,serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121614; --bg2:#1a201c; --surface:#1d2420; --surface2:#252d28; --ink:#e9ede6; --muted:#98a39a; --line:#38423b;
+  --accent:#a5c27d; --accent-ink:#16200f; --danger:#e07a7a; --google:#7fb0ee; --notion:#b9b9b3; --scrim:rgba(0,0,0,.65);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121614; --bg2:#1a201c; --surface:#1d2420; --surface2:#252d28; --ink:#e9ede6; --muted:#98a39a; --line:#38423b;
+  --accent:#a5c27d; --accent-ink:#16200f; --danger:#e07a7a; --google:#7fb0ee; --notion:#b9b9b3; --scrim:rgba(0,0,0,.65);color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;flex-wrap:wrap}
-h1{font-size:1.25rem;margin:0}
+html,body{margin:0}
+body{background:radial-gradient(120% 80% at 50% 0%,var(--bg2),var(--bg));color:var(--ink);font:15px/1.45 var(--body);min-height:100vh;padding-inline:16px;padding-block:8px 40px}
 button,input,select,textarea{font:inherit;color:inherit}
-button{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
-button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
-button.danger{background:#a4373a}
-button:hover{filter:brightness(1.1)}
-input,select,textarea{background:#2b2a28;border:1px solid var(--line);border-radius:8px;padding:8px;width:100%}
-label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
-#garden-wrap{max-width:760px;margin:0 auto;padding:0 12px 24px}
-#garden{width:100%;height:auto;display:block;touch-action:none}
-.rock{cursor:grab}
+button{background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;padding:9px 18px;cursor:pointer;font-weight:600}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.rock:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}
+button.small{padding:5px 12px;font-size:.85rem}
+button:disabled{opacity:.5;cursor:default}
+input,select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%;min-width:0}
+input[type=range]{padding:0;accent-color:var(--accent)}
+input[type=checkbox]{width:auto;accent-color:var(--accent)}
+label{display:block;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 5px}
+h1,h2,h3{font-family:var(--display);margin:0;font-weight:700}
+.wrap{max-width:780px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:14px;flex-wrap:wrap}
+h1{font-size:1.5rem;letter-spacing:.02em}
+.sub{color:var(--muted);font-size:.9rem;margin-top:2px}
+.garden-box{position:relative}
+#garden{width:100%;height:auto;display:block;touch-action:none;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 18px 24px rgba(0,0,0,.28))}
+.rock{cursor:grab;outline:none}
 .rock.drag{cursor:grabbing}
-#garden{user-select:none;-webkit-user-select:none}
-.rock text{pointer-events:none;font-weight:600;text-anchor:middle;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.55);stroke-width:3px}
-.hint{text-align:center;color:var(--muted);font-size:.9rem;margin:4px 0 0}
-.empty{text-anchor:middle;fill:#7a6a45;font-size:18px}
-.badge{fill:var(--accent);stroke:#fff;stroke-width:2}
-.badge-t{fill:#fff;font-size:12px;font-weight:700;text-anchor:middle;stroke:none!important}
+.rock .lbl{font-family:var(--display);font-weight:700;text-anchor:middle;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.6);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.rock .wt{font-family:var(--body);font-size:11px;text-anchor:middle;fill:rgba(255,255,255,.8);pointer-events:none;letter-spacing:.08em}
+.pebble-t{font:700 12px var(--body);text-anchor:middle;fill:#fff;pointer-events:none}
+.empty-t{font-family:var(--display);font-size:20px;text-anchor:middle;fill:#7a6a45}
+.hint{text-align:center;color:var(--muted);font-size:.88rem;margin:12px 0 0}
+.quick{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-top:18px;padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.quick>div{flex:1;min-width:150px}
+.quick label{margin-top:0}
+.quick button{flex:none}
 
-/* modal */
-#overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:10}
+/* sheet */
+#overlay{position:fixed;inset:0;background:var(--scrim);display:none;align-items:flex-end;justify-content:center;z-index:10;padding-top:env(safe-area-inset-top,0px)}
 #overlay.open{display:flex}
-.sheet{background:var(--panel);width:100%;max-width:820px;max-height:92vh;overflow:auto;border-radius:16px 16px 0 0;padding:16px}
-@media(min-width:700px){#overlay{align-items:center}.sheet{border-radius:16px}}
+.sheet{background:var(--surface);width:100%;max-width:840px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));border:1px solid var(--line)}
+@media(min-width:720px){#overlay{align-items:center}.sheet{border-radius:20px;padding:22px}}
 .sheet-head{display:flex;align-items:center;gap:12px}
-.dot{width:36px;height:36px;border-radius:50%;flex:none;box-shadow:inset -4px -5px 8px rgba(0,0,0,.35)}
-.sheet-head h2{margin:0;flex:1;font-size:1.3rem}
-.tabs{display:flex;gap:6px;margin:14px 0;border-bottom:1px solid var(--line)}
-.tab{background:none;border-radius:8px 8px 0 0;color:var(--muted);padding:8px 14px}
-.tab.active{color:var(--ink);background:#2b2a28}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-.row>*{flex:1;min-width:110px}
+.stone{width:38px;height:38px;border-radius:50%;flex:none;box-shadow:inset -5px -6px 9px rgba(0,0,0,.4),inset 3px 3px 6px rgba(255,255,255,.25)}
+.sheet-head h2{flex:1;font-size:1.45rem;min-width:0;overflow-wrap:anywhere}
+.tabs{display:flex;gap:4px;margin:14px 0;overflow-x:auto;border-bottom:1px solid var(--line)}
+.tab{background:none;color:var(--muted);border-radius:10px 10px 0 0;padding:8px 14px;font-weight:500;white-space:nowrap}
+.tab.active{color:var(--ink);box-shadow:inset 0 -2px 0 var(--accent)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row>input,.row>select{flex:1;min-width:120px}
 .row>button{flex:none}
 
 /* calendar */
-.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-.dow{text-align:center;font-size:.75rem;color:var(--muted)}
-.day{min-height:52px;background:#2b2a28;border-radius:6px;padding:3px 4px;font-size:.8rem;cursor:pointer;position:relative;border:1px solid transparent}
-.day.out{opacity:.35}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-nav strong{font-family:var(--display);font-size:1.15rem}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.dow{text-align:center;font-size:.72rem;color:var(--muted);letter-spacing:.08em}
+.day{min-height:56px;background:var(--surface2);border-radius:8px;padding:3px 4px;font-size:.78rem;cursor:pointer;border:1px solid transparent;overflow:hidden;min-width:0}
+.day.out{opacity:.4}
 .day.today{border-color:var(--accent)}
-.day.sel{background:#4a463f}
-.day .pip{display:block;font-size:.65rem;background:var(--ac,var(--accent));border-radius:3px;padding:0 3px;margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#fff}
-.list{list-style:none;padding:0;margin:10px 0}
-.list li{display:flex;align-items:center;gap:8px;padding:8px;background:#2b2a28;border-radius:8px;margin-bottom:6px}
-.list li .grow{flex:1}
-.list li small{color:var(--muted);display:block}
-.list li.done .grow{text-decoration:line-through;opacity:.55}
-.x{background:none;color:var(--muted);padding:2px 8px;font-size:1.1rem}
-textarea{min-height:240px;resize:vertical}
-.size-note{color:var(--muted);font-size:.8rem}
+.day.sel{background:var(--bg2);box-shadow:inset 0 0 0 1px var(--muted)}
+.pip{display:block;font-size:.62rem;border-radius:4px;padding:0 4px;margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#fff;background:var(--ac)}
+.pip.g{background:var(--google)}.pip.n{background:var(--notion)}
+.list{list-style:none;padding:0;margin:10px 0;display:flex;flex-direction:column;gap:6px}
+.list li{display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--surface2);border-radius:10px}
+.grow{flex:1;min-width:0;overflow-wrap:anywhere}
+.grow small{display:block;color:var(--muted)}
+li.done .grow{text-decoration:line-through;opacity:.55}
+.x{background:none;color:var(--muted);padding:2px 8px;font-size:1.05rem;font-weight:400}
+.tag{font-size:.65rem;font-weight:700;letter-spacing:.06em;border-radius:5px;padding:1px 6px;color:#fff;flex:none}
+.tag.g{background:var(--google)}.tag.n{background:var(--notion)}
+.sync-line{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.8rem;margin:8px 0}
+textarea{min-height:260px;resize:vertical;line-height:1.55}
+.note{color:var(--muted);font-size:.85rem}
+.msg{padding:10px 12px;border-radius:10px;background:var(--surface2);border:1px solid var(--line);font-size:.88rem;margin:8px 0}
+.msg.err{border-color:var(--danger)}
+.pick{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.pick label{display:flex;gap:10px;align-items:center;text-transform:none;letter-spacing:0;font-size:.95rem;color:var(--ink);margin:0;padding:8px 10px;background:var(--surface2);border-radius:10px}
+.colors{display:flex;gap:10px;flex-wrap:wrap}
+.colors button{width:38px;height:38px;padding:0;border-radius:50%;box-shadow:inset -4px -5px 7px rgba(0,0,0,.35)}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:rise .22s ease-out}@keyframes rise{from{transform:translateY(16px);opacity:0}}}
 </style>
-</head>
-<body>
-<header>
-  <h1>🪨 Rock Garden Organizer</h1>
-  <button id="add">+ New rock</button>
-</header>
 
-<div id="garden-wrap">
-  <svg id="garden" viewBox="0 0 700 700" aria-label="Sand garden of activity rocks"></svg>
-  <p class="hint">Bigger rock = heavier commitment. Drag rocks to rearrange them; tap one to open its calendar, notes and tasks.</p>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Rock Garden</h1>
+      <div class="sub">Every activity is a stone. Heavier commitments weigh more.</div>
+    </div>
+    <button id="add">+ New rock</button>
+  </header>
+
+  <div class="garden-box"><svg id="garden" viewBox="0 0 700 700" role="img" aria-label="Sand garden of activity rocks"></svg></div>
+  <p class="hint">Drag a rock to move it. Tap it to open its calendar, notes and tasks.</p>
+
+  <form class="quick" id="quick">
+    <div><label for="qn">Add a rock</label><input id="qn" placeholder="Club, class, hobby, job…" autocomplete="off"></div>
+    <div><label for="qw">Weight <span id="qwv">5</span>/10</label><input id="qw" type="range" min="1" max="10" value="5"></div>
+    <button type="submit">Place rock</button>
+  </form>
 </div>
 
-<div id="overlay"><div class="sheet" id="sheet"></div></div>
+<div id="overlay"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
 
 <script>
 const KEY = 'rockGarden.v1';
-const COLORS = ['#7d8597','#8d6e63','#6b8e7f','#9c7a97','#b08968','#5f7a8a','#a0522d','#708090'];
-const R = 330, C = 350;           // garden radius & center in the 700 viewBox
+const COLORS = ['#6f7a86','#8a6f58','#6d8068','#85707f','#a98d6d','#5d7487','#4d5258','#8f6048'];
+const R = 330, C = 350, GAP = 10;
+const GOOGLE = 'Google Calendar', NOTION = 'Notion';
 const $ = s => document.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2, 10);
 const pad = n => String(n).padStart(2, '0');
 const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hash = s => { let h = 2166136261; for (const c of s){ h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+const rng = seed => () => (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296;
 
 let state = load();
+function blank(name, weight, color){ return { id: uid(), name, weight, color, events: [], tasks: [], notes: '', links: { google: [], notion: [] } }; }
 function load(){
-  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.rocks) return s; } catch(e){}
-  return { rocks: [
-    { id: uid(), name: 'Robotics Club', weight: 8, color: COLORS[0], events: [], tasks: [], notes: '' },
-    { id: uid(), name: 'Piano', weight: 5, color: COLORS[2], events: [], tasks: [], notes: '' },
-    { id: uid(), name: 'Book Club', weight: 3, color: COLORS[3], events: [], tasks: [], notes: '' },
-  ]};
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.rocks){ s.rocks.forEach(r => r.links = r.links || { google: [], notion: [] }); return s; } } catch(e){}
+  return { rocks: [blank('Robotics Club', 8, COLORS[0]), blank('Piano', 5, COLORS[2]), blank('Book Club', 3, COLORS[3])] };
 }
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
 
-/* ---------- garden layout: rocks keep their own positions; overlaps get pushed apart ---------- */
-const GAP = 10;
+/* ---------- layout ---------- */
 function gardenScale(){
   const sum = state.rocks.reduce((t, r) => t + Math.pow(22 + r.weight * 9, 2), 0);
   return Math.min(1, Math.sqrt(R * R * 0.45 / (sum || 1)));
 }
 const radius = (rk, sc) => (22 + rk.weight * 9) * sc;
-
-// keep rocks inside the sand and apart; `fixed` is the rock being dragged (it doesn't get pushed)
 function settle(fixed){
   const sc = gardenScale(), rocks = state.rocks;
   for (const rk of rocks) if (typeof rk.x !== 'number'){
-    let spot = null;
-    const r = radius(rk, sc);
+    let spot = null; const r = radius(rk, sc);
     for (let d = 0; d <= R - r - 14 && !spot; d += 4){
       const steps = Math.max(1, Math.round(d / 6));
       for (let i = 0; i < steps; i++){
@@ -132,9 +167,7 @@ function settle(fixed){
       if (d < 0.01){ dx = Math.random() - .5; dy = Math.random() - .5; d = Math.hypot(dx, dy); }
       const push = (min - d) / d;
       const wp = p === fixed ? 0 : (q === fixed ? 1 : .5), wq = q === fixed ? 0 : (p === fixed ? 1 : .5);
-      p.x -= dx * push * wp; p.y -= dy * push * wp;
-      q.x += dx * push * wq; q.y += dy * push * wq;
-      moved = true;
+      p.x -= dx * push * wp; p.y -= dy * push * wp; q.x += dx * push * wq; q.y += dy * push * wq; moved = true;
     }
     for (const rk of rocks){
       const lim = R - radius(rk, sc) - 8, d = Math.hypot(rk.x, rk.y);
@@ -145,170 +178,80 @@ function settle(fixed){
   return sc;
 }
 
+/* ---------- drawing ---------- */
 function shade(hex, amt){
-  const n = parseInt(hex.slice(1), 16);
-  const f = v => Math.max(0, Math.min(255, v + amt));
+  const n = parseInt(hex.slice(1), 16), f = v => Math.max(0, Math.min(255, v + amt));
   return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
+}
+// slightly irregular, still round, closed outline (Catmull-Rom -> cubic Bezier)
+function stonePath(cx, cy, r, id){
+  const rnd = rng(hash(id)), N = 14, ph = rnd() * 6.28, a2 = rnd() * 6.28, pts = [];
+  for (let i = 0; i < N; i++){
+    const t = i / N * Math.PI * 2;
+    const k = 1 + .035 * Math.sin(2 * t + ph) + .028 * Math.sin(3 * t + a2) + (rnd() - .5) * .03;
+    pts.push([cx + Math.cos(t) * r * k, cy + Math.sin(t) * r * k]);
+  }
+  let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < N; i++){
+    const p0 = pts[(i - 1 + N) % N], p1 = pts[i], p2 = pts[(i + 1) % N], p3 = pts[(i + 2) % N];
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6], c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    d += `C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+  }
+  return d + 'Z';
+}
+function mossFor(p){
+  if (p.rk.weight < 5) return '';
+  const rnd = rng(hash(p.rk.id + 'm')), a = Math.PI * (.15 + rnd() * .5), out = [];
+  for (let i = 0; i < 7; i++){
+    const t = a + (rnd() - .5) * 1.1, d = p.r * (.78 + rnd() * .2), rr = p.r * (.05 + rnd() * .07);
+    out.push(`<circle cx="${(p.x + Math.cos(t) * d).toFixed(1)}" cy="${(p.y + Math.sin(t) * d).toFixed(1)}" r="${rr.toFixed(1)}" fill="${i % 2 ? '#5d7d3c' : '#7a9a50'}" opacity=".9"/>`);
+  }
+  return out.join('');
 }
 
 function render(){
-  const svg = $('#garden');
   const sc = settle(dragging && dragging.rk);
   const placed = state.rocks.map(rk => ({ rk, r: radius(rk, sc), x: C + rk.x, y: C + rk.y }));
-  const today = ymd(new Date());
+  const rakes = [...Array(15)].map((_, i) => `<circle cx="${C}" cy="${C}" r="${24 + i * 22}"/>`).join('');
+  const around = placed.map(p => [1,2,3,4].map(k => `<circle cx="${p.x}" cy="${p.y}" r="${(p.r + k * 8).toFixed(1)}"/>`).join('')).join('');
   let out = `<defs>
-    <radialGradient id="sandg" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#f1e2bb"/><stop offset="1" stop-color="#d4b87c"/></radialGradient>
+    <radialGradient id="sandg" cx="50%" cy="42%" r="65%"><stop offset="0" stop-color="#f3e6c4"/><stop offset=".7" stop-color="#e2cc97"/><stop offset="1" stop-color="#cdb27a"/></radialGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b7b66"/><stop offset=".5" stop-color="#5e5242"/><stop offset="1" stop-color="#3e362b"/></linearGradient>
     <clipPath id="clip"><circle cx="${C}" cy="${C}" r="${R}"/></clipPath>
-    ${state.rocks.map(r => `<radialGradient id="g${r.id}" cx="35%" cy="30%" r="75%">
-      <stop offset="0" stop-color="${shade(r.color, 55)}"/><stop offset=".6" stop-color="${r.color}"/><stop offset="1" stop-color="${shade(r.color, -60)}"/></radialGradient>`).join('')}
+    <filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4"/><feColorMatrix values="0 0 0 0 .45  0 0 0 0 .36  0 0 0 0 .2  0 0 0 .5 -.12"/></filter>
+    <filter id="stone" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".05 .07" numOctaves="3" seed="7" result="n"/><feColorMatrix in="n" type="saturate" values="0" result="g"/><feComposite in="g" in2="SourceGraphic" operator="in" result="gt"/><feBlend in="SourceGraphic" in2="gt" mode="soft-light"/></filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="5"/></filter>
+    ${state.rocks.map(r => `<radialGradient id="g${r.id}" cx="34%" cy="28%" r="80%"><stop offset="0" stop-color="${shade(r.color, 62)}"/><stop offset=".55" stop-color="${r.color}"/><stop offset="1" stop-color="${shade(r.color, -70)}"/></radialGradient>`).join('')}
   </defs>
-  <circle cx="${C}" cy="${C}" r="${R + 14}" fill="#5b4a2e"/>
+  <circle cx="${C}" cy="${C}" r="${R + 20}" fill="url(#frame)"/>
+  <circle cx="${C}" cy="${C}" r="${R + 6}" fill="#2c261e"/>
   <circle cx="${C}" cy="${C}" r="${R}" fill="url(#sandg)"/>
-  <g clip-path="url(#clip)" fill="none" stroke="#b79a5c" stroke-opacity=".35" stroke-width="1.5">
-    ${[...Array(14)].map((_, i) => `<circle cx="${C}" cy="${C}" r="${30 + i * 24}"/>`).join('')}
-    ${placed.map(p => [1,2,3].map(k => `<circle cx="${p.x}" cy="${p.y}" r="${p.r + k * 9}" stroke-opacity="${.6 - k * .13}"/>`).join('')).join('')}
-  </g>`;
-  if (!placed.length) out += `<text class="empty" x="${C}" y="${C}">Add a rock to begin</text>`;
+  <rect x="${C - R}" y="${C - R}" width="${R * 2}" height="${R * 2}" filter="url(#grain)" clip-path="url(#clip)" opacity=".55"/>
+  <g clip-path="url(#clip)" fill="none">
+    <g stroke="#fff6dc" stroke-opacity=".5" stroke-width="2" transform="translate(0.8,1.2)">${rakes}${around}</g>
+    <g stroke="#a98d55" stroke-opacity=".55" stroke-width="1.6">${rakes}${around}</g>
+  </g>
+  <circle cx="${C}" cy="${C}" r="${R}" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="6" clip-path="url(#clip)"/>`;
+  if (!placed.length) out += `<text class="empty-t" x="${C}" y="${C}">Place your first rock below</text>`;
   for (const p of placed){
-    const { rk, r, x, y } = p;
-    const pending = rk.tasks.filter(t => !t.done).length;
-    const fs = Math.max(11, Math.min(20, r / 3.2));
-    out += `<g class="rock ${dragging && dragging.rk === rk ? 'drag' : ''}" data-id="${rk.id}">
-      <ellipse cx="${x + r * .12}" cy="${y + r * .85}" rx="${r * .95}" ry="${r * .22}" fill="rgba(60,40,10,.35)"/>
-      <circle cx="${x}" cy="${y}" r="${r}" fill="url(#g${rk.id})"/>
-      <text x="${x}" y="${y + fs / 3}" font-size="${fs}">${esc(rk.name.length > 14 ? rk.name.slice(0, 13) + '…' : rk.name)}</text>
-      ${pending ? `<circle class="badge" cx="${x + r * .72}" cy="${y - r * .72}" r="11"/><text class="badge-t" x="${x + r * .72}" y="${y - r * .72 + 4}">${pending}</text>` : ''}
-      <title>${esc(rk.name)} — weight ${rk.weight}</title>
-    </g>`;
+    const { rk, r, x, y } = p, pending = rk.tasks.filter(t => !t.done).length;
+    const fs = Math.max(12, Math.min(22, r / 3.1)), nm = rk.name.length > 14 ? rk.name.slice(0, 13) + '…' : rk.name;
+    out += `<g class="rock ${dragging && dragging.rk === rk ? 'drag' : ''}" data-id="${rk.id}" tabindex="0" role="button" aria-label="${esc(rk.name)}, weight ${rk.weight}">
+      <ellipse cx="${x + r * .14}" cy="${y + r * .86}" rx="${r * 1.02}" ry="${r * .26}" fill="rgba(50,35,10,.5)" filter="url(#soft)"/>
+      <path d="${stonePath(x, y, r, rk.id)}" fill="url(#g${rk.id})" filter="url(#stone)"/>
+      ${mossFor(p)}
+      <text class="lbl" x="${x}" y="${y + fs / 4}" font-size="${fs}">${esc(nm)}</text>
+      <text class="wt" x="${x}" y="${y + fs / 4 + 15}">${rk.weight}/10</text>
+      ${pending ? `<circle cx="${x + r * .7}" cy="${y - r * .7}" r="12" fill="#c9553d" stroke="#fff" stroke-width="2"/><text class="pebble-t" x="${x + r * .7}" y="${y - r * .7 + 4.5}">${pending}</text>` : ''}
+      <title>${esc(rk.name)}</title></g>`;
   }
-  svg.innerHTML = out;
+  $('#garden').innerHTML = out;
 }
-
-/* ---------- activity sheet ---------- */
-let cur = null, tab = 'calendar', month = new Date(), selDay = ymd(new Date());
-
-function openRock(id){
-  cur = state.rocks.find(r => r.id === id);
-  if (!cur) return;
-  tab = 'calendar'; month = new Date(); selDay = ymd(new Date());
-  $('#overlay').classList.add('open');
-  sheet();
-}
-function closeSheet(){ $('#overlay').classList.remove('open'); cur = null; render(); save(); }
-
-function sheet(){
-  const r = cur;
-  $('#sheet').innerHTML = `
-    <div class="sheet-head">
-      <span class="dot" style="background:${r.color}"></span>
-      <h2>${esc(r.name)}</h2>
-      <button class="ghost" id="close">Close</button>
-    </div>
-    <div class="tabs">
-      ${['calendar','notes','tasks','settings'].map(t => `<button class="tab ${t === tab ? 'active' : ''}" data-t="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join('')}
-    </div>
-    <div id="body"></div>`;
-  $('#close').onclick = closeSheet;
-  document.querySelectorAll('.tab').forEach(b => b.onclick = () => { tab = b.dataset.t; sheet(); });
-  ({ calendar: calTab, notes: notesTab, tasks: tasksTab, settings: settingsTab })[tab]();
-}
-
-function calTab(){
-  const r = cur, y = month.getFullYear(), m = month.getMonth();
-  const first = new Date(y, m, 1), start = new Date(y, m, 1 - first.getDay());
-  const today = ymd(new Date());
-  let cells = '';
-  for (let i = 0; i < 42; i++){
-    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i), k = ymd(d);
-    const evs = r.events.filter(e => e.date === k).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
-    cells += `<div class="day ${d.getMonth() !== m ? 'out' : ''} ${k === today ? 'today' : ''} ${k === selDay ? 'sel' : ''}" data-d="${k}" style="--ac:${r.color}">
-      ${d.getDate()}${evs.slice(0, 2).map(e => `<span class="pip">${esc(e.title)}</span>`).join('')}${evs.length > 2 ? `<span class="pip">+${evs.length - 2}</span>` : ''}</div>`;
-  }
-  const dayEvs = r.events.filter(e => e.date === selDay).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
-  const upcoming = r.events.filter(e => e.date >= today).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || ''))).slice(0, 5);
-  $('#body').innerHTML = `
-    <div class="cal-nav">
-      <button class="ghost" id="prev">‹</button>
-      <strong>${month.toLocaleString(undefined, { month: 'long', year: 'numeric' })}</strong>
-      <button class="ghost" id="next">›</button>
-    </div>
-    <div class="grid">${['S','M','T','W','T','F','S'].map(d => `<div class="dow">${d}</div>`).join('')}${cells}</div>
-    <h3>${new Date(selDay + 'T00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</h3>
-    <ul class="list">${dayEvs.map(e => `<li><span class="grow">${esc(e.title)}<small>${e.time || 'All day'}</small></span><button class="x" data-del="${e.id}">✕</button></li>`).join('') || '<li><span class="grow" style="color:var(--muted)">Nothing scheduled.</span></li>'}</ul>
-    <div class="row">
-      <input id="et" placeholder="Add event (meeting, practice, deadline…)">
-      <input id="etime" type="time" style="max-width:130px">
-      <button id="eadd">Add</button>
-    </div>
-    ${upcoming.length ? `<h3>Coming up</h3><ul class="list">${upcoming.map(e => `<li><span class="grow">${esc(e.title)}<small>${e.date}${e.time ? ' · ' + e.time : ''}</small></span></li>`).join('')}</ul>` : ''}`;
-  $('#prev').onclick = () => { month = new Date(y, m - 1, 1); calTab(); };
-  $('#next').onclick = () => { month = new Date(y, m + 1, 1); calTab(); };
-  document.querySelectorAll('.day').forEach(d => d.onclick = () => { selDay = d.dataset.d; calTab(); });
-  document.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { r.events = r.events.filter(e => e.id !== b.dataset.del); save(); calTab(); });
-  const add = () => {
-    const t = $('#et').value.trim(); if (!t) return;
-    r.events.push({ id: uid(), title: t, date: selDay, time: $('#etime').value });
-    save(); calTab();
-  };
-  $('#eadd').onclick = add;
-  $('#et').onkeydown = e => { if (e.key === 'Enter') add(); };
-}
-
-function notesTab(){
-  $('#body').innerHTML = `<label>Notes about ${esc(cur.name)} (saved automatically)</label><textarea id="notes" placeholder="Meeting notes, ideas, contacts, goals…">${esc(cur.notes)}</textarea>`;
-  $('#notes').oninput = e => { cur.notes = e.target.value; save(); };
-}
-
-function tasksTab(){
-  const r = cur;
-  $('#body').innerHTML = `
-    <div class="row"><input id="tt" placeholder="Add a task that helps with this activity"><input id="td" type="date" style="max-width:160px"><button id="tadd">Add</button></div>
-    <ul class="list">${r.tasks.map(t => `<li class="${t.done ? 'done' : ''}">
-      <input type="checkbox" style="width:auto" data-c="${t.id}" ${t.done ? 'checked' : ''}>
-      <span class="grow">${esc(t.title)}${t.due ? `<small>Due ${t.due}</small>` : ''}</span>
-      <button class="x" data-x="${t.id}">✕</button></li>`).join('') || '<li><span class="grow" style="color:var(--muted)">No tasks yet.</span></li>'}</ul>`;
-  const add = () => {
-    const t = $('#tt').value.trim(); if (!t) return;
-    r.tasks.push({ id: uid(), title: t, due: $('#td').value, done: false }); save(); tasksTab();
-  };
-  $('#tadd').onclick = add;
-  $('#tt').onkeydown = e => { if (e.key === 'Enter') add(); };
-  document.querySelectorAll('[data-c]').forEach(c => c.onchange = () => { r.tasks.find(t => t.id === c.dataset.c).done = c.checked; save(); tasksTab(); });
-  document.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { r.tasks = r.tasks.filter(t => t.id !== b.dataset.x); save(); tasksTab(); });
-}
-
-function settingsTab(){
-  const r = cur;
-  $('#body').innerHTML = `
-    <label>Name</label><input id="sn" value="${esc(r.name)}">
-    <label>Weight: <span id="wv">${r.weight}</span> / 10 <span class="size-note">(how much of your life this takes — sets rock size)</span></label>
-    <input id="sw" type="range" min="1" max="10" value="${r.weight}">
-    <label>Color</label>
-    <div class="row" id="cols">${COLORS.map(c => `<button data-col="${c}" style="background:${c};flex:none;width:36px;height:36px;border-radius:50%;border:${c === r.color ? '3px solid #fff' : '0'}"></button>`).join('')}</div>
-    <p><button class="danger" id="delrock">Delete this rock</button></p>`;
-  $('#sn').oninput = e => { r.name = e.target.value || 'Untitled'; save(); document.querySelector('.sheet-head h2').textContent = r.name; };
-  $('#sw').oninput = e => { r.weight = +e.target.value; $('#wv').textContent = r.weight; save(); };
-  document.querySelectorAll('[data-col]').forEach(b => b.onclick = () => { r.color = b.dataset.col; save(); sheet(); });
-  $('#delrock').onclick = () => {
-    if (!confirm(`Delete "${r.name}" and all its events, notes and tasks?`)) return;
-    state.rocks = state.rocks.filter(x => x.id !== r.id); save(); closeSheet();
-  };
-}
-
-$('#add').onclick = () => {
-  const rock = { id: uid(), name: 'New activity', weight: 5, color: COLORS[state.rocks.length % COLORS.length], events: [], tasks: [], notes: '' };
-  state.rocks.push(rock); save(); render(); openRock(rock.id); tab = 'settings'; sheet();
-};
-$('#overlay').onclick = e => { if (e.target.id === 'overlay') closeSheet(); };
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && cur) closeSheet(); });
 
 /* ---------- dragging ---------- */
 let dragging = null;
 const gsvg = $('#garden');
-function svgPoint(e){
-  const pt = gsvg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
-  return pt.matrixTransform(gsvg.getScreenCTM().inverse());
-}
+function svgPoint(e){ const pt = gsvg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(gsvg.getScreenCTM().inverse()); }
 gsvg.addEventListener('pointerdown', e => {
   const g = e.target.closest('.rock'); if (!g) return;
   const rk = state.rocks.find(r => r.id === g.dataset.id), p = svgPoint(e);
@@ -323,14 +266,259 @@ gsvg.addEventListener('pointermove', e => {
   dragging.rk.x = p.x - C + dragging.ox; dragging.rk.y = p.y - C + dragging.oy;
   render();
 });
-function endDrag(e){
+gsvg.addEventListener('pointerup', () => {
   if (!dragging) return;
-  const d = dragging; dragging = null;
-  if (d.moved){ render(); save(); } else { render(); openRock(d.rk.id); }
-}
-gsvg.addEventListener('pointerup', endDrag);
+  const d = dragging; dragging = null; render();
+  if (d.moved) save(); else openRock(d.rk.id);
+});
 gsvg.addEventListener('pointercancel', () => { dragging = null; render(); });
+gsvg.addEventListener('keydown', e => {
+  const g = e.target.closest('.rock');
+  if (g && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); openRock(g.dataset.id); }
+});
+
+/* ---------- connectors (Google Calendar, Notion) ---------- */
+let mcp = null;
+try { window.claude?.use?.('mcp').then(m => { mcp = m; if (cur) sheet(); }).catch(() => {}); } catch(e){}
+const fail = e => {
+  const c = e && e.code;
+  if (c === 'not_in_manifest' || c === 'consent_required') return 'Access was not allowed for this page. Reopen the page and allow it, or use the artifact’s Permissions menu.';
+  if (c === 'server_not_connected' || c === 'selection_required') return 'This connector is not connected. Add it in claude.ai Settings → Connectors.';
+  if (c === 'needs_reauth') return 'The connection expired. Reconnect it in claude.ai Settings → Connectors.';
+  if (c === 'server_unavailable' || c === 'upstream_error') return 'The service did not answer. Try again in a moment.';
+  return (e && e.message) || 'Something went wrong.';
+};
+async function tool(server, name, input){ const r = await mcp.callTool(server, name, input); return r.payload ?? r; }
+
+const syncCache = new Map(); // rockId|month -> {events, error, at}
+function gridStart(m){ const f = new Date(m.getFullYear(), m.getMonth(), 1); return new Date(f.getFullYear(), f.getMonth(), 1 - f.getDay()); }
+
+async function fetchGoogle(link, start, end){
+  const p = await tool(GOOGLE, 'list_events', { calendarId: link.id, startTime: start.toISOString(), endTime: end.toISOString(), orderBy: 'startTime', pageSize: 250 });
+  return (p.events || []).filter(e => e.status !== 'cancelled').map(e => {
+    const s = e.start || {}, dt = s.dateTime;
+    return { id: 'g' + e.id, title: e.summary || '(no title)', date: (dt || s.date || '').slice(0, 10), time: dt ? dt.slice(11, 16) : '', src: 'g', url: e.htmlLink };
+  }).filter(e => e.date);
+}
+function notionRowToEvent(row){
+  const dk = Object.keys(row).find(k => /^date:.+:start$/.test(k)); if (!dk || !row[dk]) return null;
+  const isDt = row[dk.replace(/:start$/, ':is_datetime')], raw = row[dk];
+  let date = raw.slice(0, 10), time = '';
+  if (isDt){ const d = new Date(raw); if (!isNaN(d)){ date = ymd(d); time = hm(d); } }
+  const pref = ['Name', 'Title', 'Assignment', 'Task', 'Event', 'Topic', 'Item'];
+  const cand = Object.keys(row).filter(k => k !== 'url' && !k.startsWith('date:') && typeof row[k] === 'string' && !row[k].startsWith('['));
+  const key = pref.find(k => cand.includes(k)) || cand.sort((a, b) => row[b].length - row[a].length)[0];
+  return { id: 'n' + (row.url || uid()), title: key ? row[key] : 'Untitled', date, time, src: 'n', url: row.url };
+}
+async function fetchNotion(link){
+  let p = await tool(NOTION, 'notion-query-data-sources', { data: { mode: 'rows', data_source_url: link.ds, limit: 100 } });
+  let rows = p.results || [];
+  if (p.has_more && rows.length){
+    const dk = Object.keys(rows.find(r => Object.keys(r).some(k => /^date:.+:start$/.test(k))) || {}).find(k => /^date:.+:start$/.test(k));
+    if (dk){
+      try { p = await tool(NOTION, 'notion-query-data-sources', { data: { mode: 'rows', data_source_url: link.ds, limit: 100, sort: [{ property: dk.slice(5, -6), direction: 'descending' }] } }); rows = p.results || rows; } catch(e){}
+    }
+  }
+  return rows.map(notionRowToEvent).filter(Boolean);
+}
+async function syncRock(rk, force){
+  if (!mcp || !(rk.links.google.length || rk.links.notion.length)) return;
+  const gs = gridStart(month), ge = new Date(gs.getFullYear(), gs.getMonth(), gs.getDate() + 42);
+  const key = rk.id + '|' + ymd(gs);
+  const hit = syncCache.get(key);
+  if (hit && !force && Date.now() - hit.at < 120000) return;
+  syncCache.set(key, { events: hit ? hit.events : [], errors: [], at: Date.now(), busy: true });
+  if (cur === rk && tab === 'calendar') calTab();
+  const events = [], errors = [];
+  await Promise.all([
+    ...rk.links.google.map(l => fetchGoogle(l, gs, ge).then(e => events.push(...e)).catch(e => errors.push(`${l.name}: ${fail(e)}`))),
+    ...rk.links.notion.map(l => fetchNotion(l).then(e => events.push(...e)).catch(e => errors.push(`${l.name}: ${fail(e)}`)))
+  ]);
+  syncCache.set(key, { events, errors, at: Date.now(), busy: false });
+  if (cur === rk && tab === 'calendar' && ymd(gridStart(month)) === ymd(gs)) calTab();
+}
+const synced = rk => syncCache.get(rk.id + '|' + ymd(gridStart(month))) || { events: [], errors: [], busy: false };
+
+/* ---------- sheet ---------- */
+let cur = null, tab = 'calendar', month = new Date(), selDay = ymd(new Date());
+function openRock(id, t){
+  cur = state.rocks.find(r => r.id === id); if (!cur) return;
+  tab = t || 'calendar'; month = new Date(); selDay = ymd(new Date());
+  $('#overlay').classList.add('open'); sheet(); syncRock(cur);
+}
+function closeSheet(){ $('#overlay').classList.remove('open'); cur = null; render(); save(); }
+function sheet(){
+  const r = cur; if (!r) return;
+  $('#sheet').innerHTML = `
+    <div class="sheet-head"><span class="stone" style="background:radial-gradient(circle at 35% 30%,${shade(r.color, 60)},${r.color} 60%,${shade(r.color, -60)})"></span><h2>${esc(r.name)}</h2><button class="ghost small" id="close">Close</button></div>
+    <div class="tabs" role="tablist">${[['calendar','Calendar'],['notes','Notes'],['tasks','Tasks'],['sync','Connect'],['settings','Rock']].map(([k, l]) => `<button class="tab ${k === tab ? 'active' : ''}" data-t="${k}" role="tab">${l}</button>`).join('')}</div>
+    <div id="body"></div>`;
+  $('#close').onclick = closeSheet;
+  document.querySelectorAll('.tab').forEach(b => b.onclick = () => { tab = b.dataset.t; sheet(); if (tab === 'calendar') syncRock(cur); });
+  ({ calendar: calTab, notes: notesTab, tasks: tasksTab, sync: syncTab, settings: settingsTab })[tab]();
+}
+
+function calTab(){
+  const r = cur, y = month.getFullYear(), m = month.getMonth(), start = gridStart(month), today = ymd(new Date());
+  const sy = synced(r), all = [...r.events.map(e => ({ ...e, src: 'l' })), ...sy.events];
+  const byTime = (a, b) => (a.time || '').localeCompare(b.time || '');
+  let cells = '';
+  for (let i = 0; i < 42; i++){
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i), k = ymd(d), evs = all.filter(e => e.date === k).sort(byTime);
+    cells += `<div class="day ${d.getMonth() !== m ? 'out' : ''} ${k === today ? 'today' : ''} ${k === selDay ? 'sel' : ''}" data-d="${k}" style="--ac:${r.color}">${d.getDate()}${evs.slice(0, 2).map(e => `<span class="pip ${e.src === 'l' ? '' : e.src}">${esc(e.title)}</span>`).join('')}${evs.length > 2 ? `<span class="pip" style="background:var(--muted)">+${evs.length - 2}</span>` : ''}</div>`;
+  }
+  const dayEvs = all.filter(e => e.date === selDay).sort(byTime);
+  const up = all.filter(e => e.date >= today).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || ''))).slice(0, 5);
+  const li = e => `<li><span class="grow">${e.src !== 'l' ? `<span class="tag ${e.src}">${e.src === 'g' ? 'GOOGLE' : 'NOTION'}</span> ` : ''}${esc(e.title)}<small>${e.date === selDay && e.date !== undefined && !e._up ? '' : e.date + ' · '}${e.time || 'All day'}</small></span>${e.src === 'l' ? `<button class="x" data-del="${e.id}" aria-label="Delete">✕</button>` : (e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener" class="note">Open ↗</a>` : '')}</li>`;
+  const linked = r.links.google.length + r.links.notion.length;
+  $('#body').innerHTML = `
+    <div class="cal-nav"><button class="ghost small" id="prev" aria-label="Previous month">‹</button><strong>${month.toLocaleString(undefined, { month: 'long', year: 'numeric' })}</strong><button class="ghost small" id="next" aria-label="Next month">›</button></div>
+    <div class="grid">${['S','M','T','W','T','F','S'].map(d => `<div class="dow">${d}</div>`).join('')}${cells}</div>
+    ${linked ? `<div class="sync-line">${sy.busy ? 'Syncing…' : 'Synced ' + (sy.at ? new Date(sy.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '')} <button class="ghost small" id="resync" ${sy.busy ? 'disabled' : ''}>Refresh</button></div>` : `<div class="sync-line">Want your Google or Notion calendar here? <button class="ghost small" id="goconnect">Connect</button></div>`}
+    ${(sy.errors || []).map(e => `<div class="msg err">${esc(e)}</div>`).join('')}
+    <h3 style="margin-top:14px">${new Date(selDay + 'T00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</h3>
+    <ul class="list">${dayEvs.map(li).join('') || '<li><span class="grow note">Nothing scheduled.</span></li>'}</ul>
+    <div class="row"><input id="et" placeholder="Add an event (practice, meeting, deadline…)" aria-label="Event title"><input id="etime" type="time" style="max-width:130px;flex:none" aria-label="Time"><button id="eadd">Add</button></div>
+    ${up.length ? `<h3 style="margin-top:18px">Coming up</h3><ul class="list">${up.map(e => li({ ...e, _up: true })).join('')}</ul>` : ''}`;
+  $('#prev').onclick = () => { month = new Date(y, m - 1, 1); calTab(); syncRock(r); };
+  $('#next').onclick = () => { month = new Date(y, m + 1, 1); calTab(); syncRock(r); };
+  document.querySelectorAll('.day').forEach(d => d.onclick = () => { selDay = d.dataset.d; calTab(); });
+  document.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { r.events = r.events.filter(e => e.id !== b.dataset.del); save(); calTab(); });
+  const rs = $('#resync'); if (rs) rs.onclick = () => syncRock(r, true);
+  const gc = $('#goconnect'); if (gc) gc.onclick = () => { tab = 'sync'; sheet(); };
+  const add = () => { const t = $('#et').value.trim(); if (!t) return; r.events.push({ id: uid(), title: t, date: selDay, time: $('#etime').value }); save(); calTab(); };
+  $('#eadd').onclick = add; $('#et').onkeydown = e => { if (e.key === 'Enter') add(); };
+}
+
+function notesTab(){
+  $('#body').innerHTML = `<label for="notes">Notes for ${esc(cur.name)}</label><textarea id="notes" placeholder="Meeting notes, ideas, contacts, goals…">${esc(cur.notes)}</textarea><p class="note">Saved as you type.</p>`;
+  $('#notes').oninput = e => { cur.notes = e.target.value; save(); };
+}
+
+function tasksTab(){
+  const r = cur;
+  $('#body').innerHTML = `
+    <div class="row"><input id="tt" placeholder="Something that moves this activity forward" aria-label="Task"><input id="td" type="date" style="max-width:160px;flex:none" aria-label="Due date"><button id="tadd">Add</button></div>
+    <ul class="list">${r.tasks.map(t => `<li class="${t.done ? 'done' : ''}"><input type="checkbox" data-c="${t.id}" ${t.done ? 'checked' : ''} aria-label="Done"><span class="grow">${esc(t.title)}${t.due ? `<small>Due ${t.due}</small>` : ''}</span><button class="x" data-x="${t.id}" aria-label="Delete">✕</button></li>`).join('') || '<li><span class="grow note">No tasks yet.</span></li>'}</ul>`;
+  const add = () => { const t = $('#tt').value.trim(); if (!t) return; r.tasks.push({ id: uid(), title: t, due: $('#td').value, done: false }); save(); tasksTab(); };
+  $('#tadd').onclick = add; $('#tt').onkeydown = e => { if (e.key === 'Enter') add(); };
+  document.querySelectorAll('[data-c]').forEach(c => c.onchange = () => { r.tasks.find(t => t.id === c.dataset.c).done = c.checked; save(); tasksTab(); });
+  document.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { r.tasks = r.tasks.filter(t => t.id !== b.dataset.x); save(); tasksTab(); });
+}
+
+/* ---------- connect tab ---------- */
+let gcals = null, gmsg = '', nstate = { msg: '', results: [], sources: [], busy: false };
+function syncTab(){
+  const r = cur;
+  if (!mcp){
+    $('#body').innerHTML = `<div class="msg">Connecting to Google Calendar and Notion works when this page is opened inside Claude, with the connectors enabled. Everything else here works without them.</div>`;
+    return;
+  }
+  const linkRow = (kind, l) => `<li><span class="tag ${kind === 'google' ? 'g' : 'n'}">${kind === 'google' ? 'GOOGLE' : 'NOTION'}</span><span class="grow">${esc(l.name)}</span><button class="ghost small" data-unlink="${kind}|${esc(l.id || l.ds)}">Remove</button></li>`;
+  $('#body').innerHTML = `
+    <p class="note" style="margin-top:0">Events from linked calendars show up in this rock’s calendar. They are read-only and never copied into your local events.</p>
+    <h3>Google Calendar</h3>
+    <ul class="list">${r.links.google.map(l => linkRow('google', l)).join('')}</ul>
+    <button class="ghost small" id="gload">${gcals ? 'Reload calendars' : 'Choose a Google calendar'}</button>
+    ${gmsg ? `<div class="msg err">${esc(gmsg)}</div>` : ''}
+    ${gcals ? `<div class="pick">${gcals.map(c => `<label><input type="checkbox" data-gc="${esc(c.id)}" ${r.links.google.some(l => l.id === c.id) ? 'checked' : ''}> <span class="grow">${esc(c.summary || c.id)}</span></label>`).join('') || '<div class="note">No calendars found.</div>'}</div>` : ''}
+    <h3 style="margin-top:22px">Notion</h3>
+    <ul class="list">${r.links.notion.map(l => linkRow('notion', l)).join('')}</ul>
+    <div class="row"><input id="nq" placeholder="Search Notion, or paste a page or database link" aria-label="Notion search" value=""><button class="ghost" id="ngo" ${nstate.busy ? 'disabled' : ''}>${nstate.busy ? 'Working…' : 'Find'}</button></div>
+    <p class="note">Pick a database that has a date column, like a deadlines or events table.</p>
+    ${nstate.msg ? `<div class="msg ${nstate.err ? 'err' : ''}">${esc(nstate.msg)}</div>` : ''}
+    ${nstate.results.length ? `<div class="pick">${nstate.results.map((x, i) => `<label style="cursor:pointer"><span class="grow">${esc(x.title)}<small class="note">${esc(x.type)}</small></span><button class="ghost small" data-npick="${i}" type="button">Use</button></label>`).join('')}</div>` : ''}
+    ${nstate.sources.length ? `<div class="pick"><div class="note">Choose a database from that page:</div>${nstate.sources.map((s, i) => `<label><span class="grow">${esc(s.name)}</span><button class="small" data-nlink="${i}" type="button">Link</button></label>`).join('')}</div>` : ''}`;
+
+  document.querySelectorAll('[data-unlink]').forEach(b => b.onclick = () => {
+    const [k, id] = b.dataset.unlink.split('|');
+    r.links[k] = r.links[k].filter(l => (l.id || l.ds) !== id); save(); clearSync(r); syncTab();
+  });
+  $('#gload').onclick = async () => {
+    gmsg = ''; $('#gload').disabled = true; $('#gload').textContent = 'Loading…';
+    try {
+      const out = []; let token;
+      for (let i = 0; i < 4; i++){ const p = await tool(GOOGLE, 'list_calendars', token ? { pageSize: 250, pageToken: token } : { pageSize: 250 }); out.push(...(p.calendars || [])); token = p.nextPageToken; if (!token) break; }
+      gcals = out;
+    } catch(e){ gmsg = fail(e); }
+    syncTab();
+  };
+  document.querySelectorAll('[data-gc]').forEach(cb => cb.onchange = () => {
+    const c = gcals.find(x => x.id === cb.dataset.gc);
+    r.links.google = r.links.google.filter(l => l.id !== c.id);
+    if (cb.checked) r.links.google.push({ id: c.id, name: c.summary || c.id });
+    save(); clearSync(r); syncTab();
+  });
+  const go = async () => {
+    const q = $('#nq').value.trim(); if (!q) return;
+    nstate = { msg: '', results: [], sources: [], busy: true }; syncTab();
+    try {
+      if (/^https?:\/\//.test(q)) await notionOpen(q);
+      else {
+        const p = await tool(NOTION, 'notion-search', { query: q, page_size: 8, max_highlight_length: 0 });
+        nstate.results = (p.results || []).map(x => ({ title: x.title || 'Untitled', url: x.url || x.id, type: x.type || 'page' }));
+        nstate.msg = nstate.results.length ? '' : 'Nothing found. Try another word, or paste a link.';
+      }
+    } catch(e){ nstate.msg = fail(e); nstate.err = true; }
+    nstate.busy = false; syncTab();
+  };
+  $('#ngo').onclick = go; $('#nq').onkeydown = e => { if (e.key === 'Enter') go(); };
+  document.querySelectorAll('[data-npick]').forEach(b => b.onclick = async () => {
+    const x = nstate.results[+b.dataset.npick]; nstate = { msg: '', results: [], sources: [], busy: true }; syncTab();
+    try { await notionOpen(x.url); } catch(e){ nstate.msg = fail(e); nstate.err = true; }
+    nstate.busy = false; syncTab();
+  });
+  document.querySelectorAll('[data-nlink]').forEach(b => b.onclick = () => {
+    const s = nstate.sources[+b.dataset.nlink];
+    if (!r.links.notion.some(l => l.ds === s.ds)) r.links.notion.push({ ds: s.ds, name: s.name });
+    nstate = { msg: `Linked “${s.name}”.`, results: [], sources: [], busy: false };
+    save(); clearSync(r); syncTab();
+  });
+}
+async function notionOpen(url){
+  const p = await tool(NOTION, 'notion-fetch', { id: url });
+  const text = typeof p === 'string' ? p : (p.text || '');
+  const found = [], seen = new Set();
+  for (const m of text.matchAll(/<database\b[^>]*data-source-url="(collection:\/\/[^"]+)"[^>]*>([^<]*)<\/database>/g)){ if (!seen.has(m[1])){ seen.add(m[1]); found.push({ ds: m[1], name: m[2].trim() || 'Database' }); } }
+  for (const m of text.matchAll(/<data-source\b[^>]*url="(collection:\/\/[^"]+)"[^>]*>/g)){ if (!seen.has(m[1])){ seen.add(m[1]); found.push({ ds: m[1], name: (p.title || 'Database') }); } }
+  if (/^collection:\/\//.test(url) && !seen.has(url)) found.push({ ds: url, name: 'Database' });
+  nstate.sources = found;
+  nstate.msg = found.length ? '' : 'No database found there. Open a page that contains a database, or paste the database link.';
+}
+function clearSync(rk){ for (const k of [...syncCache.keys()]) if (k.startsWith(rk.id + '|')) syncCache.delete(k); }
+
+function settingsTab(){
+  const r = cur;
+  $('#body').innerHTML = `
+    <label for="sn">Name</label><input id="sn" value="${esc(r.name)}">
+    <label for="sw">Weight: <span id="wv">${r.weight}</span> / 10</label><input id="sw" type="range" min="1" max="10" value="${r.weight}">
+    <p class="note">How much of your life this takes. It sets the size of the rock.</p>
+    <label>Stone</label>
+    <div class="colors">${COLORS.map(c => `<button data-col="${c}" aria-label="Stone ${c}" style="background:radial-gradient(circle at 35% 30%,${shade(c, 60)},${c} 60%,${shade(c, -60)});${c === r.color ? 'outline:3px solid var(--accent);outline-offset:2px' : ''}"></button>`).join('')}</div>
+    <p style="margin-top:26px"><button class="danger" id="delrock">Remove this rock</button></p>`;
+  $('#sn').oninput = e => { r.name = e.target.value || 'Untitled'; save(); document.querySelector('.sheet-head h2').textContent = r.name; };
+  $('#sw').oninput = e => { r.weight = +e.target.value; $('#wv').textContent = r.weight; save(); };
+  document.querySelectorAll('[data-col]').forEach(b => b.onclick = () => { r.color = b.dataset.col; save(); sheet(); });
+  $('#delrock').onclick = () => {
+    const b = $('#delrock');
+    if (b.dataset.sure !== '1'){ b.dataset.sure = '1'; b.textContent = 'Tap again to remove it and its notes and tasks'; return; }
+    state.rocks = state.rocks.filter(x => x.id !== r.id); save(); closeSheet();
+  };
+}
+
+/* ---------- add rocks ---------- */
+function addRock(name, weight){
+  const rock = blank(name || 'New activity', weight, COLORS[state.rocks.length % COLORS.length]);
+  state.rocks.push(rock); save(); render(); return rock;
+}
+$('#add').onclick = () => { const r = addRock('New activity', 5); openRock(r.id, 'settings'); setTimeout(() => { const n = $('#sn'); if (n){ n.focus(); n.select(); } }, 30); };
+$('#qw').oninput = e => { $('#qwv').textContent = e.target.value; };
+$('#quick').onsubmit = e => {
+  e.preventDefault();
+  const n = $('#qn').value.trim(); if (!n){ $('#qn').focus(); return; }
+  addRock(n, +$('#qw').value); $('#qn').value = '';
+};
+$('#overlay').onclick = e => { if (e.target.id === 'overlay') closeSheet(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && cur) closeSheet(); });
 render();
 </script>
-</body>
-</html>
