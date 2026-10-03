@@ -21,9 +21,10 @@ button:hover{filter:brightness(1.1)}
 input,select,textarea{background:#2b2a28;border:1px solid var(--line);border-radius:8px;padding:8px;width:100%}
 label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
 #garden-wrap{max-width:760px;margin:0 auto;padding:0 12px 24px}
-#garden{width:100%;height:auto;display:block;touch-action:manipulation}
-.rock{cursor:pointer;transition:transform .15s}
-.rock:hover{transform:translateY(-3px)}
+#garden{width:100%;height:auto;display:block;touch-action:none}
+.rock{cursor:grab}
+.rock.drag{cursor:grabbing}
+#garden{user-select:none;-webkit-user-select:none}
 .rock text{pointer-events:none;font-weight:600;text-anchor:middle;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.55);stroke-width:3px}
 .hint{text-align:center;color:var(--muted);font-size:.9rem;margin:4px 0 0}
 .empty{text-anchor:middle;fill:#7a6a45;font-size:18px}
@@ -72,7 +73,7 @@ textarea{min-height:240px;resize:vertical}
 
 <div id="garden-wrap">
   <svg id="garden" viewBox="0 0 700 700" aria-label="Sand garden of activity rocks"></svg>
-  <p class="hint">Bigger rock = heavier commitment. Tap a rock to open its calendar, notes and tasks.</p>
+  <p class="hint">Bigger rock = heavier commitment. Drag rocks to rearrange them; tap one to open its calendar, notes and tasks.</p>
 </div>
 
 <div id="overlay"><div class="sheet" id="sheet"></div></div>
@@ -98,30 +99,50 @@ function load(){
 }
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
 
-/* ---------- garden layout: pack circles inside the sand circle ---------- */
-function layout(rocks){
-  const sorted = [...rocks].sort((a,b) => b.weight - a.weight);
-  let scale = 1;
-  for (let attempt = 0; attempt < 40; attempt++, scale *= .92){
-    const placed = [];
-    let ok = true;
-    for (const rk of sorted){
-      const r = (22 + rk.weight * 9) * scale;
-      let spot = null;
-      for (let d = 0; d <= R - r - 14 && !spot; d += 4){
-        const steps = Math.max(1, Math.round(d / 6));
-        for (let i = 0; i < steps; i++){
-          const a = (i / steps) * Math.PI * 2 + d * 0.35;
-          const x = Math.cos(a) * d, y = Math.sin(a) * d;
-          if (placed.every(p => Math.hypot(p.x - x, p.y - y) >= p.r + r + 10)) { spot = {x, y}; break; }
-        }
+/* ---------- garden layout: rocks keep their own positions; overlaps get pushed apart ---------- */
+const GAP = 10;
+function gardenScale(){
+  const sum = state.rocks.reduce((t, r) => t + Math.pow(22 + r.weight * 9, 2), 0);
+  return Math.min(1, Math.sqrt(R * R * 0.45 / (sum || 1)));
+}
+const radius = (rk, sc) => (22 + rk.weight * 9) * sc;
+
+// keep rocks inside the sand and apart; `fixed` is the rock being dragged (it doesn't get pushed)
+function settle(fixed){
+  const sc = gardenScale(), rocks = state.rocks;
+  for (const rk of rocks) if (typeof rk.x !== 'number'){
+    let spot = null;
+    const r = radius(rk, sc);
+    for (let d = 0; d <= R - r - 14 && !spot; d += 4){
+      const steps = Math.max(1, Math.round(d / 6));
+      for (let i = 0; i < steps; i++){
+        const an = (i / steps) * Math.PI * 2 + d * 0.35, x = Math.cos(an) * d, y = Math.sin(an) * d;
+        if (rocks.every(o => o === rk || typeof o.x !== 'number' || Math.hypot(o.x - x, o.y - y) >= radius(o, sc) + r + GAP)) { spot = { x, y }; break; }
       }
-      if (!spot){ ok = false; break; }
-      placed.push({ rk, r, x: C + spot.x, y: C + spot.y });
     }
-    if (ok) return placed;
+    rk.x = spot ? spot.x : 0; rk.y = spot ? spot.y : 0;
   }
-  return [];
+  for (let it = 0; it < 80; it++){
+    let moved = false;
+    for (let i = 0; i < rocks.length; i++) for (let j = i + 1; j < rocks.length; j++){
+      const p = rocks[i], q = rocks[j];
+      let dx = q.x - p.x, dy = q.y - p.y, d = Math.hypot(dx, dy);
+      const min = radius(p, sc) + radius(q, sc) + GAP;
+      if (d >= min) continue;
+      if (d < 0.01){ dx = Math.random() - .5; dy = Math.random() - .5; d = Math.hypot(dx, dy); }
+      const push = (min - d) / d;
+      const wp = p === fixed ? 0 : (q === fixed ? 1 : .5), wq = q === fixed ? 0 : (p === fixed ? 1 : .5);
+      p.x -= dx * push * wp; p.y -= dy * push * wp;
+      q.x += dx * push * wq; q.y += dy * push * wq;
+      moved = true;
+    }
+    for (const rk of rocks){
+      const lim = R - radius(rk, sc) - 8, d = Math.hypot(rk.x, rk.y);
+      if (d > lim){ rk.x *= lim / d; rk.y *= lim / d; }
+    }
+    if (!moved) break;
+  }
+  return sc;
 }
 
 function shade(hex, amt){
@@ -132,7 +153,8 @@ function shade(hex, amt){
 
 function render(){
   const svg = $('#garden');
-  const placed = layout(state.rocks);
+  const sc = settle(dragging && dragging.rk);
+  const placed = state.rocks.map(rk => ({ rk, r: radius(rk, sc), x: C + rk.x, y: C + rk.y }));
   const today = ymd(new Date());
   let out = `<defs>
     <radialGradient id="sandg" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#f1e2bb"/><stop offset="1" stop-color="#d4b87c"/></radialGradient>
@@ -151,7 +173,7 @@ function render(){
     const { rk, r, x, y } = p;
     const pending = rk.tasks.filter(t => !t.done).length;
     const fs = Math.max(11, Math.min(20, r / 3.2));
-    out += `<g class="rock" data-id="${rk.id}">
+    out += `<g class="rock ${dragging && dragging.rk === rk ? 'drag' : ''}" data-id="${rk.id}">
       <ellipse cx="${x + r * .12}" cy="${y + r * .85}" rx="${r * .95}" ry="${r * .22}" fill="rgba(60,40,10,.35)"/>
       <circle cx="${x}" cy="${y}" r="${r}" fill="url(#g${rk.id})"/>
       <text x="${x}" y="${y + fs / 3}" font-size="${fs}">${esc(rk.name.length > 14 ? rk.name.slice(0, 13) + '…' : rk.name)}</text>
@@ -160,7 +182,6 @@ function render(){
     </g>`;
   }
   svg.innerHTML = out;
-  svg.querySelectorAll('.rock').forEach(g => g.onclick = () => openRock(g.dataset.id));
 }
 
 /* ---------- activity sheet ---------- */
@@ -173,7 +194,7 @@ function openRock(id){
   $('#overlay').classList.add('open');
   sheet();
 }
-function closeSheet(){ $('#overlay').classList.remove('open'); cur = null; render(); }
+function closeSheet(){ $('#overlay').classList.remove('open'); cur = null; render(); save(); }
 
 function sheet(){
   const r = cur;
@@ -280,6 +301,35 @@ $('#add').onclick = () => {
 };
 $('#overlay').onclick = e => { if (e.target.id === 'overlay') closeSheet(); };
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && cur) closeSheet(); });
+
+/* ---------- dragging ---------- */
+let dragging = null;
+const gsvg = $('#garden');
+function svgPoint(e){
+  const pt = gsvg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+  return pt.matrixTransform(gsvg.getScreenCTM().inverse());
+}
+gsvg.addEventListener('pointerdown', e => {
+  const g = e.target.closest('.rock'); if (!g) return;
+  const rk = state.rocks.find(r => r.id === g.dataset.id), p = svgPoint(e);
+  dragging = { rk, ox: rk.x - (p.x - C), oy: rk.y - (p.y - C), sx: e.clientX, sy: e.clientY, moved: false };
+  gsvg.setPointerCapture(e.pointerId);
+});
+gsvg.addEventListener('pointermove', e => {
+  if (!dragging) return;
+  if (!dragging.moved && Math.hypot(e.clientX - dragging.sx, e.clientY - dragging.sy) < 6) return;
+  dragging.moved = true;
+  const p = svgPoint(e);
+  dragging.rk.x = p.x - C + dragging.ox; dragging.rk.y = p.y - C + dragging.oy;
+  render();
+});
+function endDrag(e){
+  if (!dragging) return;
+  const d = dragging; dragging = null;
+  if (d.moved){ render(); save(); } else { render(); openRock(d.rk.id); }
+}
+gsvg.addEventListener('pointerup', endDrag);
+gsvg.addEventListener('pointercancel', () => { dragging = null; render(); });
 render();
 </script>
 </body>
