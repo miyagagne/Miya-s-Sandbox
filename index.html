@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rock Garden Organizer</title>
+<style>
+:root{
+  --bg:#2b2a28; --ink:#f4efe6; --muted:#b8b0a2; --panel:#3a3835; --line:#55514b;
+  --sand:#e8d5a8; --sand2:#d9c28c; --accent:#e07a5f; --ok:#81b29a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;flex-wrap:wrap}
+h1{font-size:1.25rem;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+button.danger{background:#a4373a}
+button:hover{filter:brightness(1.1)}
+input,select,textarea{background:#2b2a28;border:1px solid var(--line);border-radius:8px;padding:8px;width:100%}
+label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
+#garden-wrap{max-width:760px;margin:0 auto;padding:0 12px 24px}
+#garden{width:100%;height:auto;display:block;touch-action:manipulation}
+.rock{cursor:pointer;transition:transform .15s}
+.rock:hover{transform:translateY(-3px)}
+.rock text{pointer-events:none;font-weight:600;text-anchor:middle;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.55);stroke-width:3px}
+.hint{text-align:center;color:var(--muted);font-size:.9rem;margin:4px 0 0}
+.empty{text-anchor:middle;fill:#7a6a45;font-size:18px}
+.badge{fill:var(--accent);stroke:#fff;stroke-width:2}
+.badge-t{fill:#fff;font-size:12px;font-weight:700;text-anchor:middle;stroke:none!important}
+
+/* modal */
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:10}
+#overlay.open{display:flex}
+.sheet{background:var(--panel);width:100%;max-width:820px;max-height:92vh;overflow:auto;border-radius:16px 16px 0 0;padding:16px}
+@media(min-width:700px){#overlay{align-items:center}.sheet{border-radius:16px}}
+.sheet-head{display:flex;align-items:center;gap:12px}
+.dot{width:36px;height:36px;border-radius:50%;flex:none;box-shadow:inset -4px -5px 8px rgba(0,0,0,.35)}
+.sheet-head h2{margin:0;flex:1;font-size:1.3rem}
+.tabs{display:flex;gap:6px;margin:14px 0;border-bottom:1px solid var(--line)}
+.tab{background:none;border-radius:8px 8px 0 0;color:var(--muted);padding:8px 14px}
+.tab.active{color:var(--ink);background:#2b2a28}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>*{flex:1;min-width:110px}
+.row>button{flex:none}
+
+/* calendar */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.dow{text-align:center;font-size:.75rem;color:var(--muted)}
+.day{min-height:52px;background:#2b2a28;border-radius:6px;padding:3px 4px;font-size:.8rem;cursor:pointer;position:relative;border:1px solid transparent}
+.day.out{opacity:.35}
+.day.today{border-color:var(--accent)}
+.day.sel{background:#4a463f}
+.day .pip{display:block;font-size:.65rem;background:var(--ac,var(--accent));border-radius:3px;padding:0 3px;margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#fff}
+.list{list-style:none;padding:0;margin:10px 0}
+.list li{display:flex;align-items:center;gap:8px;padding:8px;background:#2b2a28;border-radius:8px;margin-bottom:6px}
+.list li .grow{flex:1}
+.list li small{color:var(--muted);display:block}
+.list li.done .grow{text-decoration:line-through;opacity:.55}
+.x{background:none;color:var(--muted);padding:2px 8px;font-size:1.1rem}
+textarea{min-height:240px;resize:vertical}
+.size-note{color:var(--muted);font-size:.8rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>🪨 Rock Garden Organizer</h1>
+  <button id="add">+ New rock</button>
+</header>
+
+<div id="garden-wrap">
+  <svg id="garden" viewBox="0 0 700 700" aria-label="Sand garden of activity rocks"></svg>
+  <p class="hint">Bigger rock = heavier commitment. Tap a rock to open its calendar, notes and tasks.</p>
+</div>
+
+<div id="overlay"><div class="sheet" id="sheet"></div></div>
+
+<script>
+const KEY = 'rockGarden.v1';
+const COLORS = ['#7d8597','#8d6e63','#6b8e7f','#9c7a97','#b08968','#5f7a8a','#a0522d','#708090'];
+const R = 330, C = 350;           // garden radius & center in the 700 viewBox
+const $ = s => document.querySelector(s);
+const uid = () => Math.random().toString(36).slice(2, 10);
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+let state = load();
+function load(){
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.rocks) return s; } catch(e){}
+  return { rocks: [
+    { id: uid(), name: 'Robotics Club', weight: 8, color: COLORS[0], events: [], tasks: [], notes: '' },
+    { id: uid(), name: 'Piano', weight: 5, color: COLORS[2], events: [], tasks: [], notes: '' },
+    { id: uid(), name: 'Book Club', weight: 3, color: COLORS[3], events: [], tasks: [], notes: '' },
+  ]};
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+
+/* ---------- garden layout: pack circles inside the sand circle ---------- */
+function layout(rocks){
+  const sorted = [...rocks].sort((a,b) => b.weight - a.weight);
+  let scale = 1;
+  for (let attempt = 0; attempt < 40; attempt++, scale *= .92){
+    const placed = [];
+    let ok = true;
+    for (const rk of sorted){
+      const r = (22 + rk.weight * 9) * scale;
+      let spot = null;
+      for (let d = 0; d <= R - r - 14 && !spot; d += 4){
+        const steps = Math.max(1, Math.round(d / 6));
+        for (let i = 0; i < steps; i++){
+          const a = (i / steps) * Math.PI * 2 + d * 0.35;
+          const x = Math.cos(a) * d, y = Math.sin(a) * d;
+          if (placed.every(p => Math.hypot(p.x - x, p.y - y) >= p.r + r + 10)) { spot = {x, y}; break; }
+        }
+      }
+      if (!spot){ ok = false; break; }
+      placed.push({ rk, r, x: C + spot.x, y: C + spot.y });
+    }
+    if (ok) return placed;
+  }
+  return [];
+}
+
+function shade(hex, amt){
+  const n = parseInt(hex.slice(1), 16);
+  const f = v => Math.max(0, Math.min(255, v + amt));
+  return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
+}
+
+function render(){
+  const svg = $('#garden');
+  const placed = layout(state.rocks);
+  const today = ymd(new Date());
+  let out = `<defs>
+    <radialGradient id="sandg" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#f1e2bb"/><stop offset="1" stop-color="#d4b87c"/></radialGradient>
+    <clipPath id="clip"><circle cx="${C}" cy="${C}" r="${R}"/></clipPath>
+    ${state.rocks.map(r => `<radialGradient id="g${r.id}" cx="35%" cy="30%" r="75%">
+      <stop offset="0" stop-color="${shade(r.color, 55)}"/><stop offset=".6" stop-color="${r.color}"/><stop offset="1" stop-color="${shade(r.color, -60)}"/></radialGradient>`).join('')}
+  </defs>
+  <circle cx="${C}" cy="${C}" r="${R + 14}" fill="#5b4a2e"/>
+  <circle cx="${C}" cy="${C}" r="${R}" fill="url(#sandg)"/>
+  <g clip-path="url(#clip)" fill="none" stroke="#b79a5c" stroke-opacity=".35" stroke-width="1.5">
+    ${[...Array(14)].map((_, i) => `<circle cx="${C}" cy="${C}" r="${30 + i * 24}"/>`).join('')}
+    ${placed.map(p => [1,2,3].map(k => `<circle cx="${p.x}" cy="${p.y}" r="${p.r + k * 9}" stroke-opacity="${.6 - k * .13}"/>`).join('')).join('')}
+  </g>`;
+  if (!placed.length) out += `<text class="empty" x="${C}" y="${C}">Add a rock to begin</text>`;
+  for (const p of placed){
+    const { rk, r, x, y } = p;
+    const pending = rk.tasks.filter(t => !t.done).length;
+    const fs = Math.max(11, Math.min(20, r / 3.2));
+    out += `<g class="rock" data-id="${rk.id}">
+      <ellipse cx="${x + r * .12}" cy="${y + r * .85}" rx="${r * .95}" ry="${r * .22}" fill="rgba(60,40,10,.35)"/>
+      <circle cx="${x}" cy="${y}" r="${r}" fill="url(#g${rk.id})"/>
+      <text x="${x}" y="${y + fs / 3}" font-size="${fs}">${esc(rk.name.length > 14 ? rk.name.slice(0, 13) + '…' : rk.name)}</text>
+      ${pending ? `<circle class="badge" cx="${x + r * .72}" cy="${y - r * .72}" r="11"/><text class="badge-t" x="${x + r * .72}" y="${y - r * .72 + 4}">${pending}</text>` : ''}
+      <title>${esc(rk.name)} — weight ${rk.weight}</title>
+    </g>`;
+  }
+  svg.innerHTML = out;
+  svg.querySelectorAll('.rock').forEach(g => g.onclick = () => openRock(g.dataset.id));
+}
+
+/* ---------- activity sheet ---------- */
+let cur = null, tab = 'calendar', month = new Date(), selDay = ymd(new Date());
+
+function openRock(id){
+  cur = state.rocks.find(r => r.id === id);
+  if (!cur) return;
+  tab = 'calendar'; month = new Date(); selDay = ymd(new Date());
+  $('#overlay').classList.add('open');
+  sheet();
+}
+function closeSheet(){ $('#overlay').classList.remove('open'); cur = null; render(); }
+
+function sheet(){
+  const r = cur;
+  $('#sheet').innerHTML = `
+    <div class="sheet-head">
+      <span class="dot" style="background:${r.color}"></span>
+      <h2>${esc(r.name)}</h2>
+      <button class="ghost" id="close">Close</button>
+    </div>
+    <div class="tabs">
+      ${['calendar','notes','tasks','settings'].map(t => `<button class="tab ${t === tab ? 'active' : ''}" data-t="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join('')}
+    </div>
+    <div id="body"></div>`;
+  $('#close').onclick = closeSheet;
+  document.querySelectorAll('.tab').forEach(b => b.onclick = () => { tab = b.dataset.t; sheet(); });
+  ({ calendar: calTab, notes: notesTab, tasks: tasksTab, settings: settingsTab })[tab]();
+}
+
+function calTab(){
+  const r = cur, y = month.getFullYear(), m = month.getMonth();
+  const first = new Date(y, m, 1), start = new Date(y, m, 1 - first.getDay());
+  const today = ymd(new Date());
+  let cells = '';
+  for (let i = 0; i < 42; i++){
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i), k = ymd(d);
+    const evs = r.events.filter(e => e.date === k).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+    cells += `<div class="day ${d.getMonth() !== m ? 'out' : ''} ${k === today ? 'today' : ''} ${k === selDay ? 'sel' : ''}" data-d="${k}" style="--ac:${r.color}">
+      ${d.getDate()}${evs.slice(0, 2).map(e => `<span class="pip">${esc(e.title)}</span>`).join('')}${evs.length > 2 ? `<span class="pip">+${evs.length - 2}</span>` : ''}</div>`;
+  }
+  const dayEvs = r.events.filter(e => e.date === selDay).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+  const upcoming = r.events.filter(e => e.date >= today).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || ''))).slice(0, 5);
+  $('#body').innerHTML = `
+    <div class="cal-nav">
+      <button class="ghost" id="prev">‹</button>
+      <strong>${month.toLocaleString(undefined, { month: 'long', year: 'numeric' })}</strong>
+      <button class="ghost" id="next">›</button>
+    </div>
+    <div class="grid">${['S','M','T','W','T','F','S'].map(d => `<div class="dow">${d}</div>`).join('')}${cells}</div>
+    <h3>${new Date(selDay + 'T00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</h3>
+    <ul class="list">${dayEvs.map(e => `<li><span class="grow">${esc(e.title)}<small>${e.time || 'All day'}</small></span><button class="x" data-del="${e.id}">✕</button></li>`).join('') || '<li><span class="grow" style="color:var(--muted)">Nothing scheduled.</span></li>'}</ul>
+    <div class="row">
+      <input id="et" placeholder="Add event (meeting, practice, deadline…)">
+      <input id="etime" type="time" style="max-width:130px">
+      <button id="eadd">Add</button>
+    </div>
+    ${upcoming.length ? `<h3>Coming up</h3><ul class="list">${upcoming.map(e => `<li><span class="grow">${esc(e.title)}<small>${e.date}${e.time ? ' · ' + e.time : ''}</small></span></li>`).join('')}</ul>` : ''}`;
+  $('#prev').onclick = () => { month = new Date(y, m - 1, 1); calTab(); };
+  $('#next').onclick = () => { month = new Date(y, m + 1, 1); calTab(); };
+  document.querySelectorAll('.day').forEach(d => d.onclick = () => { selDay = d.dataset.d; calTab(); });
+  document.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { r.events = r.events.filter(e => e.id !== b.dataset.del); save(); calTab(); });
+  const add = () => {
+    const t = $('#et').value.trim(); if (!t) return;
+    r.events.push({ id: uid(), title: t, date: selDay, time: $('#etime').value });
+    save(); calTab();
+  };
+  $('#eadd').onclick = add;
+  $('#et').onkeydown = e => { if (e.key === 'Enter') add(); };
+}
+
+function notesTab(){
+  $('#body').innerHTML = `<label>Notes about ${esc(cur.name)} (saved automatically)</label><textarea id="notes" placeholder="Meeting notes, ideas, contacts, goals…">${esc(cur.notes)}</textarea>`;
+  $('#notes').oninput = e => { cur.notes = e.target.value; save(); };
+}
+
+function tasksTab(){
+  const r = cur;
+  $('#body').innerHTML = `
+    <div class="row"><input id="tt" placeholder="Add a task that helps with this activity"><input id="td" type="date" style="max-width:160px"><button id="tadd">Add</button></div>
+    <ul class="list">${r.tasks.map(t => `<li class="${t.done ? 'done' : ''}">
+      <input type="checkbox" style="width:auto" data-c="${t.id}" ${t.done ? 'checked' : ''}>
+      <span class="grow">${esc(t.title)}${t.due ? `<small>Due ${t.due}</small>` : ''}</span>
+      <button class="x" data-x="${t.id}">✕</button></li>`).join('') || '<li><span class="grow" style="color:var(--muted)">No tasks yet.</span></li>'}</ul>`;
+  const add = () => {
+    const t = $('#tt').value.trim(); if (!t) return;
+    r.tasks.push({ id: uid(), title: t, due: $('#td').value, done: false }); save(); tasksTab();
+  };
+  $('#tadd').onclick = add;
+  $('#tt').onkeydown = e => { if (e.key === 'Enter') add(); };
+  document.querySelectorAll('[data-c]').forEach(c => c.onchange = () => { r.tasks.find(t => t.id === c.dataset.c).done = c.checked; save(); tasksTab(); });
+  document.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { r.tasks = r.tasks.filter(t => t.id !== b.dataset.x); save(); tasksTab(); });
+}
+
+function settingsTab(){
+  const r = cur;
+  $('#body').innerHTML = `
+    <label>Name</label><input id="sn" value="${esc(r.name)}">
+    <label>Weight: <span id="wv">${r.weight}</span> / 10 <span class="size-note">(how much of your life this takes — sets rock size)</span></label>
+    <input id="sw" type="range" min="1" max="10" value="${r.weight}">
+    <label>Color</label>
+    <div class="row" id="cols">${COLORS.map(c => `<button data-col="${c}" style="background:${c};flex:none;width:36px;height:36px;border-radius:50%;border:${c === r.color ? '3px solid #fff' : '0'}"></button>`).join('')}</div>
+    <p><button class="danger" id="delrock">Delete this rock</button></p>`;
+  $('#sn').oninput = e => { r.name = e.target.value || 'Untitled'; save(); document.querySelector('.sheet-head h2').textContent = r.name; };
+  $('#sw').oninput = e => { r.weight = +e.target.value; $('#wv').textContent = r.weight; save(); };
+  document.querySelectorAll('[data-col]').forEach(b => b.onclick = () => { r.color = b.dataset.col; save(); sheet(); });
+  $('#delrock').onclick = () => {
+    if (!confirm(`Delete "${r.name}" and all its events, notes and tasks?`)) return;
+    state.rocks = state.rocks.filter(x => x.id !== r.id); save(); closeSheet();
+  };
+}
+
+$('#add').onclick = () => {
+  const rock = { id: uid(), name: 'New activity', weight: 5, color: COLORS[state.rocks.length % COLORS.length], events: [], tasks: [], notes: '' };
+  state.rocks.push(rock); save(); render(); openRock(rock.id); tab = 'settings'; sheet();
+};
+$('#overlay').onclick = e => { if (e.target.id === 'overlay') closeSheet(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && cur) closeSheet(); });
+render();
+</script>
+</body>
+</html>
