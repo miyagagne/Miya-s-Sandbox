@@ -196,7 +196,7 @@ function showAuth(){
 }
 function enter(u, key, data){
   user = u; dkey = key; state = fixup(data);
-  $('#auth').hidden = true; $('#app').hidden = false; $('#who').textContent = u;
+  setMode('in'); $('#auth').hidden = true; $('#app').hidden = false; $('#who').textContent = u;
   render();
 }
 async function signOut(){
