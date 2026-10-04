@@ -146,7 +146,13 @@ header .ghost{color:var(--pond-ink);border-color:rgba(255,255,255,.35)}
     <button type="submit" id="asubmit">Sign in</button>
   </form>
   <p class="note" style="margin-bottom:0" id="anote">Accounts are stored on this device only. Your garden is encrypted with your password. If you forget it, the recovery code you saved when you made the account can reset it.</p>
-  <p style="margin:10px 0 0"><button class="ghost small" id="aerase" type="button" hidden>Erase this account</button></p>
+  <p style="margin:10px 0 0;display:flex;gap:8px;flex-wrap:wrap"><button class="ghost small" id="aimport" type="button">Import an account</button><button class="ghost small" id="aerase" type="button" hidden>Erase this account</button></p>
+  <div id="aimpbox" hidden>
+    <label for="aimpfile">Transfer file</label><input id="aimpfile" type="file" accept=".json,application/json">
+    <label for="aimptext">…or paste the transfer code</label><textarea id="aimptext" style="min-height:90px" spellcheck="false"></textarea>
+    <div class="msg" id="aimpmsg" hidden></div>
+    <div class="row" style="margin-top:10px"><button type="button" id="aimpgo">Import</button></div>
+  </div>
 </div>
 
 <div class="wrap" id="app" hidden>
@@ -206,6 +212,8 @@ const seed = () => ({ active: 'main', gardens: [
 function fixup(s){
   if (!s.gardens){ s.gardens = [{ id: 'main', name: 'My Garden', kind: 'rocks', rocks: s.rocks || [] }]; delete s.rocks; s.active = 'main'; }
   s.gardens.forEach(g => { g.rocks = g.rocks || []; g.kind = g.kind || 'rocks'; g.rocks.forEach(r => { r.links = r.links || { google: [], notion: [] }; const i = OLD_COLORS.indexOf(r.color); if (i >= 0) r.color = COLORS[i]; }); });
+  s.conns = s.conns || { google: [], notion: [] };
+  s.gardens.forEach(g => g.rocks.forEach(r => { for (const k of ['google', 'notion']) for (const l of r.links[k]){ if (!s.conns[k].some(c => (c.id || c.ds) === (l.id || l.ds))) s.conns[k].push(l.id ? { id: l.id, name: l.name } : { ds: l.ds, name: l.name }); } }));
   if (!s.gardens.some(g => g.id === s.active)) s.active = s.gardens[0].id;
   const open = () => s.gardens.find(g => g.id === s.active) || s.gardens[0];
   Object.defineProperty(s, 'rocks', { get(){ return open().rocks; }, set(v){ open().rocks = v; }, enumerable: false, configurable: true });
@@ -384,12 +392,23 @@ async function localRecover(){
   enter(name, key, data);
   showRecovery(fresh, 'Your password is reset and your garden is intact. The old recovery code no longer works, so this is your new one.');
 }
-function accountSheet(){
-  cur = null; lockSheet = false;
+let accTabName = 'connect';
+function accountSheet(t){
+  cur = null; lockSheet = false; if (t) accTabName = t;
   const c = cloudOn(), who = c && sess ? sess.user.email : user;
   $('#sheet').innerHTML = `<div class="sheet-head"><h2>Account</h2><button class="ghost small" id="aclose">Close</button></div>
-    <p class="note">Signed in as <strong>${esc(who)}</strong></p>
-    <h3 style="margin-top:14px">Change password</h3>
+    <p class="note" style="margin:6px 0 0">Signed in as <strong>${esc(who)}</strong></p>
+    <div class="tabs" role="tablist">${[['connect', 'Connections'], ['password', 'Password'], ['devices', 'Other devices']].map(([k, l]) => `<button class="tab ${k === accTabName ? 'active' : ''}" data-at="${k}" role="tab">${l}</button>`).join('')}</div>
+    <div id="accbody"></div>`;
+  $('#overlay').classList.add('open');
+  $('#aclose').onclick = closeSheet;
+  document.querySelectorAll('[data-at]').forEach(b => b.onclick = () => { accTabName = b.dataset.at; accountSheet(); });
+  const host = $('#accbody');
+  ({ connect: connectTab, password: passwordTab, devices: devicesTab })[accTabName](host);
+}
+function passwordTab(host){
+  const c = cloudOn();
+  host.innerHTML = `
     <form id="pwform" autocomplete="off">
       <label for="pw0">Current password</label><input id="pw0" type="password" autocomplete="current-password" required>
       <label for="pw1">New password</label><input id="pw1" type="password" autocomplete="new-password" minlength="8" required>
@@ -400,8 +419,6 @@ function accountSheet(){
     ${c ? '' : `<h3 style="margin-top:24px">Recovery code</h3>
       <p class="note">A recovery code lets you reset a forgotten password without losing your garden. Making a new one cancels the old one.</p>
       <button class="ghost" id="newrec" type="button">Make a new recovery code</button>`}`;
-  $('#overlay').classList.add('open');
-  $('#aclose').onclick = closeSheet;
   const say = (t, ok) => { const e = $('#pwmsg'); e.textContent = t; e.hidden = !t; e.classList.toggle('err', !ok); };
   $('#pwform').onsubmit = async e => {
     e.preventDefault(); say('');
@@ -438,7 +455,45 @@ function accountSheet(){
     showRecovery(code, 'This replaces any recovery code you had before.');
   };
 }
-$('#recbtn').onclick = () => { if (user) accountSheet(); };
+
+/* ---------- moving an account to another device ---------- */
+async function exportPayload(){
+  clearTimeout(saveT); await persist();
+  return JSON.stringify({ rockGarden: 1, user, acc: accounts()[user], data: JSON.parse(localStorage.getItem(DATA(user))) });
+}
+async function saveFile(name, text){
+  try { const d = window.claude && await window.claude.use('downloads'); if (d){ await d.save({ filename: name, data: text }); return true; } } catch(e){ if (e && e.code === 'declined') return true; }
+  try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); return true; } catch(e){ return false; }
+}
+function devicesTab(host){
+  if (cloudOn()){
+    host.innerHTML = `<div class="msg">Your garden is saved to your online account. To use it on another device, open this app there and sign in with the same email and password.</div>`;
+    return;
+  }
+  host.innerHTML = `
+    <p class="note" style="margin-top:0">Your account lives on this device. To use it on another one, move a copy over. The copy is encrypted with your password, so it is unreadable without it.</p>
+    <ol class="note" style="padding-left:20px;margin:8px 0">
+      <li>Download the file, or copy the transfer code, here.</li>
+      <li>On the other device, open the app and choose <strong>Import an account</strong> on the sign-in screen.</li>
+      <li>Sign in with the same username and password.</li>
+    </ol>
+    <div class="row"><button id="xfile">Download file</button><button class="ghost" id="xcopy">Copy transfer code</button></div>
+    <div class="msg" id="xmsg" hidden></div>
+    <p class="note">This moves a snapshot. Changes you make afterwards on one device don’t appear on the other. Move a fresh copy when you want them to match, or connect an online account to keep devices in sync automatically.</p>`;
+  const say = (t, err) => { const e = $('#xmsg'); e.textContent = t; e.hidden = !t; e.classList.toggle('err', !!err); };
+  $('#xfile').onclick = async () => { const ok = await saveFile(`rock-garden-${user}.json`, await exportPayload()); say(ok ? 'File ready. Keep it private.' : 'Could not make a file here. Use “Copy transfer code” instead.', !ok); };
+  $('#xcopy').onclick = async () => { const t = await exportPayload(); try { await navigator.clipboard.writeText(t); say('Copied. Paste it into “Import an account” on the other device.'); } catch(e){ say('Could not copy automatically. Use “Download file” instead.', true); } };
+}
+async function importAccount(text, confirmed){
+  let o; try { o = JSON.parse(text); } catch(e){ throw new Error('That isn’t a Rock Garden transfer file or code.'); }
+  const ok = o && o.rockGarden === 1 && /^[a-z0-9_.-]{3,24}$/.test(o.user || '') && o.acc && typeof o.acc.salt === 'string' && o.data && typeof o.data.iv === 'string' && typeof o.data.ct === 'string';
+  if (!ok) throw new Error('That isn’t a Rock Garden transfer file or code.');
+  const accs = accounts();
+  if (accs[o.user] && !confirmed) return { exists: o.user };
+  accs[o.user] = o.acc; localStorage.setItem(ACC, JSON.stringify(accs)); localStorage.setItem(DATA(o.user), JSON.stringify(o.data));
+  return { user: o.user };
+}
+$('#recbtn').onclick = () => { if (user) accountSheet('connect'); };
 
 let authMode = 'in';
 function setMode(m){
@@ -450,6 +505,7 @@ function setMode(m){
   const c = cloudOn();
   $('#aulabel').textContent = c ? 'Email' : 'Username'; $('#au').type = c ? 'email' : 'text';
   $('#aforgotrow').hidden = m !== 'in';
+  $('#aimport').hidden = c || m === 'recover' || m === 'reset'; if ($('#aimport').hidden) $('#aimpbox').hidden = true;
   $('#arcrow').hidden = m !== 'recover'; 
   $('#aplabel').textContent = m === 'recover' || m === 'reset' ? 'New password' : 'Password';
   if (m === 'recover'){ $('#apw2').hidden = false; $('#asubmit').textContent = 'Reset password'; $('#ap').autocomplete = 'new-password'; $('#aerase').hidden = true; }
@@ -501,6 +557,20 @@ $('#aerase').onclick = () => {
   if (b.dataset.sure !== '1'){ b.dataset.sure = '1'; b.textContent = 'Tap again to erase “' + name + '” for good'; return; }
   const accs = accounts(); delete accs[name]; localStorage.setItem(ACC, JSON.stringify(accs)); localStorage.removeItem(DATA(name));
   b.dataset.sure = ''; b.textContent = 'Erase this account'; amsg(''); $('#ap').value = '';
+};
+$('#aimport').onclick = () => { $('#aimpbox').hidden = !$('#aimpbox').hidden; };
+let impSure = false;
+$('#aimpgo').onclick = async () => {
+  const say = (t, err) => { const e = $('#aimpmsg'); e.textContent = t; e.hidden = !t; e.classList.toggle('err', !!err); };
+  say('');
+  try {
+    const f = $('#aimpfile').files[0], text = f ? await f.text() : $('#aimptext').value.trim();
+    if (!text) return say('Choose a transfer file or paste the transfer code.', true);
+    const r = await importAccount(text, impSure);
+    if (r.exists){ impSure = true; $('#aimpgo').textContent = 'Replace “' + r.exists + '” on this device'; return say('An account named “' + r.exists + '” is already on this device. Importing replaces it with the copy you are importing.', true); }
+    impSure = false; $('#aimpgo').textContent = 'Import'; $('#aimpbox').hidden = true; $('#aimpfile').value = ''; $('#aimptext').value = '';
+    setMode('in'); $('#au').value = r.user; $('#ap').focus(); amsg('Imported “' + r.user + '”. Sign in with its password.', true);
+  } catch(e){ impSure = false; $('#aimpgo').textContent = 'Import'; say(e.message || 'Could not import.', true); }
 };
 $('#signout').onclick = signOut;
 async function boot(){
@@ -853,51 +923,83 @@ function tasksTab(){
 
 /* ---------- connect tab ---------- */
 let gcals = null, gmsg = '', nstate = { msg: '', results: [], sources: [], busy: false };
+const openConn = new Set();
+const allRocks = () => state.gardens.filter(g => g.kind !== 'photos').flatMap(g => g.rocks.map(r => ({ r, g })));
+const cid = c => c.id || c.ds;
+function hasLink(rk, kind, c){ return rk.links[kind].some(l => cid(l) === cid(c)); }
+function setLink(rk, kind, c, on){
+  const has = hasLink(rk, kind, c);
+  if (on && !has) rk.links[kind].push(kind === 'google' ? { id: c.id, name: c.name } : { ds: c.ds, name: c.name });
+  if (!on && has) rk.links[kind] = rk.links[kind].filter(l => cid(l) !== cid(c));
+  clearSync(rk);
+}
+function addConn(kind, c){ if (!state.conns[kind].some(x => cid(x) === cid(c))) state.conns[kind].push(kind === 'google' ? { id: c.id, name: c.name } : { ds: c.ds, name: c.name }); save(); }
+function dropConn(kind, c){ state.conns[kind] = state.conns[kind].filter(x => cid(x) !== cid(c)); allRocks().forEach(({ r }) => setLink(r, kind, c, false)); save(); }
+
+// per-rock: choose which connected calendars show in this rock
 function syncTab(){
-  const r = cur;
+  const r = cur, all = [...state.conns.google.map(c => ['google', c]), ...state.conns.notion.map(c => ['notion', c])];
+  $('#body').innerHTML = all.length
+    ? `<p class="note" style="margin-top:0">Choose which of your connected calendars show up in ${esc(r.name)}.</p>
+       <div class="pick">${all.map(([k, c]) => `<label><input type="checkbox" data-t="${k}|${esc(cid(c))}" ${hasLink(r, k, c) ? 'checked' : ''}><span class="tag ${k === 'google' ? 'g' : 'n'}">${k === 'google' ? 'GOOGLE' : 'NOTION'}</span><span class="grow">${esc(c.name)}</span></label>`).join('')}</div>
+       <button class="ghost" id="manage">Manage connections</button>`
+    : `<div class="msg">No calendars are connected yet. Add Google Calendar or Notion once in your Account, then choose which rocks show them.</div><button id="manage">Open Account → Connections</button>`;
+  document.querySelectorAll('[data-t]').forEach(cb => cb.onchange = () => {
+    const [k, id] = cb.dataset.t.split('|'), c = state.conns[k].find(x => cid(x) === id); if (!c) return;
+    setLink(r, k, c, cb.checked); save();
+  });
+  $('#manage').onclick = () => accountSheet('connect');
+}
+
+// account center: add Google calendars and Notion databases, and pick which rocks show each
+function connectTab(host){
   if (!mcp){
-    $('#body').innerHTML = mcpState === 'loading'
-      ? `<div class="msg">Connecting…</div>`
-      : `<div class="msg err">This page can’t reach your connectors here. Syncing only works on the Claude artifact page (claude.ai/artifact/…), opened while signed in as the owner, not on GitHub Pages or the installed app. If you are on the artifact page, reload it and allow access when asked.</div><button class="ghost" id="mretry">Try again</button>`;
-    const rt = $('#mretry'); if (rt) rt.onclick = () => { initMcp(); syncTab(); };
+    host.innerHTML = mcpState === 'loading' ? `<div class="msg">Connecting…</div>`
+      : `<div class="msg err">Connections to Google Calendar and Notion only work on the Claude artifact page (claude.ai/artifact/…), opened while signed in as the owner. They aren’t available on GitHub Pages or the installed app.</div><button class="ghost" id="mretry">Try again</button>`;
+    const rt = $('#mretry'); if (rt) rt.onclick = () => { initMcp(); connectTab(host); };
     return;
   }
-  const status = `<div class="msg" id="mstatus">Checking connections…</div><div class="row" style="margin-bottom:6px"><button class="small" id="mallow">Allow access</button><button class="ghost small" id="mcheck">Check again</button></div>`;
-  const linkRow = (kind, l) => `<li><span class="tag ${kind === 'google' ? 'g' : 'n'}">${kind === 'google' ? 'GOOGLE' : 'NOTION'}</span><span class="grow">${esc(l.name)}</span><button class="ghost small" data-unlink="${kind}|${esc(l.id || l.ds)}">Remove</button></li>`;
-  $('#body').innerHTML = `
-    ${status}
-    <p class="note" style="margin-top:0">Events from linked calendars show up in this rock’s calendar. They are read-only and never copied into your local events.</p>
+  const rockList = (kind, c) => allRocks().map(({ r, g }) => `<label><input type="checkbox" data-lk="${kind}|${esc(cid(c))}|${r.id}" ${hasLink(r, kind, c) ? 'checked' : ''}><span class="grow">${esc(r.name)} <small class="note">${esc(g.name)}</small></span></label>`).join('') || '<div class="note">Make a rock first, then choose where this calendar shows.</div>';
+  const row = (kind, c) => { const key = kind + '|' + cid(c), n = allRocks().filter(({ r }) => hasLink(r, kind, c)).length;
+    return `<li style="flex-direction:column;align-items:stretch;gap:8px"><div class="row" style="flex-wrap:nowrap"><span class="tag ${kind === 'google' ? 'g' : 'n'}">${kind === 'google' ? 'GOOGLE' : 'NOTION'}</span><span class="grow">${esc(c.name)}<small>Shown in ${n} rock${n === 1 ? '' : 's'}</small></span><button class="ghost small" data-cexp="${esc(key)}">${openConn.has(key) ? 'Done' : 'Choose rocks'}</button><button class="ghost small" data-crm="${esc(key)}">Remove</button></div>${openConn.has(key) ? `<div class="pick">${rockList(kind, c)}</div>` : ''}</li>`; };
+  host.innerHTML = `
+    <div class="msg" id="mstatus">Checking connections…</div>
+    <div class="row" style="margin-bottom:10px"><button class="small" id="mallow">Allow access</button><button class="ghost small" id="mcheck">Check again</button></div>
     <h3>Google Calendar</h3>
-    <ul class="list">${r.links.google.map(l => linkRow('google', l)).join('')}</ul>
-    <button class="ghost small" id="gload">${gcals ? 'Reload calendars' : 'Choose a Google calendar'}</button>
+    <ul class="list">${state.conns.google.map(c => row('google', c)).join('') || '<li><span class="grow note">None connected yet.</span></li>'}</ul>
+    <button class="ghost" id="gload">${gcals ? 'Reload my calendars' : 'Add a Google calendar'}</button>
     ${gmsg ? `<div class="msg err">${esc(gmsg)}</div>` : ''}
-    ${gcals ? `<div class="pick">${gcals.map(c => `<label><input type="checkbox" data-gc="${esc(c.id)}" ${r.links.google.some(l => l.id === c.id) ? 'checked' : ''}> <span class="grow">${esc(c.summary || c.id)}</span></label>`).join('') || '<div class="note">No calendars found.</div>'}</div>` : ''}
+    ${gcals ? `<div class="pick">${gcals.map(c => `<label><input type="checkbox" data-gc="${esc(c.id)}" ${state.conns.google.some(x => x.id === c.id) ? 'checked' : ''}><span class="grow">${esc(c.summary || c.id)}</span></label>`).join('') || '<div class="note">No calendars found.</div>'}</div>` : ''}
     <h3 style="margin-top:22px">Notion</h3>
-    <ul class="list">${r.links.notion.map(l => linkRow('notion', l)).join('')}</ul>
-    <div class="row"><input id="nq" placeholder="Search Notion, or paste a page or database link" aria-label="Notion search" value=""><button class="ghost" id="ngo" ${nstate.busy ? 'disabled' : ''}>${nstate.busy ? 'Working…' : 'Find'}</button></div>
+    <ul class="list">${state.conns.notion.map(c => row('notion', c)).join('') || '<li><span class="grow note">None connected yet.</span></li>'}</ul>
+    <div class="row"><input id="nq" placeholder="Search Notion, or paste a page or database link" aria-label="Notion search"><button class="ghost" id="ngo" ${nstate.busy ? 'disabled' : ''}>${nstate.busy ? 'Working…' : 'Find'}</button></div>
     <p class="note">Pick a database that has a date column, like a deadlines or events table.</p>
     ${nstate.msg ? `<div class="msg ${nstate.err ? 'err' : ''}">${esc(nstate.msg)}</div>` : ''}
-    ${nstate.results.length ? `<div class="pick">${nstate.results.map((x, i) => `<label style="cursor:pointer"><span class="grow">${esc(x.title)}<small class="note">${esc(x.type)}</small></span><button class="ghost small" data-npick="${i}" type="button">Use</button></label>`).join('')}</div>` : ''}
-    ${nstate.sources.length ? `<div class="pick"><div class="note">Choose a database from that page:</div>${nstate.sources.map((s, i) => `<label><span class="grow">${esc(s.name)}</span><button class="small" data-nlink="${i}" type="button">Link</button></label>`).join('')}</div>` : ''}`;
+    ${nstate.results.length ? `<div class="pick">${nstate.results.map((x, i) => `<label><span class="grow">${esc(x.title)}<small class="note">${esc(x.type)}</small></span><button class="ghost small" data-npick="${i}" type="button">Use</button></label>`).join('')}</div>` : ''}
+    ${nstate.sources.length ? `<div class="pick"><div class="note">Choose a database from that page:</div>${nstate.sources.map((x, i) => `<label><span class="grow">${esc(x.name)}</span><button class="small" data-nlink="${i}" type="button">Add</button></label>`).join('')}</div>` : ''}`;
 
   const check = async () => {
     const el = $('#mstatus'); if (!el) return;
     try {
-      const l = await mcp.listTools(), by = n => (l.servers || []).find(x => x.server === n);
-      const st = {}; if (perms) { try { Object.assign(st, await perms.state()); } catch(e){} }
-      const line = n => { const x = by(n); const p = st['mcp:' + n]; return `${n}: ${!x ? 'not connected in claude.ai' : x.authStatus === 'needs_reauth' ? 'needs reconnecting' : 'connected'}${p ? ' · access ' + p : ''}`; };
+      const l = await mcp.listTools(), by = n => (l.servers || []).find(x => x.server === n), st = {};
+      if (perms){ try { Object.assign(st, await perms.state()); } catch(e){} }
+      const line = n => { const x = by(n), p = st['mcp:' + n]; return `${n}: ${!x ? 'not connected in claude.ai' : x.authStatus === 'needs_reauth' ? 'needs reconnecting' : 'connected'}${p ? ' · access ' + p : ''}`; };
       el.textContent = line(GOOGLE) + '   |   ' + line(NOTION);
     } catch(e){ el.textContent = 'Could not check: ' + fail(e); el.classList.add('err'); }
   };
   check();
   $('#mcheck').onclick = check;
-  $('#mallow').onclick = async () => {
-    try { if (perms) await perms.request(['mcp:' + GOOGLE, 'mcp:' + NOTION]); else await mcp.listTools(); } catch(e){}
-    check();
-  };
-  document.querySelectorAll('[data-unlink]').forEach(b => b.onclick = () => {
-    const [k, id] = b.dataset.unlink.split('|');
-    r.links[k] = r.links[k].filter(l => (l.id || l.ds) !== id); save(); clearSync(r); syncTab();
+  $('#mallow').onclick = async () => { try { if (perms) await perms.request(['mcp:' + GOOGLE, 'mcp:' + NOTION]); else await mcp.listTools(); } catch(e){} check(); };
+  const find = key => { const [k, id] = key.split('|'); return [k, state.conns[k].find(x => cid(x) === id)]; };
+  host.querySelectorAll('[data-cexp]').forEach(b => b.onclick = () => { const k = b.dataset.cexp; openConn.has(k) ? openConn.delete(k) : openConn.add(k); connectTab(host); });
+  host.querySelectorAll('[data-crm]').forEach(b => b.onclick = () => {
+    if (b.dataset.sure !== '1'){ b.dataset.sure = '1'; b.textContent = 'Tap again'; return; }
+    const [k, c] = find(b.dataset.crm); if (c){ dropConn(k, c); openConn.delete(b.dataset.crm); } connectTab(host);
+  });
+  host.querySelectorAll('[data-lk]').forEach(cb => cb.onchange = () => {
+    const [k, id, rid] = cb.dataset.lk.split('|'), c = state.conns[k].find(x => cid(x) === id), hit = allRocks().find(x => x.r.id === rid);
+    if (c && hit){ setLink(hit.r, k, c, cb.checked); save(); }
+    const sm = cb.closest('li').querySelector('small'), n = allRocks().filter(({ r }) => hasLink(r, k, c)).length; if (sm) sm.textContent = `Shown in ${n} rock${n === 1 ? '' : 's'}`;
   });
   $('#gload').onclick = async () => {
     gmsg = ''; $('#gload').disabled = true; $('#gload').textContent = 'Loading…';
@@ -906,17 +1008,16 @@ function syncTab(){
       for (let i = 0; i < 4; i++){ const p = await tool(GOOGLE, 'list_calendars', token ? { pageSize: 250, pageToken: token } : { pageSize: 250 }); out.push(...(p.calendars || [])); token = p.nextPageToken; if (!token) break; }
       gcals = out;
     } catch(e){ gmsg = fail(e); }
-    syncTab();
+    connectTab(host);
   };
-  document.querySelectorAll('[data-gc]').forEach(cb => cb.onchange = () => {
-    const c = gcals.find(x => x.id === cb.dataset.gc);
-    r.links.google = r.links.google.filter(l => l.id !== c.id);
-    if (cb.checked) r.links.google.push({ id: c.id, name: c.summary || c.id });
-    save(); clearSync(r); syncTab();
+  host.querySelectorAll('[data-gc]').forEach(cb => cb.onchange = () => {
+    const c = gcals.find(x => x.id === cb.dataset.gc), conn = { id: c.id, name: c.summary || c.id };
+    if (cb.checked) addConn('google', conn); else dropConn('google', conn);
+    connectTab(host);
   });
   const go = async () => {
     const q = $('#nq').value.trim(); if (!q) return;
-    nstate = { msg: '', results: [], sources: [], busy: true }; syncTab();
+    nstate = { msg: '', results: [], sources: [], busy: true }; connectTab(host);
     try {
       if (/^https?:\/\//.test(q)) await notionOpen(q);
       else {
@@ -925,19 +1026,17 @@ function syncTab(){
         nstate.msg = nstate.results.length ? '' : 'Nothing found. Try another word, or paste a link.';
       }
     } catch(e){ nstate.msg = fail(e); nstate.err = true; }
-    nstate.busy = false; syncTab();
+    nstate.busy = false; connectTab(host);
   };
   $('#ngo').onclick = go; $('#nq').onkeydown = e => { if (e.key === 'Enter') go(); };
-  document.querySelectorAll('[data-npick]').forEach(b => b.onclick = async () => {
-    const x = nstate.results[+b.dataset.npick]; nstate = { msg: '', results: [], sources: [], busy: true }; syncTab();
+  host.querySelectorAll('[data-npick]').forEach(b => b.onclick = async () => {
+    const x = nstate.results[+b.dataset.npick]; nstate = { msg: '', results: [], sources: [], busy: true }; connectTab(host);
     try { await notionOpen(x.url); } catch(e){ nstate.msg = fail(e); nstate.err = true; }
-    nstate.busy = false; syncTab();
+    nstate.busy = false; connectTab(host);
   });
-  document.querySelectorAll('[data-nlink]').forEach(b => b.onclick = () => {
-    const s = nstate.sources[+b.dataset.nlink];
-    if (!r.links.notion.some(l => l.ds === s.ds)) r.links.notion.push({ ds: s.ds, name: s.name });
-    nstate = { msg: `Linked “${s.name}”.`, results: [], sources: [], busy: false };
-    save(); clearSync(r); syncTab();
+  host.querySelectorAll('[data-nlink]').forEach(b => b.onclick = () => {
+    const x = nstate.sources[+b.dataset.nlink]; addConn('notion', x);
+    nstate = { msg: `Added “${x.name}”. Choose which rocks show it.`, results: [], sources: [], busy: false }; openConn.add('notion|' + x.ds); connectTab(host);
   });
 }
 async function notionOpen(url){
