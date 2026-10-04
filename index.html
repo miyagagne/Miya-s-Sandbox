@@ -667,7 +667,7 @@ function devicesTab(host){
       <label for="isrc">Where is it?</label>
       <select id="isrc">${locals.map(n => `<option value="local:${esc(n)}">Device account “${esc(n)}” on this browser</option>`).join('')}<option value="file">A transfer file or code</option></select>
       <div id="ifilebox" hidden><label for="ifile">Transfer file</label><input id="ifile" type="file" accept=".json,application/json"><label for="itext">…or paste the transfer code</label><textarea id="itext" style="min-height:80px" spellcheck="false"></textarea></div>
-      <label for="ipw">Its password</label><input id="ipw" type="password" autocomplete="off">
+      <label for="ipw">Its password, or its recovery code</label><input id="ipw" type="password" autocomplete="off">
       <div class="msg" id="imsg" hidden></div>
       <div class="row" style="margin-top:12px"><button id="igo">Add it to my garden</button></div>`;
     const box = $('#ifilebox'), sel = $('#isrc'), say = (t, err) => { const e = $('#imsg'); e.textContent = t; e.hidden = !t; e.classList.toggle('err', !!err); };
@@ -683,7 +683,12 @@ function devicesTab(host){
           acc = o.acc; blob = o.data;
         } else { const n = sel.value.slice(6); acc = accounts()[n]; try { blob = JSON.parse(localStorage.getItem(DATA(n))); } catch(e){} }
         if (!acc || !blob) throw new Error('Could not find that garden.');
-        let old; try { old = await unseal(await deriveKey($('#ipw').value, unb64(acc.salt)), blob); } catch(e){ await new Promise(r => setTimeout(r, 600)); throw new Error('That password doesn’t open this garden.'); }
+        const secret = $('#ipw').value; let old;
+        try { old = await unseal(await deriveKey(secret, unb64(acc.salt)), blob); }
+        catch(e){
+          if (acc.rec && normCode(secret).length >= 20){ try { old = await unseal(await unwrapKey(secret, acc.rec), blob); } catch(e2){} }
+          if (!old){ await new Promise(r => setTimeout(r, 600)); throw new Error('That password or recovery code doesn’t open this garden.'); }
+        }
         const n = mergeGardens(old); save(); refreshChrome(); render();
         say(`Added ${n} garden${n === 1 ? '' : 's'}. Find ${n === 1 ? 'it' : 'them'} in the side tabs.`);
         $('#ipw').value = '';
