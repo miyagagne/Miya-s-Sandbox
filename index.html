@@ -1408,7 +1408,7 @@ if (window.top === window && location.protocol.startsWith('http')){
   const N = 12, fish = [], ripples = [];
   const pads = [[.08,.2,1],[.91,.13,.8],[.05,.72,1.15],[.94,.6,.9],[.17,.94,.85],[.83,.9,1.1],[.52,.035,.7]].map((p, i) => ({ fx: p[0], fy: p[1], k: p[2], rot: rnd() * TAU, bob: rnd() * TAU, flower: i === 2 || i === 5 }));
   function size(){
-    dpr = Math.min(window.devicePixelRatio || 1, innerWidth < 700 ? 1.5 : 2);
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
     W = innerWidth; H = innerHeight; U = Math.max(30, Math.min(58, W / 17));
     cv.width = W * dpr; cv.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (!fish.length) for (let i = 0; i < PAL.length; i++){
@@ -1450,9 +1450,8 @@ if (window.top === window && location.protocol.startsWith('http')){
   }
 
   // twinkling surface glints, fireflies, drifting petals, trailing sparkles and low mist
-  const lite = innerWidth < 700;
-  const glints = [...Array(lite ? 32 : 70)].map(() => ({ x: rnd(), y: rnd(), s: 2 + rnd() * 3.5, ph: rnd() * TAU, sp: .6 + rnd() * 1.4 }));
-  const flies = [...Array(lite ? 14 : 26)].map(() => ({ x: rnd(), y: rnd(), ph: rnd() * TAU, sp: .15 + rnd() * .3, r: 30 + rnd() * 60, hue: rnd() > .4 ? '255,236,150' : '170,255,230' }));
+  const glints = [...Array(70)].map(() => ({ x: rnd(), y: rnd(), s: 2 + rnd() * 3.5, ph: rnd() * TAU, sp: .6 + rnd() * 1.4 }));
+  const flies = [...Array(26)].map(() => ({ x: rnd(), y: rnd(), ph: rnd() * TAU, sp: .15 + rnd() * .3, r: 30 + rnd() * 60, hue: rnd() > .4 ? '255,236,150' : '170,255,230' }));
   const petals = [...Array(9)].map(() => ({ x: rnd(), y: rnd(), a: rnd() * TAU, sp: 6 + rnd() * 8, ph: rnd() * TAU }));
   const sparks = [];
   function magic(t, dt){
@@ -1592,7 +1591,7 @@ if (window.top === window && location.protocol.startsWith('http')){
     }
     g.globalAlpha = 1;
     // body
-    g.save(); g.shadowColor = f.pal.glow || (f.pal.spots[0] ? f.pal.spots[0][2] : base); g.shadowBlur = (f.pal.glowBlur || 24) * (lite ? .6 : 1); g.fillStyle = base; ribbon(0, N - 1, 1); g.fill(); g.restore();
+    g.save(); g.shadowColor = f.pal.glow || (f.pal.spots[0] ? f.pal.spots[0][2] : base); g.shadowBlur = f.pal.glowBlur || 24; g.fillStyle = base; ribbon(0, N - 1, 1); g.fill(); g.restore();
     g.fillStyle = base; ribbon(0, N - 1, 1); g.fill();
     g.beginPath(); g.arc(q[0].x, q[0].y, Math.max(w[0], u * .2), 0, TAU); g.fill();
     for (const [i0, i1, col, k] of f.pal.spots){ g.fillStyle = col; ribbon(i0, Math.min(i1, N - 1), k); g.fill(); }
