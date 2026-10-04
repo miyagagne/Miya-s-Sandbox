@@ -452,7 +452,7 @@ async function signOut(){
 
 /* ---------- cloud accounts (Supabase): same garden on every device ---------- */
 // Fill these in from Supabase → Project Settings → API. The anon key is meant to be public.
-const CLOUD = { url: '', key: '' };
+const CLOUD = { url: 'https://odsrrlaxhyqfkxtxynep.supabase.co', key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kc3JybGF4aHlxZmt4dHh5bmVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwNDQ5OTEsImV4cCI6MjEwNjYyMDk5MX0.V8aPFRu9_LWOiNvAfJOzQFY7mBtioa6AX9J8upe2r44' };
 const cloudOn = () => !!(CLOUD.url && CLOUD.key) && window.top === window && /^https?:$/.test(location.protocol);
 const CS = 'rockGarden.cloud.session', CCACHE = id => 'rockGarden.cloud.cache.' + id;
 let sess = null, lastAt = 0, pushing = false;
@@ -647,9 +647,49 @@ async function saveFile(name, text){
   try { const d = window.claude && await window.claude.use('downloads'); if (d){ await d.save({ filename: name, data: text }); return true; } } catch(e){ if (e && e.code === 'declined') return true; }
   try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); return true; } catch(e){ return false; }
 }
+function mergeGardens(old){
+  old = fixup(old);
+  const map = {}; old.gardens.forEach(g => { map[g.id] = uid(); });
+  old.gardens.forEach(g => {
+    const n = { ...g, id: map[g.id], rocks: g.rocks.map(r => { const c = { ...r }; if (c.gardenId) c.gardenId = map[c.gardenId] || c.gardenId; return c; }) };
+    if (g.parent) n.parent = { g: map[g.parent.g] || g.parent.g, r: g.parent.r };
+    state.gardens.push(n);
+  });
+  for (const k of ['google', 'notion']) for (const c of old.conns[k]) if (!state.conns[k].some(x => cid(x) === cid(c))) state.conns[k].push(c);
+  return old.gardens.length;
+}
 function devicesTab(host){
   if (cloudOn()){
-    host.innerHTML = `<div class="msg">Your garden is saved to your online account. To use it on another device, open this app there and sign in with the same email and password.</div>`;
+    const locals = Object.keys(accounts());
+    host.innerHTML = `<div class="msg">Your garden is saved to your online account. To use it on another device, open this app there and sign in with the same email and password.</div>
+      <h3 style="margin-top:20px">Bring in an older garden</h3>
+      <p class="note" style="margin-top:0">Made a garden before signing up online? Add it to this account. It is added alongside what you already have, nothing is replaced.</p>
+      <label for="isrc">Where is it?</label>
+      <select id="isrc">${locals.map(n => `<option value="local:${esc(n)}">Device account “${esc(n)}” on this browser</option>`).join('')}<option value="file">A transfer file or code</option></select>
+      <div id="ifilebox" hidden><label for="ifile">Transfer file</label><input id="ifile" type="file" accept=".json,application/json"><label for="itext">…or paste the transfer code</label><textarea id="itext" style="min-height:80px" spellcheck="false"></textarea></div>
+      <label for="ipw">Its password</label><input id="ipw" type="password" autocomplete="off">
+      <div class="msg" id="imsg" hidden></div>
+      <div class="row" style="margin-top:12px"><button id="igo">Add it to my garden</button></div>`;
+    const box = $('#ifilebox'), sel = $('#isrc'), say = (t, err) => { const e = $('#imsg'); e.textContent = t; e.hidden = !t; e.classList.toggle('err', !!err); };
+    const toggle = () => { box.hidden = sel.value !== 'file'; }; sel.onchange = toggle; toggle();
+    $('#igo').onclick = async () => {
+      say(''); $('#igo').disabled = true;
+      try {
+        let acc, blob;
+        if (sel.value === 'file'){
+          const f = $('#ifile').files[0], text = f ? await f.text() : $('#itext').value.trim();
+          let o; try { o = JSON.parse(text); } catch(e){ throw new Error('That isn’t a Rock Garden transfer file or code.'); }
+          if (!(o && o.rockGarden === 1 && o.acc && o.data)) throw new Error('That isn’t a Rock Garden transfer file or code.');
+          acc = o.acc; blob = o.data;
+        } else { const n = sel.value.slice(6); acc = accounts()[n]; try { blob = JSON.parse(localStorage.getItem(DATA(n))); } catch(e){} }
+        if (!acc || !blob) throw new Error('Could not find that garden.');
+        let old; try { old = await unseal(await deriveKey($('#ipw').value, unb64(acc.salt)), blob); } catch(e){ await new Promise(r => setTimeout(r, 600)); throw new Error('That password doesn’t open this garden.'); }
+        const n = mergeGardens(old); save(); refreshChrome(); render();
+        say(`Added ${n} garden${n === 1 ? '' : 's'}. Find ${n === 1 ? 'it' : 'them'} in the side tabs.`);
+        $('#ipw').value = '';
+      } catch(e){ say(e.message || 'Could not import.', true); }
+      finally { const b = $('#igo'); if (b) b.disabled = false; }
+    };
     return;
   }
   host.innerHTML = `
