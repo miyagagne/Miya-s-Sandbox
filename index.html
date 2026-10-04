@@ -41,7 +41,7 @@ h1{font-size:1.5rem;letter-spacing:.02em}
 #garden{width:100%;height:auto;display:block;touch-action:none;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 18px 24px rgba(0,0,0,.28))}
 .rock{cursor:grab;outline:none}
 .rock.drag{cursor:grabbing}
-.rock .lbl{font-family:var(--display);font-weight:700;text-anchor:middle;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.6);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.rock .lbl{font-family:var(--display);font-weight:700;text-anchor:middle;fill:#fff;paint-order:stroke;stroke:var(--ls,rgba(0,0,0,.5));stroke-width:3.5px;stroke-linejoin:round;pointer-events:none}
 .rock .wt{font-family:var(--body);font-size:11px;text-anchor:middle;fill:rgba(255,255,255,.8);pointer-events:none;letter-spacing:.08em}
 .pebble-t{font:700 12px var(--body);text-anchor:middle;fill:#fff;pointer-events:none}
 .empty-t{font-family:var(--display);font-size:20px;text-anchor:middle;fill:#7a6a45}
@@ -156,7 +156,8 @@ header .ghost{color:var(--pond-ink);border-color:rgba(255,255,255,.35)}
 
 <script>
 const KEY = 'rockGarden.v1';
-const COLORS = ['#6f7a86','#8a6f58','#6d8068','#85707f','#a98d6d','#5d7487','#4d5258','#8f6048'];
+const COLORS = ['#ff7a8a','#ffc53d','#3ddc97','#4cc9f0','#a78bfa','#ff9248','#ff6fb5','#2ec4b6'];
+const OLD_COLORS = ['#6f7a86','#8a6f58','#6d8068','#85707f','#a98d6d','#5d7487','#4d5258','#8f6048'];
 const R = 330, C = 350, GAP = 10;
 const GOOGLE = 'Google Calendar', NOTION = 'Notion';
 const $ = s => document.querySelector(s);
@@ -171,7 +172,7 @@ const rng = seed => () => (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0)
 let state = null, user = null, dkey = null, saveT = null;
 function blank(name, weight, color){ return { id: uid(), name, weight, color, events: [], tasks: [], notes: '', links: { google: [], notion: [] } }; }
 const seed = () => ({ rocks: [blank('Robotics Club', 8, COLORS[0]), blank('Piano', 5, COLORS[2]), blank('Book Club', 3, COLORS[3])] });
-function fixup(s){ s.rocks.forEach(r => r.links = r.links || { google: [], notion: [] }); return s; }
+function fixup(s){ s.rocks.forEach(r => { r.links = r.links || { google: [], notion: [] }; const i = OLD_COLORS.indexOf(r.color); if (i >= 0) r.color = COLORS[i]; }); return s; }
 
 /* ---------- accounts: stored on this device, garden encrypted with the password ---------- */
 const ACC = 'rockGarden.accounts', DATA = u => 'rockGarden.data.' + u, SES = 'rockGarden.session';
@@ -496,12 +497,16 @@ function stonePath(cx, cy, r, id){
   }
   return d + 'Z';
 }
-function mossFor(p){
-  if (p.rk.weight < 5) return '';
-  const rnd = rng(hash(p.rk.id + 'm')), a = Math.PI * (.15 + rnd() * .5), out = [];
-  for (let i = 0; i < 7; i++){
-    const t = a + (rnd() - .5) * 1.1, d = p.r * (.78 + rnd() * .2), rr = p.r * (.05 + rnd() * .07);
-    out.push(`<circle cx="${(p.x + Math.cos(t) * d).toFixed(1)}" cy="${(p.y + Math.sin(t) * d).toFixed(1)}" r="${rr.toFixed(1)}" fill="${i % 2 ? '#5d7d3c' : '#7a9a50'}" opacity=".9"/>`);
+function decor(p){
+  const rnd = rng(hash(p.rk.id + 'd')), out = [];
+  for (let i = 0; i < 9; i++){
+    const t = rnd() * 6.283, d = Math.sqrt(rnd()) * p.r * .78, rr = p.r * (.015 + rnd() * .022);
+    out.push(`<circle cx="${(p.x + Math.cos(t) * d).toFixed(1)}" cy="${(p.y + Math.sin(t) * d).toFixed(1)}" r="${rr.toFixed(1)}" fill="#fff" opacity="${(.22 + rnd() * .25).toFixed(2)}"/>`);
+  }
+  if (p.rk.weight >= 6){
+    const t = Math.PI * (.2 + rnd() * .3), d = p.r * .66, cx = p.x + Math.cos(t) * d, cy = p.y + Math.sin(t) * d, pr = p.r * .075;
+    for (let i = 0; i < 6; i++){ const a = i / 6 * 6.283; out.push(`<circle cx="${(cx + Math.cos(a) * pr * 1.2).toFixed(1)}" cy="${(cy + Math.sin(a) * pr * 1.2).toFixed(1)}" r="${(pr).toFixed(1)}" fill="#fff"/>`); }
+    out.push(`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${(pr * .8).toFixed(1)}" fill="#ffd23f"/>`);
   }
   return out.join('');
 }
@@ -521,9 +526,9 @@ function render(){
     <clipPath id="clip"><circle cx="${C}" cy="${C}" r="${R}"/></clipPath>
     <filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4"/><feColorMatrix values="0 0 0 0 .45  0 0 0 0 .36  0 0 0 0 .2  0 0 0 .5 -.12"/></filter>
     <filter id="stone" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".05 .07" numOctaves="3" seed="7" result="n"/><feColorMatrix in="n" type="saturate" values="0" result="g"/><feComposite in="g" in2="SourceGraphic" operator="in" result="gt"/><feBlend in="SourceGraphic" in2="gt" mode="soft-light"/></filter>
-    <radialGradient id="rim" cx="45%" cy="40%" r="62%"><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></radialGradient>
+    <radialGradient id="rim" cx="45%" cy="40%" r="62%"><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".16"/></radialGradient>
     <filter id="soft"><feGaussianBlur stdDeviation="5"/></filter>
-    ${state.rocks.map(r => `<radialGradient id="g${r.id}" cx="34%" cy="28%" r="80%"><stop offset="0" stop-color="${shade(r.color, 62)}"/><stop offset=".55" stop-color="${r.color}"/><stop offset="1" stop-color="${shade(r.color, -70)}"/></radialGradient>`).join('')}
+    ${state.rocks.map(r => `<radialGradient id="g${r.id}" cx="36%" cy="30%" r="78%"><stop offset="0" stop-color="${shade(r.color, 70)}"/><stop offset=".5" stop-color="${r.color}"/><stop offset="1" stop-color="${shade(r.color, -42)}"/></radialGradient>`).join('')}
   </defs>
   <circle cx="${C}" cy="${C}" r="${R + 20}" fill="url(#frame)"/>
   <circle cx="${C}" cy="${C}" r="${R + 20}" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="2" stroke-dasharray="1 0" transform="translate(-1,-1)"/>
@@ -541,12 +546,13 @@ function render(){
     const { rk, r, x, y } = p, pending = rk.tasks.filter(t => !t.done).length;
     const fs = Math.max(12, Math.min(22, r / 3.1)), nm = rk.name.length > 14 ? rk.name.slice(0, 13) + '…' : rk.name;
     out += `<g class="rock ${dragging && dragging.rk === rk ? 'drag' : ''}" data-id="${rk.id}" tabindex="0" role="button" aria-label="${esc(rk.name)}, weight ${rk.weight}">
-      <ellipse cx="${x + r * .14}" cy="${y + r * .86}" rx="${r * 1.02}" ry="${r * .26}" fill="rgba(50,35,10,.5)" filter="url(#soft)"/>
+      <ellipse cx="${x + r * .14}" cy="${y + r * .86}" rx="${r * 1.02}" ry="${r * .26}" fill="${shade(rk.color, -110)}" opacity=".38" filter="url(#soft)"/>
       <path d="${stonePath(x, y, r, rk.id)}" fill="url(#g${rk.id})"/>
       <path d="${stonePath(x, y, r, rk.id)}" fill="url(#rim)"/>
-      <ellipse cx="${(x - r * .3).toFixed(1)}" cy="${(y - r * .42).toFixed(1)}" rx="${(r * .42).toFixed(1)}" ry="${(r * .22).toFixed(1)}" fill="#fff" opacity=".28" transform="rotate(-28 ${(x - r * .3).toFixed(1)} ${(y - r * .42).toFixed(1)})" filter="url(#soft)"/>
-      ${mossFor(p)}
-      <text class="lbl" x="${x}" y="${y + fs / 4}" font-size="${fs}">${esc(nm)}</text>
+      <ellipse cx="${(x - r * .28).toFixed(1)}" cy="${(y - r * .44).toFixed(1)}" rx="${(r * .46).toFixed(1)}" ry="${(r * .24).toFixed(1)}" fill="#fff" opacity=".42" transform="rotate(-28 ${(x - r * .28).toFixed(1)} ${(y - r * .44).toFixed(1)})" filter="url(#soft)"/>
+      <ellipse cx="${(x - r * .36).toFixed(1)}" cy="${(y - r * .5).toFixed(1)}" rx="${(r * .16).toFixed(1)}" ry="${(r * .07).toFixed(1)}" fill="#fff" opacity=".85" transform="rotate(-28 ${(x - r * .36).toFixed(1)} ${(y - r * .5).toFixed(1)})"/>
+      ${decor(p)}
+      <text class="lbl" x="${x}" y="${y + fs / 4}" font-size="${fs}" style="--ls:${shade(rk.color, -95)}">${esc(nm)}</text>
       <text class="wt" x="${x}" y="${y + fs / 4 + 15}">${rk.weight}/10</text>
       ${pending ? `<circle cx="${x + r * .7}" cy="${y - r * .7}" r="12" fill="#c9553d" stroke="#fff" stroke-width="2"/><text class="pebble-t" x="${x + r * .7}" y="${y - r * .7 + 4.5}">${pending}</text>` : ''}
       <title>${esc(rk.name)}</title></g>`;
