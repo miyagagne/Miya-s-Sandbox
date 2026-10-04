@@ -33,7 +33,23 @@ input[type=range]{padding:0;accent-color:var(--accent)}
 input[type=checkbox]{width:auto;accent-color:var(--accent)}
 label{display:block;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 5px}
 h1,h2,h3{font-family:var(--display);margin:0;font-weight:700}
-.wrap{max-width:780px;margin:0 auto}
+.wrap{max-width:1040px;margin:0 auto}
+.layout{display:grid;grid-template-columns:200px minmax(0,1fr);gap:20px;align-items:start}
+.main{min-width:0}
+#rail{display:flex;flex-direction:column;gap:8px;position:sticky;top:12px;background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:10px}
+.gtab{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;color:var(--pond-ink);border-radius:14px;padding:9px 10px;font-weight:500}
+.gtab:hover{background:rgba(255,255,255,.1)}
+.gtab.on{background:rgba(255,255,255,.2);box-shadow:0 0 18px rgba(150,230,255,.35),inset 0 0 0 1px rgba(255,255,255,.35)}
+.gtab .gd{width:26px;height:26px;border-radius:50%;flex:none;box-shadow:inset -3px -4px 6px rgba(0,0,0,.3),inset 2px 2px 4px rgba(255,255,255,.5);display:grid;place-items:center;font-size:.8rem}
+.gtab .gn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gtab .gc{font-size:.75rem;opacity:.7}
+.gadd{background:transparent;border:1px dashed rgba(255,255,255,.4);color:var(--pond-ink);border-radius:14px;padding:9px 10px;font-weight:500}
+.gmore{background:none;color:var(--pond-ink);padding:2px 8px;font-size:1.1rem;opacity:.8;border-radius:8px}
+@media(max-width:860px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  #rail{flex-direction:row;overflow-x:auto;position:static;padding:8px;gap:6px}
+  .gtab,.gadd{width:auto;flex:none;white-space:nowrap}
+}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:14px;flex-wrap:wrap}
 h1{font-size:1.5rem;letter-spacing:.02em}
 .sub{color:var(--muted);font-size:.9rem;margin-top:2px}
@@ -137,19 +153,29 @@ header .ghost{color:var(--pond-ink);border-color:rgba(255,255,255,.35)}
   <header>
     <div>
       <h1>Rock Garden</h1>
-      <div class="sub">Every activity is a stone in the sand pit. Heavier commitments weigh more.</div>
+      <div class="sub">Gardens for your activities, fun things and photos. Bigger stones mean more.</div>
     </div>
     <div class="who"><span id="who"></span><span id="syncst" class="note"></span><button class="ghost small" id="recbtn" title="Make a code that can reset your password">Recovery code</button><button class="ghost small" id="signout">Sign out</button><button id="add">+ New rock</button></div>
   </header>
 
-  <div class="garden-box"><svg id="garden" viewBox="0 0 700 700" role="img" aria-label="Sand garden of activity rocks"></svg></div>
-  <p class="hint">Drag a rock to move it. Tap it to open its calendar, notes and tasks.</p>
+  <div class="layout">
+    <nav id="rail" aria-label="Gardens"></nav>
+    <div class="main">
+      <div class="garden-box"><svg id="garden" viewBox="0 0 700 700" role="img" aria-label="Sand garden"></svg></div>
+      <p class="hint" id="hint">Drag a rock to move it. Tap it to open its calendar, notes and tasks.</p>
 
-  <form class="quick" id="quick">
-    <div><label for="qn">Add a rock</label><input id="qn" placeholder="Club, class, hobby, job…" autocomplete="off"></div>
-    <div><label for="qw">Weight <span id="qwv">5</span>/10</label><input id="qw" type="range" min="1" max="10" value="5"></div>
-    <button type="submit">Place rock</button>
-  </form>
+      <form class="quick" id="quick">
+        <div><label for="qn">Add a rock</label><input id="qn" placeholder="Club, class, hobby, job…" autocomplete="off"></div>
+        <div><label for="qw">Weight <span id="qwv">5</span>/10</label><input id="qw" type="range" min="1" max="10" value="5"></div>
+        <button type="submit">Place rock</button>
+      </form>
+      <div class="quick" id="photobar" hidden>
+        <div><label>Photos</label><div class="note" id="photomsg">Add pictures and they become round photo stones you can move around the garden.</div></div>
+        <button type="button" id="photobtn">Add photos</button>
+        <input type="file" id="photofile" accept="image/*" multiple hidden>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="overlay"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
@@ -171,8 +197,21 @@ const rng = seed => () => (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0)
 
 let state = null, user = null, dkey = null, saveT = null;
 function blank(name, weight, color){ return { id: uid(), name, weight, color, events: [], tasks: [], notes: '', links: { google: [], notion: [] } }; }
-const seed = () => ({ rocks: [blank('Robotics Club', 8, COLORS[0]), blank('Piano', 5, COLORS[2]), blank('Book Club', 3, COLORS[3])] });
-function fixup(s){ s.rocks.forEach(r => { r.links = r.links || { google: [], notion: [] }; const i = OLD_COLORS.indexOf(r.color); if (i >= 0) r.color = COLORS[i]; }); return s; }
+const seed = () => ({ active: 'main', gardens: [
+  { id: 'main', name: 'My Activities', kind: 'rocks', rocks: [blank('Robotics Club', 8, COLORS[0]), blank('Piano', 5, COLORS[2]), blank('Book Club', 3, COLORS[3])] },
+  { id: 'fun', name: 'Fun Things', kind: 'rocks', rocks: [] },
+  { id: 'photos', name: 'Photos', kind: 'photos', rocks: [] }
+] });
+// older saves had one flat list of rocks; gardens wrap lists of rocks. state.rocks is always the open garden's rocks.
+function fixup(s){
+  if (!s.gardens){ s.gardens = [{ id: 'main', name: 'My Garden', kind: 'rocks', rocks: s.rocks || [] }]; delete s.rocks; s.active = 'main'; }
+  s.gardens.forEach(g => { g.rocks = g.rocks || []; g.kind = g.kind || 'rocks'; g.rocks.forEach(r => { r.links = r.links || { google: [], notion: [] }; const i = OLD_COLORS.indexOf(r.color); if (i >= 0) r.color = COLORS[i]; }); });
+  if (!s.gardens.some(g => g.id === s.active)) s.active = s.gardens[0].id;
+  const open = () => s.gardens.find(g => g.id === s.active) || s.gardens[0];
+  Object.defineProperty(s, 'rocks', { get(){ return open().rocks; }, set(v){ open().rocks = v; }, enumerable: false, configurable: true });
+  return s;
+}
+const garden = () => state.gardens.find(g => g.id === state.active) || state.gardens[0];
 
 /* ---------- accounts: stored on this device, garden encrypted with the password ---------- */
 const ACC = 'rockGarden.accounts', DATA = u => 'rockGarden.data.' + u, SES = 'rockGarden.session';
@@ -195,7 +234,7 @@ async function unseal(key, blob){
 async function persist(){
   if (cloudOn() && sess && state){ try { localStorage.setItem(CCACHE(sess.user.id), JSON.stringify(state)); } catch(e){} return push(); }
   if (!state || !user || !dkey) return;
-  try { localStorage.setItem(DATA(user), JSON.stringify(await seal(dkey, state))); } catch(e){}
+  try { localStorage.setItem(DATA(user), JSON.stringify(await seal(dkey, state))); setSync(''); } catch(e){ setSync('Could not save: storage is full. Remove some photos.'); }
 }
 let chain = Promise.resolve();
 function save(){
@@ -213,7 +252,7 @@ function showAuth(){
 function enter(u, key, data){
   user = u; dkey = key; state = fixup(data);
   setMode('in'); $('#auth').hidden = true; $('#app').hidden = false; $('#who').textContent = u;
-  render();
+  render(); refreshChrome();
 }
 async function signOut(){
   clearTimeout(saveT); await persist();
@@ -270,7 +309,7 @@ async function enterCloud(){
 }
 async function refreshFromCloud(){
   if (!cloudOn() || !sess || !state || pushing || saveT || cur) return;
-  try { const r = await pull(); if (r && Date.parse(r.updated_at) > lastAt){ lastAt = Date.parse(r.updated_at); state = fixup(r.data); render(); setSync('Synced'); } } catch(e){}
+  try { const r = await pull(); if (r && Date.parse(r.updated_at) > lastAt){ lastAt = Date.parse(r.updated_at); state = fixup(r.data); render(); refreshChrome(); setSync('Synced'); } } catch(e){}
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshFromCloud(); });
 setInterval(refreshFromCloud, 30000);
@@ -438,10 +477,11 @@ async function boot(){
 
 /* ---------- layout ---------- */
 function gardenScale(){
-  const sum = state.rocks.reduce((t, r) => t + Math.pow(22 + r.weight * 9, 2), 0);
+  const sum = state.rocks.reduce((t, r) => t + Math.pow(baseR(r), 2), 0);
   return Math.min(1, Math.sqrt(R * R * 0.45 / (sum || 1)));
 }
-const radius = (rk, sc) => (22 + rk.weight * 9) * sc;
+const baseR = rk => rk.photo ? 34 + rk.weight * 10 : 22 + rk.weight * 9;
+const radius = (rk, sc) => baseR(rk) * sc;
 function settle(fixed){
   const sc = gardenScale(), rocks = state.rocks;
   for (const rk of rocks) if (typeof rk.x !== 'number'){
@@ -511,6 +551,18 @@ function decor(p){
   return out.join('');
 }
 
+const photoURLs = new Map();
+function photoSrc(rk){
+  const c = photoURLs.get(rk.id);
+  if (c && c.len === rk.photo.length) return c.url;
+  if (c) URL.revokeObjectURL(c.url);
+  const bin = atob(rk.photo.split(',')[1]), u8 = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  const url = URL.createObjectURL(new Blob([u8], { type: 'image/jpeg' }));
+  photoURLs.set(rk.id, { len: rk.photo.length, url });
+  return url;
+}
+
 function render(){
   const sc = settle(dragging && dragging.rk);
   const placed = state.rocks.map(rk => ({ rk, r: radius(rk, sc), x: C + rk.x, y: C + rk.y }));
@@ -527,6 +579,7 @@ function render(){
     <filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4"/><feColorMatrix values="0 0 0 0 .45  0 0 0 0 .36  0 0 0 0 .2  0 0 0 .5 -.12"/></filter>
     <filter id="stone" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".05 .07" numOctaves="3" seed="7" result="n"/><feColorMatrix in="n" type="saturate" values="0" result="g"/><feComposite in="g" in2="SourceGraphic" operator="in" result="gt"/><feBlend in="SourceGraphic" in2="gt" mode="soft-light"/></filter>
     <radialGradient id="rim" cx="45%" cy="40%" r="62%"><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".16"/></radialGradient>
+    ${placed.filter(p => p.rk.photo).map(p => `<clipPath id="pc${p.rk.id}"><circle cx="${p.x}" cy="${p.y}" r="${p.r.toFixed(1)}"/></clipPath>`).join('')}
     <filter id="soft"><feGaussianBlur stdDeviation="5"/></filter>
     ${state.rocks.map(r => `<radialGradient id="g${r.id}" cx="36%" cy="30%" r="78%"><stop offset="0" stop-color="${shade(r.color, 70)}"/><stop offset=".5" stop-color="${r.color}"/><stop offset="1" stop-color="${shade(r.color, -42)}"/></radialGradient>`).join('')}
   </defs>
@@ -541,9 +594,23 @@ function render(){
     ${around}
     <circle cx="${C}" cy="${C}" r="${R}" fill="url(#pit)"/>
   </g>`;
-  if (!placed.length) out += `<text class="empty-t" x="${C}" y="${C}">Place your first rock below</text>`;
+  if (!placed.length) out += `<text class="empty-t" x="${C}" y="${C}">${garden().kind === 'photos' ? 'Add your first photos below' : 'Place your first rock below'}</text>`;
   for (const p of placed){
-    const { rk, r, x, y } = p, pending = rk.tasks.filter(t => !t.done).length;
+    const { rk, r, x, y } = p;
+    if (rk.photo){
+      const fs2 = Math.max(11, Math.min(17, r / 4.2)), cap = rk.name.length > 16 ? rk.name.slice(0, 15) + '…' : rk.name;
+      out += `<g class="rock ${dragging && dragging.rk === rk ? 'drag' : ''}" data-id="${rk.id}" tabindex="0" role="button" aria-label="${esc(rk.name)}, photo">
+        <ellipse cx="${x + r * .12}" cy="${y + r * .9}" rx="${r * 1.0}" ry="${r * .24}" fill="rgba(0,0,0,.4)" filter="url(#soft)"/>
+        <circle cx="${x}" cy="${y}" r="${(r + 7).toFixed(1)}" fill="#fff"/>
+        <circle cx="${x}" cy="${y}" r="${(r + 7).toFixed(1)}" fill="none" stroke="${rk.color}" stroke-width="4"/>
+        <image href="${photoSrc(rk)}" x="${(x - r).toFixed(1)}" y="${(y - r).toFixed(1)}" width="${(r * 2).toFixed(1)}" height="${(r * 2).toFixed(1)}" preserveAspectRatio="xMidYMid slice" clip-path="url(#pc${rk.id})"/>
+        <circle cx="${x}" cy="${y}" r="${r.toFixed(1)}" fill="url(#rim)"/>
+        <ellipse cx="${(x - r * .3).toFixed(1)}" cy="${(y - r * .5).toFixed(1)}" rx="${(r * .4).toFixed(1)}" ry="${(r * .16).toFixed(1)}" fill="#fff" opacity=".22" transform="rotate(-28 ${(x - r * .3).toFixed(1)} ${(y - r * .5).toFixed(1)})" filter="url(#soft)"/>
+        ${cap ? `<text class="lbl" x="${x}" y="${(y + r * .68).toFixed(1)}" font-size="${fs2}" style="--ls:${shade(rk.color, -95)}">${esc(cap)}</text>` : ''}
+        <title>${esc(rk.name)}</title></g>`;
+      continue;
+    }
+    const pending = rk.tasks.filter(t => !t.done).length;
     const fs = Math.max(12, Math.min(22, r / 3.1)), nm = rk.name.length > 14 ? rk.name.slice(0, 13) + '…' : rk.name;
     out += `<g class="rock ${dragging && dragging.rk === rk ? 'drag' : ''}" data-id="${rk.id}" tabindex="0" role="button" aria-label="${esc(rk.name)}, weight ${rk.weight}">
       <ellipse cx="${x + r * .14}" cy="${y + r * .86}" rx="${r * 1.02}" ry="${r * .26}" fill="${shade(rk.color, -110)}" opacity=".38" filter="url(#soft)"/>
@@ -663,19 +730,19 @@ const synced = rk => syncCache.get(rk.id + '|' + ymd(gridStart(month))) || { eve
 let cur = null, tab = 'calendar', month = new Date(), selDay = ymd(new Date());
 function openRock(id, t){
   cur = state.rocks.find(r => r.id === id); if (!cur) return;
-  tab = t || 'calendar'; month = new Date(); selDay = ymd(new Date());
+  tab = t || (cur.photo ? 'photo' : 'calendar'); month = new Date(); selDay = ymd(new Date());
   $('#overlay').classList.add('open'); sheet(); syncRock(cur);
 }
-function closeSheet(){ $('#overlay').classList.remove('open'); cur = null; render(); save(); }
+function closeSheet(){ $('#overlay').classList.remove('open'); cur = null; render(); save(); if (state) refreshChrome(); }
 function sheet(){
   const r = cur; if (!r) return;
   $('#sheet').innerHTML = `
     <div class="sheet-head"><span class="stone" style="background:radial-gradient(circle at 35% 30%,${shade(r.color, 60)},${r.color} 60%,${shade(r.color, -60)})"></span><h2>${esc(r.name)}</h2><button class="ghost small" id="close">Close</button></div>
-    <div class="tabs" role="tablist">${[['calendar','Calendar'],['notes','Notes'],['tasks','Tasks'],['sync','Connect'],['settings','Rock']].map(([k, l]) => `<button class="tab ${k === tab ? 'active' : ''}" data-t="${k}" role="tab">${l}</button>`).join('')}</div>
+    <div class="tabs" role="tablist">${(r.photo ? [['photo','Photo'],['notes','Notes'],['settings','Frame']] : [['calendar','Calendar'],['notes','Notes'],['tasks','Tasks'],['sync','Connect'],['settings','Rock']]).map(([k, l]) => `<button class="tab ${k === tab ? 'active' : ''}" data-t="${k}" role="tab">${l}</button>`).join('')}</div>
     <div id="body"></div>`;
   $('#close').onclick = closeSheet;
   document.querySelectorAll('.tab').forEach(b => b.onclick = () => { tab = b.dataset.t; sheet(); if (tab === 'calendar') syncRock(cur); });
-  ({ calendar: calTab, notes: notesTab, tasks: tasksTab, sync: syncTab, settings: settingsTab })[tab]();
+  ({ photo: photoTab, calendar: calTab, notes: notesTab, tasks: tasksTab, sync: syncTab, settings: settingsTab })[tab]();
 }
 
 function calTab(){
@@ -708,6 +775,15 @@ function calTab(){
   const gc = $('#goconnect'); if (gc) gc.onclick = () => { tab = 'sync'; sheet(); };
   const add = () => { const t = $('#et').value.trim(); if (!t) return; r.events.push({ id: uid(), title: t, date: selDay, time: $('#etime').value }); save(); calTab(); };
   $('#eadd').onclick = add; $('#et').onkeydown = e => { if (e.key === 'Enter') add(); };
+}
+
+function photoTab(){
+  const r = cur;
+  $('#body').innerHTML = `<img src="${photoSrc(r)}" alt="${esc(r.name)}" style="display:block;max-width:100%;max-height:60vh;margin:0 auto;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.35)">
+    <label for="pcap">Caption</label><input id="pcap" value="${esc(r.name)}" placeholder="What is this a picture of?">
+    <label for="pdate">Date</label><input id="pdate" type="date" value="${esc(r.taken || '')}">`;
+  $('#pcap').oninput = e => { r.name = e.target.value; save(); document.querySelector('.sheet-head h2').textContent = r.name || 'Photo'; };
+  $('#pdate').onchange = e => { r.taken = e.target.value; save(); };
 }
 
 function notesTab(){
@@ -831,11 +907,11 @@ function settingsTab(){
   const r = cur;
   $('#body').innerHTML = `
     <label for="sn">Name</label><input id="sn" value="${esc(r.name)}">
-    <label for="sw">Weight: <span id="wv">${r.weight}</span> / 10</label><input id="sw" type="range" min="1" max="10" value="${r.weight}">
-    <p class="note">How much of your life this takes. It sets the size of the rock.</p>
-    <label>Stone</label>
+    <label for="sw">${r.photo ? 'Size' : 'Weight'}: <span id="wv">${r.weight}</span> / 10</label><input id="sw" type="range" min="1" max="10" value="${r.weight}">
+    <p class="note">${r.photo ? 'Bigger photos are bigger stones.' : 'How much of your life this takes. It sets the size of the rock.'}</p>
+    <label>${r.photo ? 'Frame colour' : 'Stone'}</label>
     <div class="colors">${COLORS.map(c => `<button data-col="${c}" aria-label="Stone ${c}" style="background:radial-gradient(circle at 35% 30%,${shade(c, 60)},${c} 60%,${shade(c, -60)});${c === r.color ? 'outline:3px solid var(--accent);outline-offset:2px' : ''}"></button>`).join('')}</div>
-    <p style="margin-top:26px"><button class="danger" id="delrock">Remove this rock</button></p>`;
+    <p style="margin-top:26px"><button class="danger" id="delrock">${r.photo ? 'Remove this photo' : 'Remove this rock'}</button></p>`;
   $('#sn').oninput = e => { r.name = e.target.value || 'Untitled'; save(); document.querySelector('.sheet-head h2').textContent = r.name; };
   $('#sw').oninput = e => { r.weight = +e.target.value; $('#wv').textContent = r.weight; save(); };
   document.querySelectorAll('[data-col]').forEach(b => b.onclick = () => { r.color = b.dataset.col; save(); sheet(); });
@@ -846,12 +922,79 @@ function settingsTab(){
   };
 }
 
+
+/* ---------- gardens (side tabs) ---------- */
+function refreshChrome(){
+  const g = garden(), photos = g.kind === 'photos';
+  $('#quick').hidden = photos; $('#photobar').hidden = !photos;
+  $('#add').textContent = photos ? '+ Add photos' : '+ New rock';
+  $('#hint').textContent = photos ? 'Drag a photo to move it. Tap it to see it bigger and add a caption.' : 'Drag a rock to move it. Tap it to open its calendar, notes and tasks.';
+  $('#rail').innerHTML = state.gardens.map((x, i) => `<div style="display:flex;align-items:center;gap:2px"><button class="gtab ${x.id === g.id ? 'on' : ''}" data-g="${esc(x.id)}" aria-current="${x.id === g.id}"><span class="gd" style="background:radial-gradient(circle at 35% 30%,${shade(COLORS[i % COLORS.length], 70)},${COLORS[i % COLORS.length]} 60%,${shade(COLORS[i % COLORS.length], -42)})">${x.kind === 'photos' ? '◐' : ''}</span><span class="gn">${esc(x.name)}</span><span class="gc">${x.rocks.length}</span></button>${x.id === g.id ? '<button class="gmore" data-gm="1" aria-label="Rename or delete this garden">⋯</button>' : ''}</div>`).join('') + '<button class="gadd" id="gnew">+ New garden</button>';
+  $('#rail').querySelectorAll('[data-g]').forEach(b => b.onclick = () => { if (b.dataset.g !== state.active){ state.active = b.dataset.g; save(); render(); refreshChrome(); } });
+  const mo = $('#rail').querySelector('[data-gm]'); if (mo) mo.onclick = () => gardenSheet(g.id);
+  $('#gnew').onclick = () => gardenSheet(null);
+}
+function gardenSheet(id){
+  const g = id ? state.gardens.find(x => x.id === id) : null;
+  cur = null; lockSheet = false;
+  $('#sheet').innerHTML = `<div class="sheet-head"><h2>${g ? 'Garden settings' : 'New garden'}</h2><button class="ghost small" id="gclose">Close</button></div>
+    <label for="gname">Name</label><input id="gname" value="${esc(g ? g.name : '')}" placeholder="Fun things, Trips, Family photos…" maxlength="30">
+    ${g ? '' : `<label>What goes in it?</label>
+    <div class="colors" style="gap:8px"><button class="ghost" data-k="rocks" type="button" aria-pressed="true">Rocks (activities, fun things)</button><button class="ghost" data-k="photos" type="button" aria-pressed="false">Photos</button></div>
+    <p class="note">Rocks open to a calendar, notes and tasks. Photos become round photo stones.</p>`}
+    <div class="row" style="margin-top:18px"><button id="gsave">${g ? 'Save' : 'Create garden'}</button>${g && state.gardens.length > 1 ? '<button class="danger" id="gdel">Delete garden</button>' : ''}</div>`;
+  $('#overlay').classList.add('open');
+  let kind = 'rocks';
+  document.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { kind = b.dataset.k; document.querySelectorAll('[data-k]').forEach(x => { const on = x.dataset.k === kind; x.setAttribute('aria-pressed', on); x.style.background = on ? 'var(--accent)' : 'transparent'; x.style.color = on ? 'var(--accent-ink)' : 'var(--ink)'; }); });
+  const first = document.querySelector('[data-k="rocks"]'); if (first) first.click();
+  $('#gclose').onclick = closeSheet;
+  $('#gsave').onclick = () => {
+    const name = $('#gname').value.trim() || (g ? g.name : 'New garden');
+    if (g) g.name = name; else { const n = { id: uid(), name, kind, rocks: [] }; state.gardens.push(n); state.active = n.id; }
+    save(); closeSheet(); refreshChrome();
+  };
+  const del = $('#gdel');
+  if (del) del.onclick = () => {
+    if (del.dataset.sure !== '1'){ del.dataset.sure = '1'; del.textContent = 'Tap again to delete it and everything in it'; return; }
+    state.gardens = state.gardens.filter(x => x.id !== g.id); state.active = state.gardens[0].id; save(); closeSheet(); refreshChrome();
+  };
+  setTimeout(() => { const n = $('#gname'); if (n) n.focus(); }, 30);
+}
+
+/* ---------- photos ---------- */
+function shrink(file){
+  return new Promise((res, rej) => {
+    const im = new Image(), u = URL.createObjectURL(file);
+    im.onload = () => {
+      const k = Math.min(1, 640 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(im.width * k)); c.height = Math.max(1, Math.round(im.height * k));
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL('image/jpeg', .78));
+    };
+    im.onerror = () => { URL.revokeObjectURL(u); rej(new Error('decode')); };
+    im.src = u;
+  });
+}
+async function addPhotos(files){
+  const msg = $('#photomsg'); let ok = 0, bad = 0;
+  msg.textContent = 'Adding…';
+  for (const f of files){
+    try {
+      const rk = blank((f.name.replace(/\.[^.]+$/, '') || 'Photo').slice(0, 40), 5, COLORS[state.rocks.length % COLORS.length]);
+      rk.photo = await shrink(f); state.rocks.push(rk); ok++;
+    } catch(e){ bad++; }
+  }
+  save(); render(); refreshChrome();
+  $('#photomsg').textContent = (ok ? `Added ${ok} photo${ok > 1 ? 's' : ''}. ` : '') + (bad ? `${bad} couldn’t be read (try JPG or PNG). ` : '') + 'Add pictures and they become round photo stones you can move around the garden.';
+}
+$('#photobtn').onclick = () => $('#photofile').click();
+$('#photofile').onchange = e => { const f = [...e.target.files]; e.target.value = ''; if (f.length) addPhotos(f); };
+
 /* ---------- add rocks ---------- */
 function addRock(name, weight){
   const rock = blank(name || 'New activity', weight, COLORS[state.rocks.length % COLORS.length]);
-  state.rocks.push(rock); save(); render(); return rock;
+  state.rocks.push(rock); save(); render(); refreshChrome(); return rock;
 }
-$('#add').onclick = () => { const r = addRock('New activity', 5); openRock(r.id, 'settings'); setTimeout(() => { const n = $('#sn'); if (n){ n.focus(); n.select(); } }, 30); };
+$('#add').onclick = () => { if (garden().kind === 'photos'){ $('#photofile').click(); return; } const r = addRock('New activity', 5); openRock(r.id, 'settings'); setTimeout(() => { const n = $('#sn'); if (n){ n.focus(); n.select(); } }, 30); };
 $('#qw').oninput = e => { $('#qwv').textContent = e.target.value; };
 $('#quick').onsubmit = e => {
   e.preventDefault();
@@ -900,19 +1043,72 @@ if (window.top === window && location.protocol.startsWith('http')){
 
   function water(t){
     const gr = g.createLinearGradient(0, 0, W, H);
-    gr.addColorStop(0, '#0f4a4d'); gr.addColorStop(.5, '#0b3338'); gr.addColorStop(1, '#082228');
+    gr.addColorStop(0, '#12556a'); gr.addColorStop(.45, '#0c3a5a'); gr.addColorStop(1, '#1a2a5e');
     g.fillStyle = gr; g.fillRect(0, 0, W, H);
     g.globalCompositeOperation = 'lighter';
-    for (let i = 0; i < 12; i++){
-      const x = (Math.sin(t * .07 + i * 2.1) * .5 + .5) * W, y = (Math.cos(t * .05 + i * 1.7) * .5 + .5) * H, r = 140 + (i % 4) * 60;
+    // slow aurora-coloured glows under the surface
+    const hues = [['120,230,210', .1], ['170,140,255', .11], ['255,150,210', .08], ['110,190,255', .1]];
+    for (let i = 0; i < 9; i++){
+      const h = hues[i % hues.length], x = (Math.sin(t * .06 + i * 2.1) * .5 + .5) * W, y = (Math.cos(t * .045 + i * 1.7) * .5 + .5) * H, r = 170 + (i % 4) * 70;
       const b = g.createRadialGradient(x, y, 0, x, y, r);
-      b.addColorStop(0, 'rgba(110,210,196,.07)'); b.addColorStop(1, 'rgba(110,210,196,0)');
+      b.addColorStop(0, `rgba(${h[0]},${h[1]})`); b.addColorStop(1, `rgba(${h[0]},0)`);
       g.fillStyle = b; g.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    // moon glow and light shafts from the top left
+    const mx = W * .14, my = -H * .06, mg = g.createRadialGradient(mx, my, 0, mx, my, Math.max(W, H) * .8);
+    mg.addColorStop(0, 'rgba(210,235,255,.35)'); mg.addColorStop(.35, 'rgba(160,200,255,.1)'); mg.addColorStop(1, 'rgba(160,200,255,0)');
+    g.fillStyle = mg; g.fillRect(0, 0, W, H);
+    for (let i = 0; i < 6; i++){
+      const sway = Math.sin(t * .12 + i * 1.3) * .05, ang = .55 + i * .13 + sway, wdt = 40 + (i % 3) * 30, len = Math.max(W, H) * 1.3;
+      g.save(); g.translate(mx, my); g.rotate(ang);
+      const lg = g.createLinearGradient(0, 0, len, 0); lg.addColorStop(0, 'rgba(200,230,255,.1)'); lg.addColorStop(1, 'rgba(200,230,255,0)');
+      g.fillStyle = lg; g.fillRect(0, -wdt / 2, len, wdt); g.restore();
     }
     g.globalCompositeOperation = 'source-over';
     const v = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .35, W / 2, H / 2, Math.max(W, H) * .75);
-    v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,12,14,.55)');
+    v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(6,8,30,.5)');
     g.fillStyle = v; g.fillRect(0, 0, W, H);
+  }
+
+  // twinkling surface glints, fireflies, drifting petals, trailing sparkles and low mist
+  const glints = [...Array(70)].map(() => ({ x: rnd(), y: rnd(), s: 2 + rnd() * 3.5, ph: rnd() * TAU, sp: .6 + rnd() * 1.4 }));
+  const flies = [...Array(26)].map(() => ({ x: rnd(), y: rnd(), ph: rnd() * TAU, sp: .15 + rnd() * .3, r: 30 + rnd() * 60, hue: rnd() > .4 ? '255,236,150' : '170,255,230' }));
+  const petals = [...Array(9)].map(() => ({ x: rnd(), y: rnd(), a: rnd() * TAU, sp: 6 + rnd() * 8, ph: rnd() * TAU }));
+  const sparks = [];
+  function magic(t, dt){
+    g.globalCompositeOperation = 'lighter';
+    for (const q of glints){
+      const a = (Math.sin(t * q.sp + q.ph) * .5 + .5) ** 3 * .75, x = q.x * W, y = q.y * H, s = q.s * (U / 40);
+      if (a < .03) continue;
+      g.fillStyle = `rgba(230,250,255,${a.toFixed(2)})`;
+      g.beginPath(); g.moveTo(x, y - s * 2); g.lineTo(x + s * .3, y - s * .3); g.lineTo(x + s * 2, y); g.lineTo(x + s * .3, y + s * .3); g.lineTo(x, y + s * 2); g.lineTo(x - s * .3, y + s * .3); g.lineTo(x - s * 2, y); g.lineTo(x - s * .3, y - s * .3); g.closePath(); g.fill();
+    }
+    for (const f of flies){
+      const x = ((f.x + Math.sin(t * f.sp + f.ph) * .05 + t * .002 * f.sp) % 1 + 1) % 1 * W + Math.cos(t * f.sp * 1.7 + f.ph) * f.r * .3;
+      const y = f.y * H + Math.sin(t * f.sp * 1.3 + f.ph) * f.r * .5, a = (Math.sin(t * (.8 + f.sp * 2) + f.ph) * .5 + .5) * .9 + .1, r = 7 + a * 7;
+      const gl = g.createRadialGradient(x, y, 0, x, y, r * 2.4); gl.addColorStop(0, `rgba(${f.hue},${(a * .9).toFixed(2)})`); gl.addColorStop(.3, `rgba(${f.hue},${(a * .35).toFixed(2)})`); gl.addColorStop(1, `rgba(${f.hue},0)`);
+      g.fillStyle = gl; g.fillRect(x - r * 2.4, y - r * 2.4, r * 4.8, r * 4.8);
+    }
+    for (let i = sparks.length - 1; i >= 0; i--){
+      const q = sparks[i]; q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt;
+      if (q.life <= 0){ sparks.splice(i, 1); continue; }
+      const a = Math.min(1, q.life / q.max) * .9, gl = g.createRadialGradient(q.x, q.y, 0, q.x, q.y, q.r * 3);
+      gl.addColorStop(0, `rgba(${q.c},${a.toFixed(2)})`); gl.addColorStop(1, `rgba(${q.c},0)`);
+      g.fillStyle = gl; g.fillRect(q.x - q.r * 3, q.y - q.r * 3, q.r * 6, q.r * 6);
+    }
+    g.globalCompositeOperation = 'source-over';
+    for (const p of petals){
+      const x = ((p.x + t * .003 * p.sp / 6) % 1) * W + Math.sin(t * .3 + p.ph) * 14, y = (p.y + Math.sin(t * .05 + p.ph) * .02) * H;
+      g.save(); g.translate(x, y); g.rotate(p.a + Math.sin(t * .4 + p.ph) * .6);
+      g.shadowColor = 'rgba(255,170,215,.8)'; g.shadowBlur = 10;
+      g.fillStyle = 'rgba(255,205,225,.92)'; g.beginPath(); g.ellipse(0, 0, U * .2, U * .09, 0, 0, TAU); g.fill(); g.restore();
+    }
+    // mist banks
+    for (let i = 0; i < 3; i++){
+      const y = H * (.78 + i * .1) + Math.sin(t * .1 + i) * 10, mgd = g.createLinearGradient(0, y - 90, 0, y + 90);
+      mgd.addColorStop(0, 'rgba(200,225,255,0)'); mgd.addColorStop(.5, 'rgba(200,225,255,.06)'); mgd.addColorStop(1, 'rgba(200,225,255,0)');
+      g.fillStyle = mgd; g.fillRect(0, y - 90, W, 180);
+    }
   }
 
   function padDraw(p, t){
@@ -925,6 +1121,7 @@ if (window.top === window && location.protocol.startsWith('http')){
     g.strokeStyle = 'rgba(180,235,170,.35)'; g.lineWidth = 1;
     for (let i = 0; i < 7; i++){ const a = .5 + i * .85; g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(a) * r * .92, Math.sin(a) * r * .92); g.stroke(); }
     if (p.flower){
+      g.save(); g.globalCompositeOperation = 'lighter'; const lg = g.createRadialGradient(0, 0, 0, 0, 0, r * 1.7); lg.addColorStop(0, 'rgba(255,170,220,.55)'); lg.addColorStop(1, 'rgba(255,170,220,0)'); g.fillStyle = lg; g.fillRect(-r * 1.7, -r * 1.7, r * 3.4, r * 3.4); g.restore();
       for (let ring = 0; ring < 2; ring++) for (let i = 0; i < 8; i++){
         const a = i / 8 * TAU + ring * .4, pr = r * (ring ? .3 : .48);
         g.save(); g.rotate(a); g.fillStyle = ring ? '#ffd3e0' : '#f59bb8'; g.beginPath(); g.ellipse(pr * .75, 0, pr * .75, pr * .3, 0, 0, TAU); g.fill(); g.restore();
@@ -945,6 +1142,7 @@ if (window.top === window && location.protocol.startsWith('http')){
       f.flee -= dt; const want = Math.atan2(f.y - f.fy, f.x - f.fx); let d = want - f.a; d = Math.atan2(Math.sin(d), Math.cos(d)); turn += d * 3; sp *= 2.8;
     }
     f.a += turn * dt; f.x += Math.cos(f.a) * sp * dt; f.y += Math.sin(f.a) * sp * dt; f.ph += dt * (3 + sp / (U * .6));
+    if (!still && Math.random() < dt * 9){ const tl = f.pts[N - 1]; sparks.push({ x: tl.x, y: tl.y, vx: (Math.random() - .5) * 14, vy: (Math.random() - .5) * 14, r: 2 + Math.random() * 3, life: 1.2 + Math.random(), max: 2.2, c: Math.random() > .5 ? '255,235,170' : '190,255,240' }); }
     const s = U * .42 * f.k;
     f.pts[0].x = f.x; f.pts[0].y = f.y;
     for (let i = 1; i < N; i++){
@@ -991,6 +1189,7 @@ if (window.top === window && location.protocol.startsWith('http')){
     }
     g.globalAlpha = 1;
     // body
+    g.save(); g.shadowColor = f.pal.spots[0] ? f.pal.spots[0][2] : base; g.shadowBlur = 24; g.fillStyle = base; ribbon(0, N - 1, 1); g.fill(); g.restore();
     g.fillStyle = base; ribbon(0, N - 1, 1); g.fill();
     g.beginPath(); g.arc(q[0].x, q[0].y, Math.max(w[0], u * .2), 0, TAU); g.fill();
     for (const [i0, i1, col, k] of f.pal.spots){ g.fillStyle = col; ribbon(i0, Math.min(i1, N - 1), k); g.fill(); }
@@ -1012,9 +1211,11 @@ if (window.top === window && location.protocol.startsWith('http')){
     for (const r of ripples){ r.r += dt * U * 1.1; r.a *= Math.pow(.45, dt); }
     for (let i = ripples.length - 1; i >= 0; i--) if (ripples[i].r > ripples[i].max || ripples[i].a < .01) ripples.splice(i, 1);
     g.lineWidth = 1.6;
-    for (const r of ripples){ for (let k = 0; k < 3; k++){ g.strokeStyle = `rgba(190,238,232,${(r.a * (1 - k * .3)).toFixed(3)})`; g.beginPath(); g.arc(r.x, r.y, Math.max(1, r.r - k * U * .22), 0, TAU); g.stroke(); } }
+    for (const r of ripples){ for (let k = 0; k < 3; k++){ g.strokeStyle = `rgba(200,245,255,${(Math.min(1, r.a * 1.4) * (1 - k * .3)).toFixed(3)})`; g.shadowColor = 'rgba(150,230,255,.9)'; g.shadowBlur = 8; g.beginPath(); g.arc(r.x, r.y, Math.max(1, r.r - k * U * .22), 0, TAU); g.stroke(); } }
+    g.shadowBlur = 0;
     for (const f of fish){ if (!still) step(f, dt, t); fishDraw(f, t); }
     for (const p of pads) padDraw(p, t);
+    magic(t, still ? 0 : dt);
     if (!still) requestAnimationFrame(frame);
   }
   size();
