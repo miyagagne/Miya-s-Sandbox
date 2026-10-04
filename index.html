@@ -2,13 +2,14 @@
 <meta name="theme-color" content="#1d2420">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Shippori+Mincho:wght@500;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* Layout: one calm column. A framed sand garden sits first, quick-add under it, and each rock opens a bottom sheet (centered dialog on desktop). */
 :root{
   --bg:#e8ebe4; --bg2:#dde2d7; --surface:#f6f7f3; --surface2:#eceee7; --ink:#1f2622; --muted:#667068; --line:#cbd1c5;
   --accent:#4f6b3a; --accent-ink:#fff; --danger:#a23b3b; --google:#2f6db5; --notion:#5c5c58; --scrim:rgba(20,26,22,.5);
   --water:#0b2a30; --pond-ink:#eaf3ef; --glass:rgba(10,26,28,.58);
+  --rock:"Fredoka","Nunito","Trebuchet MS",system-ui,sans-serif;
   --display:"Shippori Mincho","Hiragino Mincho ProN",Georgia,serif;
   --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
@@ -19,6 +20,7 @@
   --bg:#121614; --bg2:#1a201c; --surface:#1d2420; --surface2:#252d28; --ink:#e9ede6; --muted:#98a39a; --line:#38423b;
   --accent:#a5c27d; --accent-ink:#16200f; --danger:#e07a7a; --google:#7fb0ee; --notion:#b9b9b3; --scrim:rgba(0,0,0,.65);color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0}
 body{background:var(--water);color:var(--ink);font:15px/1.45 var(--body);min-height:100vh;padding-inline:16px;padding-block:8px 40px}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -59,8 +61,8 @@ h1{font-size:1.5rem;letter-spacing:.02em}
 #garden{width:100%;height:auto;display:block;touch-action:none;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 18px 24px rgba(0,0,0,.28))}
 .rock{cursor:grab;outline:none}
 .rock.drag{cursor:grabbing}
-.rock .lbl{font-family:var(--display);font-weight:700;text-anchor:middle;fill:#fff;paint-order:stroke;stroke:var(--ls,rgba(0,0,0,.5));stroke-width:3.5px;stroke-linejoin:round;pointer-events:none}
-.rock .wt{font-family:var(--body);font-size:11px;text-anchor:middle;fill:rgba(255,255,255,.8);pointer-events:none;letter-spacing:.08em}
+.rock .lbl{font-family:var(--rock);font-weight:600;letter-spacing:.01em;text-anchor:middle;fill:#fff;paint-order:stroke;stroke:var(--ls,rgba(0,0,0,.5));stroke-width:3.2px;stroke-linejoin:round;pointer-events:none}
+.rock .wt{font-family:var(--rock);font-size:11px;text-anchor:middle;fill:rgba(255,255,255,.8);pointer-events:none;letter-spacing:.08em}
 .pebble-t{font:700 12px var(--body);text-anchor:middle;fill:#fff;pointer-events:none}
 .empty-t{font-family:var(--display);font-size:20px;text-anchor:middle;fill:#7a6a45}
 .hint{text-align:center;color:var(--muted);font-size:.88rem;margin:12px 0 0}
@@ -124,20 +126,36 @@ header .ghost{color:var(--pond-ink);border-color:rgba(255,255,255,.35)}
 @keyframes authOut{to{opacity:0;transform:scale(1.03) translateY(-6px);filter:blur(5px)}}
 #welcome{position:fixed;inset:0;z-index:6;display:none;align-items:center;justify-content:center;pointer-events:none;text-align:center;padding:16px}
 #welcome.show{display:flex}
-#welcome span{font-family:var(--display);font-weight:700;font-size:clamp(1.8rem,6vw,3.2rem);color:#fff;text-shadow:0 0 16px rgba(150,235,255,.8),0 0 44px rgba(120,200,255,.55);animation:welcome 3.4s ease-in-out both}
+#welcome span{font-family:var(--display);font-weight:700;font-size:clamp(1.8rem,6vw,3.2rem);color:#fff;text-shadow:0 0 16px rgba(150,235,255,.8),0 0 44px rgba(120,200,255,.55);animation:welcome 2.6s ease-in-out both}
 @keyframes welcome{0%{opacity:0;transform:translateY(10px);letter-spacing:.2em;filter:blur(6px)}30%{opacity:1;transform:none;letter-spacing:.06em;filter:blur(0)}75%{opacity:1}100%{opacity:0;transform:translateY(-8px);filter:blur(4px)}}
 .arrive header{animation:softIn 1.5s ease-out .1s both}
 .arrive #rail{animation:softLeft 1.5s ease-out .3s both}
 .arrive .garden-box{animation:poolIn 2.2s cubic-bezier(.25,.6,.3,1) both}
 .arrive .hint,.arrive .quick,.arrive .crumb{animation:softIn 1.4s ease-out 2.2s both}
 .arrive .rock.dropin{animation:floatIn 1.5s cubic-bezier(.25,.6,.3,1) calc(.9s + var(--i,0) * .38s) both;transform-box:fill-box;transform-origin:center}
-.arrive .splash{transform-box:fill-box;transform-origin:center;opacity:0;animation:ripple 2.2s ease-out calc(1.4s + var(--i,0) * .38s) both}
 @keyframes softIn{from{opacity:0;transform:translateY(-10px)}}
 @keyframes softLeft{from{opacity:0;transform:translateX(-22px)}}
 @keyframes poolIn{from{opacity:0;transform:scale(.92) translateY(14px);filter:blur(6px)}}
 @keyframes floatIn{from{opacity:0;transform:translateY(18px) scale(.88)}}
-@keyframes ripple{0%{opacity:.5;transform:scale(.6)}100%{opacity:0;transform:scale(1.9)}}
 @media (prefers-reduced-motion:reduce){.arrive *,#auth.leaving,#welcome span{animation:none!important}}
+/* daily briefing */
+#brief{position:fixed;inset:0;z-index:7;display:none;align-items:center;justify-content:center;padding:16px;overflow:auto}
+#brief.show{display:flex}
+.bcard{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:24px;padding:26px 24px;width:100%;max-width:540px;max-height:92vh;overflow:auto;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 18px 60px rgba(0,0,0,.45),0 0 70px rgba(130,220,255,.25);animation:briefIn 1.3s ease-out both}
+.bcard.out{animation:briefOut .8s ease-in forwards}
+@keyframes briefIn{from{opacity:0;transform:translateY(16px) scale(.97)}}
+@keyframes briefOut{to{opacity:0;transform:translateY(-10px) scale(1.02);filter:blur(4px)}}
+.bcard h2{font-size:1.7rem;line-height:1.15}
+.bdate{color:var(--muted);font-size:.9rem;margin-top:2px}
+.bmsg{font-family:var(--display);font-size:1.12rem;line-height:1.5;margin:16px 0 4px;text-wrap:pretty}
+.bcard h3{font-size:1rem;margin:20px 0 8px}
+.bcard .list li{align-items:flex-start}
+.bdot{width:12px;height:12px;border-radius:50%;flex:none;margin-top:5px}
+.btime{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.8rem;min-width:3.4em;flex:none;margin-top:2px}
+.bwhere{color:var(--muted);font-size:.78rem}
+.bover{font-size:.65rem;font-weight:700;letter-spacing:.06em;color:#fff;background:var(--danger);border-radius:5px;padding:1px 6px}
+.bgo{width:100%;margin-top:22px;padding:13px 18px;font-size:1.02rem}
+@media (prefers-reduced-motion:reduce){.bcard,.bcard.out{animation:none!important}}
 /* sign in */
 #auth{max-width:420px;margin:8vh auto 0;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:24px 22px}
 #auth h1{font-size:1.7rem}
@@ -207,6 +225,7 @@ header .ghost{color:var(--pond-ink);border-color:rgba(255,255,255,.35)}
 </div>
 
 <div id="welcome" aria-hidden="true"></div>
+<div id="brief" role="dialog" aria-modal="true" aria-labelledby="brief-h"></div>
 <div id="overlay"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
 
 <script>
@@ -283,18 +302,72 @@ function showAuth(){
 }
 const calm = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 let arriveTimers = [], arriveCbs = [], revealed = true, skipHandler = null;
+function clearSkip(){ if (skipHandler){ document.removeEventListener('pointerdown', skipHandler, true); document.removeEventListener('keydown', skipHandler, true); skipHandler = null; } }
 function finishArrival(){
-  arriveTimers.forEach(clearTimeout); arriveTimers = [];
-  if (window.pondEndGuide) window.pondEndGuide();
-  if (skipHandler){ document.removeEventListener('pointerdown', skipHandler, true); document.removeEventListener('keydown', skipHandler, true); skipHandler = null; }
+  arriveTimers.forEach(clearTimeout); arriveTimers = []; clearSkip();
   $('#app').classList.remove('arrive'); const w = $('#welcome'); w.classList.remove('show'); w.innerHTML = '';
   $('#auth').classList.remove('leaving'); arriving = false;
   const cbs = arriveCbs; arriveCbs = []; cbs.forEach(f => f());
 }
+
+/* ---------- daily briefing: today's events and tasks, a kind word, then on to the garden ---------- */
+const MSGS = {
+  none: ['A quiet day. Enjoy the calm, or plant something new in your garden.', 'Nothing on the list today, and that is a gift. Rest, or do something just for fun.', 'An open day. Whatever you choose to do with it is the right thing.'],
+  light: ['A gentle day. You have got this, one small step at a time.', 'Just a few things today. Take them one at a time and be proud of each one.', 'Small steps still cover a lot of ground. You are doing well.'],
+  busy: ['A full day, and you are ready for it. Breathe, start with one thing, and keep going.', 'There is a lot on your plate, and you have handled harder days. Pace yourself and be kind to you.', 'Big day. Pick the first thing, finish it, then the next. You have got this.']
+};
+function briefData(){
+  const today = ymd(new Date()), events = [], tasks = [];
+  for (const g of state.gardens) for (const r of g.rocks){
+    if (r.photo) continue;
+    r.events.filter(e => e.date === today).forEach(e => events.push({ title: e.title, time: e.time || '', where: r.name, color: r.color, src: 'l' }));
+    r.tasks.filter(t => !t.done && t.due && t.due <= today).forEach(t => tasks.push({ t, where: r.name, color: r.color, late: t.due < today }));
+  }
+  return { today, events, tasks };
+}
+function openBrief(name, onContinue){
+  const d = briefData(), el = $('#brief'), now = new Date(), hr = now.getHours();
+  const greet = hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
+  const count = d.events.length + d.tasks.length, bucket = count === 0 ? 'none' : count <= 3 ? 'light' : 'busy', pool = MSGS[bucket];
+  const msg = pool[hash(d.today + name) % pool.length], late = d.tasks.filter(x => x.late).length;
+  const evRow = e => `<li><span class="bdot" style="background:${e.color || 'var(--muted)'}"></span><span class="btime">${e.time || 'All day'}</span><span class="grow">${e.src && e.src !== 'l' ? `<span class="tag ${e.src}">${e.src === 'g' ? 'GOOGLE' : 'NOTION'}</span> ` : ''}${esc(e.title)}${e.where ? `<small class="bwhere">${esc(e.where)}</small>` : ''}</span></li>`;
+  const taskRow = (x, i) => `<li><input type="checkbox" data-bt="${i}" aria-label="Done"><span class="bdot" style="background:${x.color}"></span><span class="grow">${esc(x.t.title)}${x.late ? ' <span class="bover">OVERDUE</span>' : ''}<small class="bwhere">${esc(x.where)}</small></span></li>`;
+  const cap = (arr, fn) => arr.slice(0, 10).map(fn).join('') + (arr.length > 10 ? `<li><span class="grow note">and ${arr.length - 10} more</span></li>` : '');
+  el.innerHTML = `<div class="bcard" id="bcard">
+    <h2 id="brief-h">${greet}, ${esc(name)}</h2>
+    <div class="bdate">${now.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</div>
+    <p class="bmsg">${esc(msg)}${late ? (late === 1 ? ' One thing slipped by. That is okay. Start there when you are ready.' : ' A few things slipped by. That is okay. Pick one and start there.') : ''}</p>
+    <h3>Today’s schedule</h3>
+    <ul class="list" id="bev">${cap(d.events.sort((a, b) => (a.time || '').localeCompare(b.time || '')), evRow) || '<li><span class="grow note">Nothing scheduled.</span></li>'}</ul>
+    <div class="sync-line" id="bsync" hidden>Checking your calendars…</div>
+    <h3>Tasks to tackle</h3>
+    <ul class="list" id="btasks">${cap(d.tasks, taskRow) || '<li><span class="grow note">No tasks due. Nice.</span></li>'}</ul>
+    <button class="bgo" id="bgo">Continue to my garden</button>
+    <p class="note" style="text-align:center;margin:10px 0 0">Take your time. Continue whenever you are ready.</p>
+  </div>`;
+  el.classList.add('show');
+  el.querySelectorAll('[data-bt]').forEach(cb => cb.onchange = () => { const x = d.tasks[+cb.dataset.bt]; x.t.done = cb.checked; save(); cb.closest('li').classList.toggle('done', cb.checked); });
+  // calendars connected to the account (Google, Notion) add to today's schedule
+  if (mcp && (state.conns.google.length || state.conns.notion.length)){
+    const sync = $('#bsync'); sync.hidden = false;
+    const s0 = new Date(); s0.setHours(0, 0, 0, 0); const e0 = new Date(s0.getTime() + 86400000), seen = new Set(), got = [];
+    const jobs = [...state.conns.google.map(c => fetchGoogle(c, s0, e0)), ...state.conns.notion.map(c => fetchNotion(c))];
+    Promise.allSettled(jobs).then(rs => {
+      rs.forEach(r => { if (r.status === 'fulfilled') r.value.filter(e => e.date === d.today && !seen.has(e.id)).forEach(e => { seen.add(e.id); got.push({ title: e.title, time: e.time, src: e.src, where: '', color: null }); }); });
+      if (!$('#bev')) return;
+      const all = [...d.events, ...got].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+      $('#bev').innerHTML = cap(all, evRow) || '<li><span class="grow note">Nothing scheduled.</span></li>';
+      sync.hidden = true;
+    });
+  }
+  const go = $('#bgo'); go.focus();
+  go.onclick = () => { const c = $('#bcard'); c.classList.add('out'); setTimeout(() => { el.classList.remove('show'); el.innerHTML = ''; onContinue(); }, 760); };
+}
+
 function enter(u, key, data){
   user = u; dkey = key; state = fixup(data);
   setMode('in'); $('#who').textContent = u;
-  const card = $('#auth'), fancy = !card.hidden && !calm();
+  const card = $('#auth'), fromSignIn = !card.hidden, fancy = fromSignIn && !calm();
   const gx = innerWidth * (innerWidth > 860 ? .6 : .5), gy = innerHeight * .55;
   const reveal = () => {
     if (revealed) return; revealed = true;
@@ -302,19 +375,26 @@ function enter(u, key, data){
     entering = fancy; render(); entering = false; refreshChrome();
     if (fancy){ $('#app').classList.add('arrive'); if (window.pondGlow) window.pondGlow(gx, gy); }
   };
-  if (!fancy){ revealed = false; reveal(); return; }
+  if (!fromSignIn){ revealed = false; reveal(); return; }
   revealed = false; arriving = true;
+  let briefShown = false;
+  const showBrief = () => {
+    if (briefShown) return; briefShown = true; clearSkip();
+    card.hidden = true; card.classList.remove('leaving');
+    const w = $('#welcome'); w.classList.remove('show'); w.innerHTML = '';
+    openBrief(u, () => { reveal(); if (fancy) arriveTimers.push(setTimeout(finishArrival, 3600)); else finishArrival(); });
+  };
+  if (!fancy){ showBrief(); return; }
   const r = card.getBoundingClientRect();
   if (window.pondGuide) window.pondGuide(r.left + r.width / 2, r.top + r.height / 2, gx, gy);
   card.classList.add('leaving');
   const at = (ms, fn) => arriveTimers.push(setTimeout(fn, ms));
   at(1100, () => { const w = $('#welcome'); w.innerHTML = '<span>Welcome, ' + esc(u) + '</span>'; w.classList.add('show'); });
   at(1350, () => { card.hidden = true; });
-  at(3000, reveal);
-  at(6400, finishArrival);
-  // any click or key skips the animation
-  skipHandler = () => { reveal(); finishArrival(); };
-  setTimeout(() => { if (arriving){ document.addEventListener('pointerdown', skipHandler, true); document.addEventListener('keydown', skipHandler, true); } }, 400);
+  at(3300, showBrief);
+  // a click or key skips ahead to the briefing
+  skipHandler = e => { if (e && e.target && e.target.closest && e.target.closest('#brief')) return; showBrief(); };
+  setTimeout(() => { if (arriving && !briefShown){ document.addEventListener('pointerdown', skipHandler, true); document.addEventListener('keydown', skipHandler, true); } }, 400);
 }
 async function signOut(){
   clearTimeout(saveT); await persist();
@@ -745,7 +825,7 @@ function render(){
   const dunes = [...Array(16)].map((_, i) => { const y = C - R + 40 + i * 40 + rnd() * 10, w = 60 + rnd() * 120, x = C - R + rnd() * (R * 2 - w); return `<path d="M${x.toFixed(0)},${y.toFixed(0)} q${(w / 2).toFixed(0)},-9 ${w.toFixed(0)},0"/>`; }).join('');
   const specks = [...Array(160)].map(() => { const t = rnd() * 6.283, d = Math.sqrt(rnd()) * R; return `<circle cx="${(C + Math.cos(t) * d).toFixed(0)}" cy="${(C + Math.sin(t) * d).toFixed(0)}" r="${(.8 + rnd() * 1.6).toFixed(1)}" fill="${rnd() > .5 ? '#fff4d6' : '#9a7d46'}" opacity="${(.25 + rnd() * .35).toFixed(2)}"/>`; }).join('');
   // each rock sits sunk into the sand: dark dent, then a raised lip of sand on its upper-left
-  const around = placed.map(p => `<circle cx="${p.x}" cy="${p.y + 3}" r="${(p.r * 1.16).toFixed(1)}" fill="#8f7338" opacity=".38" filter="url(#soft)"/><circle cx="${p.x - 2}" cy="${p.y - 2}" r="${(p.r * 1.1).toFixed(1)}" fill="none" stroke="#fff3d0" stroke-opacity=".6" stroke-width="3" filter="url(#soft)"/>`).join('');
+  const around = placed.map(p => `<circle cx="${p.x}" cy="${p.y + 3}" r="${(p.r * 1.16).toFixed(1)}" fill="#8f7338" opacity=".38" filter="url(#soft)"/>`).join('');
   let out = `<defs>
     <radialGradient id="sandg" cx="50%" cy="42%" r="65%"><stop offset="0" stop-color="#f3e6c4"/><stop offset=".7" stop-color="#e2cc97"/><stop offset="1" stop-color="#cdb27a"/></radialGradient>
     <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b7b66"/><stop offset=".5" stop-color="#5e5242"/><stop offset="1" stop-color="#3e362b"/></linearGradient>
@@ -772,7 +852,7 @@ function render(){
   if (!placed.length) out += `<text class="empty-t" x="${C}" y="${C}">${garden().kind === 'photos' ? 'Add your first photos below' : 'Place your first rock below'}</text>`;
   for (const p of placed){
     const { rk, r, x, y } = p;
-    const sp = entering ? `<circle class="splash" fill="none" stroke="#fff" stroke-width="3" cx="${x.toFixed(1)}" cy="${(y + r * .55).toFixed(1)}" r="${(r * .9).toFixed(1)}" style="--i:${placed.indexOf(p)}"/>` : '';
+    const sp = '';
     if (rk.photo){
       const fs2 = Math.max(11, Math.min(17, r / 4.2)), cap = rk.name.length > 16 ? rk.name.slice(0, 15) + '…' : rk.name;
       out += `${sp}<g class="rock ${dragging && dragging.rk === rk ? 'drag' : ''}${entering ? ' dropin' : ''}" style="--i:${placed.indexOf(p)}" data-id="${rk.id}" tabindex="0" role="button" aria-label="${esc(rk.name)}, photo">
