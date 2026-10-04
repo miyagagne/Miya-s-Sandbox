@@ -195,7 +195,12 @@ async function persist(){
   if (!state || !user || !dkey) return;
   try { localStorage.setItem(DATA(user), JSON.stringify(await seal(dkey, state))); } catch(e){}
 }
-function save(){ clearTimeout(saveT); saveT = setTimeout(() => { saveT = null; persist(); }, cloudOn() ? 800 : 150); }
+let chain = Promise.resolve();
+function save(){
+  clearTimeout(saveT);
+  // device accounts write straight away (queued so writes never land out of order); cloud accounts batch for a moment
+  saveT = setTimeout(() => { saveT = null; chain = chain.then(persist, persist); }, cloudOn() ? 800 : 0);
+}
 document.addEventListener('visibilitychange', () => { if (document.hidden) { clearTimeout(saveT); persist(); } });
 window.addEventListener('pagehide', () => { clearTimeout(saveT); persist(); });
 
