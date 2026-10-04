@@ -44,6 +44,8 @@ h1,h2,h3{font-family:var(--display);margin:0;font-weight:700}
 .gtab .gn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gtab .gc{font-size:.75rem;opacity:.7}
 .gadd{background:transparent;border:1px dashed rgba(255,255,255,.4);color:var(--pond-ink);border-radius:14px;padding:9px 10px;font-weight:500}
+.crumb{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;color:var(--pond-ink);background:var(--glass);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:6px 8px 6px 8px;width:fit-content;max-width:100%}
+.crumb span{font-size:.9rem;padding-right:8px}
 .gmore{background:none;color:var(--pond-ink);padding:2px 8px;font-size:1.1rem;opacity:.8;border-radius:8px}
 @media(max-width:860px){
   .layout{grid-template-columns:minmax(0,1fr)}
@@ -167,6 +169,7 @@ header .ghost{color:var(--pond-ink);border-color:rgba(255,255,255,.35)}
   <div class="layout">
     <nav id="rail" aria-label="Gardens"></nav>
     <div class="main">
+      <div id="crumb" class="crumb" hidden></div>
       <div class="garden-box"><svg id="garden" viewBox="0 0 700 700" role="img" aria-label="Sand garden"></svg></div>
       <p class="hint" id="hint">Drag a rock to move it. Tap it to open its calendar, notes and tasks.</p>
 
@@ -212,6 +215,7 @@ const seed = () => ({ active: 'main', gardens: [
 function fixup(s){
   if (!s.gardens){ s.gardens = [{ id: 'main', name: 'My Garden', kind: 'rocks', rocks: s.rocks || [] }]; delete s.rocks; s.active = 'main'; }
   s.gardens.forEach(g => { g.rocks = g.rocks || []; g.kind = g.kind || 'rocks'; g.rocks.forEach(r => { r.links = r.links || { google: [], notion: [] }; const i = OLD_COLORS.indexOf(r.color); if (i >= 0) r.color = COLORS[i]; }); });
+  s.gardens.forEach(g => { if (g.parent && !s.gardens.some(p => p.id === g.parent.g)) delete g.parent; g.rocks.forEach(r => { if (r.gardenId && !s.gardens.some(x => x.id === r.gardenId)) delete r.gardenId; }); });
   s.conns = s.conns || { google: [], notion: [] };
   s.gardens.forEach(g => g.rocks.forEach(r => { for (const k of ['google', 'notion']) for (const l of r.links[k]){ if (!s.conns[k].some(c => (c.id || c.ds) === (l.id || l.ds))) s.conns[k].push(l.id ? { id: l.id, name: l.name } : { ds: l.ds, name: l.name }); } }));
   if (!s.gardens.some(g => g.id === s.active)) s.active = s.gardens[0].id;
@@ -741,6 +745,7 @@ function render(){
       <text class="lbl" x="${x}" y="${y + fs / 4}" font-size="${fs}" style="--ls:${shade(rk.color, -95)}">${esc(nm)}</text>
       <text class="wt" x="${x}" y="${y + fs / 4 + 15}">${rk.weight}/10</text>
       ${pending ? `<circle cx="${x + r * .7}" cy="${y - r * .7}" r="12" fill="#c9553d" stroke="#fff" stroke-width="2"/><text class="pebble-t" x="${x + r * .7}" y="${y - r * .7 + 4.5}">${pending}</text>` : ''}
+      ${rk.gardenId ? `<g data-open="${esc(rk.gardenId)}" style="cursor:pointer"><circle cx="${(x + r * .66).toFixed(1)}" cy="${(y + r * .66).toFixed(1)}" r="15" fill="#f3e6c4" stroke="#fff" stroke-width="2.5"/><circle cx="${(x + r * .66).toFixed(1)}" cy="${(y + r * .66).toFixed(1)}" r="9" fill="none" stroke="#b79b62" stroke-width="1.4"/><circle cx="${(x + r * .66 + 1).toFixed(1)}" cy="${(y + r * .66 - 1).toFixed(1)}" r="3.6" fill="${rk.color}"/><title>Open ${esc(rk.name)} garden</title></g>` : ''}
       <title>${esc(rk.name)}</title></g>`;
   }
   $('#garden').innerHTML = out;
@@ -753,7 +758,7 @@ function svgPoint(e){ const pt = gsvg.createSVGPoint(); pt.x = e.clientX; pt.y =
 gsvg.addEventListener('pointerdown', e => {
   const g = e.target.closest('.rock'); if (!g) return;
   const rk = state.rocks.find(r => r.id === g.dataset.id), p = svgPoint(e);
-  dragging = { rk, ox: rk.x - (p.x - C), oy: rk.y - (p.y - C), sx: e.clientX, sy: e.clientY, moved: false };
+  dragging = { rk, ox: rk.x - (p.x - C), oy: rk.y - (p.y - C), sx: e.clientX, sy: e.clientY, moved: false, open: (e.target.closest('[data-open]') || { dataset: {} }).dataset.open || null };
   gsvg.setPointerCapture(e.pointerId);
 });
 gsvg.addEventListener('pointermove', e => {
@@ -767,8 +772,16 @@ gsvg.addEventListener('pointermove', e => {
 gsvg.addEventListener('pointerup', () => {
   if (!dragging) return;
   const d = dragging; dragging = null; render();
-  if (d.moved) save(); else openRock(d.rk.id);
+  if (d.moved) save(); else if (d.open) goGarden(d.open); else openRock(d.rk.id);
 });
+function goGarden(id){ if (!state.gardens.some(g => g.id === id)) return; state.active = id; save(); render(); refreshChrome(); }
+const descendants = gid => { const out = []; const walk = id => state.gardens.filter(g => g.parent && g.parent.g === id).forEach(c => { out.push(c.id); walk(c.id); }); walk(gid); return out; };
+function removeGardens(ids){
+  const set = new Set(ids);
+  for (const g of state.gardens) if (set.has(g.id) && g.parent && !set.has(g.parent.g)){ const pg = state.gardens.find(x => x.id === g.parent.g), pr = pg && pg.rocks.find(x => x.id === g.parent.r); if (pr) delete pr.gardenId; }
+  state.gardens = state.gardens.filter(g => !set.has(g.id));
+  if (!state.gardens.some(g => g.id === state.active)) state.active = state.gardens[0].id;
+}
 gsvg.addEventListener('pointercancel', () => { dragging = null; render(); });
 gsvg.addEventListener('keydown', e => {
   const g = e.target.closest('.rock');
@@ -856,10 +869,12 @@ function closeSheet(){ $('#overlay').classList.remove('open'); cur = null; rende
 function sheet(){
   const r = cur; if (!r) return;
   $('#sheet').innerHTML = `
-    <div class="sheet-head"><span class="stone" style="background:radial-gradient(circle at 35% 30%,${shade(r.color, 60)},${r.color} 60%,${shade(r.color, -60)})"></span><h2>${esc(r.name)}</h2><button class="ghost small" id="close">Close</button></div>
+    <div class="sheet-head"><span class="stone" style="background:radial-gradient(circle at 35% 30%,${shade(r.color, 60)},${r.color} 60%,${shade(r.color, -60)})"></span><h2>${esc(r.name)}</h2>${r.gardenId ? '<button class="small" id="opengarden">Open garden</button>' : (r.photo ? '' : '<button class="small" id="expand">Expand into garden</button>')}<button class="ghost small" id="close">Close</button></div>
     <div class="tabs" role="tablist">${(r.photo ? [['photo','Photo'],['notes','Notes'],['settings','Frame']] : [['calendar','Calendar'],['notes','Notes'],['tasks','Tasks'],['sync','Connect'],['settings','Rock']]).map(([k, l]) => `<button class="tab ${k === tab ? 'active' : ''}" data-t="${k}" role="tab">${l}</button>`).join('')}</div>
     <div id="body"></div>`;
   $('#close').onclick = closeSheet;
+  const og = $('#opengarden'); if (og) og.onclick = () => { const id = r.gardenId; closeSheet(); goGarden(id); };
+  const ex = $('#expand'); if (ex) ex.onclick = () => expandSheet(r);
   document.querySelectorAll('.tab').forEach(b => b.onclick = () => { tab = b.dataset.t; sheet(); if (tab === 'calendar') syncRock(cur); });
   ({ photo: photoTab, calendar: calTab, notes: notesTab, tasks: tasksTab, sync: syncTab, settings: settingsTab })[tab]();
 }
@@ -1060,12 +1075,13 @@ function settingsTab(){
     <label>${r.photo ? 'Frame colour' : 'Stone'}</label>
     <div class="colors">${COLORS.map(c => `<button data-col="${c}" aria-label="Stone ${c}" style="background:radial-gradient(circle at 35% 30%,${shade(c, 60)},${c} 60%,${shade(c, -60)});${c === r.color ? 'outline:3px solid var(--accent);outline-offset:2px' : ''}"></button>`).join('')}</div>
     <p style="margin-top:26px"><button class="danger" id="delrock">${r.photo ? 'Remove this photo' : 'Remove this rock'}</button></p>`;
-  $('#sn').oninput = e => { r.name = e.target.value || 'Untitled'; save(); document.querySelector('.sheet-head h2').textContent = r.name; };
+  $('#sn').oninput = e => { r.name = e.target.value || 'Untitled'; if (r.gardenId){ const sg = state.gardens.find(x => x.id === r.gardenId); if (sg) sg.name = r.name; } save(); document.querySelector('.sheet-head h2').textContent = r.name; };
   $('#sw').oninput = e => { r.weight = +e.target.value; $('#wv').textContent = r.weight; save(); };
   document.querySelectorAll('[data-col]').forEach(b => b.onclick = () => { r.color = b.dataset.col; save(); sheet(); });
   $('#delrock').onclick = () => {
     const b = $('#delrock');
-    if (b.dataset.sure !== '1'){ b.dataset.sure = '1'; b.textContent = 'Tap again to remove it and its notes and tasks'; return; }
+    if (b.dataset.sure !== '1'){ b.dataset.sure = '1'; b.textContent = r.gardenId ? 'Tap again to remove it, its garden and everything inside' : 'Tap again to remove it and its notes and tasks'; return; }
+    if (r.gardenId) removeGardens([r.gardenId, ...descendants(r.gardenId)]);
     state.rocks = state.rocks.filter(x => x.id !== r.id); save(); closeSheet();
   };
 }
@@ -1077,7 +1093,11 @@ function refreshChrome(){
   $('#quick').hidden = photos; $('#photobar').hidden = !photos;
   $('#add').textContent = photos ? '+ Add photos' : '+ New rock';
   $('#hint').textContent = photos ? 'Drag a photo to move it. Tap it to see it bigger and add a caption.' : 'Drag a rock to move it. Tap it to open its calendar, notes and tasks.';
-  $('#rail').innerHTML = state.gardens.map((x, i) => `<div style="display:flex;align-items:center;gap:2px"><button class="gtab ${x.id === g.id ? 'on' : ''}" data-g="${esc(x.id)}" aria-current="${x.id === g.id}"><span class="gd" style="background:radial-gradient(circle at 35% 30%,${shade(COLORS[i % COLORS.length], 70)},${COLORS[i % COLORS.length]} 60%,${shade(COLORS[i % COLORS.length], -42)})">${x.kind === 'photos' ? '◐' : ''}</span><span class="gn">${esc(x.name)}</span><span class="gc">${x.rocks.length}</span></button>${x.id === g.id ? '<button class="gmore" data-gm="1" aria-label="Rename or delete this garden">⋯</button>' : ''}</div>`).join('') + '<button class="gadd" id="gnew">+ New garden</button>';
+  const order = [], walk = (pid, d) => state.gardens.filter(x => (x.parent && state.gardens.some(p => p.id === x.parent.g) ? x.parent.g : null) === pid).forEach(x => { order.push([x, d]); walk(x.id, d + 1); });
+  walk(null, 0);
+  $('#rail').innerHTML = order.map(([x, d]) => { const i = state.gardens.indexOf(x), col = COLORS[i % COLORS.length]; return `<div style="display:flex;align-items:center;gap:2px;margin-left:${Math.min(d, 3) * 14}px"><button class="gtab ${x.id === g.id ? 'on' : ''}" data-g="${esc(x.id)}" aria-current="${x.id === g.id}"><span class="gd" style="background:radial-gradient(circle at 35% 30%,${shade(col, 70)},${col} 60%,${shade(col, -42)})">${x.kind === 'photos' ? '◐' : (d ? '↳' : '')}</span><span class="gn">${esc(x.name)}</span><span class="gc">${x.rocks.length}</span></button>${x.id === g.id ? '<button class="gmore" data-gm="1" aria-label="Rename or delete this garden">⋯</button>' : ''}</div>`; }).join('') + '<button class="gadd" id="gnew">+ New garden</button>';
+  const cr = $('#crumb'), pg = g.parent && state.gardens.find(p => p.id === g.parent.g);
+  if (pg){ cr.hidden = false; cr.innerHTML = `<button class="ghost small" id="crumbback">‹ ${esc(pg.name)}</button><span>Inside <strong>${esc(g.name)}</strong></span>`; $('#crumbback').onclick = () => goGarden(pg.id); } else { cr.hidden = true; cr.innerHTML = ''; }
   $('#rail').querySelectorAll('[data-g]').forEach(b => b.onclick = () => { if (b.dataset.g !== state.active){ state.active = b.dataset.g; save(); render(); refreshChrome(); } });
   const mo = $('#rail').querySelector('[data-gm]'); if (mo) mo.onclick = () => gardenSheet(g.id);
   $('#gnew').onclick = () => gardenSheet(null);
@@ -1103,10 +1123,32 @@ function gardenSheet(id){
   };
   const del = $('#gdel');
   if (del) del.onclick = () => {
-    if (del.dataset.sure !== '1'){ del.dataset.sure = '1'; del.textContent = 'Tap again to delete it and everything in it'; return; }
-    state.gardens = state.gardens.filter(x => x.id !== g.id); state.active = state.gardens[0].id; save(); closeSheet(); refreshChrome();
+    if (del.dataset.sure !== '1'){ del.dataset.sure = '1'; del.textContent = descendants(g.id).length ? 'Tap again to delete it, its inner gardens and everything in them' : 'Tap again to delete it and everything in it'; return; }
+    removeGardens([g.id, ...descendants(g.id)]); save(); closeSheet(); refreshChrome();
   };
   setTimeout(() => { const n = $('#gname'); if (n) n.focus(); }, 30);
+}
+
+function expandSheet(r){
+  cur = null; lockSheet = false;
+  const open = r.tasks.filter(t => !t.done);
+  $('#sheet').innerHTML = `<div class="sheet-head"><h2>Expand “${esc(r.name)}”</h2><button class="ghost small" id="xclose">Close</button></div>
+    <p class="note">This makes a new garden just for ${esc(r.name)}, where you can break it into smaller rocks or keep its photos. The rock stays where it is and gets a small sand badge that opens the garden.</p>
+    <label>What goes in it?</label>
+    <div class="colors" style="gap:8px"><button class="ghost" data-xk="rocks" type="button">Rocks</button><button class="ghost" data-xk="photos" type="button">Photos</button></div>
+    ${open.length ? `<label style="text-transform:none;letter-spacing:0;font-size:.95rem;color:var(--ink);display:flex;gap:10px;align-items:center;margin-top:16px"><input type="checkbox" id="xtasks" checked> Start with its ${open.length} open task${open.length > 1 ? 's' : ''} as rocks</label>` : ''}
+    <div class="row" style="margin-top:18px"><button id="xgo">Create garden</button></div>`;
+  $('#overlay').classList.add('open');
+  let kind = 'rocks';
+  const paint = () => document.querySelectorAll('[data-xk]').forEach(x => { const on = x.dataset.xk === kind; x.style.background = on ? 'var(--accent)' : 'transparent'; x.style.color = on ? 'var(--accent-ink)' : 'var(--ink)'; const t = $('#xtasks'); if (t){ t.disabled = kind === 'photos'; } });
+  document.querySelectorAll('[data-xk]').forEach(b => b.onclick = () => { kind = b.dataset.xk; paint(); }); paint();
+  $('#xclose').onclick = closeSheet;
+  $('#xgo').onclick = () => {
+    const n = { id: uid(), name: r.name, kind, rocks: [], parent: { g: garden().id, r: r.id } };
+    const t = $('#xtasks');
+    if (kind === 'rocks' && t && t.checked) open.forEach((task, i) => n.rocks.push(blank(task.title.slice(0, 40), 3, COLORS[(i + 1) % COLORS.length])));
+    state.gardens.push(n); r.gardenId = n.id; state.active = n.id; save(); closeSheet(); render(); refreshChrome();
+  };
 }
 
 /* ---------- photos ---------- */
