@@ -155,7 +155,7 @@ header .ghost{color:var(--pond-ink);border-color:rgba(255,255,255,.35)}
       <h1>Rock Garden</h1>
       <div class="sub">Gardens for your activities, fun things and photos. Bigger stones mean more.</div>
     </div>
-    <div class="who"><span id="who"></span><span id="syncst" class="note"></span><button class="ghost small" id="recbtn" title="Make a code that can reset your password">Recovery code</button><button class="ghost small" id="signout">Sign out</button><button id="add">+ New rock</button></div>
+    <div class="who"><span id="who"></span><span id="syncst" class="note"></span><button class="ghost small" id="recbtn">Account</button><button class="ghost small" id="signout">Sign out</button><button id="add">+ New rock</button></div>
   </header>
 
   <div class="layout">
@@ -384,12 +384,61 @@ async function localRecover(){
   enter(name, key, data);
   showRecovery(fresh, 'Your password is reset and your garden is intact. The old recovery code no longer works, so this is your new one.');
 }
-$('#recbtn').onclick = async () => {
-  if (!user || !dkey || cloudOn()) return;
-  const accs = accounts(), code = newCode(); accs[user].rec = await wrapKey(code, dkey);
-  localStorage.setItem(ACC, JSON.stringify(accs));
-  showRecovery(code, 'This replaces any recovery code you had before.');
-};
+function accountSheet(){
+  cur = null; lockSheet = false;
+  const c = cloudOn(), who = c && sess ? sess.user.email : user;
+  $('#sheet').innerHTML = `<div class="sheet-head"><h2>Account</h2><button class="ghost small" id="aclose">Close</button></div>
+    <p class="note">Signed in as <strong>${esc(who)}</strong></p>
+    <h3 style="margin-top:14px">Change password</h3>
+    <form id="pwform" autocomplete="off">
+      <label for="pw0">Current password</label><input id="pw0" type="password" autocomplete="current-password" required>
+      <label for="pw1">New password</label><input id="pw1" type="password" autocomplete="new-password" minlength="8" required>
+      <label for="pw2">Repeat new password</label><input id="pw2" type="password" autocomplete="new-password" required>
+      <div class="msg err" id="pwmsg" hidden></div>
+      <div class="row" style="margin-top:14px"><button type="submit" id="pwgo">Change password</button></div>
+    </form>
+    ${c ? '' : `<h3 style="margin-top:24px">Recovery code</h3>
+      <p class="note">A recovery code lets you reset a forgotten password without losing your garden. Making a new one cancels the old one.</p>
+      <button class="ghost" id="newrec" type="button">Make a new recovery code</button>`}`;
+  $('#overlay').classList.add('open');
+  $('#aclose').onclick = closeSheet;
+  const say = (t, ok) => { const e = $('#pwmsg'); e.textContent = t; e.hidden = !t; e.classList.toggle('err', !ok); };
+  $('#pwform').onsubmit = async e => {
+    e.preventDefault(); say('');
+    const p0 = $('#pw0').value, p1 = $('#pw1').value;
+    if (p1.length < 8) return say('New password needs at least 8 characters.');
+    if (p1 !== $('#pw2').value) return say('The two new passwords don’t match.');
+    if (p1 === p0) return say('Pick a password that is different from the current one.');
+    $('#pwgo').disabled = true;
+    try {
+      if (c){
+        await authCall('/auth/v1/token?grant_type=password', { email: sess.user.email, password: p0 }).catch(() => { throw new Error('Current password is wrong.'); });
+        await authCall('/auth/v1/user', { password: p1 }, 'PUT', await token());
+        $('#pwform').reset(); say('Password changed. Use the new one next time you sign in.', true);
+      } else {
+        clearTimeout(saveT); await chain.catch(() => {});
+        const accs = accounts(), acc = accs[user];
+        let blob = null; try { blob = JSON.parse(localStorage.getItem(DATA(user))); } catch(err){}
+        try { await unseal(await deriveKey(p0, unb64(acc.salt)), blob); } catch(err){ await new Promise(r => setTimeout(r, 600)); throw new Error('Current password is wrong.'); }
+        const salt = crypto.getRandomValues(new Uint8Array(16)), key = await deriveKey(p1, salt), fresh = newCode();
+        acc.salt = b64(salt); acc.rec = await wrapKey(fresh, key);
+        localStorage.setItem(DATA(user), JSON.stringify(await seal(key, state)));
+        localStorage.setItem(ACC, JSON.stringify(accs));
+        dkey = key;
+        try { sessionStorage.setItem(SES, JSON.stringify({ u: user, k: b64(await crypto.subtle.exportKey('raw', key)) })); } catch(err){}
+        showRecovery(fresh, 'Your password is changed. Because your garden is encrypted with the password, the old recovery code no longer works. This is your new one.');
+      }
+    } catch(err){ say(err.message || 'Could not change the password.'); }
+    finally { const b = $('#pwgo'); if (b) b.disabled = false; }
+  };
+  const nr = $('#newrec');
+  if (nr) nr.onclick = async () => {
+    const accs = accounts(), code = newCode(); accs[user].rec = await wrapKey(code, dkey);
+    localStorage.setItem(ACC, JSON.stringify(accs));
+    showRecovery(code, 'This replaces any recovery code you had before.');
+  };
+}
+$('#recbtn').onclick = () => { if (user) accountSheet(); };
 
 let authMode = 'in';
 function setMode(m){
@@ -401,7 +450,7 @@ function setMode(m){
   const c = cloudOn();
   $('#aulabel').textContent = c ? 'Email' : 'Username'; $('#au').type = c ? 'email' : 'text';
   $('#aforgotrow').hidden = m !== 'in';
-  $('#arcrow').hidden = m !== 'recover'; $('#recbtn').hidden = c;
+  $('#arcrow').hidden = m !== 'recover'; 
   $('#aplabel').textContent = m === 'recover' || m === 'reset' ? 'New password' : 'Password';
   if (m === 'recover'){ $('#apw2').hidden = false; $('#asubmit').textContent = 'Reset password'; $('#ap').autocomplete = 'new-password'; $('#aerase').hidden = true; }
   if (m === 'reset'){ $('#apw2').hidden = false; $('#asubmit').textContent = 'Set new password'; $('#ap').autocomplete = 'new-password'; $('#au').hidden = true; $('#aulabel').hidden = true; }
