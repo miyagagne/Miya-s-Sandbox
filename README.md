@@ -30,3 +30,7 @@ Out of the box, accounts live on one device. To sync across devices, connect a f
 5. Project Settings → API: copy the **Project URL** and the **anon public key** into `CLOUD` near the top of the script in `index.html`.
 
 People then sign in with an email and password. Each person can only read and change their own garden (enforced by row-level security). Cloud mode runs on the standalone site and installed app, not inside the Claude artifact, which blocks outside network calls.
+
+## Friends
+
+With an online account, **Account → Friends** lets you pick a username, send and accept friend requests, and share a garden with chosen friends. Friends can view a shared garden but not change it, and you decide whether notes, tasks and events are included. Run `supabase-friends.sql` once in the Supabase SQL Editor (after `supabase-setup.sql`) to turn it on.

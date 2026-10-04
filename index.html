@@ -305,10 +305,12 @@ function fixup(s){
   s.gardens.forEach(g => g.rocks.forEach(r => { for (const k of ['google', 'notion']) for (const l of r.links[k]){ if (!s.conns[k].some(c => (c.id || c.ds) === (l.id || l.ds))) s.conns[k].push(l.id ? { id: l.id, name: l.name } : { ds: l.ds, name: l.name }); } }));
   if (!s.gardens.some(g => g.id === s.active)) s.active = s.gardens[0].id;
   const open = () => s.gardens.find(g => g.id === s.active) || s.gardens[0];
-  Object.defineProperty(s, 'rocks', { get(){ return open().rocks; }, set(v){ open().rocks = v; }, enumerable: false, configurable: true });
+  s.shares = s.shares || {};
+  Object.defineProperty(s, 'rocks', { get(){ return viewing ? viewing.data.rocks : open().rocks; }, set(v){ open().rocks = v; }, enumerable: false, configurable: true });
   return s;
 }
-const garden = () => state.gardens.find(g => g.id === state.active) || state.gardens[0];
+let viewing = null;
+const garden = () => viewing ? { id: 'view:' + viewing.id, kind: viewing.data.kind || 'rocks', name: viewing.name, rocks: viewing.data.rocks } : (state.gardens.find(g => g.id === state.active) || state.gardens[0]);
 
 /* ---------- accounts: stored on this device, garden encrypted with the password ---------- */
 const ACC = 'rockGarden.accounts', DATA = u => 'rockGarden.data.' + u, SES = 'rockGarden.session';
@@ -473,7 +475,8 @@ async function rest(path, opts = {}){
   const t = await token();
   const r = await fetch(CLOUD.url + '/rest/v1' + path, { ...opts, headers: { apikey: CLOUD.key, Authorization: 'Bearer ' + t, 'Content-Type': 'application/json', ...(opts.headers || {}) } });
   if (!r.ok) throw Object.assign(new Error('Sync failed (' + r.status + ')'), { status: r.status });
-  return r.status === 204 ? null : r.json();
+  const text = await r.text();
+  return text ? JSON.parse(text) : null;
 }
 const pull = async () => (await rest(`/gardens?select=data,updated_at&user_id=eq.${sess.user.id}`))[0] || null;
 const setSync = t => { const e = $('#syncst'); if (e) e.textContent = t; };
@@ -483,6 +486,7 @@ async function push(){
     const at = new Date().toISOString();
     await rest('/gardens?on_conflict=user_id', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ user_id: sess.user.id, data: state, updated_at: at }) });
     lastAt = Date.parse(at); setSync('Synced');
+    await publishShares().catch(() => {});
   } catch(e){ setSync('Offline, will retry'); } finally { pushing = false; }
 }
 async function enterCloud(){
@@ -494,12 +498,14 @@ async function enterCloud(){
   enter(sess.user.email.split('@')[0], null, data);
   setSync(offline ? 'Offline' : 'Synced');
   if (!remote && !offline) push();
+  if (!offline) startFriends();
 }
 async function refreshFromCloud(){
   if (!cloudOn() || !sess || !state || pushing || saveT || cur) return;
   try { const r = await pull(); if (r && Date.parse(r.updated_at) > lastAt){ lastAt = Date.parse(r.updated_at); state = fixup(r.data); render(); refreshChrome(); setSync('Synced'); } } catch(e){}
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshFromCloud(); });
+setInterval(() => { if (cloudOn() && sess && state && !document.hidden) loadShared().then(() => { if (viewing) render(); refreshChrome(); }).catch(() => {}); }, 30000);
 setInterval(refreshFromCloud, 30000);
 
 async function cloudSubmit(){
@@ -574,19 +580,150 @@ async function localRecover(){
   enter(name, key, data);
   showRecovery(fresh, 'Your password is reset and your garden is intact. The old recovery code no longer works, so this is your new one.');
 }
+/* ---------- friends: usernames, requests, and view-only sharing (online accounts) ---------- */
+let me = { handle: null }, fr = { friends: [], incoming: [], outgoing: [], names: {} }, sharedWithMe = [];
+const sharedHash = new Map();
+const myId = () => sess.user.id;
+const hstr = t => { let h = 5381; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0; return h + ':' + t.length; };
+async function loadFriends(){
+  const [prof, rows] = await Promise.all([rest(`/profiles?select=handle&user_id=eq.${myId()}`), rest('/friendships?select=id,requester,addressee,status')]);
+  me.handle = (prof[0] || {}).handle || null;
+  const ids = new Set(); rows.forEach(f => { ids.add(f.requester); ids.add(f.addressee); }); ids.delete(myId());
+  const names = {};
+  if (ids.size) (await rest(`/profiles?select=user_id,handle&user_id=in.(${[...ids].join(',')})`)).forEach(p => { names[p.user_id] = p.handle; });
+  const other = f => f.requester === myId() ? f.addressee : f.requester, mk = f => ({ fid: f.id, uid: other(f), handle: names[other(f)] || 'someone' });
+  fr = { names,
+    friends: rows.filter(f => f.status === 'accepted').map(mk),
+    incoming: rows.filter(f => f.status === 'pending' && f.addressee === myId()).map(mk),
+    outgoing: rows.filter(f => f.status === 'pending' && f.requester === myId()).map(mk) };
+}
+async function loadShared(){
+  try {
+    if (!fr.friends.length && !fr.names) await loadFriends();
+    const rows = await rest('/shared_gardens?select=id,owner,name,data,updated_at');
+    sharedWithMe = rows.filter(r => r.owner !== myId() && fr.friends.some(f => f.uid === r.owner)).map(r => ({ ...r, handle: fr.names[r.owner] || 'friend' }));
+    if (viewing){ const cur2 = sharedWithMe.find(r => r.id === viewing.id); if (cur2) viewing = { ...cur2 }; else { viewing = null; render(); } }
+  } catch(e){ /* friends tables may not exist yet */ sharedWithMe = []; }
+}
+async function startFriends(){ try { await loadFriends(); await loadShared(); refreshChrome(); } catch(e){} }
+function snapshotOf(g, details){
+  return { kind: g.kind, rocks: g.rocks.map(r => { const c = { id: r.id, name: r.name, weight: r.weight, color: r.color, x: r.x, y: r.y }; if (r.photo) c.photo = r.photo; if (r.taken) c.taken = r.taken; if (details){ c.notes = r.notes; c.tasks = r.tasks; c.events = r.events; } return c; }) };
+}
+async function publishShares(){
+  for (const [gid, sh] of Object.entries(state.shares || {})){
+    const g = state.gardens.find(x => x.id === gid); if (!g) continue;
+    const snap = snapshotOf(g, sh.details), core = JSON.stringify({ n: g.name, d: snap, w: sh.friends }), h = hstr(core);
+    if (sharedHash.get(sh.sid) === h) continue;
+    await rest('/shared_gardens?on_conflict=id', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ id: sh.sid, owner: myId(), name: g.name, data: snap, shared_with: sh.friends, updated_at: new Date().toISOString() }) });
+    sharedHash.set(sh.sid, h);
+  }
+}
+async function unshare(gid){
+  const sh = state.shares[gid]; if (!sh) return;
+  try { await rest(`/shared_gardens?id=eq.${sh.sid}`, { method: 'DELETE' }); } catch(e){}
+  sharedHash.delete(sh.sid); delete state.shares[gid]; save();
+}
+function viewShared(id){ const r = sharedWithMe.find(x => x.id === id); if (!r) return; viewing = { ...r }; render(); refreshChrome(); }
+function leaveShared(){ viewing = null; render(); refreshChrome(); }
+function friendRockSheet(rk){
+  cur = null; lockSheet = false;
+  const hasDetails = rk.notes !== undefined || rk.tasks !== undefined || rk.events !== undefined;
+  $('#sheet').innerHTML = `<div class="sheet-head"><span class="stone" style="background:radial-gradient(circle at 35% 30%,${shade(rk.color, 60)},${rk.color} 60%,${shade(rk.color, -60)})"></span><h2>${esc(rk.name || 'Photo')}</h2><button class="ghost small" id="fclose">Close</button></div>
+    <p class="note">${esc(viewing ? '@' + viewing.handle : '')}’s garden. You can look but not change anything.</p>
+    ${rk.photo ? `<img src="${photoSrc(rk)}" alt="${esc(rk.name)}" style="display:block;max-width:100%;max-height:55vh;margin:8px auto;border-radius:16px">` : `<p>Weight ${rk.weight}/10</p>`}
+    ${rk.taken ? `<p class="note">${esc(rk.taken)}</p>` : ''}
+    ${hasDetails ? `${rk.notes ? `<h3>Notes</h3><p style="white-space:pre-wrap">${esc(rk.notes)}</p>` : ''}
+      ${(rk.events || []).length ? `<h3>Events</h3><ul class="list">${rk.events.map(e => `<li><span class="grow">${esc(e.title)}<small>${esc(e.date)}${e.time ? ' · ' + esc(e.time) : ''}</small></span></li>`).join('')}</ul>` : ''}
+      ${(rk.tasks || []).length ? `<h3>Tasks</h3><ul class="list">${rk.tasks.map(t => `<li class="${t.done ? 'done' : ''}"><span class="grow">${esc(t.title)}</span></li>`).join('')}</ul>` : ''}`
+    : (rk.photo ? '' : '<p class="note">Only the rock itself is shared, not its notes or tasks.</p>')}`;
+  $('#overlay').classList.add('open'); $('#fclose').onclick = () => { $('#overlay').classList.remove('open'); };
+}
+
+async function friendsTab(host){
+  host.innerHTML = '<div class="msg">Loading…</div>';
+  let ok = true;
+  try { await loadFriends(); } catch(e){ ok = false; }
+  if (!ok){ host.innerHTML = `<div class="msg err">Friends isn’t set up yet. In Supabase, open the SQL Editor and run <strong>supabase-friends.sql</strong> from the repo, then come back here.</div>`; return; }
+  const say = (t, err) => { const e = $('#fmsg'); if (!e) return; e.textContent = t; e.hidden = !t; e.classList.toggle('err', !!err); };
+  const redraw = async () => { try { await loadFriends(); await loadShared(); } catch(e){} friendsTab(host); refreshChrome(); };
+  if (!me.handle){
+    host.innerHTML = `<p class="note" style="margin-top:0">Pick a username so friends can find you. Use 3 to 20 letters, numbers or underscores.</p>
+      <label for="fh">Username</label><div class="row"><input id="fh" placeholder="miya_g" autocapitalize="none" autocomplete="off" spellcheck="false"><button id="fhgo">Save</button></div><div class="msg err" id="fmsg" hidden></div>`;
+    $('#fhgo').onclick = async () => {
+      const h = $('#fh').value.trim().toLowerCase().replace(/^@/, '');
+      if (!/^[a-z0-9_]{3,20}$/.test(h)) return say('Use 3 to 20 letters, numbers or underscores.', true);
+      try { await rest('/profiles?on_conflict=user_id', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ user_id: myId(), handle: h }) }); redraw(); }
+      catch(e){ say(e.status === 409 ? 'That username is taken. Try another.' : 'Could not save that username.', true); }
+    };
+    return;
+  }
+  const gardensList = state.gardens.map(g => { const sh = state.shares[g.id]; return `<li><span class="grow">${esc(g.name)}<small>${sh ? 'Shared with ' + sh.friends.length + ' friend' + (sh.friends.length === 1 ? '' : 's') + (sh.details ? ', with notes and tasks' : ', rocks only') : 'Not shared'}</small></span><button class="ghost small" data-share="${esc(g.id)}">${sh ? 'Change' : 'Share'}</button></li>`; }).join('');
+  host.innerHTML = `
+    <p class="note" style="margin-top:0">Your username is <strong>@${esc(me.handle)}</strong>. Friends find you with it.</p>
+    <h3>Add a friend</h3>
+    <div class="row"><input id="fadd" placeholder="Their username" autocapitalize="none" autocomplete="off" spellcheck="false" aria-label="Friend username"><button id="faddgo">Send request</button></div>
+    <div class="msg" id="fmsg" hidden></div>
+    ${fr.incoming.length ? `<h3>Requests for you</h3><ul class="list">${fr.incoming.map(f => `<li><span class="grow">@${esc(f.handle)}</span><button class="small" data-acc="${f.fid}">Accept</button><button class="ghost small" data-rm="${f.fid}">Decline</button></li>`).join('')}</ul>` : ''}
+    ${fr.outgoing.length ? `<h3>Waiting for them</h3><ul class="list">${fr.outgoing.map(f => `<li><span class="grow">@${esc(f.handle)}<small>Request sent</small></span><button class="ghost small" data-rm="${f.fid}">Cancel</button></li>`).join('')}</ul>` : ''}
+    <h3>Friends</h3>
+    <ul class="list">${fr.friends.map(f => `<li><span class="grow">@${esc(f.handle)}</span><button class="ghost small" data-unf="${f.fid}|${f.uid}">Remove</button></li>`).join('') || '<li><span class="grow note">No friends yet. Send a request above.</span></li>'}</ul>
+    <h3>Share a garden</h3>
+    <p class="note" style="margin-top:0">Friends can look at a garden you share, but never change it. You choose who, and whether notes and tasks are included.</p>
+    <ul class="list">${gardensList}</ul>`;
+  $('#faddgo').onclick = async () => {
+    const h = $('#fadd').value.trim().toLowerCase().replace(/^@/, ''); if (!h) return;
+    if (h === me.handle) return say('That is your own username.', true);
+    try {
+      const found = await rest(`/profiles?select=user_id,handle&handle=eq.${encodeURIComponent(h)}`);
+      if (!found.length) return say('Nobody has that username.', true);
+      const uid = found[0].user_id, existing = [...fr.friends, ...fr.incoming, ...fr.outgoing].find(f => f.uid === uid);
+      if (existing) return say(fr.friends.includes(existing) ? 'You are already friends.' : 'There is already a request with them.', true);
+      await rest('/friendships', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ requester: myId(), addressee: uid, status: 'pending' }) });
+      say('Request sent to @' + found[0].handle + '.'); $('#fadd').value = ''; redraw();
+    } catch(e){ say('Could not send the request. Try again.', true); }
+  };
+  $('#fadd').onkeydown = e => { if (e.key === 'Enter') $('#faddgo').click(); };
+  host.querySelectorAll('[data-acc]').forEach(b => b.onclick = async () => { try { await rest(`/friendships?id=eq.${b.dataset.acc}`, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ status: 'accepted' }) }); } catch(e){} redraw(); });
+  host.querySelectorAll('[data-rm]').forEach(b => b.onclick = async () => { try { await rest(`/friendships?id=eq.${b.dataset.rm}`, { method: 'DELETE' }); } catch(e){} redraw(); });
+  host.querySelectorAll('[data-unf]').forEach(b => b.onclick = async () => {
+    if (b.dataset.sure !== '1'){ b.dataset.sure = '1'; b.textContent = 'Tap again'; return; }
+    const [fid, uid] = b.dataset.unf.split('|');
+    try { await rest(`/friendships?id=eq.${fid}`, { method: 'DELETE' }); } catch(e){}
+    for (const sh of Object.values(state.shares)) sh.friends = sh.friends.filter(x => x !== uid);
+    save(); redraw();
+  });
+  host.querySelectorAll('[data-share]').forEach(b => b.onclick = () => shareDialog(b.dataset.share, host));
+}
+function shareDialog(gid, host){
+  const g = state.gardens.find(x => x.id === gid), sh = state.shares[gid] || { sid: crypto.randomUUID(), friends: [], details: false };
+  if (!fr.friends.length){ host.insertAdjacentHTML('afterbegin', '<div class="msg err">Add a friend first, then you can share.</div>'); return; }
+  host.innerHTML = `<h3>Share “${esc(g.name)}”</h3>
+    <div class="pick">${fr.friends.map(f => `<label><input type="checkbox" data-fr="${f.uid}" ${sh.friends.includes(f.uid) ? 'checked' : ''}><span class="grow">@${esc(f.handle)}</span></label>`).join('')}</div>
+    ${g.kind === 'photos' ? '' : `<label class="pickrow" style="display:flex;gap:10px;align-items:center;text-transform:none;letter-spacing:0;font-size:.95rem;color:var(--ink);margin-top:12px"><input type="checkbox" id="shdet" ${sh.details ? 'checked' : ''}> Include notes, tasks and events</label>`}
+    <p class="note">Leave everyone unticked to stop sharing.</p>
+    <div class="row" style="margin-top:12px"><button id="shgo">Save</button><button class="ghost" id="shno">Back</button></div>`;
+  $('#shno').onclick = () => friendsTab(host);
+  $('#shgo').onclick = async () => {
+    const chosen = [...host.querySelectorAll('[data-fr]')].filter(c => c.checked).map(c => c.dataset.fr);
+    if (!chosen.length){ await unshare(gid); }
+    else { state.shares[gid] = { sid: sh.sid, friends: chosen, details: !!($('#shdet') && $('#shdet').checked) }; save(); }
+    friendsTab(host);
+  };
+}
+
 let accTabName = 'connect';
 function accountSheet(t){
   cur = null; lockSheet = false; if (t) accTabName = t;
   const c = cloudOn(), who = c && sess ? sess.user.email : user;
   $('#sheet').innerHTML = `<div class="sheet-head"><h2>Account</h2><button class="ghost small" id="aclose">Close</button></div>
     <p class="note" style="margin:6px 0 0">Signed in as <strong>${esc(who)}</strong></p>
-    <div class="tabs" role="tablist">${[['connect', 'Connections'], ['password', 'Password'], ['devices', 'Other devices']].map(([k, l]) => `<button class="tab ${k === accTabName ? 'active' : ''}" data-at="${k}" role="tab">${l}</button>`).join('')}</div>
+    <div class="tabs" role="tablist">${[['connect', 'Connections'], ...(cloudOn() ? [['friends', 'Friends']] : []), ['password', 'Password'], ['devices', 'Other devices']].map(([k, l]) => `<button class="tab ${k === accTabName ? 'active' : ''}" data-at="${k}" role="tab">${l}</button>`).join('')}</div>
     <div id="accbody"></div>`;
   $('#overlay').classList.add('open');
   $('#aclose').onclick = closeSheet;
   document.querySelectorAll('[data-at]').forEach(b => b.onclick = () => { accTabName = b.dataset.at; accountSheet(); });
   const host = $('#accbody');
-  ({ connect: connectTab, password: passwordTab, devices: devicesTab })[accTabName](host);
+  ({ connect: connectTab, friends: friendsTab, password: passwordTab, devices: devicesTab })[accTabName](host);
 }
 function passwordTab(host){
   const c = cloudOn();
@@ -958,7 +1095,7 @@ function render(){
         <title>${esc(rk.name)}</title></g>`;
       continue;
     }
-    const pending = rk.tasks.filter(t => !t.done).length;
+    const pending = viewing ? 0 : (rk.tasks || []).filter(t => !t.done).length;
     let fs = Math.min(22 * Math.max(1, kf * .8), r / 3.1);
     fs = Math.max(10.5 * kf, Math.min(fs, (r * 1.8) / (Math.max(3, rk.name.length) * .6)));
     const room = Math.max(4, Math.floor((r * 1.8) / (fs * .6)));
@@ -998,6 +1135,7 @@ gsvg.addEventListener('pointermove', e => {
   const dist = Math.hypot(e.clientX - dragging.sx, e.clientY - dragging.sy);
   if (!dragging.armed){ if (dist > 9){ clearTimeout(dragging.timer); dragging = null; } return; }
   if (!dragging.moved && dist < 6) return;
+  if (viewing){ dragging.moved = true; return; }
   dragging.moved = true;
   const p = svgPoint(e);
   dragging.rk.x = p.x - C + dragging.ox; dragging.rk.y = p.y - C + dragging.oy;
@@ -1006,6 +1144,7 @@ gsvg.addEventListener('pointermove', e => {
 gsvg.addEventListener('pointerup', () => {
   if (!dragging) return;
   const d = dragging; clearTimeout(d.timer); dragging = null; render();
+  if (viewing){ if (!d.moved) friendRockSheet(d.rk); return; }
   if (d.moved || d.lift){ if (d.moved) save(); } else if (d.open) goGarden(d.open); else openRock(d.rk.id);
 });
 function goGarden(id){ if (!state.gardens.some(g => g.id === id)) return; state.active = id; save(); render(); refreshChrome(); }
@@ -1013,6 +1152,7 @@ const descendants = gid => { const out = []; const walk = id => state.gardens.fi
 function removeGardens(ids){
   const set = new Set(ids);
   for (const g of state.gardens) if (set.has(g.id) && g.parent && !set.has(g.parent.g)){ const pg = state.gardens.find(x => x.id === g.parent.g), pr = pg && pg.rocks.find(x => x.id === g.parent.r); if (pr) delete pr.gardenId; }
+  if (typeof unshare === 'function' && cloudOn() && sess) for (const id of ids) if (state.shares && state.shares[id]) unshare(id);
   state.gardens = state.gardens.filter(g => !set.has(g.id));
   if (!state.gardens.some(g => g.id === state.active)) state.active = state.gardens[0].id;
 }
@@ -1095,6 +1235,7 @@ const synced = rk => syncCache.get(rk.id + '|' + ymd(gridStart(month))) || { eve
 /* ---------- sheet ---------- */
 let cur = null, tab = 'calendar', month = new Date(), selDay = ymd(new Date());
 function openRock(id, t){
+  if (viewing){ const fr = state.rocks.find(r => r.id === id); if (fr) friendRockSheet(fr); return; }
   cur = state.rocks.find(r => r.id === id); if (!cur) return;
   tab = t || (cur.photo ? 'photo' : 'calendar'); month = new Date(); selDay = ymd(new Date());
   $('#overlay').classList.add('open'); sheet(); syncRock(cur);
@@ -1324,15 +1465,17 @@ function settingsTab(){
 /* ---------- gardens (side tabs) ---------- */
 function refreshChrome(){
   const g = garden(), photos = g.kind === 'photos';
-  $('#quick').hidden = photos; $('#photobar').hidden = !photos;
+  $('#quick').hidden = !!viewing || photos; $('#photobar').hidden = !!viewing || !photos; $('#add').hidden = !!viewing;
   $('#add').textContent = photos ? '+ Add photos' : '+ New rock';
   $('#hint').textContent = photos ? 'Drag a photo to move it. Tap it to see it bigger and add a caption.' : 'Drag a rock to move it. Tap it to open its calendar, notes and tasks.';
   const order = [], walk = (pid, d) => state.gardens.filter(x => (x.parent && state.gardens.some(p => p.id === x.parent.g) ? x.parent.g : null) === pid).forEach(x => { order.push([x, d]); walk(x.id, d + 1); });
   walk(null, 0);
-  $('#rail').innerHTML = order.map(([x, d]) => { const i = state.gardens.indexOf(x), col = COLORS[i % COLORS.length]; return `<div style="display:flex;align-items:center;gap:2px;margin-left:${Math.min(d, 3) * 14}px"><button class="gtab ${x.id === g.id ? 'on' : ''}" data-g="${esc(x.id)}" aria-current="${x.id === g.id}"><span class="gd" style="background:radial-gradient(circle at 35% 30%,${shade(col, 70)},${col} 60%,${shade(col, -42)})">${x.kind === 'photos' ? '◐' : (d ? '↳' : '')}</span><span class="gn">${esc(x.name)}</span><span class="gc">${x.rocks.length}</span></button>${x.id === g.id ? '<button class="gmore" data-gm="1" aria-label="Rename or delete this garden">⋯</button>' : ''}</div>`; }).join('') + '<button class="gadd" id="gnew">+ New garden</button>';
+  $('#rail').innerHTML = order.map(([x, d]) => { const i = state.gardens.indexOf(x), col = COLORS[i % COLORS.length]; return `<div style="display:flex;align-items:center;gap:2px;margin-left:${Math.min(d, 3) * 14}px"><button class="gtab ${x.id === g.id ? 'on' : ''}" data-g="${esc(x.id)}" aria-current="${x.id === g.id}"><span class="gd" style="background:radial-gradient(circle at 35% 30%,${shade(col, 70)},${col} 60%,${shade(col, -42)})">${x.kind === 'photos' ? '◐' : (d ? '↳' : '')}</span><span class="gn">${esc(x.name)}</span><span class="gc">${x.rocks.length}</span></button>${x.id === g.id ? '<button class="gmore" data-gm="1" aria-label="Rename or delete this garden">⋯</button>' : ''}</div>`; }).join('') + (sharedWithMe.length ? '<div class="note" style="color:var(--pond-ink);opacity:.8;padding:6px 8px 0">Shared with me</div>' + sharedWithMe.map(r => `<button class="gtab ${viewing && viewing.id === r.id ? 'on' : ''}" data-sg="${esc(r.id)}"><span class="gd" style="background:radial-gradient(circle at 35% 30%,#fff,#9fd8ff 60%,#4a8fd0)">◌</span><span class="gn">${esc(r.name)}<small style="display:block;opacity:.7">@${esc(r.handle)}</small></span></button>`).join('') : '') + '<button class="gadd" id="gnew">+ New garden</button>';
   const cr = $('#crumb'), pg = g.parent && state.gardens.find(p => p.id === g.parent.g);
-  if (pg){ cr.hidden = false; cr.innerHTML = `<button class="ghost small" id="crumbback">‹ ${esc(pg.name)}</button><span>Inside <strong>${esc(g.name)}</strong></span>`; $('#crumbback').onclick = () => goGarden(pg.id); } else { cr.hidden = true; cr.innerHTML = ''; }
-  $('#rail').querySelectorAll('[data-g]').forEach(b => b.onclick = () => { if (b.dataset.g !== state.active){ state.active = b.dataset.g; save(); render(); refreshChrome(); } });
+  if (viewing){ cr.hidden = false; cr.innerHTML = `<button class="ghost small" id="crumbback">‹ My gardens</button><span>@${esc(viewing.handle)}’s <strong>${esc(viewing.name)}</strong> · view only</span>`; $('#crumbback').onclick = leaveShared; }
+  else if (pg){ cr.hidden = false; cr.innerHTML = `<button class="ghost small" id="crumbback">‹ ${esc(pg.name)}</button><span>Inside <strong>${esc(g.name)}</strong></span>`; $('#crumbback').onclick = () => goGarden(pg.id); } else { cr.hidden = true; cr.innerHTML = ''; }
+  $('#rail').querySelectorAll('[data-sg]').forEach(b => b.onclick = () => viewShared(b.dataset.sg));
+  $('#rail').querySelectorAll('[data-g]').forEach(b => b.onclick = () => { if (viewing){ viewing = null; } if (b.dataset.g !== state.active || true){ state.active = b.dataset.g; save(); render(); refreshChrome(); } });
   const mo = $('#rail').querySelector('[data-gm]'); if (mo) mo.onclick = () => gardenSheet(g.id);
   $('#gnew').onclick = () => gardenSheet(null);
 }
