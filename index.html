@@ -1,4 +1,10 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Rock Garden Organizer</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rock Garden">
 <meta name="theme-color" content="#1d2420">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,7 +64,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;pa
 h1{font-size:1.5rem;letter-spacing:.02em}
 .sub{color:var(--muted);font-size:.9rem;margin-top:2px}
 .garden-box{position:relative}
-#garden{width:100%;height:auto;display:block;touch-action:none;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 18px 24px rgba(0,0,0,.28))}
+#garden{width:100%;height:auto;display:block;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 18px 24px rgba(0,0,0,.28))}
 .rock{cursor:grab;outline:none}
 .rock.drag{cursor:grabbing}
 .rock .lbl{font-family:var(--rock);font-weight:600;letter-spacing:.01em;text-anchor:middle;fill:#fff;paint-order:stroke;stroke:var(--ls,rgba(0,0,0,.5));stroke-width:3.2px;stroke-linejoin:round;pointer-events:none}
@@ -156,6 +162,46 @@ header .ghost{color:var(--pond-ink);border-color:rgba(255,255,255,.35)}
 .bover{font-size:.65rem;font-weight:700;letter-spacing:.06em;color:#fff;background:var(--danger);border-radius:5px;padding:1px 6px}
 .bgo{width:100%;margin-top:22px;padding:13px 18px;font-size:1.02rem}
 @media (prefers-reduced-motion:reduce){.bcard,.bcard.out{animation:none!important}}
+/* phones */
+@media (display-mode: standalone){body{padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}}
+#garden{touch-action:pan-y}
+@media (max-width:640px){
+  body{padding-inline:12px}
+  input,select,textarea{font-size:16px}
+  button{min-height:42px}
+  button.small{min-height:36px}
+  header{padding:10px 12px;margin-block:6px 12px;gap:8px}
+  header h1{font-size:1.25rem}
+  header .sub{display:none}
+  .who{width:100%;gap:6px}
+  #who{display:none}
+  .who button{padding:6px 12px;font-size:.9rem;min-height:38px}
+  .who #syncst{flex:1 1 100%;order:5}
+  #add{margin-left:auto}
+  #rail{padding:6px;border-radius:16px}
+  .gtab{padding:8px 10px}
+  .quick{padding:12px;gap:8px}
+  .quick>div{flex:1 1 100%;min-width:0}
+  .quick button{width:100%}
+  .hint{font-size:.82rem;margin-top:8px}
+  .sheet{max-height:94vh;padding:16px 14px calc(18px + env(safe-area-inset-bottom,0px))}
+  .sheet-head h2{font-size:1.2rem}
+  .tab{padding:10px 12px}
+  .sheet-head{flex-wrap:wrap}
+  .sheet-head h2{flex:1 1 0;min-width:9ch}
+  .sheet-head #expand,.sheet-head #opengarden{order:5;flex:1 1 100%}
+  .day{min-height:44px;padding:2px 3px}
+  .pip{font-size:0;height:6px;padding:0;margin:2px 2px 0 0;display:inline-block;width:6px;border-radius:50%}
+  .grid{gap:2px}
+  .row>input,.row>select{min-width:0}
+  .row>input[type=time],.row>input[type=date]{flex:1 1 40%;max-width:none!important}
+  .bcard{padding:20px 16px;border-radius:20px}
+  .bcard h2{font-size:1.45rem}
+  .bmsg{font-size:1.02rem}
+  #auth{margin-top:3vh;padding:20px 16px;border-radius:18px}
+  #welcome span{font-size:1.9rem}
+  .list li{padding:10px}
+}
 /* sign in */
 #auth{max-width:420px;margin:8vh auto 0;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:24px 22px}
 #auth h1{font-size:1.7rem}
@@ -820,6 +866,7 @@ function photoSrc(rk){
 
 function render(){
   const sc = settle(dragging && dragging.rk);
+  const kf = Math.max(1, 700 / (($('#garden').getBoundingClientRect().width) || 700));
   const placed = state.rocks.map(rk => ({ rk, r: radius(rk, sc), x: C + rk.x, y: C + rk.y }));
   const rnd = rng(11);
   const dunes = [...Array(16)].map((_, i) => { const y = C - R + 40 + i * 40 + rnd() * 10, w = 60 + rnd() * 120, x = C - R + rnd() * (R * 2 - w); return `<path d="M${x.toFixed(0)},${y.toFixed(0)} q${(w / 2).toFixed(0)},-9 ${w.toFixed(0)},0"/>`; }).join('');
@@ -854,7 +901,7 @@ function render(){
     const { rk, r, x, y } = p;
     const sp = '';
     if (rk.photo){
-      const fs2 = Math.max(11, Math.min(17, r / 4.2)), cap = rk.name.length > 16 ? rk.name.slice(0, 15) + '…' : rk.name;
+      const fs2 = Math.max(11 * kf, Math.min(17 * Math.max(1, kf * .8), r / 4.2)), cap = rk.name.length > 16 ? rk.name.slice(0, 15) + '…' : rk.name;
       out += `${sp}<g class="rock ${dragging && dragging.rk === rk ? 'drag' : ''}${entering ? ' dropin' : ''}" style="--i:${placed.indexOf(p)}" data-id="${rk.id}" tabindex="0" role="button" aria-label="${esc(rk.name)}, photo">
         <ellipse cx="${x + r * .12}" cy="${y + r * .9}" rx="${r * 1.0}" ry="${r * .24}" fill="rgba(0,0,0,.4)" filter="url(#soft)"/>
         <circle cx="${x}" cy="${y}" r="${(r + 7).toFixed(1)}" fill="#fff"/>
@@ -867,7 +914,10 @@ function render(){
       continue;
     }
     const pending = rk.tasks.filter(t => !t.done).length;
-    const fs = Math.max(12, Math.min(22, r / 3.1)), nm = rk.name.length > 14 ? rk.name.slice(0, 13) + '…' : rk.name;
+    let fs = Math.min(22 * Math.max(1, kf * .8), r / 3.1);
+    fs = Math.max(10.5 * kf, Math.min(fs, (r * 1.8) / (Math.max(3, rk.name.length) * .6)));
+    const room = Math.max(4, Math.floor((r * 1.8) / (fs * .6)));
+    const nm = rk.name.length > room ? rk.name.slice(0, Math.max(1, room - 1)) + '…' : rk.name;
     out += `${sp}<g class="rock ${dragging && dragging.rk === rk ? 'drag' : ''}${entering ? ' dropin' : ''}" style="--i:${placed.indexOf(p)}" data-id="${rk.id}" tabindex="0" role="button" aria-label="${esc(rk.name)}, weight ${rk.weight}">
       <ellipse cx="${x + r * .14}" cy="${y + r * .86}" rx="${r * 1.02}" ry="${r * .26}" fill="${shade(rk.color, -110)}" opacity=".38" filter="url(#soft)"/>
       <path d="${stonePath(x, y, r, rk.id)}" fill="url(#g${rk.id})"/>
@@ -876,8 +926,8 @@ function render(){
       <ellipse cx="${(x - r * .36).toFixed(1)}" cy="${(y - r * .5).toFixed(1)}" rx="${(r * .16).toFixed(1)}" ry="${(r * .07).toFixed(1)}" fill="#fff" opacity=".85" transform="rotate(-28 ${(x - r * .36).toFixed(1)} ${(y - r * .5).toFixed(1)})"/>
       ${decor(p)}
       <text class="lbl" x="${x}" y="${y + fs / 4}" font-size="${fs}" style="--ls:${shade(rk.color, -95)}">${esc(nm)}</text>
-      <text class="wt" x="${x}" y="${y + fs / 4 + 15}">${rk.weight}/10</text>
-      ${pending ? `<circle cx="${x + r * .7}" cy="${y - r * .7}" r="12" fill="#c9553d" stroke="#fff" stroke-width="2"/><text class="pebble-t" x="${x + r * .7}" y="${y - r * .7 + 4.5}">${pending}</text>` : ''}
+      <text class="wt" x="${x}" y="${y + fs / 4 + 15 * Math.max(1, kf * .8)}" style="font-size:${(11 * Math.max(1, kf * .8)).toFixed(1)}px">${rk.weight}/10</text>
+      ${pending ? `<circle cx="${x + r * .7}" cy="${y - r * .7}" r="${(12 * Math.max(1, kf * .7)).toFixed(1)}" fill="#c9553d" stroke="#fff" stroke-width="2"/><text class="pebble-t" x="${x + r * .7}" y="${y - r * .7 + 4.5 * Math.max(1, kf * .7)}" style="font-size:${(12 * Math.max(1, kf * .7)).toFixed(1)}px">${pending}</text>` : ''}
       ${rk.gardenId ? `<g data-open="${esc(rk.gardenId)}" style="cursor:pointer"><circle cx="${(x + r * .66).toFixed(1)}" cy="${(y + r * .66).toFixed(1)}" r="15" fill="#f3e6c4" stroke="#fff" stroke-width="2.5"/><circle cx="${(x + r * .66).toFixed(1)}" cy="${(y + r * .66).toFixed(1)}" r="9" fill="none" stroke="#b79b62" stroke-width="1.4"/><circle cx="${(x + r * .66 + 1).toFixed(1)}" cy="${(y + r * .66 - 1).toFixed(1)}" r="3.6" fill="${rk.color}"/><title>Open ${esc(rk.name)} garden</title></g>` : ''}
       <title>${esc(rk.name)}</title></g>`;
   }
@@ -891,12 +941,18 @@ function svgPoint(e){ const pt = gsvg.createSVGPoint(); pt.x = e.clientX; pt.y =
 gsvg.addEventListener('pointerdown', e => {
   const g = e.target.closest('.rock'); if (!g) return;
   const rk = state.rocks.find(r => r.id === g.dataset.id), p = svgPoint(e);
-  dragging = { rk, ox: rk.x - (p.x - C), oy: rk.y - (p.y - C), sx: e.clientX, sy: e.clientY, moved: false, open: (e.target.closest('[data-open]') || { dataset: {} }).dataset.open || null };
-  gsvg.setPointerCapture(e.pointerId);
+  const touch = e.pointerType === 'touch';
+  dragging = { touch, armed: !touch, timer: null, rk, ox: rk.x - (p.x - C), oy: rk.y - (p.y - C), sx: e.clientX, sy: e.clientY, moved: false, open: (e.target.closest('[data-open]') || { dataset: {} }).dataset.open || null };
+  if (touch){
+    dragging.timer = setTimeout(() => { if (dragging && !dragging.moved){ dragging.armed = true; try { navigator.vibrate && navigator.vibrate(12); } catch(_){} try { gsvg.setPointerCapture(e.pointerId); } catch(_){} dragging.lift = true; render(); } }, 260);
+  } else gsvg.setPointerCapture(e.pointerId);
 });
+gsvg.addEventListener('touchmove', e => { if (dragging && dragging.armed && e.cancelable) e.preventDefault(); }, { passive: false });
 gsvg.addEventListener('pointermove', e => {
   if (!dragging) return;
-  if (!dragging.moved && Math.hypot(e.clientX - dragging.sx, e.clientY - dragging.sy) < 6) return;
+  const dist = Math.hypot(e.clientX - dragging.sx, e.clientY - dragging.sy);
+  if (!dragging.armed){ if (dist > 9){ clearTimeout(dragging.timer); dragging = null; } return; }
+  if (!dragging.moved && dist < 6) return;
   dragging.moved = true;
   const p = svgPoint(e);
   dragging.rk.x = p.x - C + dragging.ox; dragging.rk.y = p.y - C + dragging.oy;
@@ -904,8 +960,8 @@ gsvg.addEventListener('pointermove', e => {
 });
 gsvg.addEventListener('pointerup', () => {
   if (!dragging) return;
-  const d = dragging; dragging = null; render();
-  if (d.moved) save(); else if (d.open) goGarden(d.open); else openRock(d.rk.id);
+  const d = dragging; clearTimeout(d.timer); dragging = null; render();
+  if (d.moved || d.lift){ if (d.moved) save(); } else if (d.open) goGarden(d.open); else openRock(d.rk.id);
 });
 function goGarden(id){ if (!state.gardens.some(g => g.id === id)) return; state.active = id; save(); render(); refreshChrome(); }
 const descendants = gid => { const out = []; const walk = id => state.gardens.filter(g => g.parent && g.parent.g === id).forEach(c => { out.push(c.id); walk(c.id); }); walk(gid); return out; };
@@ -915,7 +971,7 @@ function removeGardens(ids){
   state.gardens = state.gardens.filter(g => !set.has(g.id));
   if (!state.gardens.some(g => g.id === state.active)) state.active = state.gardens[0].id;
 }
-gsvg.addEventListener('pointercancel', () => { dragging = null; render(); });
+gsvg.addEventListener('pointercancel', () => { if (dragging) clearTimeout(dragging.timer); dragging = null; render(); });
 gsvg.addEventListener('keydown', e => {
   const g = e.target.closest('.rock');
   if (g && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); openRock(g.dataset.id); }
@@ -1352,7 +1408,7 @@ if (window.top === window && location.protocol.startsWith('http')){
   const N = 12, fish = [], ripples = [];
   const pads = [[.08,.2,1],[.91,.13,.8],[.05,.72,1.15],[.94,.6,.9],[.17,.94,.85],[.83,.9,1.1],[.52,.035,.7]].map((p, i) => ({ fx: p[0], fy: p[1], k: p[2], rot: rnd() * TAU, bob: rnd() * TAU, flower: i === 2 || i === 5 }));
   function size(){
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = Math.min(window.devicePixelRatio || 1, innerWidth < 700 ? 1.5 : 2);
     W = innerWidth; H = innerHeight; U = Math.max(30, Math.min(58, W / 17));
     cv.width = W * dpr; cv.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (!fish.length) for (let i = 0; i < PAL.length; i++){
@@ -1394,8 +1450,9 @@ if (window.top === window && location.protocol.startsWith('http')){
   }
 
   // twinkling surface glints, fireflies, drifting petals, trailing sparkles and low mist
-  const glints = [...Array(70)].map(() => ({ x: rnd(), y: rnd(), s: 2 + rnd() * 3.5, ph: rnd() * TAU, sp: .6 + rnd() * 1.4 }));
-  const flies = [...Array(26)].map(() => ({ x: rnd(), y: rnd(), ph: rnd() * TAU, sp: .15 + rnd() * .3, r: 30 + rnd() * 60, hue: rnd() > .4 ? '255,236,150' : '170,255,230' }));
+  const lite = innerWidth < 700;
+  const glints = [...Array(lite ? 32 : 70)].map(() => ({ x: rnd(), y: rnd(), s: 2 + rnd() * 3.5, ph: rnd() * TAU, sp: .6 + rnd() * 1.4 }));
+  const flies = [...Array(lite ? 14 : 26)].map(() => ({ x: rnd(), y: rnd(), ph: rnd() * TAU, sp: .15 + rnd() * .3, r: 30 + rnd() * 60, hue: rnd() > .4 ? '255,236,150' : '170,255,230' }));
   const petals = [...Array(9)].map(() => ({ x: rnd(), y: rnd(), a: rnd() * TAU, sp: 6 + rnd() * 8, ph: rnd() * TAU }));
   const sparks = [];
   function magic(t, dt){
@@ -1535,7 +1592,7 @@ if (window.top === window && location.protocol.startsWith('http')){
     }
     g.globalAlpha = 1;
     // body
-    g.save(); g.shadowColor = f.pal.glow || (f.pal.spots[0] ? f.pal.spots[0][2] : base); g.shadowBlur = f.pal.glowBlur || 24; g.fillStyle = base; ribbon(0, N - 1, 1); g.fill(); g.restore();
+    g.save(); g.shadowColor = f.pal.glow || (f.pal.spots[0] ? f.pal.spots[0][2] : base); g.shadowBlur = (f.pal.glowBlur || 24) * (lite ? .6 : 1); g.fillStyle = base; ribbon(0, N - 1, 1); g.fill(); g.restore();
     g.fillStyle = base; ribbon(0, N - 1, 1); g.fill();
     g.beginPath(); g.arc(q[0].x, q[0].y, Math.max(w[0], u * .2), 0, TAU); g.fill();
     for (const [i0, i1, col, k] of f.pal.spots){ g.fillStyle = col; ribbon(i0, Math.min(i1, N - 1), k); g.fill(); }
