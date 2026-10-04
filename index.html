@@ -8,6 +8,7 @@
 :root{
   --bg:#e8ebe4; --bg2:#dde2d7; --surface:#f6f7f3; --surface2:#eceee7; --ink:#1f2622; --muted:#667068; --line:#cbd1c5;
   --accent:#4f6b3a; --accent-ink:#fff; --danger:#a23b3b; --google:#2f6db5; --notion:#5c5c58; --scrim:rgba(20,26,22,.5);
+  --water:#0b2a30; --pond-ink:#eaf3ef; --glass:rgba(10,26,28,.58);
   --display:"Shippori Mincho","Hiragino Mincho ProN",Georgia,serif;
   --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
@@ -19,7 +20,7 @@
   --accent:#a5c27d; --accent-ink:#16200f; --danger:#e07a7a; --google:#7fb0ee; --notion:#b9b9b3; --scrim:rgba(0,0,0,.65);color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:radial-gradient(120% 80% at 50% 0%,var(--bg2),var(--bg));color:var(--ink);font:15px/1.45 var(--body);min-height:100vh;padding-inline:16px;padding-block:8px 40px}
+body{background:var(--water);color:var(--ink);font:15px/1.45 var(--body);min-height:100vh;padding-inline:16px;padding-block:8px 40px}
 button,input,select,textarea{font:inherit;color:inherit}
 button{background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;padding:9px 18px;cursor:pointer;font-weight:600}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.rock:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -93,6 +94,13 @@ textarea{min-height:260px;resize:vertical;line-height:1.55}
 .pick label{display:flex;gap:10px;align-items:center;text-transform:none;letter-spacing:0;font-size:.95rem;color:var(--ink);margin:0;padding:8px 10px;background:var(--surface2);border-radius:10px}
 .colors{display:flex;gap:10px;flex-wrap:wrap}
 .colors button{width:38px;height:38px;padding:0;border-radius:50%;box-shadow:inset -4px -5px 7px rgba(0,0,0,.35)}
+/* koi pond */
+#pond{position:fixed;inset:0;width:100%;height:100%;z-index:-1;display:block}
+header{background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:12px 18px;margin-block:10px 18px}
+header h1,header .sub,header .who span{color:var(--pond-ink)}
+header .sub{opacity:.8}
+header .ghost{color:var(--pond-ink);border-color:rgba(255,255,255,.35)}
+.hint{color:var(--pond-ink);text-shadow:0 1px 6px rgba(0,0,0,.6)}
 /* sign in */
 #auth{max-width:420px;margin:8vh auto 0;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:24px 22px}
 #auth h1{font-size:1.7rem}
@@ -107,6 +115,7 @@ textarea{min-height:260px;resize:vertical;line-height:1.55}
 @media (prefers-reduced-motion:no-preference){.sheet{animation:rise .22s ease-out}@keyframes rise{from{transform:translateY(16px);opacity:0}}}
 </style>
 
+<canvas id="pond" aria-hidden="true"></canvas>
 <div id="auth" hidden>
   <h1>Rock Garden</h1>
   <div class="sub">Sign in to open your garden.</div>
@@ -789,5 +798,158 @@ if (window.top === window && location.protocol.startsWith('http')){
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   } catch(e){}
 }
+/* ---------- koi pond background ---------- */
+(function pond(){
+  const cv = document.getElementById('pond'), g = cv.getContext('2d');
+  if (!g) return;
+  const still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, U = 40, dpr = 1;
+  const rnd = rng(77), TAU = Math.PI * 2;
+  const PAL = [
+    { base: '#f5f0e6', spots: [[1,4,'#e8622a',.8],[6,9,'#e8622a',.75],[3,5,'#1f1f1f',.45]] },
+    { base: '#e9602b', spots: [[2,8,'#f28a4a',.55]] },
+    { base: '#f6f1e7', spots: [[0,3,'#d8362b',.85],[7,9,'#d8362b',.6]] },
+    { base: '#e6b445', spots: [[3,9,'#f7d98c',.55]] },
+    { base: '#f2ede2', spots: [[1,5,'#e0452b',.8],[7,10,'#e0452b',.7],[4,6,'#1f1f1f',.4]] },
+    { base: '#e9602b', spots: [[2,4,'#222',.55],[7,9,'#222',.4]] }
+  ];
+  const N = 12, fish = [], ripples = [];
+  const pads = [[.08,.2,1],[.91,.13,.8],[.05,.72,1.15],[.94,.6,.9],[.17,.94,.85],[.83,.9,1.1],[.52,.035,.7]].map((p, i) => ({ fx: p[0], fy: p[1], k: p[2], rot: rnd() * TAU, bob: rnd() * TAU, flower: i === 2 || i === 5 }));
+  function size(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight; U = Math.max(30, Math.min(58, W / 17));
+    cv.width = W * dpr; cv.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (!fish.length) for (let i = 0; i < PAL.length; i++){
+      const f = { pal: PAL[i], x: rnd() * W, y: rnd() * H, a: rnd() * TAU, sp: 26 + rnd() * 16, ph: rnd() * TAU, k: .85 + rnd() * .35, p1: rnd() * 9, p2: rnd() * 9, flee: 0, fx: 0, fy: 0, pts: [] };
+      for (let j = 0; j < N; j++) f.pts.push({ x: f.x - Math.cos(f.a) * j * U * .42, y: f.y - Math.sin(f.a) * j * U * .42 });
+      fish.push(f);
+    }
+    if (still) frame(0);
+  }
+  addEventListener('resize', size);
+
+  function water(t){
+    const gr = g.createLinearGradient(0, 0, W, H);
+    gr.addColorStop(0, '#0f4a4d'); gr.addColorStop(.5, '#0b3338'); gr.addColorStop(1, '#082228');
+    g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    g.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 12; i++){
+      const x = (Math.sin(t * .07 + i * 2.1) * .5 + .5) * W, y = (Math.cos(t * .05 + i * 1.7) * .5 + .5) * H, r = 140 + (i % 4) * 60;
+      const b = g.createRadialGradient(x, y, 0, x, y, r);
+      b.addColorStop(0, 'rgba(110,210,196,.07)'); b.addColorStop(1, 'rgba(110,210,196,0)');
+      g.fillStyle = b; g.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    g.globalCompositeOperation = 'source-over';
+    const v = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .35, W / 2, H / 2, Math.max(W, H) * .75);
+    v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,12,14,.55)');
+    g.fillStyle = v; g.fillRect(0, 0, W, H);
+  }
+
+  function padDraw(p, t){
+    const x = p.fx * W + Math.sin(t * .15 + p.bob) * 4, y = p.fy * H + Math.cos(t * .12 + p.bob) * 3, r = U * .85 * p.k, rot = p.rot + Math.sin(t * .1 + p.bob) * .08;
+    g.save(); g.translate(x, y); g.rotate(rot);
+    g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(5, 7, r, r * .96, 0, 0, TAU); g.fill();
+    g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, r, .22, TAU - .22); g.closePath();
+    const gr = g.createRadialGradient(-r * .3, -r * .3, r * .1, 0, 0, r); gr.addColorStop(0, '#5fae62'); gr.addColorStop(1, '#2f7a45');
+    g.fillStyle = gr; g.fill(); g.lineWidth = 1.5; g.strokeStyle = 'rgba(20,70,35,.8)'; g.stroke();
+    g.strokeStyle = 'rgba(180,235,170,.35)'; g.lineWidth = 1;
+    for (let i = 0; i < 7; i++){ const a = .5 + i * .85; g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(a) * r * .92, Math.sin(a) * r * .92); g.stroke(); }
+    if (p.flower){
+      for (let ring = 0; ring < 2; ring++) for (let i = 0; i < 8; i++){
+        const a = i / 8 * TAU + ring * .4, pr = r * (ring ? .3 : .48);
+        g.save(); g.rotate(a); g.fillStyle = ring ? '#ffd3e0' : '#f59bb8'; g.beginPath(); g.ellipse(pr * .75, 0, pr * .75, pr * .3, 0, 0, TAU); g.fill(); g.restore();
+      }
+      g.fillStyle = '#f6d365'; g.beginPath(); g.arc(0, 0, r * .1, 0, TAU); g.fill();
+    }
+    g.restore();
+  }
+
+  function step(f, dt, t){
+    const m = U * 3;
+    let turn = (Math.sin(t * .37 + f.p1) * .6 + Math.sin(t * .91 + f.p2) * .4) * .9;
+    let sp = f.sp * (U / 40);
+    if (f.x < m || f.x > W - m || f.y < m || f.y > H - m){
+      const want = Math.atan2(H / 2 - f.y, W / 2 - f.x); let d = want - f.a; d = Math.atan2(Math.sin(d), Math.cos(d)); turn += d * 1.6;
+    }
+    if (f.flee > 0){
+      f.flee -= dt; const want = Math.atan2(f.y - f.fy, f.x - f.fx); let d = want - f.a; d = Math.atan2(Math.sin(d), Math.cos(d)); turn += d * 3; sp *= 2.8;
+    }
+    f.a += turn * dt; f.x += Math.cos(f.a) * sp * dt; f.y += Math.sin(f.a) * sp * dt; f.ph += dt * (3 + sp / (U * .6));
+    const s = U * .42 * f.k;
+    f.pts[0].x = f.x; f.pts[0].y = f.y;
+    for (let i = 1; i < N; i++){
+      const a = f.pts[i - 1], b = f.pts[i], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1;
+      b.x = a.x + dx / d * s; b.y = a.y + dy / d * s;
+    }
+  }
+
+  function fishDraw(f, t){
+    const u = U * f.k, q = [], w = [];
+    for (let i = 0; i < N; i++){
+      const a = f.pts[Math.max(0, i - 1)], b = f.pts[Math.min(N - 1, i + 1)];
+      let nx = -(b.y - a.y), ny = b.x - a.x; const d = Math.hypot(nx, ny) || 1; nx /= d; ny /= d;
+      const tt = i / (N - 1), wave = Math.sin(f.ph - i * .55) * u * .16 * tt;
+      q.push({ x: f.pts[i].x + nx * wave, y: f.pts[i].y + ny * wave, nx, ny });
+      w.push(u * .5 * Math.pow(Math.sin(Math.PI * Math.min(1, tt * .88 + .1)), .75) * (1 - .5 * tt * tt));
+    }
+    const ribbon = (i0, i1, k, ox = 0, oy = 0) => {
+      g.beginPath();
+      for (let i = i0; i <= i1; i++) g[i === i0 ? 'moveTo' : 'lineTo'](q[i].x + q[i].nx * w[i] * k + ox, q[i].y + q[i].ny * w[i] * k + oy);
+      for (let i = i1; i >= i0; i--) g.lineTo(q[i].x - q[i].nx * w[i] * k + ox, q[i].y - q[i].ny * w[i] * k + oy);
+      g.closePath();
+    };
+    // shadow on the pond floor
+    g.fillStyle = 'rgba(0,10,12,.28)'; ribbon(0, N - 1, 1, u * .35, u * .5); g.fill();
+    const base = f.pal.base, t0 = q[N - 1], t1 = q[N - 2];
+    let dx = t0.x - t1.x, dy = t0.y - t1.y; const dl = Math.hypot(dx, dy) || 1; dx /= dl; dy /= dl;
+    const ang = Math.atan2(dy, dx) + Math.sin(f.ph - N * .55) * .45;
+    // tail
+    g.globalAlpha = .78; g.fillStyle = base;
+    g.beginPath(); g.moveTo(t0.x, t0.y);
+    const tip = a => [t0.x + Math.cos(a) * u * 1.25, t0.y + Math.sin(a) * u * 1.25];
+    const A = tip(ang + .42), B = tip(ang - .42), M = [t0.x + Math.cos(ang) * u * .62, t0.y + Math.sin(ang) * u * .62];
+    g.quadraticCurveTo(t0.x + Math.cos(ang + .6) * u * .9, t0.y + Math.sin(ang + .6) * u * .9, A[0], A[1]);
+    g.quadraticCurveTo(M[0] + Math.cos(ang + 1.6) * u * .1, M[1] + Math.sin(ang + 1.6) * u * .1, M[0], M[1]);
+    g.quadraticCurveTo(M[0] + Math.cos(ang - 1.6) * u * .1, M[1] + Math.sin(ang - 1.6) * u * .1, B[0], B[1]);
+    g.quadraticCurveTo(t0.x + Math.cos(ang - .6) * u * .9, t0.y + Math.sin(ang - .6) * u * .9, t0.x, t0.y);
+    g.fill();
+    // pectoral fins
+    const p = q[3], flap = Math.sin(f.ph * 1.2) * .25, ha = Math.atan2(q[2].y - q[4].y, q[2].x - q[4].x);
+    for (const sgn of [-1, 1]){
+      g.save(); g.translate(p.x + p.nx * w[3] * .9 * sgn, p.y + p.ny * w[3] * .9 * sgn); g.rotate(ha + sgn * (2.1 + flap));
+      g.beginPath(); g.ellipse(u * .28, 0, u * .34, u * .12, 0, 0, TAU); g.fill(); g.restore();
+    }
+    g.globalAlpha = 1;
+    // body
+    g.fillStyle = base; ribbon(0, N - 1, 1); g.fill();
+    g.beginPath(); g.arc(q[0].x, q[0].y, Math.max(w[0], u * .2), 0, TAU); g.fill();
+    for (const [i0, i1, col, k] of f.pal.spots){ g.fillStyle = col; ribbon(i0, Math.min(i1, N - 1), k); g.fill(); }
+    // soft top light
+    g.fillStyle = 'rgba(255,255,255,.14)'; ribbon(1, N - 3, .35, -u * .04, -u * .05); g.fill();
+  }
+
+  function ripple(x, y, big){ ripples.push({ x, y, r: 2, max: big ? U * 3.2 : U * 1.8, a: big ? .5 : .32 }); }
+  addEventListener('pointerdown', e => {
+    ripple(e.clientX, e.clientY, true);
+    for (const f of fish) if (Math.hypot(f.x - e.clientX, f.y - e.clientY) < U * 6){ f.flee = 1.1; f.fx = e.clientX; f.fy = e.clientY; }
+  }, { passive: true });
+
+  let last = 0, nextRip = 1;
+  function frame(ms){
+    const t = ms / 1000, dt = Math.min(.05, t - last || .016); last = t;
+    water(t);
+    if (!still) { nextRip -= dt; if (nextRip < 0){ ripple(rnd() * W, rnd() * H, false); nextRip = 2 + rnd() * 3; } }
+    for (const r of ripples){ r.r += dt * U * 1.1; r.a *= Math.pow(.45, dt); }
+    for (let i = ripples.length - 1; i >= 0; i--) if (ripples[i].r > ripples[i].max || ripples[i].a < .01) ripples.splice(i, 1);
+    g.lineWidth = 1.6;
+    for (const r of ripples){ for (let k = 0; k < 3; k++){ g.strokeStyle = `rgba(190,238,232,${(r.a * (1 - k * .3)).toFixed(3)})`; g.beginPath(); g.arc(r.x, r.y, Math.max(1, r.r - k * U * .22), 0, TAU); g.stroke(); } }
+    for (const f of fish){ if (!still) step(f, dt, t); fishDraw(f, t); }
+    for (const p of pads) padDraw(p, t);
+    if (!still) requestAnimationFrame(frame);
+  }
+  size();
+  if (!still) requestAnimationFrame(frame);
+})();
+
 boot();
 </script>
