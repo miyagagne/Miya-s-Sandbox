@@ -122,13 +122,14 @@ header .ghost{color:var(--pond-ink);border-color:rgba(255,255,255,.35)}
   <div class="seg" role="tablist"><button type="button" class="on" id="tin">Sign in</button><button type="button" id="tup">Create account</button></div>
   <form id="authform" autocomplete="on">
     <label for="au" id="aulabel">Username</label><input id="au" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
-    <label for="ap">Password</label><input id="ap" name="password" type="password" autocomplete="current-password" required>
+    <div id="arcrow" hidden><label for="arc">Recovery code</label><input id="arc" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXXX-XXXXX-XXXXX-XXXXX"></div>
+    <label for="ap" id="aplabel">Password</label><input id="ap" name="password" type="password" autocomplete="current-password" required>
     <div id="apw2" hidden><label for="ap2">Repeat password</label><input id="ap2" type="password" autocomplete="new-password"></div>
     <div class="msg err" id="amsg" hidden></div>
     <p style="margin:12px 0 0" id="aforgotrow" hidden><button class="ghost small" type="button" id="aforgot">Forgot password?</button></p>
     <button type="submit" id="asubmit">Sign in</button>
   </form>
-  <p class="note" style="margin-bottom:0" id="anote">Accounts are stored on this device only. Your garden is encrypted with your password, so there is no way to reset it. If you forget it, the account has to be erased.</p>
+  <p class="note" style="margin-bottom:0" id="anote">Accounts are stored on this device only. Your garden is encrypted with your password. If you forget it, the recovery code you saved when you made the account can reset it.</p>
   <p style="margin:10px 0 0"><button class="ghost small" id="aerase" type="button" hidden>Erase this account</button></p>
 </div>
 
@@ -138,7 +139,7 @@ header .ghost{color:var(--pond-ink);border-color:rgba(255,255,255,.35)}
       <h1>Rock Garden</h1>
       <div class="sub">Every activity is a stone in the sand pit. Heavier commitments weigh more.</div>
     </div>
-    <div class="who"><span id="who"></span><span id="syncst" class="note"></span><button class="ghost small" id="signout">Sign out</button><button id="add">+ New rock</button></div>
+    <div class="who"><span id="who"></span><span id="syncst" class="note"></span><button class="ghost small" id="recbtn" title="Make a code that can reset your password">Recovery code</button><button class="ghost small" id="signout">Sign out</button><button id="add">+ New rock</button></div>
   </header>
 
   <div class="garden-box"><svg id="garden" viewBox="0 0 700 700" role="img" aria-label="Sand garden of activity rocks"></svg></div>
@@ -296,9 +297,58 @@ async function cloudSubmit(){
   } catch(e){ amsg(e.message || 'Something went wrong.'); }
 }
 $('#aforgot').onclick = async () => {
+  if (!cloudOn()){ setMode('recover'); return; }
   const email = $('#au').value.trim().toLowerCase();
   if (!email) return amsg('Type your email first.');
   try { await authCall('/auth/v1/recover', { email }); amsg('If that email has an account, a reset link is on its way.', true); } catch(e){ amsg(e.message); }
+};
+
+/* ---------- recovery code (device accounts): lets a forgotten password be reset without losing the garden ---------- */
+const CODE_ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function newCode(){ const a = crypto.getRandomValues(new Uint8Array(20)); let t = ''; for (const x of a) t += CODE_ALPHA[x % 32]; return t.match(/.{5}/g).join('-'); }
+const normCode = c => String(c).toUpperCase().replace(/[^A-Z0-9]/g, '');
+async function wrapKey(code, key){
+  const salt = crypto.getRandomValues(new Uint8Array(16)), rk = await deriveKey(normCode(code), salt);
+  return { salt: b64(salt), blob: await seal(rk, { k: b64(await crypto.subtle.exportKey('raw', key)) }) };
+}
+async function unwrapKey(code, rec){
+  const rk = await deriveKey(normCode(code), unb64(rec.salt)), o = await unseal(rk, rec.blob);
+  return crypto.subtle.importKey('raw', unb64(o.k), 'AES-GCM', true, ['encrypt', 'decrypt']);
+}
+let lockSheet = false;
+function showRecovery(code, intro){
+  lockSheet = true; cur = null;
+  $('#sheet').innerHTML = `<h2>Your recovery code</h2><p class="note">${intro}</p>
+    <div class="msg" style="font:600 1.25rem var(--body);letter-spacing:.08em;text-align:center;user-select:all;overflow-wrap:anywhere">${esc(code)}</div>
+    <p class="note">Keep it somewhere safe, like a password manager. Anyone with this code and your username can reset your password.</p>
+    <div class="row"><button class="ghost" id="rcopy">Copy</button><button id="rdone">I’ve saved it</button></div>`;
+  $('#overlay').classList.add('open');
+  $('#rcopy').onclick = async () => { try { await navigator.clipboard.writeText(code); $('#rcopy').textContent = 'Copied'; } catch(e){ $('#rcopy').textContent = 'Select and copy it above'; } };
+  $('#rdone').onclick = () => { lockSheet = false; $('#overlay').classList.remove('open'); };
+}
+async function localRecover(){
+  const name = $('#au').value.trim().toLowerCase(), code = $('#arc').value, pw = $('#ap').value;
+  if (!name || !normCode(code)) return amsg('Enter your username and recovery code.');
+  if (pw.length < 8) return amsg('New password needs at least 8 characters.');
+  if (pw !== $('#ap2').value) return amsg('The two passwords don’t match.');
+  const accs = accounts(), acc = accs[name];
+  let blob = null; try { blob = JSON.parse(localStorage.getItem(DATA(name))); } catch(e){}
+  if (!acc || !blob) return amsg('No account with that username on this device.');
+  if (!acc.rec) return amsg('This account has no recovery code. Sign in with your password and use “Recovery code” to make one.');
+  let data; try { data = await unseal(await unwrapKey(code, acc.rec), blob); } catch(e){ await new Promise(r => setTimeout(r, 700)); return amsg('That recovery code doesn’t match this account.'); }
+  const salt = crypto.getRandomValues(new Uint8Array(16)), key = await deriveKey(pw, salt), fresh = newCode();
+  acc.salt = b64(salt); acc.rec = await wrapKey(fresh, key);
+  localStorage.setItem(DATA(name), JSON.stringify(await seal(key, data)));
+  localStorage.setItem(ACC, JSON.stringify(accs));
+  try { sessionStorage.setItem(SES, JSON.stringify({ u: name, k: b64(await crypto.subtle.exportKey('raw', key)) })); } catch(e){}
+  enter(name, key, data);
+  showRecovery(fresh, 'Your password is reset and your garden is intact. The old recovery code no longer works, so this is your new one.');
+}
+$('#recbtn').onclick = async () => {
+  if (!user || !dkey || cloudOn()) return;
+  const accs = accounts(), code = newCode(); accs[user].rec = await wrapKey(code, dkey);
+  localStorage.setItem(ACC, JSON.stringify(accs));
+  showRecovery(code, 'This replaces any recovery code you had before.');
 };
 
 let authMode = 'in';
@@ -310,16 +360,20 @@ function setMode(m){
   $('#aerase').hidden = m !== 'in' || cloudOn(); $('#amsg').hidden = true;
   const c = cloudOn();
   $('#aulabel').textContent = c ? 'Email' : 'Username'; $('#au').type = c ? 'email' : 'text';
-  $('#aforgotrow').hidden = !(c && m === 'in');
+  $('#aforgotrow').hidden = m !== 'in';
+  $('#arcrow').hidden = m !== 'recover'; $('#recbtn').hidden = c;
+  $('#aplabel').textContent = m === 'recover' || m === 'reset' ? 'New password' : 'Password';
+  if (m === 'recover'){ $('#apw2').hidden = false; $('#asubmit').textContent = 'Reset password'; $('#ap').autocomplete = 'new-password'; $('#aerase').hidden = true; }
   if (m === 'reset'){ $('#apw2').hidden = false; $('#asubmit').textContent = 'Set new password'; $('#ap').autocomplete = 'new-password'; $('#au').hidden = true; $('#aulabel').hidden = true; }
   else { $('#au').hidden = false; $('#aulabel').hidden = false; }
-  $('#anote').textContent = c ? 'Your garden is saved to your account, so it is the same on every device where you sign in.' : 'Accounts are stored on this device only. Your garden is encrypted with your password, so there is no way to reset it. If you forget it, the account has to be erased.';
+  $('#anote').textContent = c ? 'Your garden is saved to your account, so it is the same on every device where you sign in.' : 'Accounts are stored on this device only. Your garden is encrypted with your password. If you forget it, the recovery code you saved when you made the account can reset it.';
 }
 const amsg = (t, ok) => { const e = $('#amsg'); e.textContent = t; e.hidden = !t; e.classList.toggle('err', !ok); };
 $('#tin').onclick = () => setMode('in'); $('#tup').onclick = () => setMode('up');
 $('#authform').onsubmit = async e => {
   e.preventDefault(); amsg('');
   if (cloudOn()){ const b = $('#asubmit'); b.disabled = true; try { await cloudSubmit(); } finally { b.disabled = false; } return; }
+  if (authMode === 'recover'){ const b = $('#asubmit'); b.disabled = true; try { await localRecover(); } finally { b.disabled = false; } return; }
   if (!window.crypto || !crypto.subtle){ amsg('This browser can’t do secure sign-in here. Open the app over https.'); return; }
   const name = $('#au').value.trim().toLowerCase(), pw = $('#ap').value, btn = $('#asubmit');
   btn.disabled = true;
@@ -334,11 +388,13 @@ $('#authform').onsubmit = async e => {
       let data = null;
       if (!Object.keys(accs).length){ try { const old = JSON.parse(localStorage.getItem(KEY)); if (old && old.rocks){ data = old; localStorage.removeItem(KEY); } } catch(e){} }
       data = data || seed();
-      accs[name] = { salt: b64(salt) };
+      const code = newCode();
+      accs[name] = { salt: b64(salt), rec: await wrapKey(code, key) };
       localStorage.setItem(ACC, JSON.stringify(accs));
       localStorage.setItem(DATA(name), JSON.stringify(await seal(key, data)));
       sessionStorage.setItem(SES, JSON.stringify({ u: name, k: b64(await crypto.subtle.exportKey('raw', key)) }));
       enter(name, key, data);
+      showRecovery(code, 'If you ever forget your password, this code lets you reset it without losing your garden. It is shown only once.');
     } else {
       const acc = accs[name], blob = (() => { try { return JSON.parse(localStorage.getItem(DATA(name))); } catch(e){ return null; } })();
       const bad = async () => { await new Promise(r => setTimeout(r, 700)); amsg('Wrong username or password.'); };
@@ -796,7 +852,7 @@ $('#quick').onsubmit = e => {
   const n = $('#qn').value.trim(); if (!n){ $('#qn').focus(); return; }
   addRock(n, +$('#qw').value); $('#qn').value = '';
 };
-$('#overlay').onclick = e => { if (e.target.id === 'overlay') closeSheet(); };
+$('#overlay').onclick = e => { if (e.target.id === 'overlay' && !lockSheet) closeSheet(); };
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && cur) closeSheet(); });
 /* ---------- installable app (only when opened as its own page, not inside Claude) ---------- */
 if (window.top === window && location.protocol.startsWith('http')){

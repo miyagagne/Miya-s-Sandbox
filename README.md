@@ -16,7 +16,7 @@ You can also double-click `index.html` to use it in a browser with no hosting. I
 
 ## Notes
 
-- Each person creates a username and password on first open. Accounts and gardens are stored on that device only, and each garden is encrypted with its owner’s password (no reset is possible). They are not synced between devices.
+- Each person creates a username and password on first open. Accounts and gardens are stored on that device only, and each garden is encrypted with its owner’s password (a saved recovery code can reset the password). They are not synced between devices.
 - Google Calendar and Notion sync only works when the page is opened inside Claude (the published artifact). The installed app shows the rest of the features without it.
 
 ## Same garden on every device (cloud accounts)
