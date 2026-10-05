@@ -13,7 +13,7 @@
 /* Layout: one calm column. A framed sand garden sits first, quick-add under it, and each rock opens a bottom sheet (centered dialog on desktop). */
 :root{
   --bg:#e8ebe4; --bg2:#dde2d7; --surface:#f6f7f3; --surface2:#eceee7; --ink:#1f2622; --muted:#667068; --line:#cbd1c5;
-  --accent:#4f6b3a; --accent-ink:#fff; --danger:#a23b3b; --google:#2f6db5; --notion:#5c5c58; --scrim:rgba(20,26,22,.5);
+  --accent:#4f6b3a; --accent-ink:#fff; --danger:#a23b3b; --google:#2f6db5; --notion:#5c5c58; --bright:#b4561b; --scrim:rgba(20,26,22,.5);
   --water:#0b2a30; --pond-ink:#eaf3ef; --glass:rgba(10,26,28,.58);
   --rock:"Fredoka","Nunito","Trebuchet MS",system-ui,sans-serif;
   --display:"Shippori Mincho","Hiragino Mincho ProN",Georgia,serif;
@@ -21,10 +21,10 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#121614; --bg2:#1a201c; --surface:#1d2420; --surface2:#252d28; --ink:#e9ede6; --muted:#98a39a; --line:#38423b;
-  --accent:#a5c27d; --accent-ink:#16200f; --danger:#e07a7a; --google:#7fb0ee; --notion:#b9b9b3; --scrim:rgba(0,0,0,.65);color-scheme:dark}}
+  --accent:#a5c27d; --accent-ink:#16200f; --danger:#e07a7a; --google:#7fb0ee; --notion:#b9b9b3; --bright:#f0a35e; --scrim:rgba(0,0,0,.65);color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#121614; --bg2:#1a201c; --surface:#1d2420; --surface2:#252d28; --ink:#e9ede6; --muted:#98a39a; --line:#38423b;
-  --accent:#a5c27d; --accent-ink:#16200f; --danger:#e07a7a; --google:#7fb0ee; --notion:#b9b9b3; --scrim:rgba(0,0,0,.65);color-scheme:dark}
+  --accent:#a5c27d; --accent-ink:#16200f; --danger:#e07a7a; --google:#7fb0ee; --notion:#b9b9b3; --bright:#f0a35e; --scrim:rgba(0,0,0,.65);color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0}
@@ -102,7 +102,7 @@ h1{font-size:1.5rem;letter-spacing:.02em}
 .day.today{border-color:var(--accent)}
 .day.sel{background:var(--bg2);box-shadow:inset 0 0 0 1px var(--muted)}
 .pip{display:block;font-size:.62rem;border-radius:4px;padding:0 4px;margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#fff;background:var(--ac)}
-.pip.g{background:var(--google)}.pip.n{background:var(--notion)}
+.pip.g{background:var(--google)}.pip.n{background:var(--notion)}.pip.b{background:var(--bright);color:#1a1209}.pip.t{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--ac)}
 .list{list-style:none;padding:0;margin:10px 0;display:flex;flex-direction:column;gap:6px}
 .list li{display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--surface2);border-radius:10px}
 .grow{flex:1;min-width:0;overflow-wrap:anywhere}
@@ -110,7 +110,9 @@ h1{font-size:1.5rem;letter-spacing:.02em}
 li.done .grow{text-decoration:line-through;opacity:.55}
 .x{background:none;color:var(--muted);padding:2px 8px;font-size:1.05rem;font-weight:400}
 .tag{font-size:.65rem;font-weight:700;letter-spacing:.06em;border-radius:5px;padding:1px 6px;color:#fff;flex:none}
-.tag.g{background:var(--google)}.tag.n{background:var(--notion)}
+.tag.g{background:var(--google)}.tag.n{background:var(--notion)}.tag.b{background:var(--bright);color:#1a1209}
+.gcalbar{display:flex;justify-content:flex-end;margin-bottom:8px}
+.bdot{flex:none}
 .sync-line{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.8rem;margin:8px 0}
 textarea{min-height:260px;resize:vertical;line-height:1.55}
 .note{color:var(--muted);font-size:.85rem}
@@ -253,6 +255,7 @@ header .ghost{color:var(--pond-ink);border-color:rgba(255,255,255,.35)}
     <nav id="rail" aria-label="Gardens"></nav>
     <div class="main">
       <div id="crumb" class="crumb" hidden></div>
+      <div class="gcalbar"><button class="ghost small" id="gcalbtn">📅 Garden calendar</button></div>
       <div class="garden-box"><svg id="garden" viewBox="0 0 700 700" role="img" aria-label="Sand garden"></svg></div>
       <p class="hint" id="hint">Drag a rock to move it. Tap it to open its calendar, notes and tasks.</p>
 
@@ -290,7 +293,7 @@ const hash = s => { let h = 2166136261; for (const c of s){ h ^= c.charCodeAt(0)
 const rng = seed => () => (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296;
 
 let state = null, user = null, dkey = null, saveT = null;
-function blank(name, weight, color){ return { id: uid(), name, weight, color, events: [], tasks: [], notes: '', links: { google: [], notion: [] } }; }
+function blank(name, weight, color){ return { id: uid(), name, weight, color, events: [], tasks: [], notes: '', links: { google: [], notion: [], brightspace: [] } }; }
 const seed = () => ({ active: 'main', gardens: [
   { id: 'main', name: 'My Activities', kind: 'rocks', rocks: [blank('Robotics Club', 8, COLORS[0]), blank('Piano', 5, COLORS[2]), blank('Book Club', 3, COLORS[3])] },
   { id: 'fun', name: 'Fun Things', kind: 'rocks', rocks: [] },
@@ -299,9 +302,9 @@ const seed = () => ({ active: 'main', gardens: [
 // older saves had one flat list of rocks; gardens wrap lists of rocks. state.rocks is always the open garden's rocks.
 function fixup(s){
   if (!s.gardens){ s.gardens = [{ id: 'main', name: 'My Garden', kind: 'rocks', rocks: s.rocks || [] }]; delete s.rocks; s.active = 'main'; }
-  s.gardens.forEach(g => { g.rocks = g.rocks || []; g.kind = g.kind || 'rocks'; g.rocks.forEach(r => { r.links = r.links || { google: [], notion: [] }; const i = OLD_COLORS.indexOf(r.color); if (i >= 0) r.color = COLORS[i]; }); });
+  s.gardens.forEach(g => { g.rocks = g.rocks || []; g.kind = g.kind || 'rocks'; g.rocks.forEach(r => { r.links = r.links || { google: [], notion: [] }; r.links.brightspace = r.links.brightspace || []; const i = OLD_COLORS.indexOf(r.color); if (i >= 0) r.color = COLORS[i]; }); });
   s.gardens.forEach(g => { if (g.parent && !s.gardens.some(p => p.id === g.parent.g)) delete g.parent; g.rocks.forEach(r => { if (r.gardenId && !s.gardens.some(x => x.id === r.gardenId)) delete r.gardenId; }); });
-  s.conns = s.conns || { google: [], notion: [] };
+  s.conns = s.conns || { google: [], notion: [] }; s.conns.brightspace = s.conns.brightspace || [];
   s.gardens.forEach(g => g.rocks.forEach(r => { for (const k of ['google', 'notion']) for (const l of r.links[k]){ if (!s.conns[k].some(c => (c.id || c.ds) === (l.id || l.ds))) s.conns[k].push(l.id ? { id: l.id, name: l.name } : { ds: l.ds, name: l.name }); } }));
   if (!s.gardens.some(g => g.id === s.active)) s.active = s.gardens[0].id;
   const open = () => s.gardens.find(g => g.id === s.active) || s.gardens[0];
@@ -378,7 +381,7 @@ function openBrief(name, onContinue){
   const greet = hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
   const count = d.events.length + d.tasks.length, bucket = count === 0 ? 'none' : count <= 3 ? 'light' : 'busy', pool = MSGS[bucket];
   const msg = pool[hash(d.today + name) % pool.length], late = d.tasks.filter(x => x.late).length;
-  const evRow = e => `<li><span class="bdot" style="background:${e.color || 'var(--muted)'}"></span><span class="btime">${e.time || 'All day'}</span><span class="grow">${e.src && e.src !== 'l' ? `<span class="tag ${e.src}">${e.src === 'g' ? 'GOOGLE' : 'NOTION'}</span> ` : ''}${esc(e.title)}${e.where ? `<small class="bwhere">${esc(e.where)}</small>` : ''}</span></li>`;
+  const evRow = e => `<li><span class="bdot" style="background:${e.color || 'var(--muted)'}"></span><span class="btime">${e.time || 'All day'}</span><span class="grow">${e.src && e.src !== 'l' ? `<span class="tag ${e.src}">${srcName(e.src)}</span> ` : ''}${esc(e.title)}${e.where ? `<small class="bwhere">${esc(e.where)}</small>` : ''}</span></li>`;
   const taskRow = (x, i) => `<li><input type="checkbox" data-bt="${i}" aria-label="Done"><span class="bdot" style="background:${x.color}"></span><span class="grow">${esc(x.t.title)}${x.late ? ' <span class="bover">OVERDUE</span>' : ''}<small class="bwhere">${esc(x.where)}</small></span></li>`;
   const cap = (arr, fn) => arr.slice(0, 10).map(fn).join('') + (arr.length > 10 ? `<li><span class="grow note">and ${arr.length - 10} more</span></li>` : '');
   el.innerHTML = `<div class="bcard" id="bcard">
@@ -396,10 +399,11 @@ function openBrief(name, onContinue){
   el.classList.add('show');
   el.querySelectorAll('[data-bt]').forEach(cb => cb.onchange = () => { const x = d.tasks[+cb.dataset.bt]; x.t.done = cb.checked; save(); cb.closest('li').classList.toggle('done', cb.checked); });
   // calendars connected to the account (Google, Notion) add to today's schedule
-  if (mcp && (state.conns.google.length || state.conns.notion.length)){
+  const mcpJobs = mcp ? state.conns.google.length + state.conns.notion.length : 0;
+  if (mcpJobs || state.conns.brightspace.length){
     const sync = $('#bsync'); sync.hidden = false;
     const s0 = new Date(); s0.setHours(0, 0, 0, 0); const e0 = new Date(s0.getTime() + 86400000), seen = new Set(), got = [];
-    const jobs = [...state.conns.google.map(c => fetchGoogle(c, s0, e0)), ...state.conns.notion.map(c => fetchNotion(c))];
+    const jobs = [...(mcp ? [...state.conns.google.map(c => fetchGoogle(c, s0, e0)), ...state.conns.notion.map(c => fetchNotion(c))] : []), ...state.conns.brightspace.map(c => fetchBright(c))];
     Promise.allSettled(jobs).then(rs => {
       rs.forEach(r => { if (r.status === 'fulfilled') r.value.filter(e => e.date === d.today && !seen.has(e.id)).forEach(e => { seen.add(e.id); got.push({ title: e.title, time: e.time, src: e.src, where: '', color: null }); }); });
       if (!$('#bev')) return;
@@ -792,7 +796,7 @@ function mergeGardens(old){
     if (g.parent) n.parent = { g: map[g.parent.g] || g.parent.g, r: g.parent.r };
     state.gardens.push(n);
   });
-  for (const k of ['google', 'notion']) for (const c of old.conns[k]) if (!state.conns[k].some(x => cid(x) === cid(c))) state.conns[k].push(c);
+  for (const k of ['google', 'notion', 'brightspace']) for (const c of old.conns[k]) if (!state.conns[k].some(x => cid(x) === cid(c))) state.conns[k].push(c);
   return old.gardens.length;
 }
 function devicesTab(host){
@@ -1215,22 +1219,128 @@ async function fetchNotion(link){
   return rows.map(notionRowToEvent).filter(Boolean);
 }
 async function syncRock(rk, force){
-  if (!mcp || !(rk.links.google.length || rk.links.notion.length)) return;
+  const useMcp = !!mcp && (rk.links.google.length || rk.links.notion.length), bs = rk.links.brightspace.length;
+  if (!useMcp && !bs) return;
   const gs = gridStart(month), ge = new Date(gs.getFullYear(), gs.getMonth(), gs.getDate() + 42);
   const key = rk.id + '|' + ymd(gs);
   const hit = syncCache.get(key);
   if (hit && !force && Date.now() - hit.at < 120000) return;
   syncCache.set(key, { events: hit ? hit.events : [], errors: [], at: Date.now(), busy: true });
   if (cur === rk && tab === 'calendar') calTab();
+  if (gcalHas(rk)) gardenCal();
   const events = [], errors = [];
   await Promise.all([
-    ...rk.links.google.map(l => fetchGoogle(l, gs, ge).then(e => events.push(...e)).catch(e => errors.push(`${l.name}: ${fail(e)}`))),
-    ...rk.links.notion.map(l => fetchNotion(l).then(e => events.push(...e)).catch(e => errors.push(`${l.name}: ${fail(e)}`)))
+    ...(mcp ? rk.links.google.map(l => fetchGoogle(l, gs, ge).then(e => events.push(...e)).catch(e => errors.push(`${l.name}: ${fail(e)}`))) : []),
+    ...(mcp ? rk.links.notion.map(l => fetchNotion(l).then(e => events.push(...e)).catch(e => errors.push(`${l.name}: ${fail(e)}`))) : []),
+    ...rk.links.brightspace.map(l => fetchBright(l, w => errors.push(w)).then(e => events.push(...e)).catch(e => errors.push(`${l.name}: ${e.message || 'Could not read this calendar.'}`)))
   ]);
   syncCache.set(key, { events, errors, at: Date.now(), busy: false });
   if (cur === rk && tab === 'calendar' && ymd(gridStart(month)) === ymd(gs)) calTab();
+  if (gcalHas(rk) && ymd(gridStart(month)) === ymd(gs)) gardenCal();
 }
 const synced = rk => syncCache.get(rk.id + '|' + ymd(gridStart(month))) || { events: [], errors: [], busy: false };
+
+
+/* ---------- Brightspace plugin: reads the calendar feed (.ics) Brightspace gives you ---------- */
+function unfoldIcs(t){ return t.replace(/\r\n|\r/g, '\n').replace(/\n[ \t]/g, '').split('\n'); }
+const unIcs = v => String(v || '').replace(/\\n/gi, ' ').replace(/\\([,;\\])/g, '$1').trim();
+function icsDate(val, params){
+  const m = /^(\d{4})(\d\d)(\d\d)(?:T(\d\d)(\d\d)(\d\d)?(Z)?)?$/.exec(val || ''); if (!m) return null;
+  if (m[4] === undefined) return { date: `${m[1]}-${m[2]}-${m[3]}`, time: '' };
+  if (m[7]){ const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0))); return { date: ymd(d), time: hm(d) }; }
+  return { date: `${m[1]}-${m[2]}-${m[3]}`, time: `${m[4]}:${m[5]}` };
+}
+function parseIcs(text){
+  const out = [], seen = new Set(); let ev = null;
+  for (const line of unfoldIcs(String(text || ''))){
+    if (/^BEGIN:(VEVENT|VTODO)/i.test(line)){ ev = {}; continue; }
+    if (/^END:(VEVENT|VTODO)/i.test(line)){
+      if (ev){
+        const dt = icsDate(ev.DTSTART || ev.DUE, ev), id = 'b' + (ev.UID || ev.SUMMARY + (ev.DTSTART || ev.DUE));
+        if (dt && !seen.has(id + dt.date)){ seen.add(id + dt.date); out.push({ id: id + '|' + dt.date, title: unIcs(ev.SUMMARY) || '(no title)', date: dt.date, time: dt.time, src: 'b', url: /^https?:\/\//.test(ev.URL || '') ? ev.URL : '' }); }
+      }
+      ev = null; continue;
+    }
+    if (!ev) continue;
+    const i = line.indexOf(':'); if (i < 0) continue;
+    const name = line.slice(0, i).split(';')[0].toUpperCase(); if (!(name in ev)) ev[name] = line.slice(i + 1);
+  }
+  return out;
+}
+async function fetchBright(link, warn){
+  const c = state.conns.brightspace.find(x => x.id === link.id); if (!c) throw new Error('This Brightspace calendar was removed.');
+  if (c.url && !(c.fetchedAt && Date.now() - c.fetchedAt < 120000)){
+    try {
+      const res = await fetch(c.url.replace(/^webcal:/i, 'https:'), { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const t = await res.text(); if (!/BEGIN:VCALENDAR/i.test(t)) throw new Error('not a calendar feed');
+      c.ics = t; c.fetchedAt = Date.now(); save();
+    } catch(e){
+      if (!c.ics) throw new Error('Could not load the feed (the browser or Brightspace blocked it). Add the calendar from a downloaded .ics file instead.');
+      if (warn && !c.warned){ c.warned = true; warn(`${c.name}: could not refresh from Brightspace, showing the last saved copy.`); }
+    }
+  }
+  return parseIcs(c.ics || '');
+}
+
+/* ---------- garden calendar: every rock in a garden, one month grid ---------- */
+let gcal = null;
+function gcalRocks(){
+  const g = gcal && state.gardens.find(x => x.id === gcal.gid); if (!g) return [];
+  const ids = [g.id, ...descendants(g.id)], out = [];
+  ids.forEach(id => { const x = state.gardens.find(y => y.id === id); if (x && x.kind !== 'photos') x.rocks.forEach(r => out.push({ r, gname: id === g.id ? '' : x.name })); });
+  return out;
+}
+const gcalHas = rk => !!gcal && gcalRocks().some(x => x.r === rk);
+function openGardenCal(){
+  const g = garden(); if (viewing || g.kind === 'photos') return;
+  gcal = { gid: g.id }; cur = null; month = new Date(); selDay = ymd(new Date());
+  $('#overlay').classList.add('open'); gardenCal(); gcalRocks().forEach(x => syncRock(x.r));
+}
+function gardenCal(){
+  const g = state.gardens.find(x => x.id === gcal.gid); if (!g) return;
+  const y = month.getFullYear(), m = month.getMonth(), start = gridStart(month), today = ymd(new Date()), rocks = gcalRocks(), seen = new Set(), all = [];
+  let busy = false, linked = 0; const errors = new Set();
+  rocks.forEach(({ r, gname }) => {
+    const sy = synced(r); busy = busy || !!sy.busy; (sy.errors || []).forEach(e => errors.add(e));
+    linked += r.links.google.length + r.links.notion.length + r.links.brightspace.length;
+    const base = { rid: r.id, rock: r.name, gname, color: r.color };
+    r.events.forEach(e => all.push({ ...e, ...base, src: 'l' }));
+    r.tasks.filter(t => t.due && !t.done).forEach(t => all.push({ id: 't' + t.id, title: t.title, date: t.due, time: '', src: 't', ...base }));
+    sy.events.forEach(e => { if (!seen.has(e.id)) { seen.add(e.id); all.push({ ...e, ...base }); } });
+  });
+  const byTime = (a, b) => (a.time || '').localeCompare(b.time || '');
+  const pip = e => `<span class="pip ${e.src === 'l' ? '' : e.src}" style="--ac:${e.color}">${esc(e.title)}</span>`;
+  let cells = '';
+  for (let i = 0; i < 42; i++){
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i), k = ymd(d), evs = all.filter(e => e.date === k).sort(byTime);
+    cells += `<div class="day ${d.getMonth() !== m ? 'out' : ''} ${k === today ? 'today' : ''} ${k === selDay ? 'sel' : ''}" data-d="${k}" style="--ac:var(--accent)">${d.getDate()}${evs.slice(0, 2).map(pip).join('')}${evs.length > 2 ? `<span class="pip" style="background:var(--muted)">+${evs.length - 2}</span>` : ''}</div>`;
+  }
+  const row = e => `<li><span class="bdot" style="background:${e.color}"></span><span class="grow">${e.src === 't' ? '<span class="tag" style="background:var(--muted)">TASK</span> ' : (e.src !== 'l' ? `<span class="tag ${e.src}">${srcName(e.src)}</span> ` : '')}${esc(e.title)}<small>${e._up ? e.date + ' · ' : ''}${e.time || 'All day'} · ${esc(e.rock)}${e.gname ? ' · ' + esc(e.gname) : ''}</small></span>${e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener" class="note">Open ↗</a>` : ''}<button class="ghost small" data-rock="${e.rid}">Rock</button></li>`;
+  const dayEvs = all.filter(e => e.date === selDay).sort(byTime);
+  const up = all.filter(e => e.date >= today).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || ''))).slice(0, 6);
+  $('#sheet').innerHTML = `<div class="sheet-head"><h2>${esc(g.name)} calendar</h2><button class="ghost small" id="gcclose">Close</button></div>
+    <div class="cal-nav"><button class="ghost small" id="prev" aria-label="Previous month">‹</button><strong>${month.toLocaleString(undefined, { month: 'long', year: 'numeric' })}</strong><button class="ghost small" id="next" aria-label="Next month">›</button></div>
+    <div class="grid">${['S','M','T','W','T','F','S'].map(d => `<div class="dow">${d}</div>`).join('')}${cells}</div>
+    ${linked ? `<div class="sync-line">${busy ? 'Syncing…' : 'Up to date'} <button class="ghost small" id="gcresync" ${busy ? 'disabled' : ''}>Refresh</button></div>` : ''}
+    ${[...errors].map(e => `<div class="msg err">${esc(e)}</div>`).join('')}
+    <h3 style="margin-top:14px">${new Date(selDay + 'T00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</h3>
+    <ul class="list">${dayEvs.map(row).join('') || '<li><span class="grow note">Nothing scheduled.</span></li>'}</ul>
+    ${up.length ? `<h3 style="margin-top:18px">Coming up</h3><ul class="list">${up.map(e => row({ ...e, _up: true })).join('')}</ul>` : ''}
+    <p class="note">Shows every rock${g.rocks.some(r => r.gardenId) ? ' (and the gardens inside it)' : ''}, plus task due dates. To add or edit an event, open its rock.</p>`;
+  $('#gcclose').onclick = closeSheet;
+  $('#prev').onclick = () => { month = new Date(y, m - 1, 1); gardenCal(); rocks.forEach(x => syncRock(x.r)); };
+  $('#next').onclick = () => { month = new Date(y, m + 1, 1); gardenCal(); rocks.forEach(x => syncRock(x.r)); };
+  document.querySelectorAll('.day').forEach(d => d.onclick = () => { selDay = d.dataset.d; gardenCal(); });
+  const rs = $('#gcresync'); if (rs) rs.onclick = () => rocks.forEach(x => syncRock(x.r, true));
+  document.querySelectorAll('[data-rock]').forEach(b => b.onclick = () => {
+    const hit = rocks.find(x => x.r.id === b.dataset.rock); if (!hit) return;
+    gcal = null;
+    const gid = state.gardens.find(x => x.rocks.includes(hit.r)).id;
+    if (gid !== state.active){ state.active = gid; render(); refreshChrome(); }
+    openRock(hit.r.id);
+  });
+}
 
 /* ---------- sheet ---------- */
 let cur = null, tab = 'calendar', month = new Date(), selDay = ymd(new Date());
@@ -1240,7 +1350,7 @@ function openRock(id, t){
   tab = t || (cur.photo ? 'photo' : 'calendar'); month = new Date(); selDay = ymd(new Date());
   $('#overlay').classList.add('open'); sheet(); syncRock(cur);
 }
-function closeSheet(){ $('#overlay').classList.remove('open'); cur = null; render(); save(); if (state) refreshChrome(); }
+function closeSheet(){ $('#overlay').classList.remove('open'); cur = null; gcal = null; render(); save(); if (state) refreshChrome(); }
 function sheet(){
   const r = cur; if (!r) return;
   $('#sheet').innerHTML = `
@@ -1265,12 +1375,12 @@ function calTab(){
   }
   const dayEvs = all.filter(e => e.date === selDay).sort(byTime);
   const up = all.filter(e => e.date >= today).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || ''))).slice(0, 5);
-  const li = e => `<li><span class="grow">${e.src !== 'l' ? `<span class="tag ${e.src}">${e.src === 'g' ? 'GOOGLE' : 'NOTION'}</span> ` : ''}${esc(e.title)}<small>${e.date === selDay && e.date !== undefined && !e._up ? '' : e.date + ' · '}${e.time || 'All day'}</small></span>${e.src === 'l' ? `<button class="x" data-del="${e.id}" aria-label="Delete">✕</button>` : (e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener" class="note">Open ↗</a>` : '')}</li>`;
-  const linked = r.links.google.length + r.links.notion.length;
+  const li = e => `<li><span class="grow">${e.src !== 'l' ? `<span class="tag ${e.src}">${srcName(e.src)}</span> ` : ''}${esc(e.title)}<small>${e.date === selDay && e.date !== undefined && !e._up ? '' : e.date + ' · '}${e.time || 'All day'}</small></span>${e.src === 'l' ? `<button class="x" data-del="${e.id}" aria-label="Delete">✕</button>` : (e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener" class="note">Open ↗</a>` : '')}</li>`;
+  const linked = r.links.google.length + r.links.notion.length + r.links.brightspace.length;
   $('#body').innerHTML = `
     <div class="cal-nav"><button class="ghost small" id="prev" aria-label="Previous month">‹</button><strong>${month.toLocaleString(undefined, { month: 'long', year: 'numeric' })}</strong><button class="ghost small" id="next" aria-label="Next month">›</button></div>
     <div class="grid">${['S','M','T','W','T','F','S'].map(d => `<div class="dow">${d}</div>`).join('')}${cells}</div>
-    ${linked ? `<div class="sync-line">${sy.busy ? 'Syncing…' : 'Synced ' + (sy.at ? new Date(sy.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '')} <button class="ghost small" id="resync" ${sy.busy ? 'disabled' : ''}>Refresh</button></div>` : `<div class="sync-line">Want your Google or Notion calendar here? <button class="ghost small" id="goconnect">Connect</button></div>`}
+    ${linked ? `<div class="sync-line">${sy.busy ? 'Syncing…' : 'Synced ' + (sy.at ? new Date(sy.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '')} <button class="ghost small" id="resync" ${sy.busy ? 'disabled' : ''}>Refresh</button></div>` : `<div class="sync-line">Want your Google, Notion or Brightspace calendar here? <button class="ghost small" id="goconnect">Connect</button></div>`}
     ${(sy.errors || []).map(e => `<div class="msg err">${esc(e)}</div>`).join('')}
     <h3 style="margin-top:14px">${new Date(selDay + 'T00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</h3>
     <ul class="list">${dayEvs.map(li).join('') || '<li><span class="grow note">Nothing scheduled.</span></li>'}</ul>
@@ -1316,24 +1426,28 @@ let gcals = null, gmsg = '', nstate = { msg: '', results: [], sources: [], busy:
 const openConn = new Set();
 const allRocks = () => state.gardens.filter(g => g.kind !== 'photos').flatMap(g => g.rocks.map(r => ({ r, g })));
 const cid = c => c.id || c.ds;
+const connRef = (kind, c) => kind === 'notion' ? { ds: c.ds, name: c.name } : { id: c.id, name: c.name };
+const SRC = { g: ['GOOGLE', 'google'], n: ['NOTION', 'notion'], b: ['BRIGHTSPACE', 'brightspace'] };
+const srcName = k => (SRC[k] || ['', ''])[0];
+const KIND = { google: ['g', 'GOOGLE'], notion: ['n', 'NOTION'], brightspace: ['b', 'BRIGHTSPACE'] };
 function hasLink(rk, kind, c){ return rk.links[kind].some(l => cid(l) === cid(c)); }
 function setLink(rk, kind, c, on){
   const has = hasLink(rk, kind, c);
-  if (on && !has) rk.links[kind].push(kind === 'google' ? { id: c.id, name: c.name } : { ds: c.ds, name: c.name });
+  if (on && !has) rk.links[kind].push(connRef(kind, c));
   if (!on && has) rk.links[kind] = rk.links[kind].filter(l => cid(l) !== cid(c));
   clearSync(rk);
 }
-function addConn(kind, c){ if (!state.conns[kind].some(x => cid(x) === cid(c))) state.conns[kind].push(kind === 'google' ? { id: c.id, name: c.name } : { ds: c.ds, name: c.name }); save(); }
+function addConn(kind, c){ if (!state.conns[kind].some(x => cid(x) === cid(c))) state.conns[kind].push(kind === 'brightspace' ? c : connRef(kind, c)); save(); }
 function dropConn(kind, c){ state.conns[kind] = state.conns[kind].filter(x => cid(x) !== cid(c)); allRocks().forEach(({ r }) => setLink(r, kind, c, false)); save(); }
 
 // per-rock: choose which connected calendars show in this rock
 function syncTab(){
-  const r = cur, all = [...state.conns.google.map(c => ['google', c]), ...state.conns.notion.map(c => ['notion', c])];
+  const r = cur, all = [...state.conns.google.map(c => ['google', c]), ...state.conns.notion.map(c => ['notion', c]), ...state.conns.brightspace.map(c => ['brightspace', c])];
   $('#body').innerHTML = all.length
     ? `<p class="note" style="margin-top:0">Choose which of your connected calendars show up in ${esc(r.name)}.</p>
-       <div class="pick">${all.map(([k, c]) => `<label><input type="checkbox" data-t="${k}|${esc(cid(c))}" ${hasLink(r, k, c) ? 'checked' : ''}><span class="tag ${k === 'google' ? 'g' : 'n'}">${k === 'google' ? 'GOOGLE' : 'NOTION'}</span><span class="grow">${esc(c.name)}</span></label>`).join('')}</div>
+       <div class="pick">${all.map(([k, c]) => `<label><input type="checkbox" data-t="${k}|${esc(cid(c))}" ${hasLink(r, k, c) ? 'checked' : ''}><span class="tag ${KIND[k][0]}">${KIND[k][1]}</span><span class="grow">${esc(c.name)}</span></label>`).join('')}</div>
        <button class="ghost" id="manage">Manage connections</button>`
-    : `<div class="msg">No calendars are connected yet. Add Google Calendar or Notion once in your Account, then choose which rocks show them.</div><button id="manage">Open Account → Connections</button>`;
+    : `<div class="msg">No calendars are connected yet. Add Google Calendar, Notion or Brightspace once in your Account, then choose which rocks show them.</div><button id="manage">Open Account → Connections</button>`;
   document.querySelectorAll('[data-t]').forEach(cb => cb.onchange = () => {
     const [k, id] = cb.dataset.t.split('|'), c = state.conns[k].find(x => cid(x) === id); if (!c) return;
     setLink(r, k, c, cb.checked); save();
@@ -1342,26 +1456,82 @@ function syncTab(){
 }
 
 // account center: add Google calendars and Notion databases, and pick which rocks show each
+const connRockList = (kind, c) => allRocks().map(({ r, g }) => `<label><input type="checkbox" data-lk="${kind}|${esc(cid(c))}|${r.id}" ${hasLink(r, kind, c) ? 'checked' : ''}><span class="grow">${esc(r.name)} <small class="note">${esc(g.name)}</small></span></label>`).join('') || '<div class="note">Make a rock first, then choose where this calendar shows.</div>';
+const connRow = (kind, c, extra) => { const key = kind + '|' + cid(c), n = allRocks().filter(({ r }) => hasLink(r, kind, c)).length;
+  return `<li style="flex-direction:column;align-items:stretch;gap:8px"><div class="row"><span class="tag ${KIND[kind][0]}">${KIND[kind][1]}</span><span class="grow" style="flex:1 1 130px">${esc(c.name)}<small>Shown in ${n} rock${n === 1 ? '' : 's'}</small></span>${extra || ''}<button class="ghost small" data-cexp="${esc(key)}">${openConn.has(key) ? 'Done' : 'Choose rocks'}</button><button class="ghost small" data-crm="${esc(key)}">Remove</button></div>${openConn.has(key) ? `<div class="pick">${connRockList(kind, c)}</div>` : ''}</li>`; };
+// shared handlers for the expand / remove / choose-rocks buttons in a connections list
+function wireConn(host, redraw){
+  const find = key => { const [k, id] = key.split('|'); return [k, state.conns[k].find(x => cid(x) === id)]; };
+  host.querySelectorAll('[data-cexp]').forEach(b => b.onclick = () => { const k = b.dataset.cexp; openConn.has(k) ? openConn.delete(k) : openConn.add(k); redraw(); });
+  host.querySelectorAll('[data-crm]').forEach(b => b.onclick = () => {
+    if (b.dataset.sure !== '1'){ b.dataset.sure = '1'; b.textContent = 'Tap again'; return; }
+    const [k, c] = find(b.dataset.crm); if (c){ dropConn(k, c); openConn.delete(b.dataset.crm); } redraw();
+  });
+  host.querySelectorAll('[data-lk]').forEach(cb => cb.onchange = () => {
+    const [k, id, rid] = cb.dataset.lk.split('|'), c = state.conns[k].find(x => cid(x) === id), hit = allRocks().find(x => x.r.id === rid);
+    if (c && hit){ setLink(hit.r, k, c, cb.checked); save(); }
+    const sm = cb.closest('li').querySelector('small'), n = allRocks().filter(({ r }) => hasLink(r, k, c)).length; if (sm) sm.textContent = `Shown in ${n} rock${n === 1 ? '' : 's'}`;
+  });
+}
+let bsMsg = null;
+function brightConnect(host){
+  host.innerHTML = `<h3>Brightspace</h3>
+    <ul class="list">${state.conns.brightspace.map(c => connRow('brightspace', c, `<button class="ghost small" data-brf="${esc(c.id)}">Refresh</button>`)).join('') || '<li><span class="grow note">None connected yet.</span></li>'}</ul>
+    ${bsMsg ? `<div class="msg ${bsMsg.err ? 'err' : ''}">${esc(bsMsg.t)}</div>` : ''}
+    <p class="note" style="margin-top:0">In Brightspace open <strong>Calendar → Settings (gear) → Subscribe</strong>, turn on the feed, and copy its link. Paste it below. Your assignment and quiz due dates then show on the rocks you choose.</p>
+    <label for="bname">Name</label><input id="bname" placeholder="School Brightspace" maxlength="40">
+    <label for="burl">Calendar feed link</label><input id="burl" placeholder="https://… or webcal://…" autocapitalize="none" spellcheck="false">
+    <label for="bfile">…or a downloaded calendar file (.ics)</label><input id="bfile" type="file" accept=".ics,text/calendar">
+    <div class="row" style="margin-top:10px"><button id="badd">Add Brightspace</button></div>
+    <p class="note">Some schools’ Brightspace blocks the browser from reading the link directly. If it says so, download the calendar file instead. A file is a snapshot, so add it again to update it. The feed link is a private key to your calendar, so keep it to yourself.</p>`;
+  const say = (t, err) => { bsMsg = t ? { t, err } : null; brightConnect(host); };
+  wireConn(host, () => brightConnect(host));
+  host.querySelectorAll('[data-brf]').forEach(b => b.onclick = async () => {
+    const c = state.conns.brightspace.find(x => x.id === b.dataset.brf); if (!c) return;
+    b.disabled = true; c.fetchedAt = 0; c.warned = false;
+    try { const n = (await fetchBright(c)).length; allRocks().forEach(({ r }) => clearSync(r)); say(c.url ? `Refreshed “${c.name}”: ${n} items.` : `“${c.name}” came from a file. Add the file again to update it.`, !c.url); }
+    catch(e){ say(e.message, true); }
+  });
+  $('#badd').onclick = async () => {
+    const name = $('#bname').value.trim() || 'Brightspace', url = $('#burl').value.trim(), file = $('#bfile').files[0];
+    if (!url && !file) return say('Paste the feed link or choose a calendar file.', true);
+    const c = { id: uid(), name, url: file ? '' : url, ics: '' };
+    try {
+      if (file) c.ics = await file.text();
+      else {
+        if (!/^(https?|webcal):\/\//i.test(url)) return say('That does not look like a link. It should start with https:// or webcal://', true);
+        const res = await fetch(url.replace(/^webcal:/i, 'https:'), { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        c.ics = await res.text(); c.fetchedAt = Date.now();
+      }
+    } catch(e){ return say('Could not read the feed link from here (' + (e.message || 'blocked') + '). Download the calendar file from Brightspace and choose it above instead.', true); }
+    if (!/BEGIN:VCALENDAR/i.test(c.ics)) return say('That does not look like a calendar (.ics) file.', true);
+    const n = parseIcs(c.ics).length;
+    addConn('brightspace', c); openConn.add('brightspace|' + c.id);
+    bsMsg = { t: `Added “${name}” with ${n} item${n === 1 ? '' : 's'}. Choose which rocks show it.` }; brightConnect(host);
+  };
+}
 function connectTab(host){
+  host.innerHTML = '<div id="cbright"></div><div id="cmcp" style="margin-top:22px"></div>';
+  brightConnect($('#cbright')); mcpConnect($('#cmcp'));
+}
+function mcpConnect(host){
   if (!mcp){
     host.innerHTML = mcpState === 'loading' ? `<div class="msg">Connecting…</div>`
-      : `<div class="msg err">Connections to Google Calendar and Notion only work on the Claude artifact page (claude.ai/artifact/…), opened while signed in as the owner. They aren’t available on GitHub Pages or the installed app.</div><button class="ghost" id="mretry">Try again</button>`;
-    const rt = $('#mretry'); if (rt) rt.onclick = () => { initMcp(); connectTab(host); };
+      : `<div class="msg err">Google Calendar and Notion only work on the Claude artifact page (claude.ai/artifact/…), opened while signed in as the owner. They aren’t available on GitHub Pages or the installed app (Brightspace above works everywhere).</div><button class="ghost" id="mretry">Try again</button>`;
+    const rt = $('#mretry'); if (rt) rt.onclick = () => { initMcp(); mcpConnect(host); };
     return;
   }
-  const rockList = (kind, c) => allRocks().map(({ r, g }) => `<label><input type="checkbox" data-lk="${kind}|${esc(cid(c))}|${r.id}" ${hasLink(r, kind, c) ? 'checked' : ''}><span class="grow">${esc(r.name)} <small class="note">${esc(g.name)}</small></span></label>`).join('') || '<div class="note">Make a rock first, then choose where this calendar shows.</div>';
-  const row = (kind, c) => { const key = kind + '|' + cid(c), n = allRocks().filter(({ r }) => hasLink(r, kind, c)).length;
-    return `<li style="flex-direction:column;align-items:stretch;gap:8px"><div class="row" style="flex-wrap:nowrap"><span class="tag ${kind === 'google' ? 'g' : 'n'}">${kind === 'google' ? 'GOOGLE' : 'NOTION'}</span><span class="grow">${esc(c.name)}<small>Shown in ${n} rock${n === 1 ? '' : 's'}</small></span><button class="ghost small" data-cexp="${esc(key)}">${openConn.has(key) ? 'Done' : 'Choose rocks'}</button><button class="ghost small" data-crm="${esc(key)}">Remove</button></div>${openConn.has(key) ? `<div class="pick">${rockList(kind, c)}</div>` : ''}</li>`; };
   host.innerHTML = `
     <div class="msg" id="mstatus">Checking connections…</div>
     <div class="row" style="margin-bottom:10px"><button class="small" id="mallow">Allow access</button><button class="ghost small" id="mcheck">Check again</button></div>
     <h3>Google Calendar</h3>
-    <ul class="list">${state.conns.google.map(c => row('google', c)).join('') || '<li><span class="grow note">None connected yet.</span></li>'}</ul>
+    <ul class="list">${state.conns.google.map(c => connRow('google', c)).join('') || '<li><span class="grow note">None connected yet.</span></li>'}</ul>
     <button class="ghost" id="gload">${gcals ? 'Reload my calendars' : 'Add a Google calendar'}</button>
     ${gmsg ? `<div class="msg err">${esc(gmsg)}</div>` : ''}
     ${gcals ? `<div class="pick">${gcals.map(c => `<label><input type="checkbox" data-gc="${esc(c.id)}" ${state.conns.google.some(x => x.id === c.id) ? 'checked' : ''}><span class="grow">${esc(c.summary || c.id)}</span></label>`).join('') || '<div class="note">No calendars found.</div>'}</div>` : ''}
     <h3 style="margin-top:22px">Notion</h3>
-    <ul class="list">${state.conns.notion.map(c => row('notion', c)).join('') || '<li><span class="grow note">None connected yet.</span></li>'}</ul>
+    <ul class="list">${state.conns.notion.map(c => connRow('notion', c)).join('') || '<li><span class="grow note">None connected yet.</span></li>'}</ul>
     <div class="row"><input id="nq" placeholder="Search Notion, or paste a page or database link" aria-label="Notion search"><button class="ghost" id="ngo" ${nstate.busy ? 'disabled' : ''}>${nstate.busy ? 'Working…' : 'Find'}</button></div>
     <p class="note">Pick a database that has a date column, like a deadlines or events table.</p>
     ${nstate.msg ? `<div class="msg ${nstate.err ? 'err' : ''}">${esc(nstate.msg)}</div>` : ''}
@@ -1380,17 +1550,7 @@ function connectTab(host){
   check();
   $('#mcheck').onclick = check;
   $('#mallow').onclick = async () => { try { if (perms) await perms.request(['mcp:' + GOOGLE, 'mcp:' + NOTION]); else await mcp.listTools(); } catch(e){} check(); };
-  const find = key => { const [k, id] = key.split('|'); return [k, state.conns[k].find(x => cid(x) === id)]; };
-  host.querySelectorAll('[data-cexp]').forEach(b => b.onclick = () => { const k = b.dataset.cexp; openConn.has(k) ? openConn.delete(k) : openConn.add(k); connectTab(host); });
-  host.querySelectorAll('[data-crm]').forEach(b => b.onclick = () => {
-    if (b.dataset.sure !== '1'){ b.dataset.sure = '1'; b.textContent = 'Tap again'; return; }
-    const [k, c] = find(b.dataset.crm); if (c){ dropConn(k, c); openConn.delete(b.dataset.crm); } connectTab(host);
-  });
-  host.querySelectorAll('[data-lk]').forEach(cb => cb.onchange = () => {
-    const [k, id, rid] = cb.dataset.lk.split('|'), c = state.conns[k].find(x => cid(x) === id), hit = allRocks().find(x => x.r.id === rid);
-    if (c && hit){ setLink(hit.r, k, c, cb.checked); save(); }
-    const sm = cb.closest('li').querySelector('small'), n = allRocks().filter(({ r }) => hasLink(r, k, c)).length; if (sm) sm.textContent = `Shown in ${n} rock${n === 1 ? '' : 's'}`;
-  });
+  wireConn(host, () => mcpConnect(host));
   $('#gload').onclick = async () => {
     gmsg = ''; $('#gload').disabled = true; $('#gload').textContent = 'Loading…';
     try {
@@ -1398,16 +1558,16 @@ function connectTab(host){
       for (let i = 0; i < 4; i++){ const p = await tool(GOOGLE, 'list_calendars', token ? { pageSize: 250, pageToken: token } : { pageSize: 250 }); out.push(...(p.calendars || [])); token = p.nextPageToken; if (!token) break; }
       gcals = out;
     } catch(e){ gmsg = fail(e); }
-    connectTab(host);
+    mcpConnect(host);
   };
   host.querySelectorAll('[data-gc]').forEach(cb => cb.onchange = () => {
     const c = gcals.find(x => x.id === cb.dataset.gc), conn = { id: c.id, name: c.summary || c.id };
     if (cb.checked) addConn('google', conn); else dropConn('google', conn);
-    connectTab(host);
+    mcpConnect(host);
   });
   const go = async () => {
     const q = $('#nq').value.trim(); if (!q) return;
-    nstate = { msg: '', results: [], sources: [], busy: true }; connectTab(host);
+    nstate = { msg: '', results: [], sources: [], busy: true }; mcpConnect(host);
     try {
       if (/^https?:\/\//.test(q)) await notionOpen(q);
       else {
@@ -1416,17 +1576,17 @@ function connectTab(host){
         nstate.msg = nstate.results.length ? '' : 'Nothing found. Try another word, or paste a link.';
       }
     } catch(e){ nstate.msg = fail(e); nstate.err = true; }
-    nstate.busy = false; connectTab(host);
+    nstate.busy = false; mcpConnect(host);
   };
   $('#ngo').onclick = go; $('#nq').onkeydown = e => { if (e.key === 'Enter') go(); };
   host.querySelectorAll('[data-npick]').forEach(b => b.onclick = async () => {
-    const x = nstate.results[+b.dataset.npick]; nstate = { msg: '', results: [], sources: [], busy: true }; connectTab(host);
+    const x = nstate.results[+b.dataset.npick]; nstate = { msg: '', results: [], sources: [], busy: true }; mcpConnect(host);
     try { await notionOpen(x.url); } catch(e){ nstate.msg = fail(e); nstate.err = true; }
-    nstate.busy = false; connectTab(host);
+    nstate.busy = false; mcpConnect(host);
   });
   host.querySelectorAll('[data-nlink]').forEach(b => b.onclick = () => {
     const x = nstate.sources[+b.dataset.nlink]; addConn('notion', x);
-    nstate = { msg: `Added “${x.name}”. Choose which rocks show it.`, results: [], sources: [], busy: false }; openConn.add('notion|' + x.ds); connectTab(host);
+    nstate = { msg: `Added “${x.name}”. Choose which rocks show it.`, results: [], sources: [], busy: false }; openConn.add('notion|' + x.ds); mcpConnect(host);
   });
 }
 async function notionOpen(url){
@@ -1465,6 +1625,7 @@ function settingsTab(){
 /* ---------- gardens (side tabs) ---------- */
 function refreshChrome(){
   const g = garden(), photos = g.kind === 'photos';
+  $('#gcalbtn').parentElement.hidden = !!viewing || photos; $('#gcalbtn').onclick = openGardenCal;
   $('#quick').hidden = !!viewing || photos; $('#photobar').hidden = !!viewing || !photos; $('#add').hidden = !!viewing;
   $('#add').textContent = photos ? '+ Add photos' : '+ New rock';
   $('#hint').textContent = photos ? 'Drag a photo to move it. Tap it to see it bigger and add a caption.' : 'Drag a rock to move it. Tap it to open its calendar, notes and tasks.';

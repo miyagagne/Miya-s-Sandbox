@@ -19,6 +19,11 @@ You can also double-click `index.html` to use it in a browser with no hosting. I
 - Each person creates a username and password on first open. Accounts and gardens are stored on that device only, and each garden is encrypted with its owner’s password (a saved recovery code can reset the password). They are not synced between devices.
 - Google Calendar and Notion sync only works when the page is opened inside Claude (the published artifact). The installed app shows the rest of the features without it.
 
+## Garden calendar and Brightspace
+
+- **Garden calendar:** the **📅 Garden calendar** button above each garden opens one month view of every rock in that garden (and gardens expanded from its rocks): events, task due dates and any synced calendars. Tap a day to list it, or **Rock** to jump to that rock.
+- **Brightspace:** **Account → Connections → Brightspace**. In Brightspace go to Calendar → Settings (gear) → Subscribe and copy the feed link, then paste it in. Choose which rocks show it. Unlike Google/Notion this works in the installed app too. If your school's Brightspace blocks the browser from reading the link, download the calendar as an `.ics` file and add that instead (it is a snapshot; add it again to update).
+
 ## Same garden on every device (cloud accounts)
 
 Out of the box, accounts live on one device. To sync across devices, connect a free Supabase project:
