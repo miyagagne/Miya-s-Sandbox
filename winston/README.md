@@ -10,5 +10,5 @@ Create an OAuth Web client ID at console.cloud.google.com (APIs & Services > Cre
 ## What is and isn't real yet
 - Real: profile, live-class highlighting (mic speech recognition or typed lines), pop-out widget (desktop Chrome/Edge), high-paw popup, step-by-step recaps, practice questions (multiple choice, fill-in, open answer; case-insensitive; walkthrough earns coins), levels, shop, career linking.
 - Local only: data is stored in the browser. Friends use shareable codes (a snapshot), not live sync.
-- Not AI: "Ask Winston" finds the best matches in your class materials and what the teacher said. Open-answer grading is keyword-based. A real AI backend would be the next upgrade.
+- AI: on the published Claude page (the `sample` artifact capability), **Ask Winston** is answered by Claude and recaps are written by Claude as step-by-step explanations, with chat memory. In the standalone file there is no Claude to ask, so Ask Winston falls back to searching your notes and recaps are built from your materials. Open-answer grading is still keyword-based.
 - Materials are entered as `term :: explanation` lines; uploading slides/PDFs is not built yet.
