@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1f3a5f">
+<title>BUAD 112 Study</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#1b2430;--mute:#667085;--line:#dde3ee;--brand:#1f3a5f;--ok:#1a8f5a;--bad:#c0392b;--acc:#e8eef8}
+@media(prefers-color-scheme:dark){:root{--bg:#10151d;--card:#192230;--ink:#e8edf5;--mute:#93a0b4;--line:#2a374a;--brand:#7fa8e0;--acc:#223049;--ok:#47c98a;--bad:#ef7b6d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,sans-serif}
+header{background:var(--brand);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px}
+@media(prefers-color-scheme:dark){header{color:#10151d}}
+header h1{font-size:18px;margin:0;flex:1}
+nav{display:flex;gap:4px;padding:8px 12px;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--line)}
+nav button{border:0;background:none;color:var(--mute);padding:8px 14px;border-radius:8px;font:inherit;cursor:pointer;white-space:nowrap}
+nav button.on{background:var(--acc);color:var(--ink);font-weight:600}
+main{max-width:640px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+h2{margin:0 0 10px;font-size:18px}
+button.p,button.s{font:inherit;border-radius:10px;padding:10px 16px;cursor:pointer;border:1px solid var(--brand)}
+button.p{background:var(--brand);color:#fff}
+@media(prefers-color-scheme:dark){button.p{color:#10151d}}
+button.s{background:none;color:var(--brand)}
+button.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+button.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+input,select,textarea{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);margin:4px 0 10px}
+textarea{min-height:90px}
+label{font-size:13px;color:var(--mute)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.flash{min-height:200px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:22px;cursor:pointer;user-select:none}
+.flash small{display:block;color:var(--mute);font-size:13px;margin-top:10px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+.opt.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,var(--card))}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,var(--card))}
+.bar{height:10px;background:var(--acc);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok)}
+.stat{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)}
+.mute{color:var(--mute);font-size:14px}
+.item{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line)}
+.item div{flex:1}
+.tag{font-size:12px;background:var(--acc);padding:2px 8px;border-radius:99px;color:var(--mute)}
+</style>
+</head>
+<body>
+<header><h1>BUAD 112 Study</h1><span id="streak" class="mute" style="color:inherit"></span></header>
+<nav id="nav"></nav>
+<main id="main"></main>
+
+<script>
+// ---------- storage ----------
+const KEY='buad112.v1';
+const SAMPLE=[
+  {t:'Chapter 1 (sample)',q:'Opportunity cost',a:'The value of the next-best alternative you give up when making a choice.'},
+  {t:'Chapter 1 (sample)',q:'Stakeholder',a:'Any person or group affected by, or able to affect, a company’s actions.'},
+  {t:'Chapter 1 (sample)',q:'Revenue',a:'Total money a business earns from selling goods or services, before expenses.'},
+  {t:'Chapter 1 (sample)',q:'Profit',a:'Revenue minus all expenses.'},
+  {t:'Chapter 1 (sample)',q:'Market segmentation',a:'Dividing a market into groups of customers with similar needs or traits.'}
+];
+let S=load();
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.cards)return s}catch(e){}
+  return {cards:SAMPLE.map((c,i)=>({id:Date.now()+i,...c,box:0,due:0,seen:0,right:0})),log:{},sample:true}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const today=()=>new Date().toISOString().slice(0,10);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const topics=()=>[...new Set(S.cards.map(c=>c.t))].sort();
+function bump(ok){const d=today();S.log[d]=S.log[d]||{n:0,ok:0};S.log[d].n++;if(ok)S.log[d].ok++}
+function streak(){let n=0,d=new Date();while(S.log[d.toISOString().slice(0,10)]){n++;d.setDate(d.getDate()-1)}return n}
+
+// Leitner: box 0..4, review gaps in days
+const GAPS=[0,1,3,7,14];
+function grade(c,ok){c.seen++;if(ok){c.right++;c.box=Math.min(4,c.box+1)}else c.box=0;
+  c.due=Date.now()+GAPS[c.box]*864e5;bump(ok);save()}
+
+// ---------- ui ----------
+let tab='study',topic='',sess=null;
+const TABS=[['study','Flashcards'],['quiz','Quiz'],['cards','Cards'],['stats','Progress']];
+function nav(){document.getElementById('nav').innerHTML=TABS.map(([k,l])=>`<button class="${k===tab?'on':''}" data-t="${k}">${l}</button>`).join('');
+  document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;sess=null;render()});
+  const s=streak();document.getElementById('streak').textContent=s?`🔥 ${s}-day streak`:''}
+function topicPicker(){return `<label>Topic</label><select id="tp"><option value="">All topics</option>${topics().map(t=>`<option ${t===topic?'selected':''}>${esc(t)}</option>`).join('')}</select>`}
+function bindPicker(){const e=document.getElementById('tp');if(e)e.onchange=()=>{topic=e.value;sess=null;render()}}
+const pool=()=>S.cards.filter(c=>!topic||c.t===topic);
+const M=document.getElementById('main');
+
+function render(){nav();({study:rStudy,quiz:rQuiz,cards:rCards,stats:rStats})[tab]();bindPicker()}
+
+function rStudy(){
+  if(!sess){const due=pool().filter(c=>c.due<=Date.now());
+    sess={q:due.sort(()=>Math.random()-.5),i:0,flip:false,total:due.length}}
+  const c=sess.q[sess.i];
+  if(!c){M.innerHTML=`<div class="card">${topicPicker()}</div><div class="card"><h2>${sess.total?'Session done 🎉':'Nothing due'}</h2><p class="mute">${sess.total?`You reviewed ${sess.total} card(s).`:'No cards are due right now. Come back later or add more cards.'}</p><div class="row"><button class="s" id="all">Review all cards anyway</button></div></div>`;
+    document.getElementById('all').onclick=()=>{sess={q:pool().sort(()=>Math.random()-.5),i:0,flip:false,total:pool().length};render()};return}
+  M.innerHTML=`<div class="card">${topicPicker()}</div>
+  <div class="mute" style="margin-bottom:6px">Card ${sess.i+1} of ${sess.q.length}</div>
+  <div class="card flash" id="fc"><div>${esc(sess.flip?c.a:c.q)}<small>${sess.flip?'Answer':'Tap to reveal'}</small></div></div>
+  ${sess.flip?`<div class="row"><button class="p bad" id="no" style="flex:1">Missed it</button><button class="p ok" id="yes" style="flex:1">Got it</button></div>`:''}`;
+  document.getElementById('fc').onclick=()=>{sess.flip=!sess.flip;render()};
+  if(sess.flip){const go=ok=>{grade(c,ok);sess.i++;sess.flip=false;render()};
+    document.getElementById('yes').onclick=()=>go(true);document.getElementById('no').onclick=()=>go(false)}
+}
+
+function rQuiz(){
+  const p=pool();
+  if(p.length<4){M.innerHTML=`<div class="card">${topicPicker()}<p class="mute">Quiz needs at least 4 cards${topic?' in this topic':''}. Add more on the Cards tab.</p></div>`;return}
+  if(!sess){sess={n:0,ok:0,q:null}}
+  if(!sess.q){const c=p[Math.floor(Math.random()*p.length)];
+    const wrong=p.filter(x=>x.id!==c.id).sort(()=>Math.random()-.5).slice(0,3);
+    sess.q={c,opts:[c,...wrong].sort(()=>Math.random()-.5),pick:null}}
+  const {c,opts,pick}=sess.q;
+  M.innerHTML=`<div class="card">${topicPicker()}<div class="mute">Score: ${sess.ok}/${sess.n}</div></div>
+  <div class="card"><h2>${esc(c.q)}</h2><p class="mute">Choose the correct definition.</p>
+  ${opts.map((o,i)=>`<button class="opt ${pick!==null?(o.id===c.id?'right':(i===pick?'wrong':'')):''}" data-i="${i}" ${pick!==null?'disabled':''}>${esc(o.a)}</button>`).join('')}
+  ${pick!==null?`<button class="p" id="nx" style="margin-top:8px">Next question</button>`:''}</div>`;
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const i=+b.dataset.i,ok=opts[i].id===c.id;
+    sess.q.pick=i;sess.n++;if(ok)sess.ok++;grade(c,ok);render()});
+  const nx=document.getElementById('nx');if(nx)nx.onclick=()=>{sess.q=null;render()}
+}
+
+function rCards(){
+  const p=pool();
+  M.innerHTML=`<div class="card"><h2>Add a card</h2>
+   <label>Topic / chapter</label><input id="nt" list="tl" value="${esc(topic)}" placeholder="e.g. Chapter 2"><datalist id="tl">${topics().map(t=>`<option value="${esc(t)}">`).join('')}</datalist>
+   <label>Term / question</label><input id="nq"><label>Definition / answer</label><textarea id="na"></textarea>
+   <button class="p" id="add">Add card</button></div>
+  <div class="card"><h2>Bulk add</h2><p class="mute">One per line: <code>term :: definition</code>. Uses the topic above.</p>
+   <textarea id="bulk" placeholder="NPV :: Net present value…"></textarea><button class="s" id="bb">Add all</button></div>
+  <div class="card">${topicPicker()}<h2>${p.length} card(s)</h2>
+   ${p.map(c=>`<div class="item"><div><b>${esc(c.q)}</b><br><span class="mute">${esc(c.a)}</span></div><span class="tag">${esc(c.t)}</span><button class="s" data-d="${c.id}">✕</button></div>`).join('')||'<p class="mute">No cards yet.</p>'}</div>
+  <div class="card"><h2>Backup</h2><div class="row"><button class="s" id="ex">Export JSON</button><button class="s" id="im">Import JSON</button><button class="s" id="rs">Reset all</button></div></div>`;
+  const clearSample=()=>{if(S.sample){S.cards=S.cards.filter(c=>!c.t.endsWith('(sample)'));S.sample=false}};
+  const mk=(t,q,a)=>({id:Date.now()+Math.random(),t:t||'General',q,a,box:0,due:0,seen:0,right:0});
+  document.getElementById('add').onclick=()=>{const q=nq.value.trim(),a=na.value.trim();if(!q||!a)return;
+    clearSample();S.cards.push(mk(nt.value.trim(),q,a));topic=nt.value.trim()||topic;save();render()};
+  document.getElementById('bb').onclick=()=>{const L=bulk.value.split('\n').map(l=>l.split('::')).filter(x=>x.length>=2&&x[0].trim()&&x[1].trim());
+    if(!L.length)return;clearSample();L.forEach(x=>S.cards.push(mk(nt.value.trim(),x[0].trim(),x.slice(1).join('::').trim())));save();render()};
+  document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{S.cards=S.cards.filter(c=>String(c.id)!==b.dataset.d);save();render()});
+  document.getElementById('ex').onclick=()=>{const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:'application/json'}));a.download='buad112-backup.json';a.click()};
+  document.getElementById('im').onclick=()=>{const f=document.createElement('input');f.type='file';f.accept='.json';
+    f.onchange=()=>f.files[0].text().then(t=>{try{const d=JSON.parse(t);if(!d.cards)throw 0;S=d;save();render()}catch(e){alert('Not a valid backup file.')}});f.click()};
+  document.getElementById('rs').onclick=()=>{if(confirm('Delete all cards and progress?')){localStorage.removeItem(KEY);S=load();topic='';render()}};
+}
+
+function rStats(){
+  const p=pool(),n=p.length,seen=p.reduce((a,c)=>a+c.seen,0),right=p.reduce((a,c)=>a+c.right,0);
+  const mastered=p.filter(c=>c.box>=3).length,due=p.filter(c=>c.due<=Date.now()).length;
+  const weak=p.filter(c=>c.seen>0).map(c=>({c,r:c.right/c.seen})).sort((a,b)=>a.r-b.r).slice(0,5).filter(x=>x.r<1);
+  const days=[...Array(7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);const k=d.toISOString().slice(0,10);return [k.slice(5),(S.log[k]||{n:0}).n]});
+  const mx=Math.max(1,...days.map(d=>d[1]));
+  M.innerHTML=`<div class="card">${topicPicker()}</div>
+  <div class="card"><h2>Mastery</h2><div class="bar"><i style="width:${n?mastered/n*100:0}%"></i></div>
+   <div class="stat"><span>Mastered (box 4+)</span><b>${mastered}/${n}</b></div>
+   <div class="stat"><span>Due now</span><b>${due}</b></div>
+   <div class="stat"><span>Accuracy</span><b>${seen?Math.round(right/seen*100)+'%':'–'}</b></div>
+   <div class="stat"><span>Total answers</span><b>${seen}</b></div></div>
+  <div class="card"><h2>Last 7 days</h2><div class="row" style="align-items:flex-end;height:90px;gap:6px">
+   ${days.map(d=>`<div style="flex:1;text-align:center"><div style="background:var(--brand);height:${d[1]/mx*70}px;border-radius:4px 4px 0 0;min-height:2px"></div><div class="mute" style="font-size:11px">${d[0]}</div><div style="font-size:12px">${d[1]}</div></div>`).join('')}</div></div>
+  <div class="card"><h2>Needs work</h2>${weak.map(x=>`<div class="item"><div><b>${esc(x.c.q)}</b></div><span class="tag">${Math.round(x.r*100)}%</span></div>`).join('')||'<p class="mute">Nothing yet — keep studying.</p>'}</div>`;
+}
+render();
+</script>
+</body>
+</html>
