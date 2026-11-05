@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ff8a3d">
+<title>Winston</title>
+<style>
+:root{--bg:#fff7ef;--card:#fff;--ink:#2b2233;--mute:#7b6f86;--line:#f0e0d0;--brand:#ff8a3d;--brand2:#7c4dff;--ok:#1a9a62;--bad:#d64545;--soft:#ffeede}
+@media(prefers-color-scheme:dark){:root{--bg:#171320;--card:#221c2e;--ink:#f3edf9;--mute:#a79bb8;--line:#352c46;--soft:#2e2540}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,sans-serif;padding-bottom:84px}
+main{max-width:680px;margin:0 auto;padding:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
+h1,h2,h3{margin:0 0 8px}h2{font-size:19px}h3{font-size:16px}
+.mute{color:var(--mute);font-size:14px}
+button{font:inherit;cursor:pointer}
+.p,.s{border-radius:12px;padding:10px 16px;border:2px solid var(--brand)}
+.p{background:var(--brand);color:#fff;font-weight:600}.s{background:none;color:var(--brand)}
+.p.ok{background:var(--ok);border-color:var(--ok)}.p.bad{background:var(--bad);border-color:var(--bad)}
+.p.purple{background:var(--brand2);border-color:var(--brand2)}
+input,select,textarea{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);margin:4px 0 10px}
+textarea{min-height:90px}label{font-size:13px;color:var(--mute)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.grow{flex:1}
+.chip{display:inline-block;padding:6px 12px;border-radius:99px;background:var(--soft);margin:3px;font-size:14px;border:2px solid transparent;cursor:pointer}
+.chip.on{border-color:var(--brand2);font-weight:600}
+.stats{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.stat{background:var(--soft);padding:6px 12px;border-radius:99px;font-weight:600;font-size:14px}
+.bar{height:10px;background:var(--soft);border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2))}
+.dogwrap{text-align:center}.dogwrap svg{max-width:240px;width:70%;animation:bob 3s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px)}}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 0 10px;z-index:5}
+nav button{border:0;background:none;color:var(--mute);font-size:11px;padding:4px 8px}nav button b{display:block;font-size:20px;font-weight:400}
+nav button.on{color:var(--brand);font-weight:700}
+.mat{display:block;padding:10px 12px;border:2px solid var(--line);border-radius:14px;margin:8px 0;transition:.3s;background:var(--card)}
+.mat .term{position:relative;display:inline-block;font-weight:700}
+.mat.glow{border-color:#ffc400;box-shadow:0 0 0 4px rgba(255,196,0,.35),0 0 24px rgba(255,196,0,.7);animation:pulse 1.2s ease-in-out 3;transform:scale(1.02)}
+.mat.glow .term::after{content:'';position:absolute;inset:-6px -12px;border:3px solid #e63946;border-radius:50%;animation:draw .7s ease-out;pointer-events:none}
+.mat.seen{border-color:var(--ok)}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(255,196,0,.2),0 0 38px rgba(255,196,0,.95)}}
+@keyframes draw{from{opacity:0;transform:scale(1.8) rotate(-12deg)}to{opacity:1;transform:none}}
+.step{display:flex;gap:10px;margin:10px 0}.step .n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--brand2);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink)}
+.opt.right{border-color:var(--ok)}.opt.wrong{border-color:var(--bad)}
+.tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;padding:8px;border-radius:10px;border:0;background:var(--soft);color:var(--ink)}.tabs .on{background:var(--brand2);color:#fff}
+.bubble{background:var(--soft);border-radius:14px;padding:10px 12px;margin:8px 0;font-size:15px}
+.shopgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.shopgrid .card{margin:0;text-align:center;padding:8px}.shopgrid svg{width:70px;height:70px}
+#toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--brand2);color:#fff;padding:10px 18px;border-radius:99px;z-index:50;opacity:0;transition:.3s;pointer-events:none;max-width:90vw;text-align:center}
+#toast.on{opacity:1}
+#widget{position:fixed;right:10px;bottom:86px;width:210px;background:var(--card);border:2px solid var(--brand);border-radius:20px;padding:8px;z-index:20;box-shadow:0 8px 28px rgba(0,0,0,.25);display:none;text-align:center;font-size:14px}
+#widget.show{display:block}
+#widget svg{width:90px;height:90px}
+body.live{padding-bottom:340px}
+#widget.pip{position:static;width:100%;min-height:100vh;border-radius:0;border:0;box-shadow:none;display:block}
+.paw{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-radius:16px;padding:12px;margin-top:8px;animation:pulse2 .8s infinite}
+@keyframes pulse2{50%{transform:scale(1.05)}}
+.paw button{font-size:20px;padding:10px 18px;border-radius:99px;border:0;background:#fff;color:var(--brand2);font-weight:800;margin-top:6px}
+.hero{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-radius:18px;padding:16px;margin-bottom:14px}
+</style>
+</head>
+<body>
+<main id="main"></main>
+<nav id="nav"></nav>
+<div id="widget"></div>
+<div id="toast"></div>
+
+<script>
+/* ======= CONFIG =======
+   Google sign-in: create an OAuth Web client ID at console.cloud.google.com
+   (APIs & Services > Credentials), add your site URL as an authorized JS origin,
+   and paste the client ID below. Leave empty to use the name-only fallback. */
+const GOOGLE_CLIENT_ID='';
+
+/* ======= helpers ======= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const norm=s=>String(s).toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+const shuffle=a=>[...a].sort(()=>Math.random()-.5);
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2600)}
+
+/* ======= state ======= */
+const KEY='winston.v1';
+const DEMO={id:'demo',name:'Intro to Business (demo)',careerNotes:{},sessions:[],items:[
+ ['Opportunity cost','The value of the next-best alternative you give up when you make a choice. Every choice has one.'],
+ ['Revenue','The total money a business earns from selling goods or services. It is counted before any expenses are subtracted.'],
+ ['Profit','Revenue minus all expenses. If it is negative, the business has a loss.'],
+ ['Stakeholder','Any person or group affected by a company\'s actions. Examples are customers, employees, and investors.'],
+ ['Market segmentation','Dividing a market into groups of customers with similar needs. It lets a company aim its message at the right people.'],
+ ['Supply and demand','Prices rise when demand is higher than supply. Prices fall when supply is higher than demand.']
+].map(([term,text])=>({id:uid(),term,text}))};
+let S=load();
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===1)return s}catch(e){}
+ return {v:1,user:null,coins:0,earned:0,happy:70,tick:Date.now(),owned:[],eq:{},classes:[DEMO],friends:[],checks:0}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+// Winston gets a little lonelier while you are away (gentle: never below 15).
+(function decay(){const h=(Date.now()-S.tick)/36e5;S.happy=Math.max(15,Math.min(S.happy,100)-h*1.5);S.tick=Date.now();save()})();
+
+const lvl=()=>Math.floor(Math.sqrt(S.earned/15))+1;
+function earn(n,why){const before=lvl();S.coins+=n;S.earned+=n;S.happy=Math.min(100,S.happy+n*1.5);save();
+ toast(`+${n} 🪙 ${why}`);if(lvl()>before)setTimeout(()=>toast(`🎉 Level ${lvl()}! Winston is so proud!`),2700);refresh()}
+const mood=()=>S.happy>=65?'happy':S.happy>=35?'ok':'sad';
+
+/* ======= Winston the Pomeranian (SVG) ======= */
+const ACC={
+ bow:{slot:'hat',name:'Pink bow',price:10,svg:'<g transform="translate(62 50)"><path d="M0 0 L-18 -10 L-18 10Z M0 0 L18 -10 L18 10Z" fill="#ff5fa2"/><circle r="5" fill="#d93b82"/></g>'},
+ party:{slot:'hat',name:'Party hat',price:20,svg:'<polygon points="100,2 80,48 120,48" fill="#7c4dff"/><polygon points="100,2 90,26 110,26" fill="#ffd23f"/><circle cx="100" cy="3" r="5" fill="#ff5fa2"/>'},
+ beanie:{slot:'hat',name:'Beanie',price:15,svg:'<path d="M66 54 Q100 6 134 54Z" fill="#3a86ff"/><rect x="64" y="50" width="72" height="9" rx="4" fill="#2a63c4"/><circle cx="100" cy="12" r="8" fill="#fff"/>'},
+ crown:{slot:'hat',name:'Gold crown',price:40,svg:'<path d="M70 52 L74 22 L88 40 L100 16 L112 40 L126 22 L130 52Z" fill="#ffc400" stroke="#d99a00" stroke-width="2"/><circle cx="100" cy="30" r="4" fill="#e63946"/>'},
+ glasses:{slot:'face',name:'Round glasses',price:15,svg:'<g fill="none" stroke="#2b2233" stroke-width="3"><circle cx="78" cy="100" r="13"/><circle cx="122" cy="100" r="13"/><path d="M91 100h18"/></g>'},
+ shades:{slot:'face',name:'Sunglasses',price:25,svg:'<rect x="63" y="90" width="31" height="20" rx="8" fill="#111"/><rect x="106" y="90" width="31" height="20" rx="8" fill="#111"/><path d="M94 98h12" stroke="#111" stroke-width="3"/>'},
+ bandana:{slot:'neck',name:'Red bandana',price:12,svg:'<path d="M66 146 Q100 166 134 146 L100 186Z" fill="#e63946"/><circle cx="100" cy="160" r="3" fill="#fff"/><circle cx="90" cy="156" r="2" fill="#fff"/><circle cx="110" cy="156" r="2" fill="#fff"/>'},
+ bowtie:{slot:'neck',name:'Bow tie',price:18,svg:'<path d="M100 156 L78 144 L78 168Z M100 156 L122 144 L122 168Z" fill="#7c4dff"/><circle cx="100" cy="156" r="5" fill="#5a2fd6"/>'},
+ medal:{slot:'neck',name:'Gold medal',price:35,svg:'<path d="M84 140 L100 162 L116 140" fill="none" stroke="#3a86ff" stroke-width="5"/><circle cx="100" cy="168" r="10" fill="#ffc400" stroke="#d99a00" stroke-width="2"/><text x="100" y="173" font-size="12" text-anchor="middle" fill="#7a5600">1</text>'}
+};
+const TREATS=[{id:'bone',name:'Bone treat',price:5,h:15,e:'🦴'},{id:'ball',name:'Squeaky ball',price:8,h:25,e:'🎾'},{id:'cake',name:'Pup cake',price:15,h:50,e:'🧁'}];
+function dog(eq={},m='happy'){
+ let fl='';for(let i=0;i<22;i++){const a=i/22*Math.PI*2;fl+=`<circle cx="${(100+54*Math.cos(a)).toFixed(1)}" cy="${(108+50*Math.sin(a)).toFixed(1)}" r="15" fill="#f4a259"/>`}
+ const eyes=m==='happy'?'<path d="M69 102 Q78 90 87 102M113 102 Q122 90 131 102" stroke="#2b2233" stroke-width="4" fill="none" stroke-linecap="round"/>'
+  :m==='ok'?'<circle cx="78" cy="100" r="6" fill="#2b2233"/><circle cx="122" cy="100" r="6" fill="#2b2233"/><circle cx="80" cy="98" r="2" fill="#fff"/><circle cx="124" cy="98" r="2" fill="#fff"/>'
+  :'<circle cx="78" cy="102" r="6" fill="#2b2233"/><circle cx="122" cy="102" r="6" fill="#2b2233"/><path d="M68 88 L86 94M132 88 L114 94" stroke="#2b2233" stroke-width="3"/><path d="M74 112q-3 8 0 12" stroke="#6ab7ff" stroke-width="3" fill="none"/>';
+ const mouth=m==='happy'?'<path d="M90 124 Q100 138 110 124Z" fill="#e0526b"/>':m==='ok'?'<path d="M92 126 Q100 131 108 126" stroke="#2b2233" stroke-width="3" fill="none"/>':'<path d="M92 132 Q100 122 108 132" stroke="#2b2233" stroke-width="3" fill="none"/>';
+ const g=s=>eq[s]&&ACC[eq[s]]?ACC[eq[s]].svg:'';
+ return `<svg viewBox="0 0 200 200" role="img" aria-label="Winston the Pomeranian">
+ <ellipse cx="100" cy="176" rx="46" ry="22" fill="#fde3c0"/><circle cx="68" cy="190" r="10" fill="#fde3c0"/><circle cx="132" cy="190" r="10" fill="#fde3c0"/>
+ <circle cx="158" cy="150" r="22" fill="#f4a259"/><circle cx="165" cy="136" r="14" fill="#f4a259"/>
+ ${fl}<circle cx="100" cy="108" r="56" fill="#f4a259"/>
+ <polygon points="52,72 54,26 92,56" fill="#f4a259"/><polygon points="148,72 146,26 108,56" fill="#f4a259"/>
+ <polygon points="60,64 61,38 80,56" fill="#ffb6c1"/><polygon points="140,64 139,38 120,56" fill="#ffb6c1"/>
+ <ellipse cx="100" cy="124" rx="28" ry="21" fill="#fde3c0"/>${m==='happy'?'<circle cx="64" cy="118" r="8" fill="#ff9aa8" opacity=".6"/><circle cx="136" cy="118" r="8" fill="#ff9aa8" opacity=".6"/>':''}
+ ${eyes}<ellipse cx="100" cy="114" rx="8" ry="6" fill="#2b2233"/>${mouth}
+ ${g('neck')}${g('face')}${g('hat')}</svg>`}
+function accIcon(id){return `<svg viewBox="40 0 120 200">${ACC[id].svg}</svg>`}
+
+/* ======= navigation ======= */
+let tab='home',view={cls:null,sub:'live'},P=null,ob=1,obData={majors:'',minors:'',careers:[],interests:[]};
+const TABS=[['home','🏠','Home'],['class','📚','Classes'],['practice','✏️','Practice'],['career','🚀','Careers'],['friends','👥','Friends'],['shop','🛍️','Shop']];
+const ACTIONS={};
+function go(t){tab=t;P=null;render()}
+function refresh(){render(true);updateWidget()}
+function render(keep){
+ const n=$('#nav');
+ if(!S.user){n.style.display='none';return renderOnboard()}
+ n.style.display='flex';
+ n.innerHTML=TABS.map(([k,i,l])=>`<button data-a="tab" data-k="${k}" class="${k===tab?'on':''}"><b>${i}</b>${l}</button>`).join('');
+ ({home:rHome,class:rClass,practice:rPractice,career:rCareer,friends:rFriends,shop:rShop})[tab]();
+}
+const classes=()=>S.classes;
+const allItems=()=>S.classes.flatMap(c=>c.items.map(i=>({...i,cls:c.id,clsName:c.name})));
+const careers=()=>S.user.careers.length?S.user.careers:['your future career'];
+
+/* ======= onboarding ======= */
+const INTERESTS={'Helping people':['Counselor','Nurse','Social worker'],'Building things':['Engineer','Product designer','Architect'],'Money & markets':['Financial analyst','Entrepreneur','Accountant'],'Creativity':['Marketing creative','Game designer','Filmmaker'],'Data & puzzles':['Data analyst','Software developer','Consultant'],'Leading teams':['Project manager','HR leader','Operations manager'],'Science & health':['Researcher','Doctor','Biotech specialist'],'Law & policy':['Lawyer','Policy analyst','Public servant']};
+function renderOnboard(){
+ const M=$('#main');
+ if(ob===1){M.innerHTML=`<div class="hero dogwrap"><div class="dogwrap">${dog({},'happy')}</div><h1>Hi, I'm Winston! 🐾</h1><p>Study with me and I'll help you actually enjoy it. Let's get to know you first.</p></div>
+ <div class="card"><h2>Sign in</h2>
+ ${GOOGLE_CLIENT_ID?'<div id="gbtn"></div>':'<p class="mute">Google sign-in turns on once a Google client ID is added in the app config. For now, just tell me your name:</p>'}
+ <label>Your name</label><input id="nm" placeholder="e.g. Miya"><label>Email (optional)</label><input id="em" type="email">
+ <button class="p" data-a="ob1">Continue</button></div>`;
+  if(GOOGLE_CLIENT_ID)loadGoogle()}
+ if(ob===2){M.innerHTML=`<div class="card"><h2>What are you studying?</h2><label>Major(s)</label><input id="mj" value="${esc(obData.majors)}" placeholder="e.g. Business Administration"><label>Minor(s) (optional)</label><input id="mn" value="${esc(obData.minors)}">
+ <button class="p" data-a="ob2">Next</button></div>`}
+ if(ob===3){M.innerHTML=`<div class="card"><h2>Where do you want to end up?</h2><label>Career(s) you're aiming for (comma separated)</label><input id="cr" value="${esc(obData.careers.join(', '))}" placeholder="e.g. Marketing manager, Entrepreneur">
+ <p class="mute">Not sure yet? That's totally okay — pick what lights you up and I'll suggest paths to explore:</p>
+ <div>${Object.keys(INTERESTS).map(k=>`<span class="chip ${obData.interests.includes(k)?'on':''}" data-a="int" data-k="${k}">${k}</span>`).join('')}</div>
+ <br><button class="p" data-a="ob3">Meet my pup 🐶</button></div>`}
+}
+function loadGoogle(){const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=()=>{google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:r=>{try{const p=JSON.parse(atob(r.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));obData.name=p.name;obData.email=p.email;ob=2;render()}catch(e){toast('Google sign-in failed')}}});google.accounts.id.renderButton($('#gbtn'),{theme:'outline',size:'large'})};document.head.append(s)}
+Object.assign(ACTIONS,{
+ ob1(){const n=$('#nm').value.trim()||obData.name;if(!n)return toast('Tell me your name!');obData.name=n;obData.email=$('#em').value.trim();ob=2;render()},
+ ob2(){obData.majors=$('#mj').value.trim();obData.minors=$('#mn').value.trim();ob=3;render()},
+ int(d){const a=obData.interests,i=a.indexOf(d.k);i<0?a.push(d.k):a.splice(i,1);obData.careers=$('#cr').value.split(',').map(x=>x.trim()).filter(Boolean);render()},
+ ob3(){let c=$('#cr').value.split(',').map(x=>x.trim()).filter(Boolean);const explore=!c.length;
+  if(explore)c=[...new Set(obData.interests.flatMap(k=>INTERESTS[k]))].slice(0,4);
+  S.user={name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,careers:c,exploring:explore};save();tab='home';render();toast(`Welcome, ${S.user.name}! 🐶`)},
+ tab(d){go(d.k)}
+});
+
+/* ======= home ======= */
+const MOODS=[['😴','bored','Boredom usually means the task is too easy or too unclear. Let\'s make it a game: pick ONE term and teach it to me in your own words. Race the clock — 3 minutes!'],
+ ['😫','stressed','Deep breath with me. Stress shrinks when we shrink the task. Open a class recap — it walks through things one step at a time, no pressure.'],
+ ['😶','unmotivated','You don\'t have to feel motivated to start — motivation shows up AFTER you begin. Just do 3 practice questions. I\'ll be right here (and the coins help me out!).'],
+ ['🙂','okay','Nice, steady is great. Do a quick practice round and let\'s bank a few coins.'],
+ ['🔥','sparked','YES! Ride that spark — go crush a full practice round and tell a friend what you learned.']];
+function rHome(){
+ const u=S.user,L=lvl(),lo=15*(L-1)**2,hi=15*L*L,cr=careers()[0];
+ const pct=Math.round((S.earned-lo)/(hi-lo)*100);
+ $('#main').innerHTML=`<div class="card dogwrap"><div class="dogwrap">${dog(S.eq,mood())}</div>
+ <h2>Winston · Level ${L}</h2>
+ <div class="stats"><span class="stat">🪙 ${S.coins}</span><span class="stat">❤️ ${Math.round(S.happy)}%</span><span class="stat">⭐ ${S.earned} XP</span></div>
+ <div class="bar" style="margin:10px 0 4px"><i style="width:${pct}%"></i></div><div class="mute">${hi-S.earned} XP to level ${L+1}</div>
+ <p class="bubble">${mood()==='sad'?'I miss you! Studying together makes me happy 🥺':'Hi '+esc(u.name)+'! Every concept you learn is a step toward being a '+esc(cr)+' ✨'}</p></div>
+ <div class="card"><h2>How are you feeling about studying right now?</h2><div>${MOODS.map(m=>`<span class="chip" data-a="feel" data-k="${m[1]}">${m[0]} ${m[1]}</span>`).join('')}</div><div id="feelout"></div></div>
+ <div class="row"><button class="p grow" data-a="tab" data-k="class">▶ Start class</button><button class="p purple grow" data-a="tab" data-k="practice">✏️ Practice</button></div>`;
+}
+Object.assign(ACTIONS,{feel(d){const m=MOODS.find(x=>x[1]===d.k);$('#feelout').innerHTML=`<p class="bubble">🐶 ${m[2]}</p>`;S.checks++;save()}});
+
+/* ======= classes ======= */
+function rClass(){
+ const c=classes().find(x=>x.id===view.cls);
+ if(!c){$('#main').innerHTML=`<div class="card"><h2>Your classes</h2>${classes().map(x=>`<div class="row" style="margin:8px 0"><button class="s grow" data-a="openc" data-k="${x.id}">${esc(x.name)} <span class="mute">· ${x.items.length} items · ${x.sessions.length} recaps</span></button><button class="s" data-a="delc" data-k="${x.id}">✕</button></div>`).join('')||'<p class="mute">No classes yet.</p>'}</div>
+ <div class="card"><h2>Add a class</h2><label>Class name</label><input id="cn" placeholder="BUAD 112">
+ <label>Materials from your teacher — one per line: <code>term :: explanation</code></label><textarea id="cm" placeholder="Opportunity cost :: What you give up when you choose..."></textarea>
+ <button class="p" data-a="addc">Add class</button></div>`;return}
+ const sub=view.sub;
+ $('#main').innerHTML=`<button class="s" data-a="openc" data-k="">← All classes</button><h2 style="margin-top:10px">${esc(c.name)}</h2>
+ <div class="tabs">${[['live','🎙 Live class'],['recap','📝 Recaps'],['mat','📄 Materials']].map(([k,l])=>`<button data-a="sub" data-k="${k}" class="${k===sub?'on':''}">${l}</button>`).join('')}</div><div id="sub"></div>`;
+ ({live:rLive,recap:rRecap,mat:rMat})[sub](c);
+}
+Object.assign(ACTIONS,{
+ openc(d){view.cls=d.k||null;view.sub='live';render()},
+ sub(d){view.sub=d.k;render()},
+ delc(d){if(confirm('Delete this class?')){S.classes=S.classes.filter(c=>c.id!==d.k);save();render()}},
+ addc(){const n=$('#cn').value.trim();if(!n)return toast('Name your class');S.classes=S.classes.filter(c=>c.id!=='demo'||c.sessions.length);
+  S.classes.push({id:uid(),name:n,careerNotes:{},sessions:[],items:parseItems($('#cm').value)});save();render()},
+ addm(){const c=cur();c.items.push(...parseItems($('#mm').value));save();render()},
+ delm(d){const c=cur();c.items=c.items.filter(i=>i.id!==d.k);save();render()}
+});
+const cur=()=>classes().find(x=>x.id===view.cls);
+function parseItems(t){return t.split('\n').map(l=>l.split('::')).filter(x=>x.length>=2&&x[0].trim()&&x[1].trim()).map(x=>({id:uid(),term:x[0].trim(),text:x.slice(1).join('::').trim()}))}
+function rMat(c){$('#sub').innerHTML=`<div class="card">${c.items.map(i=>`<div class="mat"><span class="term">${esc(i.term)}</span> <button class="s" style="float:right;padding:0 8px" data-a="delm" data-k="${i.id}">✕</button><br><span class="mute">${esc(i.text)}</span></div>`).join('')||'<p class="mute">No materials yet.</p>'}</div>
+ <div class="card"><h3>Add more</h3><textarea id="mm" placeholder="term :: explanation"></textarea><button class="p" data-a="addm">Add</button></div>`}
+
+/* ======= LIVE CLASS ======= */
+let live=null,rec=null,pawT=null,pawCount=null;
+function rLive(c){
+ if(!live||live.cls!==c.id){$('#sub').innerHTML=`<div class="card"><h2>Ready for class?</h2><p>Winston will float on your screen, light up your teacher's materials as they're mentioned, and pop up for a surprise <b>high paw</b> now and then. 🐾</p>
+ <button class="p" data-a="startlive">▶ Start class with Winston</button><p class="mute">Live listening uses your browser's speech recognition (in Chrome/Edge the audio is processed by the browser vendor's service). You can also type what the teacher said.</p></div>`;return}
+ $('#sub').innerHTML=`<div class="row" style="margin-bottom:8px"><button class="p ok" data-a="endlive">■ End class &amp; get recap</button><button class="s" data-a="mic">${live.listening?'🔇 Stop mic':'🎙 Listen'}</button><button class="s" data-a="popout">🪟 Pop out Winston</button></div>
+ <div class="card"><h3>Teacher's materials</h3><div id="livemat"></div></div>
+ <div class="card"><h3>What the teacher said</h3><div class="row"><input class="grow" id="said" placeholder="Type what was said, e.g. “now let's talk about opportunity cost”"><button class="p" data-a="say">Add</button></div>
+ <div id="livelog" class="mute"></div><button class="s" data-a="testpaw" style="margin-top:8px">🐾 Test high-paw popup</button></div>`;
+ paintLive();
+}
+function paintLive(){const c=cur();if(!c||!live||!$('#livemat'))return;
+ $('#livemat').innerHTML=c.items.map(i=>`<div class="mat ${live.focus===i.id?'glow':''} ${live.hits.some(h=>h.id===i.id)?'seen':''}" id="m${i.id}"><span class="term">${esc(i.term)}</span><br><span class="mute">${esc(i.text)}</span></div>`).join('');
+ $('#livelog').innerHTML=live.lines.slice(-4).map(l=>`<div>“${esc(l)}”</div>`).join('');
+ const f=$('#m'+live.focus);if(f)f.scrollIntoView({block:'center',behavior:'smooth'})}
+const STOP=new Set('about their there these those which would could should where while other being because'.split(' '));
+function matches(item,t){const T=norm(item.term);if(t.includes(T))return true;
+ const kw=[...new Set(norm(item.text).split(' ').filter(w=>w.length>4&&!STOP.has(w)))];
+ return kw.filter(w=>t.includes(w.slice(0,5))).length>=2}
+function heard(line){if(!live)return;const c=cur(),t=norm(line);live.lines.push(line);
+ const hit=c.items.find(i=>matches(i,t));
+ if(hit){live.focus=hit.id;if(!live.hits.some(h=>h.id===hit.id))live.hits.push({id:hit.id,line})}
+ paintLive();updateWidget()}
+Object.assign(ACTIONS,{
+ startlive(){const c=cur();live={cls:c.id,hits:[],lines:[],focus:null,listening:false,t0:Date.now()};schedulePaw();updateWidget();render()},
+ say(){const v=$('#said').value.trim();if(!v)return;$('#said').value='';heard(v)},
+ mic(){if(live.listening){live.listening=false;try{rec.stop()}catch(e){}}else startListen();render()},
+ popout:popOut,
+ testpaw:()=>showPaw(),
+ endlive(){const c=cur();clearTimeout(pawT);if(rec){live.listening=false;try{rec.stop()}catch(e){}}
+  const n=live.hits.length;
+  c.sessions.push({id:uid(),date:new Date().toLocaleString(),hits:live.hits,lines:live.lines});
+  live=null;document.body.classList.remove('live');$('#widget').className='';$('#widget').innerHTML='';
+  const out=Math.min(20,n*2);if(out)earn(out,`for engaging in class (${n} topics)`);save();view.sub='recap';render()}
+});
+function startListen(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR)return toast('This browser has no speech recognition — type what was said instead.');
+ rec=new SR();rec.continuous=true;rec.interimResults=false;rec.lang='en-US';
+ rec.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)heard(e.results[i][0].transcript)};
+ rec.onend=()=>{if(live&&live.listening)try{rec.start()}catch(e){}};
+ try{rec.start();live.listening=true}catch(e){toast('Could not start the mic')}}
+
+/* widget + high paw */
+function updateWidget(){const w=$('#widget');if(!live){document.body.classList.remove('live');w.className='';w.innerHTML='';return}
+ const c=cur()||classes().find(x=>x.id===live.cls),it=c&&c.items.find(i=>i.id===live.focus);
+ const paw=w.querySelector('.paw');const keep=paw?paw.outerHTML:'';
+ w.classList.add('show');document.body.classList.add('live');
+ w.innerHTML=`${dog(S.eq,'happy')}<div class="bubble">${it?`<b>${esc(it.term)}</b><br>${esc(it.text.split(/(?<=[.!?])\s/)[0])}`:'I\'m listening… 👂'}</div>${keep}`;
+ if(keep)bindPaw()}
+function schedulePaw(){clearTimeout(pawT);pawT=setTimeout(()=>{showPaw();schedulePaw()},(90+Math.random()*150)*1000)}
+function showPaw(){const w=$('#widget');if(!live||w.querySelector('.paw'))return;w.classList.add('show');
+ const d=document.createElement('div');d.className='paw';d.innerHTML='Still with me? 🐶<br><button data-a="highpaw">🐾 High paw!</button><div style="font-size:12px;margin-top:4px">Tap within 15s</div>';w.append(d);
+ clearTimeout(pawCount);pawCount=setTimeout(()=>{if(w.querySelector('.paw')){d.remove();S.happy=Math.max(10,S.happy-5);save();toast('Winston missed his high paw 🥺')}},15000)}
+function bindPaw(){}
+ACTIONS.highpaw=()=>{clearTimeout(pawCount);const p=$('#widget .paw')||(pipWin&&pipWin.document.querySelector('.paw'));if(p)p.remove();earn(4,'high paw! 🐾')};
+let pipWin=null;
+async function popOut(){
+ if(!window.documentPictureInPicture)return toast('Pop-out works in desktop Chrome/Edge. Winston floats inside the page here.');
+ try{const w=await documentPictureInPicture.requestWindow({width:260,height:340});pipWin=w;
+  [...document.styleSheets].forEach(ss=>{try{const st=document.createElement('style');st.textContent=[...ss.cssRules].map(r=>r.cssText).join('');w.document.head.append(st)}catch(e){}});
+  w.document.body.style.margin='0';w.document.addEventListener('click',onClick);
+  const el=$('#widget');el.classList.add('pip','show');w.document.body.append(el);
+  w.addEventListener('pagehide',()=>{el.classList.remove('pip');document.body.append(el);pipWin=null})}
+ catch(e){toast('Could not pop out Winston')}}
+
+/* ======= recap ======= */
+function sentences(t){const s=t.split(/(?<=[.!?])\s+/).map(x=>x.trim()).filter(Boolean);return s.length?s:[t]}
+function rRecap(c){
+ const ses=c.sessions[c.sessions.length-1];
+ const items=ses?ses.hits.map(h=>({it:c.items.find(i=>i.id===h.id),line:h.line})).filter(x=>x.it):c.items.map(it=>({it}));
+ let n=0;
+ $('#sub').innerHTML=`<div class="card"><h2>${ses?'Recap · '+esc(ses.date):'Primer from your materials'}</h2>
+ <p class="mute">${ses?'Here\'s what happened, one small step at a time. No stress — you only need to understand one step at a time. 💛':'No live class recorded yet, so here\'s a gentle walkthrough of your materials.'}</p>
+ ${items.map(({it,line})=>`<div class="step"><div class="n">${++n}</div><div><b>${esc(it.term)}</b>${line?`<div class="mute">Teacher: “${esc(line)}”</div>`:''}<ol style="margin:6px 0 0;padding-left:18px">${sentences(it.text).map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div></div>`).join('')||'<p class="mute">Nothing was matched in that class — try adding the materials, then use the “Teacher said” box next time.</p>'}
+ <button class="p purple" data-a="pc" data-k="${c.id}">✏️ Practice this class</button></div>
+ <div class="card"><h3>🐶 Ask Winston anything about this class</h3><div class="row"><input class="grow" id="ask" placeholder="e.g. what's the difference between revenue and profit?"><button class="p" data-a="ask">Ask</button></div><div id="ans"></div></div>`;
+}
+Object.assign(ACTIONS,{pc(d){tab='practice';startPractice(d.k)},
+ ask(){const c=cur(),q=norm($('#ask').value);if(!q)return;
+  const qw=q.split(' ').filter(w=>w.length>2&&!STOP.has(w));
+  const pool=[...c.items.map(i=>({t:i.term,s:i.text})),...c.sessions.flatMap(s=>s.lines.map(l=>({t:'Teacher said',s:l})))];
+  const sc=pool.map(p=>({p,n:qw.filter(w=>norm(p.t+' '+p.s).includes(w.slice(0,5))).length})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n).slice(0,3);
+  $('#ans').innerHTML=sc.length?`<p class="bubble">Woof! Here's how I'd explain it, step by step:</p>`+sc.map((x,i)=>`<div class="step"><div class="n">${i+1}</div><div><b>${esc(x.p.t)}</b><br>${esc(x.p.s)}</div></div>`).join('')+`<p class="mute">Still fuzzy? Ask me again with different words, or try the practice questions.</p>`
+   :`<p class="bubble">Hmm, I couldn't find that in this class's materials or what your teacher said. Add it to Materials and I'll learn it too! 🐾</p>`}});
+
+/* ======= practice ======= */
+function rPractice(){
+ if(!P){$('#main').innerHTML=`<div class="card"><h2>Practice with Winston</h2><p class="mute">Correct answers earn 5 🪙. Miss one? Walk through my step-by-step explanation and you'll still earn 3 🪙.</p>
+ <button class="p purple" data-a="pall" style="width:100%;margin-bottom:8px">All classes mixed</button>
+ ${classes().map(c=>`<button class="s" style="width:100%;margin:4px 0" data-a="pc" data-k="${c.id}">${esc(c.name)}</button>`).join('')}</div>`;return}
+ if(P.done){$('#main').innerHTML=`<div class="card dogwrap"><div class="dogwrap">${dog(S.eq,'happy')}</div><h2>Round complete! 🎉</h2><p>${P.right} first-try correct · ${P.walked} learned with my help.<br>You earned <b>${P.coins} 🪙</b>.</p><button class="p" data-a="again">Another round</button> <button class="s" data-a="tab" data-k="home">Home</button></div>`;return}
+ const q=P.qs[P.i];let body='';
+ if(P.phase==='ask'){
+  body=`<span class="chip on">${{mc:'Multiple choice',fill:'Fill in the blank',open:'Open answer'}[q.type]}</span><h3 style="margin-top:8px">${esc(q.prompt)}</h3>`+
+   (q.type==='mc'?q.choices.map((ch,i)=>`<button class="opt" data-a="mcpick" data-k="${i}">${esc(ch)}</button>`).join('')
+   :(q.type==='open'?'<textarea id="ans" placeholder="Type your answer"></textarea>':'<input id="ans" placeholder="Type your answer">')+`<button class="p" data-a="submit">Check</button>`)}
+ if(P.phase==='walk'){const st=q.steps;
+  body=`<p class="bubble">Not quite — and that's totally fine! Let's walk through it together. 🐾</p><h3>Step ${P.step+1} of ${st.length}</h3><div class="step"><div class="n">${P.step+1}</div><div>${esc(st[P.step])}</div></div><button class="p" data-a="nextstep">${P.step+1<st.length?'Got it, next step':'Got it — try again'}</button>`}
+ if(P.phase==='retry'){body=`<p class="bubble">Now that we've walked through it: ${esc(q.retry)}</p><input id="ans" placeholder="Type your answer">${P.hint?`<p class="mute">Hint: starts with “${esc(q.answer[0])}”</p>`:''}<button class="p" data-a="retrysub">Check</button>`}
+ if(P.phase==='fb'){body=`<p class="bubble">${P.msg}</p><button class="p" data-a="nextq">${P.i+1<P.qs.length?'Next question':'Finish'}</button>`}
+ $('#main').innerHTML=`<div class="row" style="margin-bottom:6px"><span class="mute grow">Question ${P.i+1} of ${P.qs.length}</span><span class="stat">🪙 ${S.coins}</span></div><div class="card">${body}</div>`;
+ const a=$('#ans');if(a)a.focus();
+}
+function startPractice(clsId){
+ const pool=clsId==='all'?allItems():allItems().filter(i=>i.cls===clsId);
+ if(!pool.length){tab='practice';return toast('Add materials to a class first!')}
+ const every=allItems().map(i=>i.text);
+ const qs=shuffle(pool).slice(0,8).map((it,idx)=>{
+  let type=['mc','fill','open'][idx%3];
+  const others=shuffle(every.filter(t=>t!==it.text)).slice(0,3);
+  if(type==='mc'&&others.length<3)type='fill';
+  const short=t=>t.length>120?t.slice(0,117)+'…':t;
+  const steps=sentences(it.text);if(steps.length<2)steps.push(`The key term here is “${it.term}”.`);
+  const q={item:it,type,steps,answer:it.term,retry:`what is this describing? “${it.text}”`};
+  if(type==='mc'){q.prompt=`Which best describes “${it.term}”?`;q.choices=shuffle([it.text,...others]).map(short);q.right=short(it.text)}
+  if(type==='fill'){const re=new RegExp(it.term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'ig');const t=it.text.replace(re,'_____');
+   q.prompt=t.includes('_____')?t:`_____ : ${it.text}`}
+  if(type==='open'){q.prompt=`In your own words, what is “${it.term}”?`}
+  return q});
+ P={qs,i:0,phase:'ask',step:0,right:0,walked:0,coins:0,scope:clsId};render()}
+function okFill(a,b){a=norm(a);b=norm(b);if(!a)return false;if(a===b)return true;return a.length>5&&lev(a,b)<=1}
+function lev(a,b){const d=[...Array(a.length+1)].map((_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;
+ for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+function okOpen(ans,q){const a=norm(ans);if(a.length<3)return false;
+ const kw=[...new Set(norm(q.item.text).split(' ').filter(w=>w.length>4&&!STOP.has(w)))];if(!kw.length)return okFill(ans,q.answer);
+ const hit=kw.filter(w=>a.includes(w.slice(0,5))).length;return hit>=Math.max(1,Math.ceil(kw.length*.3))}
+function grade(ok){const q=P.qs[P.i];
+ if(ok){P.right++;P.coins+=5;earn(5,'correct!');P.phase='fb';P.msg='✅ Yes! '+(q.type==='open'?`Model answer: ${esc(q.item.text)}`:'Nice one.')}
+ else{P.phase='walk';P.step=0}render()}
+Object.assign(ACTIONS,{
+ pall(){startPractice('all')},again(){startPractice(P.scope)},
+ mcpick(d){const q=P.qs[P.i];grade(q.choices[+d.k]===q.right)},
+ submit(){const q=P.qs[P.i],v=$('#ans').value;if(!v.trim())return;grade(q.type==='fill'?okFill(v,q.answer):okOpen(v,q))},
+ nextstep(){const q=P.qs[P.i];if(P.step+1<q.steps.length)P.step++;else{P.phase='retry';P.hint=false}render()},
+ retrysub(){const q=P.qs[P.i];if(okFill($('#ans').value,q.answer)){P.walked++;P.coins+=3;earn(3,'you worked it out!');P.phase='fb';P.msg=`✅ That's it — <b>${esc(q.answer)}</b>! You figured it out with me. I'm proud of you. 🐶`}else{P.hint=true;toast('Almost — check the hint!')}render()},
+ nextq(){if(P.i+1<P.qs.length){P.i++;P.phase='ask'}else P.done=true;render()}
+});
+
+/* ======= careers ======= */
+function rCareer(){
+ const u=S.user;
+ $('#main').innerHTML=`<div class="hero"><h2>Your why 🚀</h2><p>${esc(u.majors||'Your major')}${u.minors?' + '+esc(u.minors):''} → ${u.careers.map(esc).join(' · ')}</p>${u.exploring?'<p>You\'re still exploring — that\'s great. Try each path on for size below.</p>':''}</div>
+ <div class="card"><h3>Careers I'm aiming for / exploring</h3><input id="cr2" value="${esc(u.careers.join(', '))}"><button class="s" data-a="savecr">Save</button></div>
+ ${classes().map(c=>`<div class="card"><h3>${esc(c.name)}</h3>${c.items.slice(0,4).map(i=>{const k=c.id+'|'+i.id;const car=u.careers[c.items.indexOf(i)%u.careers.length]||'your future career';
+  return `<div class="bubble"><b>${esc(i.term)}</b> → <i>As a ${esc(car)}, where might you use this?</i><textarea id="n${i.id}" placeholder="Your idea…" data-c="${c.id}">${esc(c.careerNotes[i.id]||'')}</textarea><button class="s" data-a="savenote" data-c="${c.id}" data-k="${i.id}">Save idea (+2 🪙 first time)</button></div>`}).join('')||'<p class="mute">Add materials to connect them to your future.</p>'}</div>`).join('')}`;
+}
+Object.assign(ACTIONS,{
+ savecr(){S.user.careers=$('#cr2').value.split(',').map(x=>x.trim()).filter(Boolean);S.user.exploring=false;save();render()},
+ savenote(d){const c=classes().find(x=>x.id===d.c),v=$('#n'+d.k).value.trim();if(!v)return;const first=!c.careerNotes[d.k];c.careerNotes[d.k]=v;save();if(first)earn(2,'for linking class to career');else toast('Saved')}
+});
+
+/* ======= friends ======= */
+const myCode=()=>btoa(unescape(encodeURIComponent(JSON.stringify({n:S.user.name,l:lvl(),h:Math.round(S.happy),e:S.eq}))));
+function rFriends(){
+ $('#main').innerHTML=`<div class="card"><h2>Your friend code</h2><p class="mute">Send this to a friend. They paste it below to see Winston in his latest outfit.</p><textarea readonly id="mc" style="min-height:70px">${myCode()}</textarea><button class="s" data-a="copy">Copy</button></div>
+ <div class="card"><h2>Add a friend</h2><textarea id="fc" placeholder="Paste a friend code"></textarea><button class="p" data-a="addf">Add friend</button>
+ <p class="mute">Heads up: codes are a snapshot. Live updating and friend requests need an online account (the Supabase setup used elsewhere in this repo) — a good next step.</p></div>
+ <div class="shopgrid">${S.friends.map((f,i)=>`<div class="card"><div class="dogwrap">${dog(f.e,f.h>=65?'happy':f.h>=35?'ok':'sad')}</div><b>${esc(f.n)}</b><div class="mute">Level ${f.l} · ❤️ ${f.h}%</div><button class="s" data-a="delf" data-k="${i}">Remove</button></div>`).join('')}</div>`}
+Object.assign(ACTIONS,{
+ copy(){navigator.clipboard&&navigator.clipboard.writeText($('#mc').value).then(()=>toast('Copied!'),()=>toast('Select the text and copy it'))},
+ addf(){try{const f=JSON.parse(decodeURIComponent(escape(atob($('#fc').value.trim()))));if(!f.n)throw 0;S.friends=S.friends.filter(x=>x.n!==f.n);S.friends.push(f);save();render();toast(`${f.n} added!`)}catch(e){toast('That code doesn\'t look right')}},
+ delf(d){S.friends.splice(+d.k,1);save();render()}
+});
+
+/* ======= shop ======= */
+function rShop(){
+ $('#main').innerHTML=`<div class="card dogwrap"><div class="dogwrap">${dog(S.eq,mood())}</div><div class="stats"><span class="stat">🪙 ${S.coins}</span><span class="stat">❤️ ${Math.round(S.happy)}%</span></div></div>
+ <div class="card"><h2>Treats &amp; toys</h2><div class="shopgrid">${TREATS.map(t=>`<div class="card"><div style="font-size:40px">${t.e}</div><b>${t.name}</b><div class="mute">+${t.h} ❤️</div><button class="p" data-a="treat" data-k="${t.id}">${t.price} 🪙</button></div>`).join('')}</div></div>
+ <div class="card"><h2>Accessories</h2><div class="shopgrid">${Object.entries(ACC).map(([id,a])=>{const own=S.owned.includes(id),on=S.eq[a.slot]===id;
+  return `<div class="card">${accIcon(id)}<br><b>${a.name}</b><br>${own?`<button class="${on?'p':'s'}" data-a="equip" data-k="${id}">${on?'Wearing ✓':'Wear'}</button>`:`<button class="p" data-a="buy" data-k="${id}">${a.price} 🪙</button>`}</div>`}).join('')}</div></div>`}
+Object.assign(ACTIONS,{
+ treat(d){const t=TREATS.find(x=>x.id===d.k);if(S.coins<t.price)return toast('Not enough coins — study to earn more!');S.coins-=t.price;S.happy=Math.min(100,S.happy+t.h);save();toast(`Winston loves the ${t.name}! ❤️`);refresh()},
+ buy(d){const a=ACC[d.k];if(S.coins<a.price)return toast('Not enough coins yet — keep studying!');S.coins-=a.price;S.owned.push(d.k);S.eq[a.slot]=d.k;S.happy=Math.min(100,S.happy+8);save();toast(`Winston looks great in the ${a.name}!`);refresh()},
+ equip(d){const a=ACC[d.k];S.eq[a.slot]===d.k?delete S.eq[a.slot]:S.eq[a.slot]=d.k;save();refresh()}
+});
+
+/* ======= events ======= */
+function onClick(e){const b=e.target.closest('[data-a]');if(b&&ACTIONS[b.dataset.a])ACTIONS[b.dataset.a](b.dataset,b)}
+document.addEventListener('click',onClick);
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){const b=e.target.closest('.card,.row')?.querySelector('button.p');if(b)b.click()}});
+render();
+</script>
+</body>
+</html>
