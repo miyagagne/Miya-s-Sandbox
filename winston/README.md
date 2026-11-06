@@ -15,3 +15,10 @@ Create an OAuth Web client ID at console.cloud.google.com (APIs & Services > Cre
 
 ## Course materials
 Each class has a Materials tab with course-wide and weekly sections. Upload PDF, Word (.docx), PowerPoint (.pptx) or text files, or paste notes; Winston turns them into study cards (AI-written on the published Claude page, definition-spotting elsewhere). Live class and practice can be limited to one week. File readers load from cdnjs, so uploads need an internet connection. Scanned-image PDFs have no text to read.
+
+## Feelings, calendar, timer, notes
+- **How are you feeling?** (Home) bored opens a Memory Match game made from your study cards; stressed guides 5 deep breaths; unmotivated shows your goals and a pep talk; okay and sparked open a "let's get started" plan (sparked is extra excited).
+- **Name your dog** during setup or in Settings (the gear on Home).
+- **Calendar** per class: add events, set when the class meets, and pull exam and assignment dates out of an uploaded syllabus.
+- **Study timer**: track time per class against a weekly goal; live class and practice rounds are logged automatically.
+- **Class notes**: during live class the dog takes notes; afterwards they are organized (by Claude on the published page) and can be saved to Google Docs in `Winston Notes > <class>` on your Drive (needs the Google Drive connector and your OK), or downloaded.
