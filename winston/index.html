@@ -313,12 +313,12 @@ function rHome(){
 /* ======= classes ======= */
 function rClass(){
  const c=classes().find(x=>x.id===view.cls);
- if(!c){$('#main').innerHTML=`<div class="card"><h2>Your classes</h2>${classes().map(x=>`<div class="row" style="margin:8px 0"><button class="s grow" data-a="openc" data-k="${x.id}">${esc(x.name)} <span class="mute">· ${x.items.length} items · ${x.sessions.length} recaps</span></button><button class="${view.delc===x.id?'p bad':'s'}" data-a="delc" data-k="${x.id}">${view.delc===x.id?'Delete?':'✕'}</button></div>`).join('')||'<p class="mute">No classes yet.</p>'}</div>
+ if(!c){$('#main').innerHTML=`<div class="card"><h2>Your classes</h2>${classes().map(x=>`<div class="row" style="margin:8px 0"><button class="s grow" data-a="openc" data-k="${x.id}">${esc(x.name)} <span class="mute">· ${x.items.length} items · ${x.sessions.length} recaps</span></button><button class="s" data-a="editc" data-k="${x.id}" aria-label="Edit class">✎</button><button class="${view.delc===x.id?'p bad':'s'}" data-a="delc" data-k="${x.id}">${view.delc===x.id?'Delete?':'✕'}</button></div>`).join('')||'<p class="mute">No classes yet.</p>'}</div>
  <div class="card"><h2>Add a class</h2><label>Class name</label><input id="cn" placeholder="BUAD 112">
  <label>Materials from your teacher — one per line: <code>term :: explanation</code></label><textarea id="cm" placeholder="Opportunity cost :: What you give up when you choose..."></textarea>
  <label>Syllabus &amp; course materials (optional) — PDF, Word, PowerPoint or text</label><input id="cf" type="file" multiple accept=".pdf,.docx,.pptx,.txt,.md,.csv"><button class="p" data-a="addc">Add class</button></div>`;return}
  const sub=view.sub;
- $('#main').innerHTML=`<button class="s" data-a="openc" data-k="">← All classes</button><h2 style="margin-top:10px">${esc(c.name)}</h2>
+ $('#main').innerHTML=`<button class="s" data-a="openc" data-k="">← All classes</button><div class="row" style="margin-top:10px"><h2 class="grow" style="margin:0">${esc(c.name)}</h2><button class="s" data-a="editc" data-k="${c.id}">✏️ Edit</button></div>${c.instructor||c.room?`<p class="mute" style="margin:4px 0 8px">${[c.instructor&&'👩‍🏫 '+esc(c.instructor),c.room&&'📍 '+esc(c.room)].filter(Boolean).join(' · ')}</p>`:''}
  <div class="tabs">${[['live','🎙 Live'],['recap','📝 Recaps'],['notes','🗒 Notes'],['mat','📄 Materials'],['cal','📅 Calendar'],['time','⏱ Time']].map(([k,l])=>`<button data-a="sub" data-k="${k}" class="${k===sub?'on':''}">${l}</button>`).join('')}</div><div id="sub"></div>`;
  ({live:rLive,recap:rRecap,notes:rNotes,mat:rMat,cal:rCal,time:rTime})[sub](c);
 }
@@ -383,7 +383,7 @@ function rMat(c){
  <label style="margin-top:8px;display:block">Or paste notes</label><textarea id="pn" placeholder="Paste your notes, a syllabus, a chapter summary…"></textarea><button class="s" data-a="addnotes">Add notes</button>
  <p class="mute">${AI.sm?'Winston uses AI to turn files into study cards.':'Cards are found from definitions in your files (AI makes better ones on the published Claude page).'} Files stay in this browser.</p></div>
  <div class="card"><h3>Files (${docs.length})</h3>${docs.map(d=>`<div class="item"><div><b>${esc(d.name)}</b>${d.kind==='syllabus'?' <span class="chip on" style="padding:1px 8px;font-size:12px">syllabus</span>':''}<div class="mute">${d.chars.toLocaleString()} characters · ${d.cards||0} cards</div></div><button class="s" data-a="mkcards" data-k="${d.id}">${d.cards?'More cards':'Make cards'}</button><button class="${view.rmdoc===d.id?'p bad':'s'}" data-a="rmdoc" data-k="${d.id}">${view.rmdoc===d.id?'Remove file + cards?':'✕'}</button></div>`).join('')||'<p class="mute">No files here yet.</p>'}</div>
- <div class="card"><h3>Study cards (${its.length})</h3>${its.map(i=>`<div class="mat"><span class="term">${esc(i.term)}</span> <button class="s" style="float:right;padding:0 10px" data-a="delm" data-k="${i.id}">✕</button><br><span class="mute">${esc(i.text)}</span></div>`).join('')||'<p class="mute">No cards yet — upload a file or add some below.</p>'}
+ <div class="card"><h3>Study cards (${its.length})</h3>${its.map(i=>`<div class="mat"><span class="term">${esc(i.term)}</span> <button class="s" style="float:right;padding:0 10px" data-a="delm" data-k="${i.id}">✕</button><button class="s" style="float:right;padding:0 10px;margin-right:6px" data-a="editcard" data-k="${i.id}" aria-label="Edit card">✎</button><br><span class="mute">${esc(i.text)}</span></div>`).join('')||'<p class="mute">No cards yet — upload a file or add some below.</p>'}
  <h3 style="margin-top:12px">Add cards by hand</h3><textarea id="mm" placeholder="term :: explanation (one per line)"></textarea><button class="p" data-a="addm">Add cards</button></div>`;
  const fi=$('#fi'),u=$('#upl');fi.onchange=()=>{const fs=[...fi.files];fi.value='';addFiles(c,fs,wk)};
  ['dragover','dragenter'].forEach(e=>u.addEventListener(e,ev=>{ev.preventDefault();u.classList.add('drag')}));
@@ -733,7 +733,7 @@ function rCal(c){const now=new Date(),cv=view.cal||(view.cal={y:now.getFullYear(
   <div class="cal" style="margin-top:8px">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(x=>`<div class="dow">${x}</div>`).join('')}${cells}</div>
   <div class="mute" style="margin-top:8px">${Object.values(EVT).map(([n,col])=>`<span style="margin-right:8px"><i class="dot" style="background:${col};width:8px;height:8px"></i> ${n}</span>`).join('')}</div></div>
  <div class="card"><h3>${fromIso(sel).toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}</h3>
-  ${dayEv.map(e=>`<div class="item"><i class="dot" style="background:${EVT[e.type][1]}"></i><div><b>${esc(e.title)}</b><div class="mute">${EVT[e.type][0]}${e.time?' · '+esc(e.time):''}${e.rec?' · every week':''}</div></div>${e.rec?'':`<button class="s" data-a="delev" data-k="${e.id}">✕</button>`}</div>`).join('')||'<p class="mute">Nothing on this day.</p>'}
+  ${dayEv.map(e=>`<div class="item"><i class="dot" style="background:${EVT[e.type][1]}"></i><div><b>${esc(e.title)}</b><div class="mute">${EVT[e.type][0]}${e.time?' · '+esc(e.time):''}${e.rec?' · every week':''}</div></div>${e.rec?'':`<button class="s" data-a="editev" data-k="${e.id}" aria-label="Edit event">✎</button><button class="s" data-a="delev" data-k="${e.id}">✕</button>`}</div>`).join('')||'<p class="mute">Nothing on this day.</p>'}
   <h3 style="margin-top:12px">Add to this day</h3><input id="et" placeholder="e.g. Midterm exam, Essay due"><div class="row"><select id="ety" class="grow">${Object.entries(EVT).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join('')}</select><input id="etm" type="time" class="grow"></div><button class="p" data-a="addev">Add</button></div>
  <div class="card"><h3>Coming up in ${esc(c.name)}</h3>${up.map(e=>`<div class="item"><i class="dot" style="background:${EVT[e.type][1]}"></i><div><b>${esc(e.title)}</b><div class="mute">${fromIso(e.date).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}${e.time?' · '+esc(e.time):''}</div></div></div>`).join('')||'<p class="mute">No dates yet.</p>'}
   <button class="s" data-a="finddates" style="margin-top:8px">📄 Find dates in my syllabus &amp; materials</button><div id="datestat" class="mute"></div></div>
@@ -848,6 +848,27 @@ Object.assign(ACTIONS,{
  dlnote(d){const c=cur(),ses=c.sessions.find(x=>x.id===d.k);downloadText(`${c.name} notes ${ses.date.split(',')[0]}.md`,ses.notes.text)},
  savedoc(d){const c=cur();driveSave(c,c.sessions.find(x=>x.id===d.k))},
  async mknotes(d){const c=cur();await makeNotes(c,c.sessions.find(x=>x.id===d.k));render()}});
+
+/* ---- editing classes, cards and events ---- */
+function openEditClass(id){const c=S.classes.find(x=>x.id===id);if(!c)return;
+ openModal(`<h2>✏️ Edit class</h2><label>Class name</label><input id="ecn" value="${esc(c.name)}" maxlength="60"><label>Instructor (optional)</label><input id="eci" value="${esc(c.instructor||'')}" maxlength="60"><label>Room / location (optional)</label><input id="ecr" value="${esc(c.room||'')}" maxlength="60"><label>Weekly study goal (hours)</label><input id="ecg" type="number" step="0.5" min="0.5" max="40" value="${c.goalMin/60}"><button class="p" data-a="savec" data-k="${c.id}" style="width:100%">Save</button><hr style="border:0;border-top:2px dotted #f1d9b5;margin:14px 0"><button class="${view.delc===c.id?'p bad':'s'}" data-a="delc2" data-k="${c.id}" style="width:100%">${view.delc===c.id?'Really delete this class?':'Delete this class'}</button>`)}
+function openEditCard(id){const c=cur(),i=c&&c.items.find(x=>x.id===id);if(!i)return;
+ openModal(`<h2>✏️ Edit study card</h2><label>Term</label><input id="ect" value="${esc(i.term)}" maxlength="80"><label>Explanation</label><textarea id="ecx">${esc(i.text)}</textarea><label>Section</label><select id="ecw">${['course',...c.weeks.map(w=>w.id)].map(k=>`<option value="${k}" ${i.wk===k?'selected':''}>${esc(wkLabel(c,k))}</option>`).join('')}</select><button class="p" data-a="savecard" data-k="${id}" style="width:100%">Save</button>`)}
+function openEditEvent(id){const c=cur(),e=c&&c.events.find(x=>x.id===id);if(!e)return;
+ openModal(`<h2>✏️ Edit event</h2><label>Title</label><input id="eet" value="${esc(e.title)}" maxlength="80"><label>Date</label><input id="eed" type="date" value="${esc(e.date)}"><div class="row"><div class="grow"><label>Type</label><select id="eey">${Object.entries(EVT).map(([k,v])=>`<option value="${k}" ${e.type===k?'selected':''}>${v[0]}</option>`).join('')}</select></div><div class="grow"><label>Time</label><input id="eem" type="time" value="${esc(e.time||'')}"></div></div><button class="p" data-a="saveev" data-k="${id}" style="width:100%">Save</button>`)}
+Object.assign(ACTIONS,{
+ editc(d){view.delc=null;openEditClass(d.k)},
+ savec(d){const c=S.classes.find(x=>x.id===d.k),n=$('#ecn').value.trim();if(!c)return;if(!n)return toast('Give the class a name');
+  const h=parseFloat($('#ecg').value);if(n!==c.name&&S.drive&&S.drive.classes)delete S.drive.classes[c.id];
+  c.name=n.slice(0,60);c.instructor=$('#eci').value.trim();c.room=$('#ecr').value.trim();if(h>0)c.goalMin=Math.round(h*60);save();closeModal();render();toast('Class updated ✏️')},
+ delc2(d){if(view.delc!==d.k){view.delc=d.k;openEditClass(d.k);return}
+  S.classes=S.classes.filter(c=>c.id!==d.k);if(view.cls===d.k)view.cls=null;view.delc=null;if(S.timer&&S.timer.cls===d.k)S.timer=null;save();closeModal();render();tickTimer()},
+ editcard(d){openEditCard(d.k)},
+ savecard(d){const c=cur(),i=c.items.find(x=>x.id===d.k),t=$('#ect').value.trim(),x=$('#ecx').value.trim();if(!t||!x)return toast('Both the term and explanation are needed');
+  i.term=t;i.text=x.slice(0,400);i.wk=$('#ecw').value;save();closeModal();render();toast('Card updated ✏️')},
+ editev(d){openEditEvent(d.k)},
+ saveev(d){const c=cur(),e=c.events.find(x=>x.id===d.k),t=$('#eet').value.trim(),dt=$('#eed').value;if(!t||!dt)return toast('Title and date are needed');
+  e.title=t;e.date=dt;e.type=$('#eey').value;e.time=$('#eem').value;view.calSel=dt;const x=fromIso(dt);view.cal={y:x.getFullYear(),m:x.getMonth()};save();closeModal();render();toast('Event updated ✏️')}});
 
 /* ---- intro screen ---- */
 function showIntro(){const el=$('#intro'),u=S.user;let title,sub;
