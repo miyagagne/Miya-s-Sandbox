@@ -3,83 +3,86 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0a0b1e">
+<meta name="theme-color" content="#bfeaff">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Instrument+Sans:wght@400;500;600&display=swap">
 <title>Winston Study Buddy</title>
 <style>
-:root{color-scheme:dark;--bg:#0a0b1e;--ink:#e8ecff;--mute:#9aa3cf;--card:rgba(13,13,42,.66);--line:rgba(130,190,255,.22);--brand:#62f0ff;--brand2:#8d7cff;--ok:#7fe3a8;--bad:#ff8f8f;--soft:rgba(255,255,255,.08);--display:'Fredoka',system-ui,sans-serif}
+:root{color-scheme:light;--bg:#bfeaff;--ink:#4a3426;--mute:#8a7260;--card:rgba(255,252,240,.95);--line:#ffb3d1;--brand:#ff9a3d;--brand2:#ff6fa8;--ok:#3fb84c;--bad:#e0504d;--soft:#fff0c2;--display:'Fredoka',system-ui,sans-serif}
 *{box-sizing:border-box}
-html{background:#0a0b1e}
-body{margin:0;background:transparent;color:var(--ink);font:16px/1.45 'Instrument Sans',system-ui,sans-serif;padding-bottom:90px;min-height:100vh}
+html{background:#bfeaff}
+body{margin:0;background:transparent;color:var(--ink);font:16px/1.45 'Instrument Sans',system-ui,sans-serif;padding-bottom:96px;min-height:100vh}
 #bg{position:fixed;inset:0;width:100%;height:100%;z-index:-1;display:block}
 main{max-width:680px;margin:0 auto;padding:14px}
-.card{background:var(--card);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:24px;padding:16px;margin-bottom:14px;box-shadow:0 10px 30px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.08)}
+.card{background:var(--card);border:3px dotted var(--line);border-radius:26px;padding:16px;margin-bottom:14px;box-shadow:0 5px 0 rgba(255,150,190,.35),0 12px 22px rgba(60,120,160,.18)}
 h1,h2,h3{margin:0 0 8px;font-family:var(--display);font-weight:600;letter-spacing:.2px}h2{font-size:21px}h3{font-size:17px}
-.glowtitle{font-size:30px;text-align:center;background:linear-gradient(90deg,#8ff7ff,#62f0ff,#b79cff,#ff7ad9);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 12px rgba(98,240,255,.45))}
+.sign{display:block;margin:2px auto 14px;width:max-content;max-width:100%;padding:6px 30px 8px;background:linear-gradient(#e0a050,#b8742e);border:4px solid #8a521f;border-radius:18px;color:#fff6dd;font-size:32px;text-shadow:0 2px 0 #8a521f;box-shadow:0 5px 0 #6e3f14,inset 0 2px 0 rgba(255,255,255,.35);position:relative}
+.sign::before,.sign::after{content:'';position:absolute;top:8px;width:8px;height:8px;border-radius:50%;background:#6e3f14;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.sign::before{left:9px}.sign::after{right:9px}
 .mute{color:var(--mute);font-size:14px}
 button{font:inherit;cursor:pointer}
-.p,.s{border-radius:99px;padding:10px 18px;border:2px solid var(--brand);transition:transform .15s,box-shadow .2s}
-.p{background:linear-gradient(135deg,#7ef7ff,#8d7cff);color:#06102a;font-weight:700;box-shadow:0 0 18px rgba(98,240,255,.45)}
-.s{background:rgba(255,255,255,.04);color:var(--brand)}
-.p:hover,.s:hover{transform:translateY(-2px) scale(1.03)}
-.p.ok{background:linear-gradient(135deg,#9af0bf,#5fcf95);border-color:#7fe3a8;color:#0c3a22;box-shadow:0 0 18px rgba(127,227,168,.4)}
-.p.bad{background:#ff8f8f;border-color:#ff8f8f;color:#4a0f0f}
-.p.purple{background:linear-gradient(135deg,#a79bff,#7c6cff);border-color:#a79bff;color:#fff;box-shadow:0 0 18px rgba(141,124,255,.45)}
-input,select,textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.07);color:var(--ink);margin:4px 0 10px;outline:none}
-input:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(98,240,255,.2)}
-::placeholder{color:#7f9b98}
+.p,.s{border-radius:18px;padding:10px 18px;transition:transform .12s,box-shadow .12s}
+.p{background:linear-gradient(#97ee78,#4cc455);color:#fff;border:3px solid #2f9a3a;text-shadow:0 1px 0 #2f9a3a;font-weight:700;box-shadow:0 4px 0 #2f9a3a}
+.s{background:#fff7e0;color:#c4691a;border:3px solid #f5b25a;box-shadow:0 3px 0 #f5b25a;font-weight:600}
+.p:active,.s:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.2)}
+.p.ok{background:linear-gradient(#97ee78,#4cc455)}
+.p.bad{background:linear-gradient(#ff8f8a,#e0504d);border-color:#b02f2c;box-shadow:0 4px 0 #b02f2c;text-shadow:0 1px 0 #b02f2c}
+.p.purple{background:linear-gradient(#ffa9cc,#ff6fa8);border-color:#d94d86;box-shadow:0 4px 0 #d94d86;text-shadow:0 1px 0 #d94d86}
+input,select,textarea{width:100%;font:inherit;padding:11px 12px;border:2px solid #f1d9b5;border-radius:14px;background:#fff;color:var(--ink);margin:4px 0 10px;outline:none}
+input:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(255,154,61,.25)}
+::placeholder{color:#b9a48f}
 textarea{min-height:90px}label{font-size:13px;color:var(--mute)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.grow{flex:1}
-.chip{display:inline-block;padding:7px 13px;border-radius:99px;background:var(--soft);margin:3px;font-size:14px;border:2px solid transparent;cursor:pointer;transition:.2s}
-.chip:hover{background:rgba(255,255,255,.14)}
-.chip.on{border-color:var(--brand);box-shadow:0 0 14px rgba(98,240,255,.35);font-weight:600}
+.chip{display:inline-block;padding:7px 13px;border-radius:99px;background:var(--soft);margin:3px;font-size:14px;border:2px solid #f6d57a;cursor:pointer;transition:.15s}
+.chip:hover{background:#ffe9a0}
+.chip.on{border-color:var(--brand2);background:#ffe0ee;font-weight:600}
 .stats{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.stat{background:var(--soft);padding:6px 13px;border-radius:99px;font-weight:600;font-size:14px;border:1px solid var(--line)}
-.bar{height:12px;background:rgba(255,255,255,.1);border-radius:8px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#62f0ff,#8d7cff,#ff7ad9);box-shadow:0 0 12px rgba(98,240,255,.6);border-radius:8px}
-.dogwrap{text-align:center}.dogwrap svg{max-width:260px;width:74%;animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 8px 14px rgba(0,0,0,.35))}
-@keyframes bob{50%{transform:translateY(-6px)}}
-.stage{position:relative;padding-bottom:18px}
-.stage::after,.stage::before{content:'';position:absolute;left:50%;bottom:6px;width:64%;height:30px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse,rgba(98,240,255,.38) 0%,rgba(141,124,255,.18) 55%,rgba(98,240,255,0) 72%);border:2px solid rgba(98,240,255,.75);box-shadow:0 0 26px rgba(98,240,255,.55),inset 0 0 14px rgba(98,240,255,.5);z-index:-1;animation:holo 3s ease-in-out infinite}
-.stage::before{width:84%;height:42px;bottom:0;opacity:.4;animation:none}
-@keyframes holo{50%{box-shadow:0 0 38px rgba(255,94,203,.6),inset 0 0 18px rgba(255,94,203,.4);border-color:rgba(255,122,217,.85)}}
-.stage .lotus{position:absolute;right:12%;bottom:4px;font-size:32px;animation:sway 4s ease-in-out infinite}
-.stage .fly{position:absolute;left:14%;top:18%;font-size:26px;animation:flit 7s ease-in-out infinite}
+.stat{background:#fff;padding:6px 13px;border-radius:99px;font-weight:600;font-size:14px;border:2px solid #ffd9a0}
+.bar{height:15px;background:#f1e3c6;border:2px solid #e2cba0;border-radius:10px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(#97ee78,#4cc455);box-shadow:inset 0 3px 0 rgba(255,255,255,.45);border-radius:8px}
+.dogwrap{text-align:center}.dogwrap svg{max-width:270px;width:76%;animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 8px 8px rgba(80,60,20,.22))}
+@keyframes bob{50%{transform:translateY(-5px)}}
+.stage{position:relative;padding-bottom:20px}
+.stage::after,.stage::before{content:'';position:absolute;left:50%;transform:translateX(-50%);border-radius:50%;z-index:-1}
+.stage::after{bottom:6px;width:72%;height:36px;background:radial-gradient(ellipse,#86dc6e 0%,#52b94e 68%,rgba(82,185,78,0) 74%)}
+.stage::before{bottom:0;width:92%;height:48px;background:radial-gradient(ellipse,rgba(255,255,255,.7),rgba(255,255,255,0) 70%)}
+.stage .lotus{position:absolute;right:11%;bottom:8px;font-size:30px;animation:sway 4s ease-in-out infinite}
+.stage .fly{position:absolute;left:12%;top:18%;font-size:26px;animation:flit 7s ease-in-out infinite}
 @keyframes sway{50%{transform:rotate(6deg) translateY(-2px)}}
 @keyframes flit{0%,100%{transform:translate(0,0) rotate(-8deg)}25%{transform:translate(26px,-22px) rotate(10deg)}50%{transform:translate(52px,6px) rotate(-6deg)}75%{transform:translate(20px,22px) rotate(8deg)}}
-nav{position:fixed;bottom:10px;left:10px;right:10px;max-width:660px;margin:0 auto;background:rgba(11,11,36,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:26px;display:flex;justify-content:space-around;padding:6px 4px;z-index:5;box-shadow:0 8px 28px rgba(0,0,0,.35)}
-nav button{border:0;background:none;color:var(--mute);font-size:11px;padding:4px 8px;border-radius:16px;transition:.2s}nav button b{display:block;font-size:21px;font-weight:400}
-nav button.on{color:var(--brand);font-weight:700;background:rgba(98,240,255,.12);text-shadow:0 0 10px rgba(98,240,255,.6)}
-.mat{display:block;padding:11px 13px;border:2px solid var(--line);border-radius:18px;margin:9px 0;transition:.4s;background:rgba(255,255,255,.04)}
+nav{position:fixed;bottom:10px;left:10px;right:10px;max-width:660px;margin:0 auto;background:linear-gradient(#dba256,#b8742e);border:4px solid #8a521f;border-radius:24px;display:flex;justify-content:space-around;padding:5px 4px;z-index:5;box-shadow:0 5px 0 #6e3f14,0 12px 22px rgba(0,0,0,.2)}
+nav button{border:0;background:none;color:#fff2d0;font-size:11px;padding:4px 8px;border-radius:16px;text-shadow:0 1px 0 #8a521f}nav button b{display:block;font-size:21px;font-weight:400}
+nav button.on{background:#fff3cf;color:#a85a10;font-weight:700;text-shadow:none;box-shadow:inset 0 -3px 0 #f0cf86}
+.mat{display:block;padding:11px 13px;border:3px solid #f3e1bd;border-radius:18px;margin:9px 0;transition:.4s;background:#fff}
 .mat .term{position:relative;display:inline-block;font-family:var(--display);font-weight:600;font-size:17px}
-.mat.glow{border-color:#62f0ff;background:rgba(98,240,255,.12);box-shadow:0 0 0 4px rgba(98,240,255,.22),0 0 30px rgba(98,240,255,.65);animation:pulse 1.3s ease-in-out 3;transform:scale(1.025)}
-.mat.seen{border-color:rgba(127,227,168,.55)}
+.mat.glow{border-color:#ffb300;background:#fff8d6;box-shadow:0 0 0 4px rgba(255,200,60,.4),0 0 26px rgba(255,190,40,.85);animation:pulse 1.3s ease-in-out 3;transform:scale(1.025)}
+.mat.seen{border-color:#7bd36a}
 .circ{position:absolute;left:-14px;top:-9px;width:calc(100% + 28px);height:calc(100% + 18px);overflow:visible;pointer-events:none}
-.circ path{fill:none;stroke:#ff5ecb;stroke-width:3.2;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:scribble .8s ease-out .1s forwards;filter:drop-shadow(0 0 4px rgba(255,94,203,.8))}
+.circ path{fill:none;stroke:#ff4f6d;stroke-width:3.2;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:scribble .8s ease-out .1s forwards}
 @keyframes scribble{to{stroke-dashoffset:0}}
-@keyframes pulse{50%{box-shadow:0 0 0 9px rgba(98,240,255,.12),0 0 44px rgba(98,240,255,.95)}}
-.step{display:flex;gap:10px;margin:11px 0}.step .n{flex:none;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#a79bff,#7c6cff);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px;box-shadow:0 0 12px rgba(141,124,255,.6)}
-.opt{display:block;width:100%;text-align:left;margin:7px 0;padding:12px 14px;border-radius:16px;border:2px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);transition:.2s}
-.opt:hover{border-color:var(--brand);background:rgba(98,240,255,.08)}
-.opt.right{border-color:var(--ok)}.opt.wrong{border-color:var(--bad)}
-.tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;padding:9px;border-radius:99px;border:1px solid var(--line);background:var(--soft);color:var(--ink)}.tabs .on{background:linear-gradient(135deg,#a79bff,#7c6cff);border-color:transparent;color:#fff;box-shadow:0 0 16px rgba(141,124,255,.5)}
-.bubble{background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:18px;padding:10px 13px;margin:8px 0;font-size:15px;position:relative}
+@keyframes pulse{50%{box-shadow:0 0 0 9px rgba(255,200,60,.2),0 0 40px rgba(255,190,40,1)}}
+.step{display:flex;gap:10px;margin:11px 0}.step .n{flex:none;width:30px;height:30px;border-radius:50%;background:linear-gradient(#ffa9cc,#ff6fa8);border:2px solid #d94d86;color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px;text-shadow:0 1px 0 #d94d86}
+.opt{display:block;width:100%;text-align:left;margin:7px 0;padding:12px 14px;border-radius:16px;border:3px solid #f3e1bd;background:#fff;color:var(--ink);transition:.15s}
+.opt:hover{border-color:var(--brand);background:#fff6e6}
+.opt.right{border-color:var(--ok);background:#e8ffe6}.opt.wrong{border-color:var(--bad);background:#ffe9e8}
+.tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;padding:9px;border-radius:99px;border:2px solid #f6d57a;background:var(--soft);color:var(--ink);font-weight:600}.tabs .on{background:linear-gradient(#ffa9cc,#ff6fa8);border-color:#d94d86;color:#fff}
+.bubble{background:#fff;border:2px solid #f1d9b5;border-radius:18px;padding:10px 13px;margin:8px 0;font-size:15px;position:relative}
 .shopgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
 .shopgrid .card{margin:0;text-align:center;padding:10px}.shopgrid svg{width:78px;height:62px}
-#toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#a79bff,#7c6cff);color:#fff;padding:10px 20px;border-radius:99px;z-index:50;opacity:0;transition:.3s;pointer-events:none;max-width:90vw;text-align:center;box-shadow:0 0 24px rgba(141,124,255,.7)}
+.item{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:2px dotted #f1d9b5}.item>div{flex:1;min-width:0;overflow-wrap:anywhere}
+.upl{display:block;border:3px dashed #f5b25a;border-radius:22px;padding:18px;text-align:center;background:#fff9e8;cursor:pointer;color:var(--ink)}
+.upl.drag{border-color:var(--brand2);background:#ffe9f3}
+#toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:linear-gradient(#ffa9cc,#ff6fa8);color:#fff;border:3px solid #d94d86;padding:9px 20px;border-radius:99px;z-index:50;opacity:0;transition:.3s;pointer-events:none;max-width:90vw;text-align:center;font-weight:600;text-shadow:0 1px 0 #d94d86;box-shadow:0 4px 0 #d94d86}
 #toast.on{opacity:1}
-#widget{position:fixed;right:10px;bottom:92px;width:210px;background:linear-gradient(160deg,rgba(22,18,64,.96),rgba(10,10,32,.96));border:2px solid rgba(98,240,255,.7);border-radius:26px;padding:8px;z-index:20;box-shadow:0 0 30px rgba(98,240,255,.35),0 8px 28px rgba(0,0,0,.4);display:none;text-align:center;font-size:14px;color:var(--ink)}
+#widget{position:fixed;right:10px;bottom:96px;width:210px;background:#fffaf0;border:4px solid #ff9a3d;border-radius:26px;padding:8px;z-index:20;box-shadow:0 5px 0 #c4691a,0 12px 24px rgba(0,0,0,.25);display:none;text-align:center;font-size:14px;color:var(--ink)}
 #widget.show{display:block}
 #widget svg{width:96px;height:96px}
 body.live{padding-bottom:350px}
 #widget.pip{position:static;width:100%;min-height:100vh;border-radius:0;border:0;box-shadow:none;display:block}
-.paw{background:linear-gradient(135deg,#ff7ad9,#8d7cff);color:#fff;border-radius:18px;padding:12px;margin-top:8px;animation:pulse2 .8s infinite}
+.paw{background:linear-gradient(135deg,#ffb347,#ff6fa8);color:#fff;border-radius:18px;padding:12px;margin-top:8px;animation:pulse2 .8s infinite;font-weight:600}
 @keyframes pulse2{50%{transform:scale(1.05)}}
-.paw button{font-size:20px;padding:10px 18px;border-radius:99px;border:0;background:#fff;color:#6b57e8;font-weight:800;margin-top:6px}
-.hero{background:linear-gradient(135deg,rgba(98,240,255,.22),rgba(141,124,255,.3));border:1px solid var(--line);color:#fff;border-radius:24px;padding:16px;margin-bottom:14px;backdrop-filter:blur(10px)}
-/* Winston animations */
+.paw button{font-size:20px;padding:10px 18px;border-radius:99px;border:0;background:#fff;color:#e0508a;font-weight:800;margin-top:6px}
+.hero{background:linear-gradient(135deg,#ffe08a,#ffb3d1);border:3px dotted #fff;color:var(--ink);border-radius:26px;padding:16px;margin-bottom:14px;box-shadow:0 5px 0 rgba(255,150,190,.4)}
 .wag{transform-box:fill-box;transform-origin:8% 92%;animation:wag 1s ease-in-out infinite}@keyframes wag{50%{transform:rotate(10deg)}}
-.earR{transform-box:fill-box;transform-origin:25% 100%;animation:twitch 6s infinite}@keyframes twitch{0%,90%,100%{transform:none}93%{transform:rotate(-9deg)}96%{transform:rotate(3deg)}}
 .blink{transform-box:fill-box;transform-origin:center;animation:blink 5s infinite}@keyframes blink{0%,94%,100%{transform:none}97%{transform:scaleY(.1)}}
 .spk{transform-box:fill-box;transform-origin:center;animation:tw 2.4s ease-in-out infinite}@keyframes tw{50%{opacity:.2;transform:scale(.45) rotate(45deg)}}
 .hrt{transform-box:fill-box;transform-origin:center;animation:rise 3.4s ease-in infinite}@keyframes rise{0%{opacity:0;transform:translateY(8px) scale(.6)}30%{opacity:1}100%{opacity:0;transform:translateY(-28px) scale(1.1)}}
@@ -89,11 +92,11 @@ body.live{padding-bottom:350px}
 </head>
 <body>
 <svg id="defs" width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-<radialGradient id="fur" cx=".5" cy=".3" r=".8"><stop offset="0" stop-color="#ffcf8e"/><stop offset=".55" stop-color="#f6a65a"/><stop offset="1" stop-color="#d9813b"/></radialGradient>
+<radialGradient id="fur" cx=".5" cy=".3" r=".8"><stop offset="0" stop-color="#ffcb86"/><stop offset=".55" stop-color="#f5a24a"/><stop offset="1" stop-color="#d27a2c"/></radialGradient>
 <radialGradient id="cream" cx=".5" cy=".3" r=".8"><stop offset="0" stop-color="#fffaf0"/><stop offset=".6" stop-color="#fde6c4"/><stop offset="1" stop-color="#efc592"/></radialGradient>
 <radialGradient id="eye" cx=".5" cy=".35" r=".7"><stop offset="0" stop-color="#6b4430"/><stop offset="1" stop-color="#1b1015"/></radialGradient>
 <radialGradient id="blush" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ff8fa8" stop-opacity=".85"/><stop offset="1" stop-color="#ff8fa8" stop-opacity="0"/></radialGradient>
-<radialGradient id="aura" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#9ff3ff" stop-opacity=".5"/><stop offset="1" stop-color="#9ff3ff" stop-opacity="0"/></radialGradient>
+<radialGradient id="aura" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff3a8" stop-opacity=".65"/><stop offset="1" stop-color="#fff3a8" stop-opacity="0"/></radialGradient>
 <linearGradient id="ear" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc2d0"/><stop offset="1" stop-color="#ff98b0"/></linearGradient>
 <linearGradient id="tongue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9fb4"/><stop offset="1" stop-color="#f0617f"/></linearGradient>
 <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0a0"/><stop offset=".5" stop-color="#ffc400"/><stop offset="1" stop-color="#d99200"/></linearGradient>
@@ -102,7 +105,7 @@ body.live{padding-bottom:350px}
 <linearGradient id="pink" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa8cf"/><stop offset="1" stop-color="#e5468f"/></linearGradient>
 <linearGradient id="red" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7b7b"/><stop offset="1" stop-color="#c92a3b"/></linearGradient>
 <linearGradient id="wing" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4fbff" stop-opacity=".95"/><stop offset="1" stop-color="#e6c8ff" stop-opacity=".65"/></linearGradient>
-</defs></svg>
+<radialGradient id="nose" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#5c4852"/><stop offset="1" stop-color="#1b1216"/></radialGradient></defs></svg>
 <canvas id="bg"></canvas>
 <main id="main"></main>
 <nav id="nav"></nav>
@@ -134,10 +137,11 @@ const DEMO={id:'demo',name:'Intro to Business (demo)',careerNotes:{},sessions:[]
  ['Market segmentation','Dividing a market into groups of customers with similar needs. It lets a company aim its message at the right people.'],
  ['Supply and demand','Prices rise when demand is higher than supply. Prices fall when supply is higher than demand.']
 ].map(([term,text])=>({id:uid(),term,text}))};
-let S=load();let joy=0;
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===1)return s}catch(e){}
+ensure(DEMO);let S=load();let joy=0;
+function ensure(c){c.weeks=c.weeks||[];c.docs=c.docs||[];c.items.forEach(i=>{if(!i.wk)i.wk='course'})}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===1){s.classes.forEach(ensure);return s}}catch(e){}
  return {v:1,user:null,coins:0,earned:0,happy:70,tick:Date.now(),owned:[],eq:{},classes:[DEMO],friends:[],checks:0}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Storage is full — remove some uploaded files')}}
 // Winston gets a little lonelier while you are away (gentle: never below 15).
 (function decay(){const h=(Date.now()-S.tick)/36e5;S.happy=Math.max(15,Math.min(S.happy,100)-h*1.5);S.tick=Date.now();save()})();
 
@@ -170,53 +174,48 @@ const ACC={
 const TREATS=[{id:'bone',name:'Bone treat',price:5,h:15,e:'🦴'},{id:'ball',name:'Squeaky ball',price:8,h:25,e:'🎾'},{id:'cake',name:'Pup cake',price:15,h:50,e:'🧁'}];
 function dog(eq={},m='happy'){
  const g=s=>eq[s]&&ACC[eq[s]]?ACC[eq[s]].svg:'';
- const C=(x,y,r,f,o)=>`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${f}"${o?` opacity="${o}"`:''}/>`;
- // every ring puff is drawn on the right and mirrored to the left
- const ring=(n,rad,sq,rr,fill,op,stroke)=>{let o='';for(let k=0;k<=n;k++){const a=-Math.PI/2+k/n*Math.PI,r=rad(k),x=r*Math.cos(a),y=108+r*sq*Math.sin(a),sz=rr(k),st=stroke?' stroke="#c9742f" stroke-opacity=".28" stroke-width="1"':'';
-  for(const sx of(x<1e-6?[1]:[1,-1]))o+=`<circle cx="${(100+sx*x).toFixed(1)}" cy="${y.toFixed(1)}" r="${sz.toFixed(1)}" fill="${fill}"${op?` opacity="${op}"`:''}${st}/>`}return o};
- const outer=ring(15,k=>54+(k%3===0?10:k%2?5:7.5),.94,k=>13+(k%4)*1.6,'url(#fur)',0,true);
- const inner=ring(11,k=>42,.95,k=>8.5,'#ffe0b0',.5,false);
+ const H=s=>s+`<g transform="translate(200 0) scale(-1 1)">${s}</g>`;   // draw the right side, mirror it to the left
+ const F=(x,y,r,f='url(#fur)')=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${f}" stroke="#c4742a" stroke-opacity=".22" stroke-width="1"/>`;
+ const C=(x,y,r,f,o)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${f}"${o?` opacity="${o}"`:''}/>`;
  const star=(x,y,sc,d)=>`<path class="spk" style="animation-delay:${d}s" transform="translate(${x} ${y}) scale(${sc})" d="${STAR}" fill="#fff3b0"/>`;
- const heart=(x,y,d)=>`<path class="hrt" style="animation-delay:${d}s" transform="translate(${x} ${y}) scale(.7)" d="M0 -3 C-6 -10 -14 0 0 10 C14 0 6 -10 0 -3Z" fill="#ff7aa8"/>`;
+ const heart=(x,y,d)=>`<path class="hrt" style="animation-delay:${d}s" transform="translate(${x} ${y}) scale(.7)" d="M0 -3 C-6 -10 -14 0 0 10 C14 0 6 -10 0 -3Z" fill="#ff6fa8"/>`;
+ const eye=(ry)=>`<ellipse cx="122" cy="100" rx="${ry-1.5}" ry="${ry}" fill="url(#eye)"/><ellipse cx="122" cy="100" rx="${ry-1.5}" ry="${ry}" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="1.6"/><circle cx="126" cy="${95-(ry>12?1:0)}" r="${ry>12?5.2:4.6}" fill="#fff"/><circle cx="118" cy="105" r="2.2" fill="#fff" opacity=".85"/><path d="M113 109 Q122 115 131 109" stroke="#8fd3ff" stroke-opacity=".55" stroke-width="1.6" fill="none"/>`;
  const eyes=m==='happy'
-  ?'<path d="M68 104 Q78 88 88 104M112 104 Q122 88 132 104" stroke="#2b1a16" stroke-width="4.6" fill="none" stroke-linecap="round"/><path d="M66 100 l-4-3M70 94 l-3-4M134 100 l4-3M130 94 l3-4" stroke="#2b1a16" stroke-width="2.4" stroke-linecap="round"/>'
-  :m==='ok'
-  ?'<g class="blink"><ellipse cx="78" cy="101" rx="7.5" ry="8.8" fill="url(#eye)"/><ellipse cx="122" cy="101" rx="7.5" ry="8.8" fill="url(#eye)"/><circle cx="81" cy="97" r="3.2" fill="#fff"/><circle cx="119" cy="97" r="3.2" fill="#fff"/><circle cx="75" cy="105" r="1.5" fill="#fff" opacity=".8"/><circle cx="125" cy="105" r="1.5" fill="#fff" opacity=".8"/></g>'
-  :'<g class="blink"><ellipse cx="78" cy="103" rx="8.6" ry="10" fill="url(#eye)"/><ellipse cx="122" cy="103" rx="8.6" ry="10" fill="url(#eye)"/><circle cx="81" cy="98" r="3.8" fill="#fff"/><circle cx="119" cy="98" r="3.8" fill="#fff"/><circle cx="75" cy="107" r="2" fill="#bfe6ff"/><circle cx="125" cy="107" r="2" fill="#bfe6ff"/></g><path d="M66 88 L88 94M134 88 L112 94" stroke="#7a4a2a" stroke-width="3.2" stroke-linecap="round"/><path d="M70 114 q-4 9 0 13 q4-4 0-13Z M130 114 q4 9 0 13 q-4-4 0-13Z" fill="#7fd0ff" opacity=".9"/>';
+  ?H('<path d="M112 104 Q122 88 132 104" stroke="#2a1810" stroke-width="4.6" fill="none" stroke-linecap="round"/><path d="M134 100 l4-3M130 94 l3-4" stroke="#2a1810" stroke-width="2.4" stroke-linecap="round"/>')
+  :m==='ok'?`<g class="blink">${H(eye(11.5))}</g>`
+  :`<g class="blink">${H(eye(13))}</g>`+H('<path d="M108 86 L136 92" stroke="#7a4a2a" stroke-width="3.4" stroke-linecap="round"/><path d="M130 114 q4 9 0 13 q-4-4 0-13Z" fill="#7fd0ff" opacity=".9"/>');
  const mouth=m==='happy'
-  ?'<path d="M100 124 V129" stroke="#2b1a16" stroke-width="2.4"/><path d="M87 129 Q100 148 113 129 Q100 134 87 129Z" fill="#7a2438" stroke="#2b1a16" stroke-width="2" stroke-linejoin="round"/><path d="M94 138 Q100 150 106 138 Q100 134 94 138Z" fill="url(#tongue)"/><path d="M87 129 Q83 128 82 124M113 129 Q117 128 118 124" stroke="#2b1a16" stroke-width="2" fill="none" stroke-linecap="round"/>'
+  ?'<path d="M100 121 V127" stroke="#2a1810" stroke-width="2.4"/><path d="M86 127 Q100 152 114 127 Q100 134 86 127Z" fill="#7a2438" stroke="#2a1810" stroke-width="2" stroke-linejoin="round"/><path d="M93 139 Q100 155 107 139 Q100 134 93 139Z" fill="url(#tongue)"/><path d="M86 127 Q82 126 81 122M114 127 Q118 126 119 122" stroke="#2a1810" stroke-width="2" fill="none" stroke-linecap="round"/>'
   :m==='ok'
-  ?'<path d="M100 124 V129 M89 131 Q95 137 100 129 Q105 137 111 131" stroke="#2b1a16" stroke-width="2.6" fill="none" stroke-linecap="round"/>'
-  :'<path d="M100 124 V129 M90 137 Q100 126 110 137" stroke="#2b1a16" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
- return `<svg viewBox="0 0 200 200" role="img" aria-label="Winston the Pomeranian">
- <circle cx="100" cy="104" r="98" fill="url(#aura)" opacity="${m==='sad'?.25:m==='ok'?.5:.95}"/>
- <ellipse cx="100" cy="196" rx="58" ry="6" fill="#000" opacity=".25"/>
+  ?'<path d="M100 121 V127 M88 129 Q94 136 100 127 Q106 136 112 129" stroke="#2a1810" stroke-width="2.6" fill="none" stroke-linecap="round"/>'
+  :'<path d="M100 121 V127 M90 136 Q100 125 110 136" stroke="#2a1810" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
+ return `<svg viewBox="0 0 200 200" role="img" aria-label="Winston the Pomeranian puppy">
+ <circle cx="100" cy="104" r="98" fill="url(#aura)" opacity="${m==='sad'?.3:m==='ok'?.55:.95}"/>
+ <ellipse cx="100" cy="197" rx="62" ry="6" fill="#5a3a10" opacity=".2"/>
  ${g('back')}
- <ellipse cx="100" cy="172" rx="52" ry="27" fill="url(#fur)" stroke="#c9742f" stroke-opacity=".3"/>
- ${C(100,152,26,'url(#cream)')}${C(82,158,18,'url(#cream)')}${C(118,158,18,'url(#cream)')}${C(100,166,20,'url(#cream)')}${C(70,150,9,'url(#cream)')}${C(130,150,9,'url(#cream)')}
- <ellipse cx="74" cy="192" rx="14" ry="8.5" fill="url(#cream)" stroke="#d2a574" stroke-width="1"/><ellipse cx="126" cy="192" rx="14" ry="8.5" fill="url(#cream)" stroke="#d2a574" stroke-width="1"/>
- <path d="M69 188v5M74 187v6M79 188v5M121 188v5M126 187v6M131 188v5" stroke="#d2a574" stroke-width="1.5" stroke-linecap="round"/>
- <path d="M50 80 C42 52 50 28 58 20 C74 30 88 44 94 60Z" fill="url(#fur)" stroke="#c9742f" stroke-opacity=".3"/>
- <path d="M58 68 C54 50 58 38 62 32 C72 38 80 48 84 58Z" fill="url(#ear)"/>
- <path d="M150 80 C158 52 150 28 142 20 C126 30 112 44 106 60Z" fill="url(#fur)" stroke="#c9742f" stroke-opacity=".3"/>
- <path d="M142 68 C146 50 142 38 138 32 C128 38 120 48 116 58Z" fill="url(#ear)"/>
- ${outer}<circle cx="100" cy="108" r="57" fill="url(#fur)"/>${inner}
- <ellipse cx="100" cy="84" rx="9" ry="19" fill="url(#cream)" opacity=".85"/>
- <ellipse cx="100" cy="127" rx="31" ry="22" fill="url(#cream)"/><ellipse cx="86" cy="125" rx="18" ry="15" fill="url(#cream)"/><ellipse cx="114" cy="125" rx="18" ry="15" fill="url(#cream)"/>
- ${C(86,128,1.4,'#b8845a')}${C(81,132,1.4,'#b8845a')}${C(90,133,1.4,'#b8845a')}${C(114,128,1.4,'#b8845a')}${C(119,132,1.4,'#b8845a')}${C(110,133,1.4,'#b8845a')}
- ${C(78,85,3,'#ffe2b8')}${C(122,85,3,'#ffe2b8')}
- ${m==='happy'?`<circle cx="62" cy="120" r="11" fill="url(#blush)"/><circle cx="138" cy="120" r="11" fill="url(#blush)"/>`:''}
+ <ellipse cx="100" cy="164" rx="48" ry="32" fill="url(#fur)" stroke="#c4742a" stroke-opacity=".25"/>
+ ${H('<ellipse cx="146" cy="171" rx="22" ry="20" fill="url(#fur)" stroke="#c4742a" stroke-opacity=".25"/><ellipse cx="156" cy="190" rx="15" ry="7.5" fill="url(#cream)" stroke="#d2a574" stroke-opacity=".7"/><path d="M150 188v4M156 187v5M162 188v4" stroke="#d2a574" stroke-width="1.4" stroke-linecap="round"/>')}
+ <ellipse cx="100" cy="150" rx="32" ry="24" fill="url(#cream)"/>${H(F(120,152,13,'url(#cream)')+F(131,163,10,'url(#cream)'))}
+ ${H('<path d="M103 156 Q127 152 127 172 L126 187 Q125 195 115 195 Q104 195 103 187Z" fill="url(#cream)" stroke="#d2a574" stroke-opacity=".7"/><path d="M109 189v5M115 188v6M121 189v5" stroke="#d2a574" stroke-width="1.5" stroke-linecap="round"/>')}
+ ${H('<path d="M114 64 C122 48 134 34 146 26 C158 46 164 64 160 84 C146 76 128 70 114 64Z" fill="url(#fur)" stroke="#c4742a" stroke-opacity=".3"/><path d="M127 64 C133 54 140 44 146 40 C153 54 156 64 154 76 C144 72 134 68 127 64Z" fill="url(#ear)"/>'+C(146,29,5,'url(#fur)'))}
+ ${H(F(148,110,15)+F(152,95,13)+F(146,126,13)+F(135,138,11)+F(142,77,12)+F(129,62,12)+F(117,54,11))}${F(100,53,11)}
+ <ellipse cx="100" cy="102" rx="54" ry="46" fill="url(#fur)"/>
+ <ellipse cx="100" cy="63" rx="30" ry="7" fill="#fff" opacity=".17"/>
+ ${H('<path d="M126 70 q6 5 8 14M138 82 q6 4 8 12M146 104 q4 6 3 14M140 130 q-2 5-8 8M120 58 q4 3 6 8" fill="none" stroke="#c4742a" stroke-opacity=".32" stroke-width="1.8" stroke-linecap="round"/>')}
+ <ellipse cx="100" cy="80" rx="7" ry="18" fill="url(#cream)" opacity=".9"/>
+ <ellipse cx="100" cy="122" rx="24" ry="18" fill="url(#cream)"/><ellipse cx="100" cy="138" rx="13" ry="7" fill="url(#cream)"/>${H('<ellipse cx="116" cy="126" rx="14" ry="12" fill="url(#cream)"/>'+C(112,126,1.5,'#b8845a')+C(117,130,1.5,'#b8845a')+C(108,131,1.5,'#b8845a')+C(124,82,3.2,'#ffe6bd')+(m==='happy'?'<circle cx="142" cy="120" r="10" fill="url(#blush)"/>':''))}
  ${eyes}
- <path d="M90 114 Q100 107 110 114 Q107 124 100 125 Q93 124 90 114Z" fill="#2b1a16"/><ellipse cx="100" cy="112.5" rx="4.4" ry="1.9" fill="#fff" opacity=".6"/>
+ <path d="M90 110 Q100 103 110 110 Q108 120 100 121 Q92 120 90 110Z" fill="url(#nose)"/><ellipse cx="100" cy="107.5" rx="5" ry="2" fill="#fff" opacity=".7"/>
  ${mouth}
+ <path d="M72 148 Q100 166 128 148 L128 156 Q100 174 72 156Z" fill="#e8484f" stroke="#a52a30" stroke-width="1.5"/><circle cx="100" cy="168" r="6.5" fill="url(#gold)" stroke="#b97a00" stroke-width="1.5"/><path transform="translate(100 168) scale(.45)" d="${STAR}" fill="#fff6c8"/>
  ${g('neck')}${g('face')}${g('hat')}
- ${m==='happy'?star(30,62,1,0)+star(170,62,1,0)+star(22,128,.7,1.2)+star(178,128,.7,1.2)+heart(30,44,0)+heart(170,44,0):''}
+ ${m==='happy'?star(28,62,1,0)+star(172,62,1,0)+star(20,128,.7,1.2)+star(180,128,.7,1.2)+heart(30,44,0)+heart(170,44,0):''}
  </svg>`}
 const ICONVB={hat:'40 -16 120 86',face:'52 78 96 44',neck:'56 134 88 62',back:'0 52 200 148'};
 function accIcon(id){return `<svg viewBox="${ICONVB[ACC[id].slot]}">${ACC[id].svg}</svg>`}
 
 /* ======= navigation ======= */
-let tab='home',view={cls:null,sub:'live',ses:null},P=null,ob=1,obData={majors:'',minors:'',careers:[],interests:[]};
+let tab='home',view={cls:null,sub:'live',ses:null,wk:'all',mwk:'course',delc:null,rmdoc:null},P=null,ob=1,obData={majors:'',minors:'',careers:[],interests:[]};
 const TABS=[['home','🏠','Home'],['class','📚','Classes'],['practice','✏️','Practice'],['career','🚀','Careers'],['friends','👥','Friends'],['shop','🛍️','Shop']];
 const ACTIONS={};
 function go(t){tab=t;P=null;render()}
@@ -270,7 +269,7 @@ const MOODS=[['😴','bored','Boredom usually means the task is too easy or too 
 function rHome(){
  const u=S.user,L=lvl(),lo=15*(L-1)**2,hi=15*L*L,cr=careers()[0];
  const pct=Math.round((S.earned-lo)/(hi-lo)*100);
- $('#main').innerHTML=`<div class="card dogwrap"><h1 class="glowtitle">Winston’s Magic Lab</h1><div class="dogwrap stage">${dog(S.eq,mood())}<span class="lotus">🔮</span><span class="fly">🛰️</span></div>
+ $('#main').innerHTML=`<div class="card dogwrap"><h1 class="sign">Winston</h1><div class="dogwrap stage">${dog(S.eq,mood())}<span class="lotus">🌼</span><span class="fly">🦋</span></div>
  <h2>Winston · Level ${L}</h2>
  <div class="stats"><span class="stat">🪙 ${S.coins}</span><span class="stat">❤️ ${Math.round(S.happy)}%</span><span class="stat">⭐ ${S.earned} XP</span></div>
  <div class="bar" style="margin:10px 0 4px"><i style="width:${pct}%"></i></div><div class="mute">${hi-S.earned} XP to level ${L+1}</div>
@@ -283,7 +282,7 @@ Object.assign(ACTIONS,{feel(d){const m=MOODS.find(x=>x[1]===d.k);$('#feelout').i
 /* ======= classes ======= */
 function rClass(){
  const c=classes().find(x=>x.id===view.cls);
- if(!c){$('#main').innerHTML=`<div class="card"><h2>Your classes</h2>${classes().map(x=>`<div class="row" style="margin:8px 0"><button class="s grow" data-a="openc" data-k="${x.id}">${esc(x.name)} <span class="mute">· ${x.items.length} items · ${x.sessions.length} recaps</span></button><button class="s" data-a="delc" data-k="${x.id}">✕</button></div>`).join('')||'<p class="mute">No classes yet.</p>'}</div>
+ if(!c){$('#main').innerHTML=`<div class="card"><h2>Your classes</h2>${classes().map(x=>`<div class="row" style="margin:8px 0"><button class="s grow" data-a="openc" data-k="${x.id}">${esc(x.name)} <span class="mute">· ${x.items.length} items · ${x.sessions.length} recaps</span></button><button class="${view.delc===x.id?'p bad':'s'}" data-a="delc" data-k="${x.id}">${view.delc===x.id?'Delete?':'✕'}</button></div>`).join('')||'<p class="mute">No classes yet.</p>'}</div>
  <div class="card"><h2>Add a class</h2><label>Class name</label><input id="cn" placeholder="BUAD 112">
  <label>Materials from your teacher — one per line: <code>term :: explanation</code></label><textarea id="cm" placeholder="Opportunity cost :: What you give up when you choose..."></textarea>
  <button class="p" data-a="addc">Add class</button></div>`;return}
@@ -295,43 +294,103 @@ function rClass(){
 Object.assign(ACTIONS,{
  openc(d){view.cls=d.k||null;view.sub='live';render()},
  sub(d){view.sub=d.k;render()},
- delc(d){if(confirm('Delete this class?')){S.classes=S.classes.filter(c=>c.id!==d.k);save();render()}},
+ delc(d){if(view.delc===d.k){S.classes=S.classes.filter(c=>c.id!==d.k);view.delc=null;save();render()}else{view.delc=d.k;render();setTimeout(()=>{if(view.delc===d.k){view.delc=null;if(tab==='class'&&!view.cls)render()}},3500)}},
  addc(){const n=$('#cn').value.trim();if(!n)return toast('Name your class');S.classes=S.classes.filter(c=>c.id!=='demo'||c.sessions.length);
-  S.classes.push({id:uid(),name:n,careerNotes:{},sessions:[],items:parseItems($('#cm').value)});save();render()},
- addm(){const c=cur();c.items.push(...parseItems($('#mm').value));save();render()},
+  S.classes.push({id:uid(),name:n,careerNotes:{},sessions:[],weeks:[],docs:[],items:parseItems($('#cm').value)});save();render()},
+ addm(){const c=cur();c.items.push(...parseItems($('#mm').value,view.mwk));save();render()},
  delm(d){const c=cur();c.items=c.items.filter(i=>i.id!==d.k);save();render()}
 });
 const cur=()=>classes().find(x=>x.id===view.cls);
-function parseItems(t){return t.split('\n').map(l=>l.split('::')).filter(x=>x.length>=2&&x[0].trim()&&x[1].trim()).map(x=>({id:uid(),term:x[0].trim(),text:x.slice(1).join('::').trim()}))}
-function rMat(c){$('#sub').innerHTML=`<div class="card">${c.items.map(i=>`<div class="mat"><span class="term">${esc(i.term)}</span> <button class="s" style="float:right;padding:0 8px" data-a="delm" data-k="${i.id}">✕</button><br><span class="mute">${esc(i.text)}</span></div>`).join('')||'<p class="mute">No materials yet.</p>'}</div>
- <div class="card"><h3>Add more</h3><textarea id="mm" placeholder="term :: explanation"></textarea><button class="p" data-a="addm">Add</button></div>`}
+function parseItems(t,wk='course'){return t.split('\n').map(l=>l.split('::')).filter(x=>x.length>=2&&x[0].trim()&&x[1].trim()).map(x=>({id:uid(),term:x[0].trim(),text:x.slice(1).join('::').trim(),wk}))}
+const wkLabel=(c,k)=>k==='all'?'All materials':k==='course'?'Course-wide':'Week '+((c.weeks.find(w=>w.id===k)||{}).n||'?');
+const wkChips=(c,act,sel,all)=>[all?'all':null,'course',...c.weeks.map(w=>w.id)].filter(Boolean).map(k=>`<span class="chip ${k===sel?'on':''}" data-a="${act}" data-k="${k}">${wkLabel(c,k)} <span class="mute">· ${k==='all'?c.items.length:c.items.filter(i=>i.wk===k).length}</span></span>`).join('');
+const docsCtx=c=>c.docs.map(d=>`[${wkLabel(c,d.wk)}] ${d.name}: ${d.text.slice(0,1200)}`).join('\n').slice(0,6000)||'(none)';
+const _scripts={};
+function loadScript(u){return _scripts[u]||(_scripts[u]=new Promise((ok,no)=>{const e=document.createElement('script');e.src=u;e.onload=ok;e.onerror=()=>no(new Error('Could not load a file reader — check your connection'));document.head.append(e)}))}
+const CDN='https://cdnjs.cloudflare.com/ajax/libs/';
+async function readDoc(f){const ext=(f.name.split('.').pop()||'').toLowerCase();
+ if(['txt','md','csv','text'].includes(ext))return await f.text();
+ if(ext==='pdf'){await loadScript(CDN+'pdf.js/3.11.174/pdf.min.js');pdfjsLib.GlobalWorkerOptions.workerSrc=CDN+'pdf.js/3.11.174/pdf.worker.min.js';
+  const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;let out=[];
+  for(let i=1;i<=Math.min(pdf.numPages,80);i++){const pg=await pdf.getPage(i),tc=await pg.getTextContent();out.push(tc.items.map(x=>x.str).join(' '))}return out.join('\n\n')}
+ if(ext==='docx'){await loadScript(CDN+'mammoth/1.6.0/mammoth.browser.min.js');return (await mammoth.extractRawText({arrayBuffer:await f.arrayBuffer()})).value}
+ if(ext==='pptx'){await loadScript(CDN+'jszip/3.10.1/jszip.min.js');const z=await JSZip.loadAsync(await f.arrayBuffer());
+  const names=Object.keys(z.files).filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n)).sort((a,b)=>a.match(/\d+/)[0]-b.match(/\d+/)[0]);const out=[];
+  for(const n of names){const x=await z.files[n].async('string');out.push('Slide '+n.match(/\d+/)[0]+': '+[...x.matchAll(/<a:t>([^<]*)<\/a:t>/g)].map(m=>m[1]).join(' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'"))}return out.join('\n')}
+ throw new Error('Unsupported file type .'+ext+' (try PDF, DOCX, PPTX or TXT)')}
+function heuristic(text){const out=[],seen=new Set();
+ const add=(t,x)=>{t=t.replace(/^[•\-–*\d.)\s]+/,'').replace(/^(?:an?|the)\s+/i,'').trim();t=t.charAt(0).toUpperCase()+t.slice(1);x=x.trim();if(t.length<2||t.length>60||t.split(/\s+/).length>6||x.length<15)return;const k=t.toLowerCase();if(seen.has(k))return;seen.add(k);out.push({term:t,text:x.slice(0,300)})};
+ for(const l of text.split(/\n+/)){const m=l.match(/^[\s•\-–*\d.)]*([^:–—]{2,60}?)\s*(?:::|:|—|–|-)\s+(.{15,})$/);if(m)add(m[1],m[2])}
+ for(const sn of text.replace(/\s+/g,' ').split(/(?<=[.!?])\s+/)){const m=sn.match(/^(?:An?|The)?\s*([A-Z][A-Za-z'’ -]{2,50}?)\s+(?:is|are|refers to|means|describes)\s+(.{15,})/);if(m)add(m[1],sn)}
+ return out.slice(0,40)}
+async function makeCards(c,doc){let cards=[];
+ if(AI.sm){try{for(let k=0;k<2&&k*12000<doc.text.length;k++){const chunk=doc.text.slice(k*12000,(k+1)*12000);
+   const r=await AI.sm.json(`You are helping a student study. From the course material below (file "${doc.name}", ${wkLabel(c,doc.wk)}), create study cards for the key terms and concepts a student should learn. Each card has "term" (a short name, 1-6 words) and "text" (a clear 1-2 sentence explanation in plain words, based on the material). Skip fluff, page numbers and boilerplate. Return ONLY JSON: {"cards":[{"term":"...","text":"..."}]} with at most 20 cards.\n\nMATERIAL:\n${chunk}`);
+   cards.push(...(r.cards||[]))}}catch(e){if(e&&e.code==='not_granted')AI.sm=null}}
+ if(!cards.length)cards=heuristic(doc.text);
+ const have=new Set(c.items.map(i=>i.term.toLowerCase()));let n=0;
+ for(const x of cards){if(!x||!x.term||!x.text)continue;const k=String(x.term).toLowerCase();if(have.has(k))continue;have.add(k);c.items.push({id:uid(),term:String(x.term).slice(0,60),text:String(x.text).slice(0,300),wk:doc.wk,src:doc.id});n++}
+ doc.cards=(doc.cards||0)+n;save();return n}
+const stat=m=>{const e=$('#upstat');if(e)e.textContent=m};
+async function addFiles(c,files,wk){let msg='';
+ for(const f of files){try{stat(`Reading ${f.name}…`);const text=(await readDoc(f))||'';
+   if(text.trim().length<20){msg+=`⚠️ ${f.name}: no readable text found (scanned image PDFs aren't supported). `;continue}
+   const doc={id:uid(),name:f.name,wk,text:text.slice(0,40000),chars:text.length,cards:0};c.docs.push(doc);save();
+   stat(`Making study cards from ${f.name}…`);const n=await makeCards(c,doc);msg+=`✅ ${f.name}: ${n} study cards added. `}
+  catch(e){msg+=`⚠️ ${f.name}: ${e.message||'could not read'} `}}
+ render();stat(msg)}
+function rMat(c){
+ const wk=view.mwk==='course'||c.weeks.some(w=>w.id===view.mwk)?view.mwk:'course';view.mwk=wk;
+ const docs=c.docs.filter(d=>d.wk===wk),its=c.items.filter(i=>i.wk===wk),lab=wkLabel(c,wk);
+ $('#sub').innerHTML=`<div class="card"><h3>Where do these go?</h3><div>${wkChips(c,'mwk',wk,false)}<span class="chip" data-a="addwk">＋ Add week</span></div><p class="mute">Course-wide = syllabus, textbook, big-picture notes. Weekly = that week's slides and handouts.</p></div>
+ <div class="card"><h3>Upload for ${esc(lab)}</h3>
+ <label class="upl" id="upl" for="fi"><div style="font-size:34px">📂🐾</div><b>Tap to choose files</b> or drop them here<div class="mute">PDF, Word (.docx), PowerPoint (.pptx) or text files</div></label>
+ <input id="fi" type="file" multiple accept=".pdf,.docx,.pptx,.txt,.md,.csv" style="display:none"><div id="upstat" class="mute" style="margin-top:6px"></div>
+ <label style="margin-top:8px;display:block">Or paste notes</label><textarea id="pn" placeholder="Paste your notes, a syllabus, a chapter summary…"></textarea><button class="s" data-a="addnotes">Add notes</button>
+ <p class="mute">${AI.sm?'Winston uses AI to turn files into study cards.':'Cards are found from definitions in your files (AI makes better ones on the published Claude page).'} Files stay in this browser.</p></div>
+ <div class="card"><h3>Files (${docs.length})</h3>${docs.map(d=>`<div class="item"><div><b>${esc(d.name)}</b><div class="mute">${d.chars.toLocaleString()} characters · ${d.cards||0} cards</div></div><button class="s" data-a="mkcards" data-k="${d.id}">${d.cards?'More cards':'Make cards'}</button><button class="${view.rmdoc===d.id?'p bad':'s'}" data-a="rmdoc" data-k="${d.id}">${view.rmdoc===d.id?'Remove file + cards?':'✕'}</button></div>`).join('')||'<p class="mute">No files here yet.</p>'}</div>
+ <div class="card"><h3>Study cards (${its.length})</h3>${its.map(i=>`<div class="mat"><span class="term">${esc(i.term)}</span> <button class="s" style="float:right;padding:0 10px" data-a="delm" data-k="${i.id}">✕</button><br><span class="mute">${esc(i.text)}</span></div>`).join('')||'<p class="mute">No cards yet — upload a file or add some below.</p>'}
+ <h3 style="margin-top:12px">Add cards by hand</h3><textarea id="mm" placeholder="term :: explanation (one per line)"></textarea><button class="p" data-a="addm">Add cards</button></div>`;
+ const fi=$('#fi'),u=$('#upl');fi.onchange=()=>{const fs=[...fi.files];fi.value='';addFiles(c,fs,wk)};
+ ['dragover','dragenter'].forEach(e=>u.addEventListener(e,ev=>{ev.preventDefault();u.classList.add('drag')}));
+ ['dragleave','drop'].forEach(e=>u.addEventListener(e,ev=>{ev.preventDefault();u.classList.remove('drag')}));
+ u.addEventListener('drop',ev=>addFiles(c,[...ev.dataTransfer.files],wk))}
+Object.assign(ACTIONS,{
+ mwk(d){view.mwk=d.k;render()},vwk(d){view.wk=d.k;render()},
+ addwk(){const c=cur(),n=c.weeks.reduce((m,w)=>Math.max(m,w.n),0)+1;c.weeks.push({id:'w'+n,n});view.mwk='w'+n;save();render()},
+ addnotes(){const c=cur(),t=$('#pn').value.trim();if(t.length<20)return toast('Paste a bit more text first');
+  const doc={id:uid(),name:'Pasted notes '+new Date().toLocaleDateString(),wk:view.mwk,text:t.slice(0,40000),chars:t.length,cards:0};c.docs.push(doc);save();stat('Making study cards…');makeCards(c,doc).then(n=>{render();stat(`✅ ${n} study cards added`)})},
+ mkcards(d){const c=cur(),doc=c.docs.find(x=>x.id===d.k);stat(`Making study cards from ${doc.name}…`);makeCards(c,doc).then(n=>{render();stat(`✅ ${n} new study cards from ${doc.name}`)})},
+ rmdoc(d){const c=cur();if(view.rmdoc===d.k){c.docs=c.docs.filter(x=>x.id!==d.k);c.items=c.items.filter(i=>i.src!==d.k);view.rmdoc=null;save();render()}else{view.rmdoc=d.k;render();setTimeout(()=>{if(view.rmdoc===d.k){view.rmdoc=null;if(tab==='class'&&view.sub==='mat')render()}},3500)}}
+});
 
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 function rLive(c){
  if(!live||live.cls!==c.id){$('#sub').innerHTML=`<div class="card"><h2>Ready for class?</h2><p>Winston will float on your screen, light up your teacher's materials as they're mentioned, and pop up for a surprise <b>high paw</b> now and then. 🐾</p>
- <button class="p" data-a="startlive">▶ Start class with Winston</button><p class="mute">Live listening uses your browser's speech recognition (in Chrome/Edge the audio is processed by the browser vendor's service). You can also type what the teacher said.</p></div>`;return}
+ <p class="mute" style="margin-bottom:2px">Which materials is class on today?</p><div style="margin-bottom:10px">${wkChips(c,'vwk',view.wk,true)}</div><button class="p" data-a="startlive">▶ Start class with Winston</button><p class="mute">Live listening uses your browser's speech recognition (in Chrome/Edge the audio is processed by the browser vendor's service). You can also type what the teacher said.</p></div>`;return}
  $('#sub').innerHTML=`<div class="row" style="margin-bottom:8px"><button class="p ok" data-a="endlive">■ End class &amp; get recap</button><button class="s" data-a="mic">${live.listening?'🔇 Stop mic':'🎙 Listen'}</button><button class="s" data-a="popout">🪟 Pop out Winston</button></div>
- <div class="card"><h3>Teacher's materials</h3><div id="livemat"></div></div>
+ <div class="card"><h3>Teacher's materials · ${esc(wkLabel(c,live.wk||'all'))}</h3><div id="livemat"></div></div>
  <div class="card"><h3>What the teacher said</h3><div class="row"><input class="grow" id="said" placeholder="Type what was said, e.g. “now let's talk about opportunity cost”"><button class="p" data-a="say">Add</button></div>
  <div id="livelog" class="mute"></div><button class="s" data-a="testpaw" style="margin-top:8px">🐾 Test high-paw popup</button></div>`;
  paintLive();
 }
 const CIRC='<svg class="circ" viewBox="0 0 100 40" preserveAspectRatio="none"><path pathLength="1" d="M8 24 C2 8 56 0 90 8 C104 14 98 34 52 37 C14 38 -2 28 14 12"/></svg>';
 function paintLive(){const c=cur();if(!c||!live||!$('#livemat'))return;
- $('#livemat').innerHTML=c.items.map(i=>`<div class="mat ${live.focus===i.id?'glow':''} ${live.hits.some(h=>h.id===i.id)?'seen':''}" id="m${i.id}"><span class="term">${esc(i.term)}${live.focus===i.id?CIRC:''}</span><br><span class="mute">${esc(i.text)}</span></div>`).join('');
+ $('#livemat').innerHTML=(liveItems(c).map(i=>`<div class="mat ${live.focus===i.id?'glow':''} ${live.hits.some(h=>h.id===i.id)?'seen':''}" id="m${i.id}"><span class="term">${esc(i.term)}${live.focus===i.id?CIRC:''}</span><br><span class="mute">${esc(i.text)}</span></div>`).join('')||'<p class="mute">No cards in this section yet — add some in Materials.</p>');
  $('#livelog').innerHTML=live.lines.slice(-4).map(l=>`<div>“${esc(l)}”</div>`).join('');
  const f=$('#m'+live.focus);if(f)f.scrollIntoView({block:'center',behavior:'smooth'})}
+const liveItems=c=>live&&live.wk&&live.wk!=='all'?c.items.filter(i=>i.wk===live.wk):c.items;
 const STOP=new Set('about their there these those which would could should where while other being because'.split(' '));
 function matches(item,t){const T=norm(item.term);if(t.includes(T))return true;
  const kw=[...new Set(norm(item.text).split(' ').filter(w=>w.length>4&&!STOP.has(w)))];
  return kw.filter(w=>t.includes(w.slice(0,5))).length>=2}
 function heard(line){if(!live)return;const c=cur(),t=norm(line);live.lines.push(line);
- const hit=c.items.find(i=>matches(i,t));
+ const hit=liveItems(c).find(i=>matches(i,t));
  if(hit){live.focus=hit.id;if(!live.hits.some(h=>h.id===hit.id))live.hits.push({id:hit.id,line})}
  paintLive();updateWidget();if(hit)setTimeout(()=>burst(7,$('#m'+hit.id)),60)}
 Object.assign(ACTIONS,{
- startlive(){const c=cur();live={cls:c.id,hits:[],lines:[],focus:null,listening:false,t0:Date.now()};schedulePaw();updateWidget();render()},
+ startlive(){const c=cur();live={cls:c.id,wk:view.wk||'all',hits:[],lines:[],focus:null,listening:false,t0:Date.now()};schedulePaw();updateWidget();render()},
  say(){const v=$('#said').value.trim();if(!v)return;$('#said').value='';heard(v)},
  mic(){if(live.listening){live.listening=false;try{rec.stop()}catch(e){}}else startListen();render()},
  popout:popOut,
@@ -378,7 +437,7 @@ function sentences(t){const s=t.split(/(?<=[.!?])\s+/).map(x=>x.trim()).filter(B
 const AI={sm:null};
 const PERSONA="You are Winston, a warm, playful Pomeranian study buddy and tutor. Help stressed students feel capable. Rules: plain friendly words, short sentences; break explanations into numbered steps (1., 2., 3.) with ONE idea per step; use a tiny everyday example when it helps; at most one emoji; no markdown headings; never talk down. Prefer the student's class materials and what the teacher said; if you go beyond them, start that part with 'Beyond your notes:'. Keep chat answers under 170 words.";
 const chat={};
-function ctxOf(c){const u=S.user;return `CLASS: ${c.name}\nSTUDENT: major ${u.majors||'unknown'}; career goals: ${u.careers.join(', ')}\nCLASS MATERIALS:\n${c.items.slice(0,40).map(i=>`- ${i.term}: ${i.text}`).join('\n')||'(none yet)'}\nWHAT THE TEACHER SAID RECENTLY:\n${c.sessions.flatMap(x=>x.lines).slice(-20).map(l=>'- '+l).join('\n')||'(nothing recorded)'}`}
+function ctxOf(c){const u=S.user;return `CLASS: ${c.name}\nSTUDENT: major ${u.majors||'unknown'}; career goals: ${u.careers.join(', ')}\nCLASS MATERIALS:\n${c.items.slice(0,40).map(i=>`- ${i.term}: ${i.text}`).join('\n')||'(none yet)'}\nUPLOADED COURSE DOCUMENTS (excerpts):\n${docsCtx(c)}\nWHAT THE TEACHER SAID RECENTLY:\n${c.sessions.flatMap(x=>x.lines).slice(-20).map(l=>'- '+l).join('\n')||'(nothing recorded)'}`}
 function md(t){const b=x=>x.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');return esc(t).split(/\n+/).filter(l=>l.trim()).map(l=>{const m=l.match(/^\s*(\d+)[.)]\s+(.*)/);return m?`<div class="step"><div class="n">${m[1]}</div><div>${b(m[2])}</div></div>`:`<p style="margin:6px 0">${b(l)}</p>`}).join('')}
 function chatHTML(id){return (chat[id]||[]).map(m=>m.role==='user'?`<div class="bubble" style="margin-left:28px;background:rgba(141,124,255,.22)">${esc(m.content)}</div>`:`<div class="bubble">🐶 ${m.pending&&!m.content?'<span class="mute">thinking…</span>':md(m.content)}</div>`).join('')}
 function paintChat(c){const el=$('#chat');if(el){el.innerHTML=chatHTML(c.id);el.lastElementChild&&el.lastElementChild.scrollIntoView({block:'nearest'})}}
@@ -412,7 +471,7 @@ async function genRecap(c,ses){
  const prompt=`${PERSONA}\n\nTASK: Write a calm, step-by-step recap of today's class so the student feels they understand it and is not overwhelmed. Use ONLY the information below. Teach in the order it was covered.\n\n${ctxOf(c)}\n\nTOPICS COVERED TODAY, IN ORDER:\n${use.map((i,k)=>`${k+1}. ${i.term}: ${i.text}`).join('\n')}\nTEACHER'S WORDS TODAY:\n${ses.lines.slice(-30).map(l=>'- '+l).join('\n')||'(not recorded)'}\n\nReturn ONLY JSON in exactly this shape: {"big":"one reassuring sentence about the big picture","steps":[{"title":"short title","body":"2-3 simple sentences","example":"one tiny everyday example"}],"career":"one sentence linking today to the student's career goals","check":["two quick self-check questions"]}. At most 7 steps.`;
  try{const r=await AI.sm.json(prompt);if(!r||!Array.isArray(r.steps)||!r.steps.length)throw 0;ses.ai=r;ses.aiState='done'}catch(e){ses.aiState='error';if(e&&e.code==='not_granted')AI.sm=null}
  save();if(here())render()}
-Object.assign(ACTIONS,{pc(d){tab='practice';startPractice(d.k)},
+Object.assign(ACTIONS,{pc(d){tab='practice';startPractice(d.k,d.w)},
  pickses(d){view.ses=+d.k;render()},
  genrecap(){const c=cur();genRecap(c,curSes(c))},
  async ask(d){const c=cur(),inp=$('#ask'),q=(d.q||(inp&&inp.value)||'').trim();if(!q)return;if(inp)inp.value='';
@@ -429,7 +488,7 @@ Object.assign(ACTIONS,{pc(d){tab='practice';startPractice(d.k)},
 function rPractice(){
  if(!P){$('#main').innerHTML=`<div class="card"><h2>Practice with Winston</h2><p class="mute">Correct answers earn 5 🪙. Miss one? Walk through my step-by-step explanation and you'll still earn 3 🪙.</p>
  <button class="p purple" data-a="pall" style="width:100%;margin-bottom:8px">All classes mixed</button>
- ${classes().map(c=>`<button class="s" style="width:100%;margin:4px 0" data-a="pc" data-k="${c.id}">${esc(c.name)}</button>`).join('')}</div>`;return}
+ ${classes().map(c=>`<button class="s" style="width:100%;margin:4px 0" data-a="pc" data-k="${c.id}">${esc(c.name)}</button><div style="margin:0 0 10px">${c.weeks.filter(w=>c.items.some(i=>i.wk===w.id)).map(w=>`<span class="chip" data-a="pc" data-k="${c.id}" data-w="${w.id}">Week ${w.n}</span>`).join('')}</div>`).join('')}</div>`;return}
  if(P.done){$('#main').innerHTML=`<div class="card dogwrap"><div class="dogwrap">${dog(S.eq,'happy')}</div><h2>Round complete! 🎉</h2><p>${P.right} first-try correct · ${P.walked} learned with my help.<br>You earned <b>${P.coins} 🪙</b>.</p><button class="p" data-a="again">Another round</button> <button class="s" data-a="tab" data-k="home">Home</button></div>`;return}
  const q=P.qs[P.i];let body='';
  if(P.phase==='ask'){
@@ -443,8 +502,8 @@ function rPractice(){
  $('#main').innerHTML=`<div class="row" style="margin-bottom:6px"><span class="mute grow">Question ${P.i+1} of ${P.qs.length}</span><span class="stat">🪙 ${S.coins}</span></div><div class="card">${body}</div>`;
  const a=$('#ans');if(a)a.focus();
 }
-function startPractice(clsId){
- const pool=clsId==='all'?allItems():allItems().filter(i=>i.cls===clsId);
+function startPractice(clsId,wk){
+ const pool=clsId==='all'?allItems():allItems().filter(i=>i.cls===clsId&&(!wk||wk==='all'||i.wk===wk));
  if(!pool.length){tab='practice';return toast('Add materials to a class first!')}
  const every=allItems().map(i=>i.text);
  const qs=shuffle(pool).slice(0,8).map((it,idx)=>{
@@ -459,7 +518,7 @@ function startPractice(clsId){
    q.prompt=t.includes('_____')?t:`_____ : ${it.text}`}
   if(type==='open'){q.prompt=`In your own words, what is “${it.term}”?`}
   return q});
- P={qs,i:0,phase:'ask',step:0,right:0,walked:0,coins:0,scope:clsId};render()}
+ P={qs,i:0,phase:'ask',step:0,right:0,walked:0,coins:0,scope:clsId,wk};render()}
 function okFill(a,b){a=norm(a);b=norm(b);if(!a)return false;if(a===b)return true;return a.length>5&&lev(a,b)<=1}
 function lev(a,b){const d=[...Array(a.length+1)].map((_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;
  for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
@@ -470,7 +529,7 @@ function grade(ok){const q=P.qs[P.i];
  if(ok){P.right++;P.coins+=5;earn(5,'correct!');P.phase='fb';P.msg='✅ Yes! '+(q.type==='open'?`Model answer: ${esc(q.item.text)}`:'Nice one.')}
  else{P.phase='walk';P.step=0}render()}
 Object.assign(ACTIONS,{
- pall(){startPractice('all')},again(){startPractice(P.scope)},
+ pall(){startPractice('all')},again(){startPractice(P.scope,P.wk)},
  mcpick(d){const q=P.qs[P.i];grade(q.choices[+d.k]===q.right)},
  submit(){const q=P.qs[P.i],v=$('#ans').value;if(!v.trim())return;grade(q.type==='fill'?okFill(v,q.answer):okOpen(v,q))},
  nextstep(){const q=P.qs[P.i];if(P.step+1<q.steps.length)P.step++;else{P.phase='retry';P.hint=false}render()},
@@ -524,50 +583,44 @@ document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='
 /* ======= enchanted pond background (matches the Rock Garden look) ======= */
 function burst(n=14,el){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
  const r=(el||document.querySelector('.dogwrap svg')||document.body).getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+Math.min(r.height*.4,60);
- const em=['✨','⚡','⭐','🔮','💫','💠'];
+ const em=['✨','💛','🦴','🐾','⭐','🌼'];
  for(let i=0;i<n;i++){const e=document.createElement('span');e.textContent=em[i%em.length];e.style.cssText=`position:fixed;left:${cx}px;top:${cy}px;font-size:${14+Math.random()*14}px;pointer-events:none;z-index:60`;document.body.append(e);
   const a=Math.random()*6.283,d=60+Math.random()*120;
   e.animate([{transform:'translate(-50%,-50%) scale(.3)',opacity:1},{transform:`translate(calc(-50% + ${Math.cos(a)*d}px),calc(-50% + ${Math.sin(a)*d-50}px)) scale(1.15) rotate(${Math.random()*200-100}deg)`,opacity:0}],{duration:900+Math.random()*700,easing:'cubic-bezier(.2,.7,.3,1)'}).onfinish=()=>e.remove()}}
 (function(){const cv=$('#bg'),g=cv.getContext('2d'),RM=matchMedia('(prefers-reduced-motion: reduce)').matches,TAU=Math.PI*2,rnd=Math.random;
- let W,H,D,rip=[],last=0,comets=[],pulses=[];
- const small=innerWidth<600;
- const stars=[...Array(50)].map(()=>({x:rnd(),y:rnd()*.75,p:rnd()*TAU,s:rnd()*1.2+.4}));
- const nodes=[...Array(small?24:42)].map(()=>({x:rnd(),y:rnd()*.78,vx:(rnd()-.5)*.01,vy:(rnd()-.5)*.01,r:1+rnd()*1.6}));
- const CH='ᚠᚢᚦᚨᚱᚲᚷᚹ{}</>01λΣπ∞⌘'.split('');
- const glyphs=[...Array(small?12:20)].map(()=>({x:rnd(),y:rnd(),sp:.02+rnd()*.03,ch:CH[rnd()*CH.length|0],c:rnd()<.5?'98,240,255':rnd()<.5?'255,122,217':'170,150,255',sz:12+rnd()*14,p:rnd()*TAU}));
+ let W,H,D,last=0,stamps=[];
+ const clouds=[...Array(5)].map(()=>({x:rnd()*1.2,y:.05+rnd()*.2,s:.7+rnd()*.8,sp:.004+rnd()*.006}));
+ const bits=[...Array(9)].map(()=>({x:rnd(),y:rnd(),sp:.012+rnd()*.016,k:rnd()<.5?'paw':'bone',sz:13+rnd()*11,rot:(rnd()-.5)*.9}));
+ const flowers=[...Array(24)].map(()=>({x:rnd(),r:rnd(),k:rnd()<.55?'daisy':'tulip',c:['#ff7eb3','#ffb347','#ff6b6b','#b79cff'][rnd()*4|0],p:rnd()*TAU,s:.8+rnd()*.6}));
+ const FAR={y:.7,a:.025,ph:0,c:'#a8e29a'},MID={y:.78,a:.03,ph:2,c:'#82d672'},NEAR={y:.88,a:.02,ph:4,c:'#5fc255'};
  function size(){D=Math.min(devicePixelRatio||1,1.5);W=cv.width=Math.round(innerWidth*D);H=cv.height=Math.round(innerHeight*D);if(RM)draw(0)}
  addEventListener('resize',size);size();
- document.addEventListener('pointerdown',e=>{rip.push({x:e.clientX*D,y:e.clientY*D,r:4,a:.6})},{passive:true});
- function sigil(t){const R=Math.min(W,H)*.46;g.save();g.translate(W*.5,H*.36);g.lineWidth=1.3*D;g.shadowColor='rgba(98,240,255,.8)';g.shadowBlur=10*D;
-  g.strokeStyle='rgba(98,240,255,.17)';[1,.88,.64].forEach(f=>{g.beginPath();g.arc(0,0,R*f,0,TAU);g.stroke()});
-  g.save();g.rotate(t*.06);for(let i=0;i<48;i++){g.rotate(TAU/48);g.beginPath();g.moveTo(R*.9,0);g.lineTo(R*(i%4?.94:.99),0);g.stroke()}g.restore();
-  g.strokeStyle='rgba(255,122,217,.17)';g.save();g.rotate(-t*.08);for(let k=0;k<2;k++){g.rotate(Math.PI/3);g.beginPath();for(let i=0;i<3;i++){const a=i*TAU/3;g.lineTo(Math.cos(a)*R*.64,Math.sin(a)*R*.64)}g.closePath();g.stroke()}g.restore();g.restore()}
- function floor(t){const hy=H*.8;g.save();g.lineWidth=D;
-  for(let i=-10;i<=10;i++){g.strokeStyle='rgba(255,122,217,.15)';g.beginPath();g.moveTo(W/2+i*W*.03,hy);g.lineTo(W/2+i*W*.17,H);g.stroke()}
-  for(let k=0;k<9;k++){const z=(k+(t*.35)%1)/9,y=hy+(H-hy)*z*z;g.strokeStyle=`rgba(98,240,255,${.05+.22*z})`;g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}
-  const hg=g.createLinearGradient(0,hy-8*D,0,hy+8*D);hg.addColorStop(0,'rgba(98,240,255,0)');hg.addColorStop(.5,'rgba(98,240,255,.35)');hg.addColorStop(1,'rgba(98,240,255,0)');g.fillStyle=hg;g.fillRect(0,hy-8*D,W,16*D);g.restore()}
+ document.addEventListener('pointerdown',e=>{stamps.push({x:e.clientX*D,y:e.clientY*D,a:.8,s:16*D,rot:(rnd()-.5)*.6})},{passive:true});
+ const hy=(L,x)=>(L.y+L.a*Math.sin(x/W*TAU*1.2+L.ph)+L.a*.5*Math.sin(x/W*TAU*2.7+L.ph*2))*H;
+ function hill(L){g.fillStyle=L.c;g.beginPath();g.moveTo(0,H);for(let x=0;x<=W+20*D;x+=20*D)g.lineTo(x,hy(L,x));g.lineTo(W,H);g.closePath();g.fill()}
+ function paw(x,y,s,rot){g.save();g.translate(x,y);g.rotate(rot);g.beginPath();g.ellipse(0,s*.28,s*.58,s*.46,0,0,TAU);g.fill();for(const [dx,dy,r] of[[-.66,-.12,.22],[-.24,-.52,.25],[.24,-.52,.25],[.66,-.12,.22]]){g.beginPath();g.arc(dx*s,dy*s,r*s,0,TAU);g.fill()}g.restore()}
+ function bone(x,y,s,rot){g.save();g.translate(x,y);g.rotate(rot);g.beginPath();g.rect(-s*.6,-s*.17,s*1.2,s*.34);for(const sx of[-1,1])for(const sy of[-1,1]){g.moveTo(sx*s*.62+s*.2,sy*s*.2);g.arc(sx*s*.62,sy*s*.2,s*.2,0,TAU)}g.fill();g.stroke();g.restore()}
+ function cloud(x,y,s){g.save();g.fillStyle='rgba(255,255,255,.94)';g.shadowColor='rgba(120,170,210,.35)';g.shadowBlur=12*D;for(const [dx,dy,r] of[[0,0,26],[28,6,20],[-28,8,20],[14,-12,22],[-12,-8,18]]){g.beginPath();g.arc(x+dx*s*D,y+dy*s*D,r*s*D,0,TAU);g.fill()}g.restore()}
+ function flower(f,t){const x=f.x*W,b=hy(NEAR,x),y=b+(f.r*.85+.04)*(H-b),h=20*D*f.s,sw=Math.sin(t*1.4+f.p)*2.5*D,hx=x+sw,hyy=y-h;
+  g.strokeStyle='#3f9a3a';g.lineWidth=2.2*D;g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x+sw*.3,y-h*.5,hx,hyy);g.stroke();
+  if(f.k==='daisy'){g.fillStyle='#fff';for(let k=0;k<8;k++){g.save();g.translate(hx,hyy);g.rotate(k/8*TAU);g.beginPath();g.ellipse(0,-6*D*f.s,2.6*D*f.s,5.4*D*f.s,0,0,TAU);g.fill();g.restore()}g.fillStyle='#ffd23f';g.beginPath();g.arc(hx,hyy,3.4*D*f.s,0,TAU);g.fill()}
+  else{g.fillStyle=f.c;g.beginPath();g.moveTo(hx-6*D*f.s,hyy-8*D*f.s);g.quadraticCurveTo(hx-8*D*f.s,hyy+5*D*f.s,hx,hyy+6*D*f.s);g.quadraticCurveTo(hx+8*D*f.s,hyy+5*D*f.s,hx+6*D*f.s,hyy-8*D*f.s);g.lineTo(hx+2*D*f.s,hyy-3*D*f.s);g.lineTo(hx,hyy-9*D*f.s);g.lineTo(hx-2*D*f.s,hyy-3*D*f.s);g.closePath();g.fill()}}
  function draw(t){
-  const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#17124a');bg.addColorStop(.5,'#0a0b1e');bg.addColorStop(1,'#04040d');g.fillStyle=bg;g.fillRect(0,0,W,H);
-  g.save();g.globalCompositeOperation='lighter';
-  [['98,240,255',.2,.25,.5],['150,100,255',.82,.3,.5],['255,100,210',.5,.78,.42]].forEach(([c,x,y,r],i)=>{const cx=(x+.1*Math.sin(t*.08+i*2))*W,cy=(y+.08*Math.cos(t*.07+i))*H,a=g.createRadialGradient(cx,cy,0,cx,cy,r*Math.max(W,H));a.addColorStop(0,`rgba(${c},.15)`);a.addColorStop(1,`rgba(${c},0)`);g.fillStyle=a;g.fillRect(0,0,W,H)});
-  g.restore();
-  for(const s of stars){g.fillStyle=`rgba(220,235,255,${.2+.45*(Math.sin(t*s.s+s.p)+1)/2})`;g.beginPath();g.arc(s.x*W,s.y*H,s.s*D*.9,0,TAU);g.fill()}
-  sigil(t);floor(t);
-  const md=Math.min(W,H)*.3;g.lineWidth=D;
-  for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const dx=(nodes[i].x-nodes[j].x)*W,dy=(nodes[i].y-nodes[j].y)*H,d=Math.hypot(dx,dy);if(d<md){g.strokeStyle=`rgba(98,240,255,${(1-d/md)*.3})`;g.beginPath();g.moveTo(nodes[i].x*W,nodes[i].y*H);g.lineTo(nodes[j].x*W,nodes[j].y*H);g.stroke()}}
-  g.save();g.shadowColor='rgba(98,240,255,.9)';g.shadowBlur=8*D;g.fillStyle='rgba(180,250,255,.85)';for(const n of nodes){g.beginPath();g.arc(n.x*W,n.y*H,n.r*D,0,TAU);g.fill()}
-  g.shadowColor='rgba(255,122,217,.95)';g.fillStyle='#ffb3ea';for(const p of pulses){const a=nodes[p.i],b=nodes[p.j];g.beginPath();g.arc((a.x+(b.x-a.x)*p.k)*W,(a.y+(b.y-a.y)*p.k)*H,2.4*D,0,TAU);g.fill()}g.restore();
-  for(const q of glyphs){const al=(.15+.35*(Math.sin(t*.8+q.p)+1)/2)*Math.min(1,q.y*6)*Math.min(1,(1.1-q.y)*6);g.font=`${q.sz*D}px ui-monospace,monospace`;g.fillStyle=`rgba(${q.c},${Math.max(0,al)})`;g.shadowColor=`rgba(${q.c},.9)`;g.shadowBlur=8*D;g.fillText(q.ch,q.x*W,q.y*H);g.shadowBlur=0}
-  for(const c of comets){const gr=g.createLinearGradient(c.x,c.y,c.x-c.vx*.5,c.y-c.vy*.5);gr.addColorStop(0,`rgba(200,250,255,${c.l})`);gr.addColorStop(1,'rgba(98,240,255,0)');g.strokeStyle=gr;g.lineWidth=2*D;g.beginPath();g.moveTo(c.x,c.y);g.lineTo(c.x-c.vx*.5,c.y-c.vy*.5);g.stroke()}
-  for(const r of rip){for(let q=0;q<3;q++){g.strokeStyle=`rgba(${q%2?'255,122,217':'98,240,255'},${Math.max(0,r.a*(1-q*.28))})`;g.lineWidth=1.8*D;g.beginPath();g.arc(r.x,r.y,Math.max(1,r.r-q*8*D),0,TAU);g.stroke()}}}
+  const sk=g.createLinearGradient(0,0,0,H);sk.addColorStop(0,'#7fd3ff');sk.addColorStop(.55,'#c4ecff');sk.addColorStop(.8,'#fff4d4');g.fillStyle=sk;g.fillRect(0,0,W,H);
+  const sx=W*.86,sy=H*.11,sg=g.createRadialGradient(sx,sy,0,sx,sy,H*.3);sg.addColorStop(0,'rgba(255,246,176,.95)');sg.addColorStop(.35,'rgba(255,240,150,.35)');sg.addColorStop(1,'rgba(255,240,150,0)');g.fillStyle=sg;g.fillRect(0,0,W,H);
+  g.save();g.translate(sx,sy);g.rotate(t*.1);g.fillStyle='rgba(255,236,130,.55)';for(let k=0;k<14;k++){g.rotate(TAU/14);g.beginPath();g.moveTo(34*D,-5*D);g.lineTo(70*D,0);g.lineTo(34*D,5*D);g.fill()}g.restore();
+  g.fillStyle='#ffe14d';g.beginPath();g.arc(sx,sy,28*D,0,TAU);g.fill();g.fillStyle='#fff3a0';g.beginPath();g.arc(sx-6*D,sy-6*D,14*D,0,TAU);g.fill();
+  for(const c of clouds)cloud(((c.x%1.4)-.2)*W,c.y*H,c.s);
+  hill(FAR);hill(MID);
+  g.strokeStyle='#e3b06a';g.lineWidth=5*D;for(let x=.04*W,px=null;x<=.62*W;x+=46*D){const y=hy(MID,x);if(px){g.beginPath();g.moveTo(px[0],px[1]-18*D);g.lineTo(x,y-18*D);g.moveTo(px[0],px[1]-8*D);g.lineTo(x,y-8*D);g.stroke()}px=[x,y]}
+  for(let x=.04*W;x<=.62*W;x+=46*D){const y=hy(MID,x);g.fillStyle='#d49a52';g.strokeStyle='#a86a2a';g.lineWidth=2*D;g.beginPath();g.rect(x-4*D,y-28*D,8*D,32*D);g.fill();g.stroke()}
+  hill(NEAR);for(const f of flowers)flower(f,t);
+  g.lineWidth=1.5*D;for(const b of bits){g.globalAlpha=.34;g.fillStyle=b.k==='paw'?'#ff8fba':'#fff';g.strokeStyle='#e8d3a8';(b.k==='paw'?paw:bone)(b.x*W,b.y*H,b.sz*D,b.rot+Math.sin(t+b.x*9)*.15)}g.globalAlpha=1;
+  for(const s of stamps){g.fillStyle=`rgba(255,111,168,${Math.max(0,s.a)})`;paw(s.x,s.y,s.s,s.rot)}}
  function tick(ts){const t=ts/1000,dt=Math.min(.05,t-last);last=t;
-  for(const n of nodes){n.x+=n.vx*dt;n.y+=n.vy*dt;if(n.x<0||n.x>1)n.vx*=-1;if(n.y<0||n.y>.8)n.vy*=-1}
-  for(const q of glyphs){q.y-=q.sp*dt;if(q.y<-.05){q.y=1.05;q.x=rnd()}}
-  if(pulses.length<9&&rnd()<dt*1.4){const i=rnd()*nodes.length|0,j=rnd()*nodes.length|0;if(i!==j&&Math.hypot((nodes[i].x-nodes[j].x)*W,(nodes[i].y-nodes[j].y)*H)<Math.min(W,H)*.3)pulses.push({i,j,k:0})}
-  for(const p of pulses)p.k+=dt*.6;pulses=pulses.filter(p=>p.k<1);
-  if(rnd()<dt*.3)comets.push({x:rnd()*W*.8,y:rnd()*H*.35,vx:W*.5,vy:H*.22,l:1});
-  for(const c of comets){c.x+=c.vx*dt;c.y+=c.vy*dt;c.l-=dt*.9}comets=comets.filter(c=>c.l>0);
-  for(const r of rip){r.r+=dt*150*D;r.a*=Math.pow(.35,dt)}rip=rip.filter(r=>r.a>.02);
+  for(const c of clouds)c.x+=c.sp*dt;
+  for(const b of bits){b.y-=b.sp*dt;if(b.y<-.05){b.y=1.05;b.x=rnd()}}
+  for(const s of stamps){s.a-=dt*.9;s.s+=dt*10*D}stamps=stamps.filter(s=>s.a>0);
   draw(t);if(!RM)requestAnimationFrame(tick)}
  if(!RM)requestAnimationFrame(tick);
 })();

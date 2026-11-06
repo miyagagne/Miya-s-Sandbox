@@ -12,3 +12,6 @@ Create an OAuth Web client ID at console.cloud.google.com (APIs & Services > Cre
 - Local only: data is stored in the browser. Friends use shareable codes (a snapshot), not live sync.
 - AI: on the published Claude page (the `sample` artifact capability), **Ask Winston** is answered by Claude and recaps are written by Claude as step-by-step explanations, with chat memory. In the standalone file there is no Claude to ask, so Ask Winston falls back to searching your notes and recaps are built from your materials. Open-answer grading is still keyword-based.
 - Materials are entered as `term :: explanation` lines; uploading slides/PDFs is not built yet.
+
+## Course materials
+Each class has a Materials tab with course-wide and weekly sections. Upload PDF, Word (.docx), PowerPoint (.pptx) or text files, or paste notes; Winston turns them into study cards (AI-written on the published Claude page, definition-spotting elsewhere). Live class and practice can be limited to one week. File readers load from cdnjs, so uploads need an internet connection. Scanned-image PDFs have no text to read.
