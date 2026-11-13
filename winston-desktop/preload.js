@@ -1,0 +1,9 @@
+const { contextBridge, ipcRenderer } = require('electron');
+contextBridge.exposeInMainWorld('winstonDesktop', {
+  isDesktop: true,
+  setMode: (m) => ipcRenderer.send('mode', m),
+  hide: () => ipcRenderer.send('hide'),
+  quit: () => ipcRenderer.send('quit'),
+  getSettings: () => ipcRenderer.invoke('get-settings'),
+  setSettings: (s) => ipcRenderer.invoke('set-settings', s)
+});

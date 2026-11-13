@@ -149,6 +149,15 @@ details>summary b::after{content:' ▾';color:var(--mute)}details[open]>summary 
 .toolgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .tool{background:var(--soft);border:2px solid #f6d57a;border-radius:16px;padding:10px 4px;font-size:26px;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}.tool span{font-size:12px;font-weight:700}
 .badges{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.bdg{text-align:center;background:#f4efe3;border-radius:14px;padding:8px 2px;opacity:.55}.bdg.on{background:#fff6cf;opacity:1;border:2px solid #f5b25a}.bdg b{font-size:24px;font-weight:400;display:block}.bdg span{font-size:11px;font-weight:600}
+html.wm,body.wm{background:transparent}
+body.wm{padding:0;overflow:hidden;min-height:0}
+body.wm #main,body.wm nav,body.wm #timerchip,body.wm #bg,body.wm #intro,body.wm #modal{display:none!important}
+#widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
+.whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
+.dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
+#deskbar{display:none;position:fixed;left:0;right:0;top:0;height:30px;z-index:200;-webkit-app-region:drag;align-items:center;justify-content:space-between;padding:0 10px;background:linear-gradient(#dba256,#b8742e);color:#fff2d0;font:700 13px var(--display);text-shadow:0 1px 0 #8a521f}
+#deskbar button{-webkit-app-region:no-drag;border:0;background:rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:1px 8px;margin-left:4px;cursor:pointer;font-size:14px}
+body.fullbar #deskbar{display:flex}body.fullbar{padding-top:32px}body.fullbar #bg{top:30px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -173,6 +182,7 @@ details>summary b::after{content:' ▾';color:var(--mute)}details[open]>summary 
 <nav id="nav"></nav>
 <div id="widget"></div>
 <div id="toast"></div>
+<div id="deskbar"><span>🐶 Winston</span><span><button data-a="dwpin" title="Always on top">📌</button><button data-a="dwcollapse" title="Collapse to widget">▭ Widget</button><button data-a="dwhide" title="Hide to tray">–</button></span></div>
 <div id="modal"></div>
 <div id="intro"></div>
 <div id="timerchip" data-a="tab" data-k="home"></div>
@@ -331,7 +341,7 @@ Object.assign(ACTIONS,{
  ob1(){const n=$('#nm').value.trim()||obData.name;if(!n)return toast('Tell me your name!');obData.name=n;obData.email=$('#em').value.trim();ob=2;render()},
  ob2(){obData.majors=$('#mj').value.trim();obData.minors=$('#mn').value.trim();ob=4;render()},
  pick(d){$('#dn').value=d.k},
- ob4(){const dn=($('#dn').value.trim()||'Winston').slice(0,20);S.user={name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,dogName:dn,goals:($('#gl')?$('#gl').value.trim():'')};save();tab='home';render();drawWidget();toast(`Welcome, ${S.user.name}! Say hi to ${dn}! 🐶`);if(!(S.pref&&S.pref.autoFloat===false))popOut(true)},
+ ob4(){const dn=($('#dn').value.trim()||'Winston').slice(0,20);S.user={name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,dogName:dn,goals:($('#gl')?$('#gl').value.trim():'')};save();tab='home';render();drawWidget();toast(`Welcome, ${S.user.name}! Say hi to ${dn}! 🐶`);if(DESK)setDeskMode('widget');else if(!(S.pref&&S.pref.autoFloat===false))popOut(true)},
  tab(d){go(d.k)}
 });
 
@@ -447,7 +457,9 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const SRC=window.SpeechRecognition||window.webkitSpeechRecognition;
+const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
+const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
+const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
 const inFrame=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 function rLive(c){
  if(!live||live.cls!==c.id){const dr=S.liveDraft&&S.liveDraft.cls===c.id&&S.liveDraft.lines.length?S.liveDraft:null;
@@ -467,7 +479,7 @@ function rLive(c){
  micUI();paintLive()}
 function micUI(){const b=$('#micbtn'),st=$('#micstat');if(!live)return;
  if(b)b.textContent=live.listening?'🔇 Stop mic':'🎙 Listen';
- if(st){st.className='mute'+(live.micWarn?' warn':'');st.textContent=live.micMsg||(live.listening?'🎙 Listening… I\'ll write down what I hear.':(SRC?'Mic is off. Tap 🎙 Listen, or type/dictate below.':'This browser has no speech recognition — type or dictate below.')+(inFrame?' (Inside Claude the browser may block the mic.)':''))}}
+ if(st){st.className='mute'+(live.micWarn?' warn':'');st.textContent=live.micMsg||(live.listening?'🎙 Listening… I\'ll write down what I hear.':(SRC?'Mic is off. Tap 🎙 Listen, or type/dictate below.':NOSR)+(inFrame?' (Inside Claude the browser may block the mic.)':''))}}
 function micSay(msg,warn){if(!live)return;live.micMsg=msg;live.micWarn=!!warn;micUI()}
 const CIRC='<svg class="circ" viewBox="0 0 100 40" preserveAspectRatio="none"><path pathLength="1" d="M8 24 C2 8 56 0 90 8 C104 14 98 34 52 37 C14 38 -2 28 14 12"/></svg>';
 function paintLive(){const c=cur();if(!c||!live||!$('#livemat'))return;
@@ -489,7 +501,7 @@ function heard(line,opt){if(!live)return;line=String(line||'').trim();if(!line)r
  if(!mine)W.msg=hit?`${hit.term}: ${hit.text.split(/(?<=[.!?])\s/)[0]}`:'';
  saveDraft();paintLive();drawWidget();if(hit)setTimeout(()=>burst(7,$('#m'+hit.id)),60)}
 function startListen(){
- if(!SRC){micSay('This browser has no speech recognition. Type or dictate into the box below instead.',true);return}
+ if(!SRC){micSay(DESK?NOSR:'This browser has no speech recognition. Type or dictate into the box below instead.',true);return}
  try{rec=new SRC()}catch(e){micSay('Could not start speech recognition. Type or dictate below instead.',true);return}
  rec.continuous=true;rec.interimResults=true;rec.lang=navigator.language||'en-US';
  rec.onstart=()=>{if(!live)return;live.listening=true;micSay('🎙 Listening… I\'ll write down what I hear.')};
@@ -506,7 +518,7 @@ Object.assign(ACTIONS,{
  say(){if(!live)return;const el=$('#said'),v=el&&el.value.trim();if(!v)return;el.value='';v.split(/\n+/).forEach(l=>heard(l,{mine:live.mine}))},
  nsrc(d){if(!live)return;live.mine=d.k==='mine';const a=$('#nsT'),b=$('#nsM');if(a)a.classList.toggle('on',!live.mine);if(b)b.classList.toggle('on',live.mine)},
  mic(){if(!live)return;if(live.listening){live.listening=false;live.micMsg='';try{rec.stop()}catch(e){}micUI()}else{live.micMsg='';startListen()}},
- popout(){popOut(false)},
+ popout(){if(DESK)setDeskMode(deskMode==='widget'?'full':'widget');else popOut(false)},
  testpaw(){showPaw()},
  finishdraft(){const c=cur(),d=S.liveDraft;if(!c||!d)return;const ses={id:uid(),date:new Date(d.t0).toLocaleString(),hits:d.hits,lines:d.lines};c.sessions.push(ses);view.ses=c.sessions.length-1;S.liveDraft=null;save();view.sub='review';render();makeNotes(c,ses);genRecap(c,ses)},
  dropdraft(){S.liveDraft=null;save();render()},
@@ -537,12 +549,13 @@ const dogMood=()=>Date.now()<W.cheerUntil?'cheer':W.view==='breathe'?'calm':mood
 const wClock=()=>{const t=S.timer;if(!t)return'';const el=(Date.now()-t.start)/1000;return fmtClock(t.target?Math.max(0,t.target-el):el)};
 function drawWidget(){
  if(!S.user){WEL.className='';WEL.innerHTML='';document.body.classList.remove('live');return}
- const open=W.popped||W.open;W.drawn=Date.now();
+ const desk=DESK&&deskMode==='widget',open=W.popped||W.open||desk;W.drawn=Date.now();
  document.body.classList.toggle('live',!!(open&&!W.popped&&innerWidth>=700));
  if(!open){const cap=live?`<div class="wcap">${esc(W.msg||'🎙 Listening…').slice(0,90)}</div>`:'';
   WEL.className='mini show';WEL.innerHTML=`<button class="wbtn" data-a="wopen" aria-label="Open ${esc(DN())}">${dog(S.eq,dogMood(),'28 8 144 150')}</button>${cap}`;return}
- WEL.className='show'+(W.popped?' pip':'');
- const head=`<div class="whead">${dog(S.eq,dogMood(),'28 8 144 150')}<div class="grow"><b>${esc(DN())}</b><div class="mute" style="font-size:12px">Study Therapy Dog · Lv ${lvl()}</div><div class="wstats"><span>🪙 ${S.coins}</span><span>🔥 ${streakDays()}</span><span>❤️ ${Math.round(S.happy)}%</span></div></div>${W.popped?'':'<button class="wx" data-a="wclose" aria-label="Minimize">–</button>'}</div>`;
+ WEL.className='show'+(W.popped?' pip':'')+(desk?' desk':'');
+ const dwb=desk?'<div class="dwbtns"><button class="wx" data-a="dwpin" title="Always on top" aria-label="Always on top">📌</button><button class="wx" data-a="dwexpand" title="Open the full app" aria-label="Open the full app">⤢</button><button class="wx" data-a="dwhide" title="Hide to tray" aria-label="Hide">–</button></div>':'';
+ const head=`<div class="whead${desk?' drag':''}">${dog(S.eq,dogMood(),'28 8 144 150')}<div class="grow"><b>${esc(DN())}</b><div class="mute" style="font-size:12px">Study Therapy Dog · Lv ${lvl()}</div><div class="wstats"><span>🪙 ${S.coins}</span><span>🔥 ${streakDays()}</span><span>❤️ ${Math.round(S.happy)}%</span></div></div>${desk?dwb:(W.popped?'':'<button class="wx" data-a="wclose" aria-label="Minimize">–</button>')}</div>`;
  const V={home:wHome,breathe:wBreathe,boost:wBoost,talk:wTalk,note:wNote,card:wCard,mood:wMood,focus:wFocus};
  WEL.innerHTML=head+(V[W.view]||wHome)()+(W.view!=='home'?'<button class="s wback" data-a="wview" data-k="home">← Back</button>':'');
  if(W.paw)appendPaw()}
@@ -554,7 +567,7 @@ function wHome(){const g=goalToday(),t=S.timer,c=t&&S.classes.find(x=>x.id===t.c
  <div class="wgrid"><button data-a="wpet">🐾<span>Pet me</span></button><button data-a="wview" data-k="breathe">🌬️<span>Breathe</span></button><button data-a="wview" data-k="boost">💛<span>Boost</span></button><button data-a="wview" data-k="talk">💭<span>Talk</span></button><button data-a="wview" data-k="card">🃏<span>Quick card</span></button><button data-a="wview" data-k="note">📝<span>Note</span></button></div>
  <div class="mute" style="text-align:center;font-size:12px;margin-top:8px">How are you feeling? ${MOODS.map(m=>`<span class="wm" data-a="wfeel" data-k="${m[1]}" title="${m[1]}">${m[0]}</span>`).join('')}</div>
  ${live?`<div class="mute" style="font-size:12px;margin-top:4px">🎙 In class · ${live.lines.length} notes so far</div>`:''}
- ${W.popped?'':'<button class="s wpop" data-a="popout">🪟 Float on my screen</button>'}`}
+ ${W.popped||DESK?'':'<button class="s wpop" data-a="popout">🪟 Float on my screen</button>'}`}
 function wMood(){return `<div class="bubble wmsg">${esc(W.msg||'How are you feeling right now?')}</div><div class="wgrid">${MOODS.map(m=>`<button data-a="wfeel" data-k="${m[1]}">${m[0]}<span>${m[1]}</span></button>`).join('')}</div>`}
 function wFocus(){if(S.timer){W.view='home';return wHome()}
  if(!S.classes.length)return '<div class="bubble wmsg">Add a class first, then we can focus together!</div>';
@@ -763,12 +776,15 @@ Object.assign(ACTIONS,{
 /* ======= shop ======= */
 function rDog(){const sub=view.dsub||'shop';
  $('#main').innerHTML=`<div class="tabs">${[['shop','🛍️ Shop'],['friends','👥 Friends'],['me','⚙️ Settings']].map(([k,l])=>`<button data-a="dsub" data-k="${k}" class="${k===sub?'on':''}">${l}</button>`).join('')}</div><div id="dsub"></div>`;
- mainT=$('#dsub');try{({shop:rShop,friends:rFriends,me:rSettings})[sub]()}finally{mainT=null}}
+ mainT=$('#dsub');try{({shop:rShop,friends:rFriends,me:rSettings})[sub]()}finally{mainT=null}
+ if(sub==='me'&&DESK)deskUI()}
 function rSettings(){const u=S.user;
  MAIN().innerHTML=`<div class="card"><h2>Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea>
  <label style="display:block;margin-top:6px">Floating widget</label><div><span class="chip ${S.pref.autoFloat===false?'':'on'}" id="autof" data-a="toggleauto">${S.pref.autoFloat===false?'':'✓ '}Float ${esc(DN())} on my screen when I open the app</span></div><p class="mute" style="margin-top:0">Works in desktop Chrome or Edge. He stays on top of Brightspace, Google and other tabs.</p>
  <button class="p" data-a="savesettings" style="width:100%">Save</button></div>
  <div class="card"><h2>Study Reminders</h2><label>Daily Reminder Time</label><input id="rt" type="time" value="${esc(S.rem.time)}"><div class="row"><button class="s grow" data-a="remgcal">📅 Add To Google Calendar</button><button class="s grow" data-a="remics">⬇ Calendar File</button></div><div style="margin-top:8px"><span class="chip ${S.rem.notify?'on':''}" id="remn" data-a="remnotify">${S.rem.notify?'✓ ':''}Notify Me While The App Is Open</span></div><button class="p" data-a="remsave" style="width:100%;margin-top:8px">Save Time</button><p class="mute">Reminders repeat daily in your calendar. In-app alerts show when the app or floating widget is open; true background push notifications need a hosted version of the app.</p></div>
+ ${DESK?'<div class="card" id="deskset"></div>':''}
+ <div class="card"><h2>Backup</h2><p class="mute">Move your streak, classes and notes between the web app and the desktop widget.</p><div class="row"><button class="s grow" data-a="exportdata">⬇ Export My Data</button><button class="s grow" data-a="importdata">⬆ Import My Data</button></div></div>
  <div class="card"><button class="${view.reset?'p bad':'s'}" data-a="resetall" style="width:100%">${view.reset?'Really erase everything?':'Erase everything & start over'}</button></div>`}
 ACTIONS.dsub=d=>{view.dsub=d.k;render()};
 function rShop(){
@@ -1210,13 +1226,26 @@ Object.assign(ACTIONS,{
   toast(liveStatus==='live'?'Live leaderboard on! 🏆 Send friends a fresh code.':liveStatus==='setup'?'Live sync needs the one-time database setup (see supabase-leaderboard.sql).':"Couldn't reach the live leaderboard from here — snapshots still work.")},
  async livedelete(){if(!S.live.uid)return;const r=await liveCall('winston_delete',{p_uid:S.live.uid,p_secret:S.live.secret});S.live={on:false,uid:'',secret:''};save();render();toast(r===null?"Live sharing off. (Couldn't reach the server to delete — your data there stays until you can.)":'Your live data was deleted 🗑️')}});
 
+/* ======= v7: desktop widget mode ======= */
+function setDeskMode(m){if(!DESK)return;deskMode=m;winstonDesktop.setMode(m);const w=m==='widget';document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',!w);
+ if(!w){const i=$('#intro');if(i)i.style.display='none'}drawWidget();if(!w)render()}
+Object.assign(ACTIONS,{
+ dwexpand(){setDeskMode('full')},dwcollapse(){setDeskMode('widget')},dwhide(){if(DESK)winstonDesktop.hide()},
+ async dwpin(){if(!DESK)return;const st=await winstonDesktop.getSettings(),n=await winstonDesktop.setSettings({onTop:!st.onTop});toast(n.onTop?'Always on top: on 📌':'Always on top: off');deskUI()},
+ async dwlogin(){const st=await winstonDesktop.getSettings();await winstonDesktop.setSettings({openAtLogin:!st.openAtLogin});deskUI()},
+ async dwopacity(d,el){await winstonDesktop.setSettings({opacity:parseFloat(el&&el.value||1)})},
+ exportdata(){saveBlob('winston-data.json',new Blob([JSON.stringify(S)],{type:'application/json'})).then(()=>toast('Your data was exported. Keep it safe 💾'))},
+ importdata(){const f=document.createElement('input');f.type='file';f.accept='.json';f.onchange=async()=>{try{const d=JSON.parse(await f.files[0].text());if(!d||d.v!==1||!Array.isArray(d.classes))throw 0;S=d;save();toast('Imported! Reloading…');setTimeout(()=>location.reload(),600)}catch(e){toast("That file isn't a Winston backup.")}};f.click()}});
+async function deskUI(){const box=$('#deskset');if(!box||!DESK)return;const st=await winstonDesktop.getSettings();
+ box.innerHTML=`<h2>Desktop Widget</h2><div><span class="chip ${st.onTop?'on':''}" data-a="dwpin">${st.onTop?'✓ ':''}Always On Top</span><span class="chip ${st.openAtLogin?'on':''}" data-a="dwlogin">${st.openAtLogin?'✓ ':''}Start With My Computer</span></div><label style="display:block;margin-top:8px">Widget Opacity</label><input type="range" min="0.4" max="1" step="0.05" value="${st.opacity}" data-a="dwopacity" style="margin:0" oninput="ACTIONS.dwopacity({},this)"><p class="mute">Shortcut: Ctrl/Cmd + Shift + W shows or hides Winston. Closing the window keeps him in your system tray.</p>`}
+
 /* ---- intro screen ---- */
 function showIntro(){const el=$('#intro'),u=S.user;let title,sub;
  if(u){const wk=S.classes.reduce((a,c)=>a+weekSecs(c),0),up=upcoming(1,14)[0];title=`Welcome back, ${esc(u.name)}!`;sub=`${esc(DN())} missed you! ${wk>60?`You've studied ${fmtDur(wk)} this week. `:''}${up?`Next up: ${esc(up.title)} (${esc(up.cls)}) ${when(up)}.`:'Ready to learn something fun today?'}`}
  else{title="Hi, I'm Winston!";sub="Your study buddy dog. Studying is better with a friend."}
  el.innerHTML=`<h1 class="sign">${title}</h1>${dog(u?S.eq:{},'cheer')}<p style="max-width:340px;font-size:17px">${sub}</p><button class="p" data-a="intro" style="font-size:20px;padding:12px 30px;margin-top:6px">Let's go! 🐾</button>`;
  el.className='';el.style.display='flex';setTimeout(()=>burst(14,el.querySelector('svg')),500)}
-ACTIONS.intro=()=>{const el=$('#intro');el.classList.add('out');setTimeout(()=>{el.style.display='none'},650);if(S.user&&!(S.pref&&S.pref.autoFloat===false))popOut(true)};
+ACTIONS.intro=()=>{const el=$('#intro');el.classList.add('out');setTimeout(()=>{el.style.display='none'},650);if(S.user&&!DESK&&!(S.pref&&S.pref.autoFloat===false))popOut(true)};
 
 function burst(n=14,el){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
  const r=(el||document.querySelector('.dogwrap svg')||document.body).getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+Math.min(r.height*.4,60);
@@ -1265,7 +1294,8 @@ S.classes.forEach(c=>c.sessions.forEach(x=>{if(x.aiState==='loading')x.aiState='
 S.classes.forEach(ensure);
 (async()=>{try{AI.sm=window.claude&&claude.use?await claude.use('sample'):null}catch(e){AI.sm=null}try{AI.mcp=window.claude&&claude.use?await claude.use('mcp'):null}catch(e){AI.mcp=null}if((AI.sm||AI.mcp)&&S.user)render()})();
 if(!inFrame&&/^https?:/.test(location.protocol)){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest';document.head.append(l);if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{})}
-render();drawWidget();tickTimer();showIntro();
+if(DESK){const w=deskMode==='widget'&&!!S.user;if(!S.user)deskMode='full';winstonDesktop.setMode(deskMode);document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',deskMode==='full')}
+render();drawWidget();tickTimer();if(DESK&&deskMode==='widget')$('#intro').style.display='none';else showIntro();
 </script>
 </body>
 </html>

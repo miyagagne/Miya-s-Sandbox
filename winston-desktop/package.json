@@ -1,0 +1,27 @@
+{
+  "name": "winston-desktop",
+  "version": "1.0.0",
+  "description": "Winston, your study therapy dog, as an always-on-top desktop widget.",
+  "main": "main.js",
+  "author": "Winston",
+  "license": "MIT",
+  "scripts": {
+    "prestart": "node scripts/copy-app.js",
+    "start": "electron .",
+    "dist": "node scripts/copy-app.js && electron-builder --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.winston.studybuddy",
+    "productName": "Winston",
+    "files": ["main.js", "preload.js", "app/**", "build/tray.png"],
+    "directories": { "buildResources": "build", "output": "dist" },
+    "mac": { "category": "public.app-category.education", "target": ["dmg", "zip"] },
+    "win": { "target": ["nsis", "portable"] },
+    "linux": { "target": ["AppImage"], "category": "Education" },
+    "nsis": { "oneClick": true, "perMachine": false }
+  }
+}
