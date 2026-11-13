@@ -73,11 +73,6 @@ nav button.on{background:#fff3cf;color:#a85a10;font-weight:700;text-shadow:none;
 .upl.drag{border-color:var(--brand2);background:#ffe9f3}
 #toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:linear-gradient(#ffa9cc,#ff6fa8);color:#fff;border:3px solid #d94d86;padding:9px 20px;border-radius:99px;z-index:50;opacity:0;transition:.3s;pointer-events:none;max-width:90vw;text-align:center;font-weight:600;text-shadow:0 1px 0 #d94d86;box-shadow:0 4px 0 #d94d86}
 #toast.on{opacity:1}
-#widget{position:fixed;right:10px;bottom:96px;width:210px;background:#fffaf0;border:4px solid #ff9a3d;border-radius:26px;padding:8px;z-index:20;box-shadow:0 5px 0 #c4691a,0 12px 24px rgba(0,0,0,.25);display:none;text-align:center;font-size:14px;color:var(--ink)}
-#widget.show{display:block}
-#widget svg{width:96px;height:96px}
-body.live{padding-bottom:350px}
-#widget.pip{position:static;width:100%;min-height:100vh;border-radius:0;border:0;box-shadow:none;display:block}
 .paw{background:linear-gradient(135deg,#ffb347,#ff6fa8);color:#fff;border-radius:18px;padding:12px;margin-top:8px;animation:pulse2 .8s infinite;font-weight:600}
 @keyframes pulse2{50%{transform:scale(1.05)}}
 .paw button{font-size:20px;padding:10px 18px;border-radius:99px;border:0;background:#fff;color:#e0508a;font-weight:800;margin-top:6px}
@@ -113,6 +108,32 @@ body.live{padding-bottom:350px}
 .excited{animation:shake .5s ease-in-out 3}@keyframes shake{25%{transform:rotate(-2deg) scale(1.03)}75%{transform:rotate(2deg) scale(1.03)}}
 .nbox{white-space:pre-wrap;background:#fff;border:2px solid #f1d9b5;border-radius:14px;padding:10px 12px;font-size:14px;max-height:260px;overflow:auto;margin-top:6px}
 a{color:#c4691a;font-weight:600}
+#widget{position:fixed;right:10px;bottom:96px;width:250px;max-height:72vh;overflow:auto;background:#fffaf0;border:4px solid #49c6bd;border-radius:26px;padding:10px;z-index:20;box-shadow:0 5px 0 #2a9d97,0 12px 24px rgba(0,0,0,.25);display:none;font-size:14px;color:var(--ink)}
+#widget.show{display:block}
+#widget.mini{width:auto;max-height:none;overflow:visible;padding:0;border:0;background:none;box-shadow:none}
+body.live{padding-bottom:340px}
+.wbtn{width:76px;height:76px;border-radius:50%;border:4px solid #49c6bd;background:radial-gradient(circle,#fffdf5,#e8f8f6);box-shadow:0 4px 0 #2a9d97,0 8px 16px rgba(0,0,0,.25);padding:0;overflow:hidden;cursor:pointer;display:block}
+.wbtn svg{width:100%;height:100%;display:block}
+.wcap{position:absolute;right:84px;bottom:6px;width:max-content;max-width:190px;background:#fff;border:2px solid #49c6bd;border-radius:14px;padding:5px 9px;font-size:12px;box-shadow:0 3px 0 #2a9d97;color:var(--ink)}
+#widget.pip{position:relative;width:100%;max-height:none;min-height:100vh;border-radius:0;border:0;box-shadow:none;display:block;overflow:auto}
+#widget{position:fixed}#widget.pip{position:relative}
+.whead{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.whead svg{width:64px;height:60px;flex:none}
+.wstats{display:flex;gap:8px;font-size:12px;font-weight:600;flex-wrap:wrap}
+.wx{border:0;background:#e8f8f6;border-radius:50%;width:28px;height:28px;font-size:18px;line-height:1;color:#2a9d97;cursor:pointer;align-self:flex-start;flex:none}
+.wmsg{font-size:14.5px;line-height:1.35;margin-top:4px}
+.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.wgrid button{background:#e8f8f6;border:2px solid #b8e8e3;border-radius:14px;padding:6px 2px;font-size:20px;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:1px}
+.wgrid button span{font-size:11px;font-weight:600}
+.wgoal{background:#fff;border:2px dashed #49c6bd;border-radius:12px;padding:6px 10px;margin-top:8px;cursor:pointer;font-weight:600}.wgoal.done{text-decoration:line-through;opacity:.7}
+.wtimer{text-align:center;background:#e8f8f6;border-radius:16px;padding:8px;margin-top:6px}.wclock{font:600 32px var(--display)}
+.wm{font-size:20px;cursor:pointer;margin:0 2px}
+.wback{margin-top:8px;width:100%;padding:6px}.wpop{width:100%;margin-top:8px;padding:6px}
+.wbreath{width:120px;height:120px;margin:10px auto;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#a8d8ff 60%,#78b8f0);box-shadow:0 0 30px rgba(120,184,240,.7);display:grid;place-items:center;font-family:var(--display);font-size:15px;color:#2c5f8a;text-align:center;transition:transform 4s ease-in-out;padding:8px}
+.badge{display:inline-block;background:#e8f8f6;border:2px solid #49c6bd;color:#1b6f6a;border-radius:99px;padding:2px 12px;font-weight:700;font-size:13px;margin-bottom:6px}
+.fheart{position:absolute;pointer-events:none;font-size:20px;animation:fh 1.4s ease-out forwards}@keyframes fh{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-60px)}}
+.breathe{transform-box:fill-box;transform-origin:50% 100%;animation:breathe 3.4s ease-in-out infinite}@keyframes breathe{50%{transform:scale(1.015,1.025)}}
+.warn{color:#b3541e;font-weight:600}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -158,7 +179,7 @@ function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clea
 
 /* ======= state ======= */
 const KEY='winston.v1';
-const DEMO={id:'demo',name:'Intro to Business (demo)',careerNotes:{},sessions:[],items:[
+const DEMO={id:'demo',name:'Intro to Business (demo)',sessions:[],items:[
  ['Opportunity cost','The value of the next-best alternative you give up when you make a choice. Every choice has one.'],
  ['Revenue','The total money a business earns from selling goods or services. It is counted before any expenses are subtracted.'],
  ['Profit','Revenue minus all expenses. If it is negative, the business has a loss.'],
@@ -167,7 +188,7 @@ const DEMO={id:'demo',name:'Intro to Business (demo)',careerNotes:{},sessions:[]
  ['Supply and demand','Prices rise when demand is higher than supply. Prices fall when supply is higher than demand.']
 ].map(([term,text])=>({id:uid(),term,text}))};
 ensure(DEMO);let S=load();let joy=0;
-function ensure(c){c.weeks=c.weeks||[];c.docs=c.docs||[];c.events=c.events||[];c.meet=c.meet||{days:[],start:'',end:''};c.goalMin=c.goalMin||180;c.items.forEach(i=>{if(!i.wk)i.wk='course'})}
+function ensure(c){c.weeks=c.weeks||[];c.docs=c.docs||[];c.events=c.events||[];c.meet=c.meet||{days:[],start:'',end:''};c.goalMin=c.goalMin||180;c.scratch=c.scratch||[];c.items.forEach(i=>{if(!i.wk)i.wk='course'})}
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===1){s.classes.forEach(ensure);return s}}catch(e){}
  return {v:1,user:null,coins:0,earned:0,happy:70,tick:Date.now(),owned:[],eq:{},classes:[DEMO],friends:[],checks:0}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Storage is full — remove some uploaded files')}}
@@ -175,7 +196,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('
 (function decay(){const h=(Date.now()-S.tick)/36e5;S.happy=Math.max(15,Math.min(S.happy,100)-h*1.5);S.tick=Date.now();save()})();
 
 const lvl=()=>Math.floor(Math.sqrt(S.earned/15))+1;
-function earn(n,why){const before=lvl();S.coins+=n;S.earned+=n;S.happy=Math.min(100,S.happy+n*1.5);save();
+function earn(n,why){const before=lvl();S.coins+=n;S.earned+=n;try{dayRec().act=1}catch(e){}S.happy=Math.min(100,S.happy+n*1.5);save();
  toast(`+${n} 🪙 ${why}`);if(lvl()>before)setTimeout(()=>{toast(`🎉 Level ${lvl()}! Winston is so proud!`);burst(44)},2700);refresh();joy=Date.now();setTimeout(()=>burst(8+Math.min(n,8)),80)}
 const mood=()=>S.happy>=65?'happy':S.happy>=35?'ok':'sad';
 
@@ -207,50 +228,60 @@ function fluff(cx,cy,rx,ry,n,tuft,cheek,tension){
  const P=[...R,...R.slice(1,-1).reverse().map(([x,y])=>[2*cx-x,y])],N=P.length,t=(tension||1)/6;let d=`M${P[0][0].toFixed(1)} ${P[0][1].toFixed(1)}`;
  for(let i=0;i<N;i++){const a=P[(i-1+N)%N],b=P[i],c=P[(i+1)%N],e=P[(i+2)%N];d+=`C${(b[0]+(c[0]-a[0])*t).toFixed(1)} ${(b[1]+(c[1]-a[1])*t).toFixed(1)} ${(c[0]-(e[0]-b[0])*t).toFixed(1)} ${(c[1]-(e[1]-b[1])*t).toFixed(1)} ${c[0].toFixed(1)} ${c[1].toFixed(1)}`}
  return d+'Z'}
-function dog(eq={},m='happy'){
+function dog(eq={},m='happy',vb='0 0 200 200'){
  const g=s=>eq[s]&&ACC[eq[s]]?ACC[eq[s]].svg:'';
  const H=s=>s+`<g transform="translate(200 0) scale(-1 1)">${s}</g>`;   // draw the right side, mirror it to the left
  const C=(x,y,r,f,o)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${f}"${o?` opacity="${o}"`:''}/>`;
  const star=(x,y,sc,d)=>`<path class="spk" style="animation-delay:${d}s" transform="translate(${x} ${y}) scale(${sc})" d="${STAR}" fill="#fff3b0"/>`;
- const heart=(x,y,d)=>`<path class="hrt" style="animation-delay:${d}s" transform="translate(${x} ${y}) scale(.7)" d="M0 -3 C-6 -10 -14 0 0 10 C14 0 6 -10 0 -3Z" fill="#ff6fa8"/>`;
- const eye=(ry)=>`<ellipse cx="122" cy="100" rx="${ry-1.5}" ry="${ry}" fill="url(#eye)"/><ellipse cx="122" cy="100" rx="${ry-1.5}" ry="${ry}" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="1.6"/><circle cx="126" cy="${95-(ry>12?1:0)}" r="${ry>12?5.2:4.6}" fill="#fff"/><circle cx="118" cy="105" r="2.2" fill="#fff" opacity=".85"/><path d="M113 109 Q122 115 131 109" stroke="#8fd3ff" stroke-opacity=".55" stroke-width="1.6" fill="none"/>`;
+ const hd='M0 -3 C-6 -10 -14 0 0 10 C14 0 6 -10 0 -3Z';
+ const heart=(x,y,d)=>`<path class="hrt" style="animation-delay:${d}s" transform="translate(${x} ${y}) scale(.7)" d="${hd}" fill="#ff6fa8"/>`;
+ const eye=(ry,sp)=>`<ellipse cx="122" cy="100" rx="${ry-1.5}" ry="${ry}" fill="url(#eye)"/><ellipse cx="122" cy="100" rx="${ry-1.5}" ry="${ry}" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="1.6"/>${sp?`<path transform="translate(126 95) scale(.85)" d="${STAR}" fill="#fff"/>`:`<circle cx="126" cy="${95-(ry>12?1:0)}" r="${ry>12?5.2:4.6}" fill="#fff"/>`}<circle cx="118" cy="105" r="2.2" fill="#fff" opacity=".85"/><path d="M113 109 Q122 115 131 109" stroke="#8fd3ff" stroke-opacity=".55" stroke-width="1.6" fill="none"/>`;
  const eyes=m==='happy'
   ?H('<path d="M112 104 Q122 88 132 104" stroke="#2a1810" stroke-width="4.6" fill="none" stroke-linecap="round"/><path d="M134 100 l4-3M130 94 l3-4" stroke="#2a1810" stroke-width="2.4" stroke-linecap="round"/>')
+  :m==='calm'?H('<path d="M112 98 Q122 109 132 98" stroke="#2a1810" stroke-width="4.2" fill="none" stroke-linecap="round"/><path d="M134 100 l4 2M131 105 l3 3" stroke="#2a1810" stroke-width="2.2" stroke-linecap="round"/>')
+  :m==='cheer'?`<g class="blink">${H(eye(12.5,true))}</g>`
   :m==='ok'?`<g class="blink">${H(eye(11.5))}</g>`
   :`<g class="blink">${H(eye(13))}</g>`+H('<path d="M108 86 L136 92" stroke="#7a4a2a" stroke-width="3.4" stroke-linecap="round"/><path d="M130 114 q4 9 0 13 q-4-4 0-13Z" fill="#7fd0ff" opacity=".9"/>');
  const mouth=m==='happy'
   ?'<path d="M100 121 V127" stroke="#2a1810" stroke-width="2.4"/><path d="M86 127 Q100 152 114 127 Q100 134 86 127Z" fill="#7a2438" stroke="#2a1810" stroke-width="2" stroke-linejoin="round"/><path d="M93 139 Q100 155 107 139 Q100 134 93 139Z" fill="url(#tongue)"/><path d="M86 127 Q82 126 81 122M114 127 Q118 126 119 122" stroke="#2a1810" stroke-width="2" fill="none" stroke-linecap="round"/>'
+  :m==='cheer'
+  ?'<path d="M100 121 V126" stroke="#2a1810" stroke-width="2.4"/><path d="M82 126 Q100 160 118 126 Q100 135 82 126Z" fill="#7a2438" stroke="#2a1810" stroke-width="2" stroke-linejoin="round"/><path d="M91 141 Q100 160 109 141 Q100 135 91 141Z" fill="url(#tongue)"/><path d="M82 126 Q78 124 77 119M118 126 Q122 124 123 119" stroke="#2a1810" stroke-width="2" fill="none" stroke-linecap="round"/>'
+  :m==='calm'?'<path d="M100 121 V127 M91 129 Q100 138 109 129" stroke="#2a1810" stroke-width="2.4" fill="none" stroke-linecap="round"/>'
   :m==='ok'
   ?'<path d="M100 121 V127 M88 129 Q94 136 100 127 Q106 136 112 129" stroke="#2a1810" stroke-width="2.6" fill="none" stroke-linecap="round"/>'
   :'<path d="M100 121 V127 M90 136 Q100 125 110 136" stroke="#2a1810" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
- const furLines=H('<path d="M124 64 q7 4 10 13M137 76 q7 4 9 13M146 98 q4 7 3 15M141 126 q-2 6-9 10M118 56 q4 3 7 9M130 88 q5 3 6 9M110 70 q4 3 6 8" fill="none" stroke="#b86a22" stroke-opacity=".3" stroke-width="1.6" stroke-linecap="round"/><path d="M128 70 q5 3 7 10M140 84 q4 4 5 11M122 62 q3 2 5 6" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="1.4" stroke-linecap="round"/>');
- return `<svg viewBox="0 0 200 200" role="img" aria-label="Winston the Pomeranian puppy">
+ const glad=m==='happy'||m==='cheer'||m==='calm';
+ const furLines=H('<path d="M124 64 q7 4 10 13M137 76 q7 4 9 13M146 98 q4 7 3 15M141 126 q-2 6-9 10M118 56 q4 3 7 9M130 88 q5 3 6 9M110 70 q4 3 6 8" fill="none" stroke="#b86a22" stroke-opacity=".3" stroke-width="1.6" stroke-linecap="round"/><path d="M128 70 q5 3 7 10M140 84 q4 4 5 11M122 62 q3 2 5 6" fill="none" stroke="#fff" stroke-opacity=".24" stroke-width="1.4" stroke-linecap="round"/>');
+ return `<svg viewBox="${vb}" role="img" aria-label="Winston the study therapy dog">
  <circle cx="100" cy="104" r="98" fill="url(#aura)" opacity="${m==='sad'?.3:m==='ok'?.55:.95}"/>
  <ellipse cx="100" cy="197" rx="62" ry="6" fill="#5a3a10" opacity=".2"/>
  ${g('back')}
+ <g class="breathe">
  <ellipse cx="100" cy="164" rx="48" ry="32" fill="url(#fur)"/>
  ${H('<ellipse cx="146" cy="171" rx="22" ry="20" fill="url(#fur)"/><ellipse cx="156" cy="190" rx="15" ry="7.5" fill="url(#cream)"/><path d="M150 188v4M156 187v5M162 188v4" stroke="#d2a574" stroke-width="1.4" stroke-linecap="round"/>')}
  <path d="${fluff(100,150,36,26,12,.06,.05,1.1)}" fill="url(#cream)"/>
- ${H('<path d="M103 156 Q127 152 127 172 L126 187 Q125 195 115 195 Q104 195 103 187Z" fill="url(#cream)"/><path d="M109 189v5M115 188v6M121 189v5" stroke="#d2a574" stroke-width="1.5" stroke-linecap="round"/>')}
- ${H('<path d="M114 64 C122 48 134 34 146 26 C158 46 164 64 160 84 C146 76 128 70 114 64Z" fill="url(#fur)"/><path d="M127 64 C133 54 140 44 146 40 C153 54 156 64 154 76 C144 72 134 68 127 64Z" fill="url(#ear)"/>')}
+ <ellipse cx="100" cy="150" rx="28" ry="7" fill="#b86a22" opacity=".16"/>
+ ${H('<path d="M103 156 Q127 152 127 172 L126 187 Q125 195 115 195 Q104 195 103 187Z" fill="url(#cream)"/><path d="M109 189v5M115 188v6M121 189v5" stroke="#d2a574" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="115" cy="193" rx="9" ry="2.4" fill="#ffc9cf" opacity=".6"/>')}
+ </g>
+ ${H('<path d="M114 64 C122 48 134 34 146 26 C158 46 164 64 160 84 C146 76 128 70 114 64Z" fill="url(#fur)"/><path d="M127 64 C133 54 140 44 146 40 C153 54 156 64 154 76 C144 72 134 68 127 64Z" fill="url(#ear)"/><ellipse cx="138" cy="70" rx="9" ry="5" fill="url(#cream)" opacity=".9" transform="rotate(-35 138 70)"/><path d="M118 62 C124 46 134 34 144 28" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="2" stroke-linecap="round"/>')}
  <path d="${fluff(100,102,57,48,20,.045,.12,1.15)}" fill="url(#fur)"/>
  <ellipse cx="100" cy="76" rx="42" ry="26" fill="url(#shine)"/>
  ${furLines}
  <ellipse cx="100" cy="80" rx="7" ry="18" fill="url(#cream)" opacity=".9"/>
- <ellipse cx="100" cy="122" rx="24" ry="18" fill="url(#cream)"/><ellipse cx="100" cy="138" rx="13" ry="7" fill="url(#cream)"/>${H('<ellipse cx="116" cy="126" rx="14" ry="12" fill="url(#cream)"/>'+C(112,126,1.5,'#b8845a')+C(117,130,1.5,'#b8845a')+C(108,131,1.5,'#b8845a')+C(124,82,3.2,'#ffe6bd')+(m==='happy'?'<circle cx="142" cy="120" r="10" fill="url(#blush)"/>':''))}
+ <ellipse cx="100" cy="122" rx="24" ry="18" fill="url(#cream)"/><ellipse cx="100" cy="138" rx="13" ry="7" fill="url(#cream)"/>${H('<ellipse cx="116" cy="126" rx="14" ry="12" fill="url(#cream)"/>'+C(112,126,1.5,'#b8845a')+C(117,130,1.5,'#b8845a')+C(108,131,1.5,'#b8845a')+C(124,82,3.2,'#ffe6bd')+(glad?'<circle cx="142" cy="120" r="10" fill="url(#blush)"/>':''))}
  ${eyes}
  <path d="M90 110 Q100 103 110 110 Q108 120 100 121 Q92 120 90 110Z" fill="url(#nose)"/><ellipse cx="100" cy="107.5" rx="5" ry="2" fill="#fff" opacity=".7"/>
  ${mouth}
- <path d="M72 148 Q100 166 128 148 L128 156 Q100 174 72 156Z" fill="#e8484f" stroke="#a52a30" stroke-width="1.5"/><circle cx="100" cy="168" r="6.5" fill="url(#gold)" stroke="#b97a00" stroke-width="1.5"/><path transform="translate(100 168) scale(.45)" d="${STAR}" fill="#fff6c8"/>
+ <path d="M72 148 Q100 166 128 148 L128 156 Q100 174 72 156Z" fill="#e8484f" stroke="#a52a30" stroke-width="1.5"/><circle cx="100" cy="168" r="7" fill="url(#gold)" stroke="#b97a00" stroke-width="1.5"/><path transform="translate(100 168) scale(.5)" d="${hd}" fill="#e8484f"/>
  ${g('neck')}${g('face')}${g('hat')}
- ${m==='happy'?star(28,62,1,0)+star(172,62,1,0)+star(20,128,.7,1.2)+star(180,128,.7,1.2)+heart(30,44,0)+heart(170,44,0):''}
+ ${m==='happy'||m==='cheer'?star(28,62,1,0)+star(172,62,1,0)+star(20,128,.7,1.2)+star(180,128,.7,1.2)+heart(30,44,0)+heart(170,44,0):''}
  </svg>`}
 const ICONVB={hat:'40 -16 120 86',face:'52 78 96 44',neck:'56 134 88 62',back:'0 52 200 148'};
 function accIcon(id){return `<svg viewBox="${ICONVB[ACC[id].slot]}">${ACC[id].svg}</svg>`}
 
 /* ======= navigation ======= */
-let tab='home',view={cls:null,sub:'live',ses:null,wk:'all',mwk:'course',delc:null,rmdoc:null},P=null,ob=1,obData={majors:'',minors:'',careers:[],interests:[]};
-const TABS=[['home','🏠','Home'],['class','📚','Classes'],['practice','✏️','Practice'],['career','🚀','Careers'],['friends','👥','Friends'],['shop','🛍️','Shop']];
+let tab='home',view={cls:null,sub:'live',ses:null,wk:'all',mwk:'course',delc:null,rmdoc:null},P=null,ob=1,obData={majors:'',minors:''};
+const TABS=[['home','🏠','Home'],['class','📚','Classes'],['practice','✏️','Practice'],['friends','👥','Friends'],['shop','🛍️','Shop']];
 const ACTIONS={};
 function go(t){tab=t;P=null;render()}
 function refresh(){render(true);updateWidget()}
@@ -259,15 +290,13 @@ function render(keep){
  if(!S.user){n.style.display='none';return renderOnboard()}
  n.style.display='flex';
  n.innerHTML=TABS.map(([k,i,l])=>`<button data-a="tab" data-k="${k}" class="${k===tab?'on':''}"><b>${i}</b>${l}</button>`).join('');
- ({home:rHome,class:rClass,practice:rPractice,career:rCareer,friends:rFriends,shop:rShop})[tab]();
+ ({home:rHome,class:rClass,practice:rPractice,friends:rFriends,shop:rShop})[tab]();
  if(Date.now()-joy<900)document.querySelectorAll('.dogwrap svg').forEach(x=>x.classList.add('hop'));
 }
 const classes=()=>S.classes;
 const allItems=()=>S.classes.flatMap(c=>c.items.map(i=>({...i,cls:c.id,clsName:c.name})));
-const careers=()=>S.user.careers.length?S.user.careers:['your future career'];
 
 /* ======= onboarding ======= */
-const INTERESTS={'Helping people':['Counselor','Nurse','Social worker'],'Building things':['Engineer','Product designer','Architect'],'Money & markets':['Financial analyst','Entrepreneur','Accountant'],'Creativity':['Marketing creative','Game designer','Filmmaker'],'Data & puzzles':['Data analyst','Software developer','Consultant'],'Leading teams':['Project manager','HR leader','Operations manager'],'Science & health':['Researcher','Doctor','Biotech specialist'],'Law & policy':['Lawyer','Policy analyst','Public servant']};
 function renderOnboard(){
  const M=$('#main');
  if(ob===1){M.innerHTML=`<div class="hero dogwrap"><div class="dogwrap">${dog({},'happy')}</div><h1>Hi, I'm Winston! 🐾</h1><p>Study with me and I'll help you actually enjoy it. Let's get to know you first.</p></div>
@@ -278,35 +307,29 @@ function renderOnboard(){
   if(GOOGLE_CLIENT_ID)loadGoogle()}
  if(ob===2){M.innerHTML=`<div class="card"><h2>What are you studying?</h2><label>Major(s)</label><input id="mj" value="${esc(obData.majors)}" placeholder="e.g. Business Administration"><label>Minor(s) (optional)</label><input id="mn" value="${esc(obData.minors)}">
  <button class="p" data-a="ob2">Next</button></div>`}
- if(ob===3){M.innerHTML=`<div class="card"><h2>Where do you want to end up?</h2><label>Career(s) you're aiming for (comma separated)</label><input id="cr" value="${esc(obData.careers.join(', '))}" placeholder="e.g. Marketing manager, Entrepreneur">
- <p class="mute">Not sure yet? That's totally okay — pick what lights you up and I'll suggest paths to explore:</p>
- <div>${Object.keys(INTERESTS).map(k=>`<span class="chip ${obData.interests.includes(k)?'on':''}" data-a="int" data-k="${k}">${k}</span>`).join('')}</div>
- <br><button class="p" data-a="ob3">Next →</button></div>`}
  if(ob===4){M.innerHTML=`<div class="card dogwrap"><h2>Name your pup! 🐶</h2><div class="dogwrap stage">${dog({},'happy')}</div><label>Your dog's name</label><input id="dn" value="Winston" maxlength="20"><div>${['Winston','Biscuit','Mochi','Pepper','Waffles','Cosmo','Luna','Peanut'].map(n=>`<span class="chip" data-a="pick" data-k="${n}">${n}</span>`).join('')}</div><label style="display:block;margin-top:8px">One big goal you're studying for (optional)</label><textarea id="gl" placeholder="e.g. Graduate with honors and land my dream marketing job"></textarea><button class="p" data-a="ob4">Let's go! 🐾</button></div>`}
 }
 function loadGoogle(){const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=()=>{google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:r=>{try{const p=JSON.parse(atob(r.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));obData.name=p.name;obData.email=p.email;ob=2;render()}catch(e){toast('Google sign-in failed')}}});google.accounts.id.renderButton($('#gbtn'),{theme:'outline',size:'large'})};document.head.append(s)}
 Object.assign(ACTIONS,{
  ob1(){const n=$('#nm').value.trim()||obData.name;if(!n)return toast('Tell me your name!');obData.name=n;obData.email=$('#em').value.trim();ob=2;render()},
- ob2(){obData.majors=$('#mj').value.trim();obData.minors=$('#mn').value.trim();ob=3;render()},
- int(d){const a=obData.interests,i=a.indexOf(d.k);i<0?a.push(d.k):a.splice(i,1);obData.careers=$('#cr').value.split(',').map(x=>x.trim()).filter(Boolean);render()},
- ob3(){let c=$('#cr').value.split(',').map(x=>x.trim()).filter(Boolean);const explore=!c.length;if(explore)c=[...new Set(obData.interests.flatMap(k=>INTERESTS[k]))].slice(0,4);obData.c=c;obData.explore=explore;ob=4;render()},
+ ob2(){obData.majors=$('#mj').value.trim();obData.minors=$('#mn').value.trim();ob=4;render()},
  pick(d){$('#dn').value=d.k},
- ob4(){const dn=($('#dn').value.trim()||'Winston').slice(0,20);S.user={name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,careers:obData.c,exploring:obData.explore,dogName:dn,goals:($('#gl')?$('#gl').value.trim():'')};save();tab='home';render();toast(`Welcome, ${S.user.name}! Say hi to ${dn}! 🐶`)},
+ ob4(){const dn=($('#dn').value.trim()||'Winston').slice(0,20);S.user={name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,dogName:dn,goals:($('#gl')?$('#gl').value.trim():'')};save();tab='home';render();drawWidget();toast(`Welcome, ${S.user.name}! Say hi to ${dn}! 🐶`);if(!(S.pref&&S.pref.autoFloat===false))popOut(true)},
  tab(d){go(d.k)}
 });
 
 /* ======= home ======= */
 const MOODS=[['😴','bored','bored'],['😫','stressed','stressed'],['😶','unmotivated','unmotivated'],['🙂','okay','okay — let\'s get started'],['🔥','sparked','sparked!']];
 function rHome(){
- const u=S.user,L=lvl(),lo=15*(L-1)**2,hi=15*L*L,cr=careers()[0];
+ const u=S.user,L=lvl(),lo=15*(L-1)**2,hi=15*L*L;
  const pct=Math.round((S.earned-lo)/(hi-lo)*100);
  $('#main').innerHTML=`<div class="card dogwrap"><button class="gear" data-a="settings" aria-label="Settings">⚙️</button><h1 class="sign">Winston</h1><div class="dogwrap stage">${dog(S.eq,mood())}<span class="lotus">🌼</span><span class="fly">🦋</span></div>
- <h2>Winston · Level ${L}</h2>
- <div class="stats"><span class="stat">🪙 ${S.coins}</span><span class="stat">❤️ ${Math.round(S.happy)}%</span><span class="stat">⭐ ${S.earned} XP</span></div>
+ <h2>Winston · Level ${L}</h2><div class="badge">🩺 Study Therapy Dog</div>
+ <div class="stats"><span class="stat">🪙 ${S.coins}</span><span class="stat">❤️ ${Math.round(S.happy)}%</span><span class="stat">⭐ ${S.earned} XP</span><span class="stat">🔥 ${streakDays()}-day streak</span></div>
  <div class="bar" style="margin:10px 0 4px"><i style="width:${pct}%"></i></div><div class="mute">${hi-S.earned} XP to level ${L+1}</div>
- <p class="bubble">${mood()==='sad'?'I miss you! Studying together makes me happy 🥺':'Hi '+esc(u.name)+'! Every concept you learn is a step toward being a '+esc(cr)+' ✨'}</p></div>
+ <p class="bubble">${mood()==='sad'?'I miss you! Studying together makes me happy 🥺':'Hi '+esc(u.name)+'! Every concept you learn is a step forward ✨'}</p></div>
  <div class="card"><h2>How are you feeling about studying right now?</h2><div>${MOODS.map(m=>`<span class="chip" data-a="feel" data-k="${m[1]}">${m[0]} ${m[1]}</span>`).join('')}</div><div id="feelout"></div></div>
- ${upCard()}${weekCard()}<div class="row"><button class="p grow" data-a="tab" data-k="class">▶ Start class</button><button class="p purple grow" data-a="tab" data-k="practice">✏️ Practice</button></div>`;
+ ${goalCard()}<button class="s" style="width:100%;margin-bottom:12px" data-a="popout">🪟 Float ${DN()} on my screen</button><div class="mute" style="margin:-6px 0 12px;text-align:center;font-size:13px">Stays on top while you browse Brightspace, Google or any tab (desktop Chrome or Edge). Keep this tab open.</div>${upCard()}${weekCard()}<div class="row"><button class="p grow" data-a="tab" data-k="class">▶ Start class</button><button class="p purple grow" data-a="tab" data-k="practice">✏️ Practice</button></div>`;
 }
 /*FEEL*/
 
@@ -327,7 +350,7 @@ Object.assign(ACTIONS,{
  sub(d){view.sub=d.k;render()},
  delc(d){if(view.delc===d.k){S.classes=S.classes.filter(c=>c.id!==d.k);view.delc=null;save();render()}else{view.delc=d.k;render();setTimeout(()=>{if(view.delc===d.k){view.delc=null;if(tab==='class'&&!view.cls)render()}},3500)}},
  async addc(){const n=$('#cn').value.trim();if(!n)return toast('Name your class');const files=[...(($('#cf')||{}).files||[])];
-  S.classes=S.classes.filter(c=>c.id!=='demo'||c.sessions.length);const nc={id:uid(),name:n,careerNotes:{},sessions:[],items:parseItems($('#cm').value)};ensure(nc);S.classes.push(nc);save();render();
+  S.classes=S.classes.filter(c=>c.id!=='demo'||c.sessions.length);const nc={id:uid(),name:n,sessions:[],items:parseItems($('#cm').value)};ensure(nc);S.classes.push(nc);save();render();
   if(files.length){view.cls=nc.id;view.sub='mat';view.mwk='course';render();await addFiles(nc,files,'course',true)}},
  addm(){const c=cur();c.items.push(...parseItems($('#mm').value,view.mwk));save();render()},
  delm(d){const c=cur();c.items=c.items.filter(i=>i.id!==d.k);save();render()}
@@ -357,7 +380,7 @@ function heuristic(text){const out=[],seen=new Set();
  return out.slice(0,40)}
 async function makeCards(c,doc){let cards=[];
  if(AI.sm){try{for(let k=0;k<2&&k*12000<doc.text.length;k++){const chunk=doc.text.slice(k*12000,(k+1)*12000);
-   const r=await AI.sm.json(`You are helping a student study. From the course material below (file "${doc.name}", ${wkLabel(c,doc.wk)}), create study cards for the key terms and concepts a student should learn. Each card has "term" (a short name, 1-6 words) and "text" (a clear 1-2 sentence explanation in plain words, based on the material). Skip fluff, page numbers and boilerplate. Return ONLY JSON: {"cards":[{"term":"...","text":"..."}]} with at most 20 cards.\n\nMATERIAL:\n${chunk}`);
+   const r=await aiJson(`You are helping a student study. From the course material below (file "${doc.name}", ${wkLabel(c,doc.wk)}), create study cards for the key terms and concepts a student should learn. Each card has "term" (a short name, 1-6 words) and "text" (a clear 1-2 sentence explanation in plain words, based on the material). Skip fluff, page numbers and boilerplate. Return ONLY JSON: {"cards":[{"term":"...","text":"..."}]} with at most 20 cards.\n\nMATERIAL:\n${chunk}`);
    cards.push(...(r.cards||[]))}}catch(e){if(e&&e.code==='not_granted')AI.sm=null}}
  if(!cards.length)cards=heuristic(doc.text);
  const have=new Set(c.items.map(i=>i.term.toLowerCase()));let n=0;
@@ -400,81 +423,205 @@ Object.assign(ACTIONS,{
 
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
+const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
+const SRC=window.SpeechRecognition||window.webkitSpeechRecognition;
+const inFrame=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 function rLive(c){
- if(!live||live.cls!==c.id){$('#sub').innerHTML=`<div class="card"><h2>Ready for class?</h2><p>Winston will float on your screen, light up your teacher's materials as they're mentioned, and pop up for a surprise <b>high paw</b> now and then. 🐾</p>
- <p class="mute" style="margin-bottom:2px">Which materials is class on today?</p><div style="margin-bottom:10px">${wkChips(c,'vwk',view.wk,true)}</div><button class="p" data-a="startlive">▶ Start class with Winston</button><p class="mute">Live listening uses your browser's speech recognition (in Chrome/Edge the audio is processed by the browser vendor's service). You can also type what the teacher said.</p></div>`;return}
- $('#sub').innerHTML=`<div class="row" style="margin-bottom:8px"><button class="p ok" data-a="endlive">■ End class &amp; get recap</button><button class="s" data-a="mic">${live.listening?'🔇 Stop mic':'🎙 Listen'}</button><button class="s" data-a="popout">🪟 Pop out Winston</button></div>
+ if(!live||live.cls!==c.id){const dr=S.liveDraft&&S.liveDraft.cls===c.id&&S.liveDraft.lines.length?S.liveDraft:null;
+  $('#sub').innerHTML=`${dr?`<div class="card"><h3>🛟 Unfinished class found</h3><p class="mute">${esc(DN())} saved ${dr.lines.length} lines from a class that didn't get finished.</p><div class="row"><button class="p" data-a="finishdraft">Finish &amp; make notes</button><button class="s" data-a="dropdraft">Discard</button></div></div>`:''}
+ <div class="card"><h2>Ready for class?</h2><p>${esc(DN())} will take notes while your teacher talks, light up your teacher's materials as they're mentioned, and pop up for a surprise <b>high paw</b> now and then. 🐾</p>
+ <p class="mute" style="margin-bottom:2px">Which materials is class on today?</p><div style="margin-bottom:10px">${wkChips(c,'vwk',view.wk,true)}</div><button class="p" data-a="startlive">▶ Start class with ${esc(DN())}</button>
+ <p class="mute">${esc(DN())} listens with your browser's speech recognition and <b>you can always type or dictate notes too</b> (tap the 🎙 on your phone keyboard). Audio is processed by your browser vendor's service.</p></div>`;return}
+ $('#sub').innerHTML=`<div class="row" style="margin-bottom:8px"><button class="p ok" data-a="endlive">■ End class &amp; get notes</button><button class="s" id="micbtn" data-a="mic">🎙 Listen</button><button class="s" data-a="popout">🪟 Float ${esc(DN())}</button></div>
+ <div id="endwarn"></div>
+ <div class="card"><h3>🎙 Capturing notes</h3><div id="micstat" class="mute"></div><div id="interim" class="mute" style="font-style:italic;min-height:20px"></div>
+ <div style="margin:6px 0"><span class="chip ${live.mine?'':'on'}" data-a="nsrc" data-k="teacher" id="nsT">Teacher said</span><span class="chip ${live.mine?'on':''}" data-a="nsrc" data-k="mine" id="nsM">My own note</span></div>
+ <textarea id="said" placeholder="Type or dictate here — Enter adds it (Shift+Enter for a new line)"></textarea>
+ <div class="row"><button class="p" data-a="say">Add to notes</button><span class="mute" id="capcount"></span></div></div>
+ <div class="card"><h3>📝 ${esc(DN())} is taking notes</h3><div id="livenotes"></div></div>
  <div class="card"><h3>Teacher's materials · ${esc(wkLabel(c,live.wk||'all'))}</h3><div id="livemat"></div></div>
- <div class="card"><h3>📝 Winston is taking notes</h3><div id="livenotes"></div></div>
- <div class="card"><h3>What the teacher said</h3><div class="row"><input class="grow" id="said" placeholder="Type what was said, e.g. “now let's talk about opportunity cost”"><button class="p" data-a="say">Add</button></div>
- <div id="livelog" class="mute"></div><button class="s" data-a="testpaw" style="margin-top:8px">🐾 Test high-paw popup</button></div>`;
- paintLive();
-}
+ <div class="card"><div id="livelog" class="mute"></div><button class="s" data-a="testpaw" style="margin-top:8px">🐾 Test high-paw popup</button></div>`;
+ const ta=$('#said');ta.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ACTIONS.say()}};
+ micUI();paintLive()}
+function micUI(){const b=$('#micbtn'),st=$('#micstat');if(!live)return;
+ if(b)b.textContent=live.listening?'🔇 Stop mic':'🎙 Listen';
+ if(st){st.className='mute'+(live.micWarn?' warn':'');st.textContent=live.micMsg||(live.listening?'🎙 Listening… I\'ll write down what I hear.':(SRC?'Mic is off. Tap 🎙 Listen, or type/dictate below.':'This browser has no speech recognition — type or dictate below.')+(inFrame?' (Inside Claude the browser may block the mic.)':''))}}
+function micSay(msg,warn){if(!live)return;live.micMsg=msg;live.micWarn=!!warn;micUI()}
 const CIRC='<svg class="circ" viewBox="0 0 100 40" preserveAspectRatio="none"><path pathLength="1" d="M8 24 C2 8 56 0 90 8 C104 14 98 34 52 37 C14 38 -2 28 14 12"/></svg>';
 function paintLive(){const c=cur();if(!c||!live||!$('#livemat'))return;
  $('#livemat').innerHTML=(liveItems(c).map(i=>`<div class="mat ${live.focus===i.id?'glow':''} ${live.hits.some(h=>h.id===i.id)?'seen':''}" id="m${i.id}"><span class="term">${esc(i.term)}${live.focus===i.id?CIRC:''}</span><br><span class="mute">${esc(i.text)}</span></div>`).join('')||'<p class="mute">No cards in this section yet — add some in Materials.</p>');
  $('#livelog').innerHTML=live.lines.slice(-4).map(l=>`<div>“${esc(l)}”</div>`).join('');
- const ln=$('#livenotes');if(ln)ln.innerHTML=live.notes.slice(-6).map(n=>n.term?`<div class="bubble"><b>${esc(n.term)}</b> — ${esc(n.text.split(/(?<=[.!?])\s/)[0])}<div class="mute">teacher: “${esc(n.line)}”</div></div>`:`<div class="bubble">• ${esc(n.line)}</div>`).join('')||'<p class="mute">I\'ll jot down the important moments here as your teacher talks.</p>';
+ const cc=$('#capcount');if(cc)cc.textContent=`${live.lines.length} line${live.lines.length===1?'':'s'} captured`;
+ const ln=$('#livenotes');if(ln)ln.innerHTML=live.notes.slice(-6).map(n=>n.term?`<div class="bubble"><b>${esc(n.term)}</b> — ${esc(n.text.split(/(?<=[.!?])\s/)[0])}<div class="mute">teacher: “${esc(n.line)}”</div></div>`:`<div class="bubble">${n.mine?'📌 ':'• '}${esc(n.line)}</div>`).join('')||'<p class="mute">Nothing captured yet. When I hear (or you type) something, it shows up here.</p>';
  const f=$('#m'+live.focus);if(f)f.scrollIntoView({block:'center',behavior:'smooth'})}
 const liveItems=c=>live&&live.wk&&live.wk!=='all'?c.items.filter(i=>i.wk===live.wk):c.items;
 const STOP=new Set('about their there these those which would could should where while other being because'.split(' '));
 function matches(item,t){const T=norm(item.term);if(t.includes(T))return true;
  const kw=[...new Set(norm(item.text).split(' ').filter(w=>w.length>4&&!STOP.has(w)))];
  return kw.filter(w=>t.includes(w.slice(0,5))).length>=2}
-function heard(line){if(!live)return;const c=cur(),t=norm(line);live.lines.push(line);
- const hit=liveItems(c).find(i=>matches(i,t));live.notes.push(hit?{term:hit.term,text:hit.text,line}:{line});
+function saveDraft(){if(live){S.liveDraft={cls:live.cls,wk:live.wk,t0:live.t0,lines:live.lines,hits:live.hits,notes:live.notes};save()}}
+function heard(line,opt){if(!live)return;line=String(line||'').trim();if(!line)return;const c=S.classes.find(x=>x.id===live.cls),mine=!!(opt&&opt.mine),t=norm(line);
+ live.lines.push(mine?'[My note] '+line:line);
+ const hit=mine||!c?null:liveItems(c).find(i=>matches(i,t));
+ live.notes.push(hit?{term:hit.term,text:hit.text,line}:{line,mine});
  if(hit){live.focus=hit.id;if(!live.hits.some(h=>h.id===hit.id))live.hits.push({id:hit.id,line})}
- paintLive();updateWidget();if(hit)setTimeout(()=>burst(7,$('#m'+hit.id)),60)}
+ if(!mine)W.msg=hit?`${hit.term}: ${hit.text.split(/(?<=[.!?])\s/)[0]}`:'';
+ saveDraft();paintLive();drawWidget();if(hit)setTimeout(()=>burst(7,$('#m'+hit.id)),60)}
+function startListen(){
+ if(!SRC){micSay('This browser has no speech recognition. Type or dictate into the box below instead.',true);return}
+ try{rec=new SRC()}catch(e){micSay('Could not start speech recognition. Type or dictate below instead.',true);return}
+ rec.continuous=true;rec.interimResults=true;rec.lang=navigator.language||'en-US';
+ rec.onstart=()=>{if(!live)return;live.listening=true;micSay('🎙 Listening… I\'ll write down what I hear.')};
+ rec.onresult=e=>{if(!live)return;let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)heard(r[0].transcript);else interim+=r[0].transcript}
+  const el=$('#interim');if(el)el.textContent=interim?'…'+interim:''};
+ rec.onerror=e=>{if(!live)return;const c=e&&e.error;if(c==='no-speech'||c==='aborted')return;
+  if(['not-allowed','service-not-allowed','audio-capture','language-not-supported'].includes(c)){live.listening=false;
+   micSay((MIC_MSG[c]||'The mic stopped.')+' No problem — type or dictate into the box below and I\'ll still make your notes.'+(inFrame&&c.includes('allowed')?' (This can happen inside Claude. Opening the standalone page lets the mic work.)':''),true)}
+  else micSay(`Mic hiccup (${c||'unknown'}). Retrying…`,true)};
+ rec.onend=()=>{if(live&&live.listening)setTimeout(()=>{if(live&&live.listening)try{rec.start()}catch(e){}},350);else micUI()};
+ live.listening=true;try{rec.start()}catch(e){live.listening=false;micSay('Could not start the mic. Type or dictate below instead.',true)}}
 Object.assign(ACTIONS,{
- startlive(){const c=cur();live={cls:c.id,wk:view.wk||'all',notes:[],hits:[],lines:[],focus:null,listening:false,t0:Date.now()};schedulePaw();updateWidget();render()},
- say(){const v=$('#said').value.trim();if(!v)return;$('#said').value='';heard(v)},
- mic(){if(live.listening){live.listening=false;try{rec.stop()}catch(e){}}else startListen();render()},
- popout:popOut,
- testpaw:()=>showPaw(),
- endlive(){const c=cur();clearTimeout(pawT);if(rec){live.listening=false;try{rec.stop()}catch(e){}}
+ startlive(){const c=cur();live={cls:c.id,wk:view.wk||'all',notes:[],hits:[],lines:[],focus:null,listening:false,t0:Date.now(),mine:false,ack:false};S.liveDraft=null;schedulePaw();drawWidget();render();startListen()},
+ say(){if(!live)return;const el=$('#said'),v=el&&el.value.trim();if(!v)return;el.value='';v.split(/\n+/).forEach(l=>heard(l,{mine:live.mine}))},
+ nsrc(d){if(!live)return;live.mine=d.k==='mine';const a=$('#nsT'),b=$('#nsM');if(a)a.classList.toggle('on',!live.mine);if(b)b.classList.toggle('on',live.mine)},
+ mic(){if(!live)return;if(live.listening){live.listening=false;live.micMsg='';try{rec.stop()}catch(e){}micUI()}else{live.micMsg='';startListen()}},
+ popout(){popOut(false)},
+ testpaw(){showPaw()},
+ finishdraft(){const c=cur(),d=S.liveDraft;if(!c||!d)return;const ses={id:uid(),date:new Date(d.t0).toLocaleString(),hits:d.hits,lines:d.lines};c.sessions.push(ses);view.ses=c.sessions.length-1;S.liveDraft=null;save();view.sub='notes';render();makeNotes(c,ses);genRecap(c,ses)},
+ dropdraft(){S.liveDraft=null;save();render()},
+ endlive(){const c=cur();if(!live)return;
+  if(!live.lines.length&&!live.ack){live.ack=true;const w=$('#endwarn');if(w)w.innerHTML=`<div class="bubble">🐾 I haven't captured anything yet, so there'd be no notes. Type or dictate what you remember below — or tap <b>End class</b> again to finish without notes.</div>`;return}
+  clearTimeout(pawT);clearTimeout(pawCount);W.paw=false;if(rec){live.listening=false;try{rec.stop()}catch(e){}}
   const n=live.hits.length;addLog(c.id,(Date.now()-live.t0)/1000,'class',live.t0);
-  const newSes={id:uid(),date:new Date().toLocaleString(),hits:live.hits,lines:live.lines};c.sessions.push(newSes);view.ses=c.sessions.length-1;setTimeout(()=>{genRecap(c,newSes);makeNotes(c,newSes)},0);
-  live=null;document.body.classList.remove('live');$('#widget').className='';$('#widget').innerHTML='';
-  const out=Math.min(20,n*2);if(out)earn(out,`for engaging in class (${n} topics)`);save();view.sub='recap';render()}
+  const newSes={id:uid(),date:new Date().toLocaleString(),hits:live.hits,lines:live.lines};c.sessions.push(newSes);view.ses=c.sessions.length-1;
+  setTimeout(()=>{makeNotes(c,newSes);genRecap(c,newSes)},0);
+  live=null;S.liveDraft=null;document.body.classList.remove('live');drawWidget();
+  const out=Math.min(20,n*2);if(out)earn(out,`for engaging in class (${n} topics)`);save();view.sub=newSes.lines.length?'notes':'recap';render()}
 });
-function startListen(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!SR)return toast('This browser has no speech recognition — type what was said instead.');
- rec=new SR();rec.continuous=true;rec.interimResults=false;rec.lang='en-US';
- rec.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)heard(e.results[i][0].transcript)};
- rec.onend=()=>{if(live&&live.listening)try{rec.start()}catch(e){}};
- try{rec.start();live.listening=true}catch(e){toast('Could not start the mic')}}
 
-/* widget + high paw */
-function updateWidget(){const w=$('#widget');if(!live){document.body.classList.remove('live');w.className='';w.innerHTML='';return}
- const c=cur()||classes().find(x=>x.id===live.cls),it=c&&c.items.find(i=>i.id===live.focus);
- const paw=w.querySelector('.paw');const keep=paw?paw.outerHTML:'';
- w.classList.add('show');document.body.classList.add('live');
- w.innerHTML=`${dog(S.eq,'happy')}<div class="bubble">${it?`<b>${esc(it.term)}</b><br>${esc(it.text.split(/(?<=[.!?])\s/)[0])}`:'I\'m listening… 👂'}</div>${keep}`;
- if(keep)bindPaw()}
+/* ======= companion widget: your study therapy dog ======= */
+const WEL=$('#widget'),wq=s=>WEL.querySelector(s),wdoc=()=>WEL.ownerDocument;
+const W={open:false,view:'home',msg:'',popped:false,cheerUntil:0,qcard:null,reveal:false,talk:'',talkBusy:false,breath:null,fm:25,paw:false,autoOpen:false,drawn:0};
+const QUOTES=["You don't have to do it all today — just the next small thing. 🐾","Hey {n}, I'm proud of you for showing up.","Every page you study is a step forward.","Progress, not perfection. I believe in you!","It's okay to be tired. Rest if you need to — I'll wait right here. 💛","Big goals are just tiny steps in a row.","You are more capable than you feel right now.","Deep breath. You've handled hard things before.","Future you will be so glad you started.","Wag more, worry less. 🐕"];
+function streakDays(){const set=new Set(S.logs.map(l=>isoD(new Date(l.start))));Object.entries(S.days||{}).forEach(([k,v])=>{if(v&&v.act)set.add(k)});let n=0;const d=new Date();if(!set.has(isoD(d)))d.setDate(d.getDate()-1);while(set.has(isoD(d))){n++;d.setDate(d.getDate()-1)}return n}
+const goalToday=()=>S.goalToday&&S.goalToday.date===todayIso()?S.goalToday:null;
+function smartMsg(){const u=S.user,c=live&&S.classes.find(x=>x.id===live.cls);
+ if(live){const it=c&&c.items.find(i=>i.id===live.focus);return it?`${it.term}: ${it.text.split(/(?<=[.!?])\s/)[0]}`:`I'm listening with you, ${u.name}. You've got this. 🐾`}
+ if(S.timer){const m=Math.floor((Date.now()-S.timer.start)/60000);return m<5?'You started — that\'s the hardest part! 🌟':`${m} minutes of focus. You're doing amazing, ${u.name}!`}
+ const up=upcoming(1,2)[0];if(up)return `Heads-up: ${up.title} (${up.cls}) is ${when(up)}. We'll be ready — one step at a time. 💛`;
+ const g=goalToday();if(g)return g.done?`You crushed today's goal! Proud of you, ${u.name}! 🎉`:`Today's goal: ${g.text}. Let's go get it! 🎯`;
+ const st=streakDays();if(st>=2)return `🔥 ${st}-day streak! ${DN()} is so proud of you.`;
+ return QUOTES[Math.floor(Date.now()/60000)%QUOTES.length].replace('{n}',u.name)}
+const dogMood=()=>Date.now()<W.cheerUntil?'cheer':W.view==='breathe'?'calm':mood();
+const wClock=()=>{const t=S.timer;if(!t)return'';const el=(Date.now()-t.start)/1000;return fmtClock(t.target?Math.max(0,t.target-el):el)};
+function drawWidget(){
+ if(!S.user){WEL.className='';WEL.innerHTML='';document.body.classList.remove('live');return}
+ const open=W.popped||W.open;W.drawn=Date.now();
+ document.body.classList.toggle('live',!!(open&&!W.popped&&innerWidth>=700));
+ if(!open){const cap=live?`<div class="wcap">${esc(W.msg||'🎙 Listening…').slice(0,90)}</div>`:'';
+  WEL.className='mini show';WEL.innerHTML=`<button class="wbtn" data-a="wopen" aria-label="Open ${esc(DN())}">${dog(S.eq,dogMood(),'28 8 144 150')}</button>${cap}`;return}
+ WEL.className='show'+(W.popped?' pip':'');
+ const head=`<div class="whead">${dog(S.eq,dogMood(),'28 8 144 150')}<div class="grow"><b>${esc(DN())}</b><div class="mute" style="font-size:12px">Study Therapy Dog · Lv ${lvl()}</div><div class="wstats"><span>🪙 ${S.coins}</span><span>🔥 ${streakDays()}</span><span>❤️ ${Math.round(S.happy)}%</span></div></div>${W.popped?'':'<button class="wx" data-a="wclose" aria-label="Minimize">–</button>'}</div>`;
+ const V={home:wHome,breathe:wBreathe,boost:wBoost,talk:wTalk,note:wNote,card:wCard,mood:wMood,focus:wFocus};
+ WEL.innerHTML=head+(V[W.view]||wHome)()+(W.view!=='home'?'<button class="s wback" data-a="wview" data-k="home">← Back</button>':'');
+ if(W.paw)appendPaw()}
+function updateWidget(){drawWidget()}
+function wHome(){const g=goalToday(),t=S.timer,c=t&&S.classes.find(x=>x.id===t.cls);
+ return `<div class="bubble wmsg">${esc(W.msg||smartMsg())}</div>
+ ${t?`<div class="wtimer"><div class="mute" style="font-size:12px">${t.target?'Focus':'Studying'} · ${esc(c?c.name:'')}</div><div class="tmv wclock">${wClock()}</div><button class="p bad" data-a="stoptimer">■ Stop &amp; save</button></div>`:`<button class="p" data-a="wview" data-k="focus" style="width:100%;margin-top:6px">⏱ Start a focus session</button>`}
+ ${g?`<div class="wgoal ${g.done?'done':''}" data-a="goaltoggle">${g.done?'✅':'⬜'} ${esc(g.text)}</div>`:''}
+ <div class="wgrid"><button data-a="wpet">🐾<span>Pet me</span></button><button data-a="wview" data-k="breathe">🌬️<span>Breathe</span></button><button data-a="wview" data-k="boost">💛<span>Boost</span></button><button data-a="wview" data-k="talk">💭<span>Talk</span></button><button data-a="wview" data-k="card">🃏<span>Quick card</span></button><button data-a="wview" data-k="note">📝<span>Note</span></button></div>
+ <div class="mute" style="text-align:center;font-size:12px;margin-top:8px">How are you feeling? ${MOODS.map(m=>`<span class="wm" data-a="wfeel" data-k="${m[1]}" title="${m[1]}">${m[0]}</span>`).join('')}</div>
+ ${live?`<div class="mute" style="font-size:12px;margin-top:4px">🎙 In class · ${live.lines.length} notes so far</div>`:''}
+ ${W.popped?'':'<button class="s wpop" data-a="popout">🪟 Float on my screen</button>'}`}
+function wMood(){return `<div class="bubble wmsg">${esc(W.msg||'How are you feeling right now?')}</div><div class="wgrid">${MOODS.map(m=>`<button data-a="wfeel" data-k="${m[1]}">${m[0]}<span>${m[1]}</span></button>`).join('')}</div>`}
+function wFocus(){if(S.timer){W.view='home';return wHome()}
+ if(!S.classes.length)return '<div class="bubble wmsg">Add a class first, then we can focus together!</div>';
+ return `<div class="bubble wmsg">${esc(W.msg||'Pick a class and a length. I\'ll cheer you on! 🐾')}</div><select id="wfc" style="margin-top:6px">${S.classes.map(c=>`<option value="${c.id}" ${view.tcls===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select><div>${[15,25,45].map(m=>`<span class="chip ${W.fm===m?'on':''}" data-a="wfm" data-k="${m}">${m} min</span>`).join('')}</div><button class="p" data-a="wfocusgo" style="width:100%">▶ Start focus</button>`}
+function wBreathe(){return `<div class="bubble wmsg" id="wbm">${esc(W.msg||'Let\'s breathe together. 3 slow breaths.')}</div><div class="wbreath" id="wbc"><span id="wbt">Get ready…</span></div>`}
+async function runWBreath(){const tk=W.breath={stop:false};const msgs=['Let your shoulders drop.','You are safe. You are doing just fine.','Almost there — you\'re doing great.'];await sleep(900);
+ for(let i=1;i<=3;i++){if(tk.stop)return;const c=wq('#wbc'),t=wq('#wbt'),m=wq('#wbm');if(!c)return;m.textContent=`Breath ${i} of 3 — ${msgs[i-1]}`;
+  t.textContent='In… 4';c.style.transitionDuration='4s';c.style.transform='scale(1.4)';await sleep(4000);if(tk.stop)return;
+  t.textContent='Hold… 4';await sleep(4000);if(tk.stop)return;
+  t.textContent='Out… 6';c.style.transitionDuration='6s';c.style.transform='scale(1)';await sleep(6000)}
+ if(tk.stop)return;const r=dayRec();W.msg='Nice work. You\'re doing better than you think. 💙';W.cheerUntil=Date.now()+2500;W.view='home';if(!r.breath){r.breath=1;earn(2,'for a calm moment 💙')}else drawWidget()}
+function wBoost(){const u=S.user;
+ return `<div class="bubble wmsg">💛 ${esc(u.name)}, you're working toward something that matters to you. Every bit you do today counts.</div>${u.goals?`<div class="bubble"><b>Your why:</b> ${esc(u.goals)}</div>`:''}<div class="bubble">You don't need to feel motivated to start — motivation shows up <i>after</i> you begin. You are capable, and you are going to do great.</div>${W.boost?`<div class="bubble">🐶 ${esc(W.boost)}</div>`:''}<button class="p" data-a="wfm3" style="width:100%">Just 3 minutes</button>${AI.sm?'<button class="s" data-a="wboostai" style="width:100%;margin-top:6px">✨ Say something just for me</button>':''}`}
+function wTalk(){return `<div class="bubble wmsg">What's on your mind? I'm a good listener. 🐾</div><textarea id="wt" placeholder="Stressed, stuck, tired, worried…" style="min-height:70px"></textarea><button class="p" data-a="wsend" style="width:100%" ${W.talkBusy?'disabled':''}>${W.talkBusy?'Listening…':'Tell ' + esc(DN())}</button>${W.talk?`<div class="bubble wtalkout" style="margin-top:8px">${esc(W.talk)}</div>`:''}`}
+function wNote(){if(!S.classes.length)return '<div class="bubble wmsg">Add a class first so I can file your note.</div>';
+ return `<div class="bubble wmsg">${live?'Adding to your live class notes.':'Jot a quick note — I\'ll file it under the class.'}</div>${live?'':`<select id="wnc">${S.classes.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select>`}<textarea id="wnt" placeholder="Type or dictate a note…" style="min-height:70px"></textarea><button class="p" data-a="wnotego" style="width:100%">Save note</button>`}
+function wCard(){const q=W.qcard;if(!q)return '<div class="bubble wmsg">Add some study cards and I\'ll quiz you!</div>';
+ return `<div class="bubble wmsg"><b>${esc(q.term)}</b></div>${W.reveal?`<div class="bubble">${esc(q.text)}</div><div class="row"><button class="p ok grow" data-a="wgot">Got it ✅</button><button class="s grow" data-a="wagain">Again</button></div>`:'<button class="p" data-a="wshow" style="width:100%">Show answer</button>'}<div class="mute" style="font-size:12px;margin-top:6px">${esc(q.clsName||'')}</div>`}
+function appendPaw(){if(wq('.paw'))return;const d=wdoc().createElement('div');d.className='paw';d.innerHTML='Still with me? 🐶<br><button data-a="highpaw">🐾 High paw!</button><div style="font-size:12px;margin-top:4px">Tap within 15s</div>';WEL.append(d)}
 function schedulePaw(){clearTimeout(pawT);pawT=setTimeout(()=>{showPaw();schedulePaw()},(90+Math.random()*150)*1000)}
-function showPaw(){const w=$('#widget');if(!live||w.querySelector('.paw'))return;w.classList.add('show');
- const d=document.createElement('div');d.className='paw';d.innerHTML='Still with me? 🐶<br><button data-a="highpaw">🐾 High paw!</button><div style="font-size:12px;margin-top:4px">Tap within 15s</div>';w.append(d);
- clearTimeout(pawCount);pawCount=setTimeout(()=>{if(w.querySelector('.paw')){d.remove();S.happy=Math.max(10,S.happy-5);save();toast('Winston missed his high paw 🥺')}},15000)}
-function bindPaw(){}
-ACTIONS.highpaw=()=>{clearTimeout(pawCount);const p=$('#widget .paw')||(pipWin&&pipWin.document.querySelector('.paw'));if(p)p.remove();earn(4,'high paw! 🐾')};
+function showPaw(){if(!live||W.paw)return;W.paw=true;if(!W.popped&&!W.open){W.open=true;W.autoOpen=true}W.view='home';drawWidget();
+ clearTimeout(pawCount);pawCount=setTimeout(()=>{if(!W.paw)return;W.paw=false;S.happy=Math.max(10,S.happy-5);save();if(W.autoOpen){W.open=false;W.autoOpen=false}drawWidget();toast(DN()+' missed his high paw 🥺')},15000)}
+function wHearts(){const d=wdoc();for(let i=0;i<5;i++){const h=d.createElement('span');h.className='fheart';h.textContent=['💛','🐾','✨','💗'][i%4];h.style.left=(20+Math.random()*60)+'%';h.style.top=(15+Math.random()*25)+'%';h.style.animationDelay=(i*.12)+'s';WEL.style.position=W.popped?'relative':'fixed';WEL.append(h);setTimeout(()=>h.remove(),1700)}}
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+function canned(){return "That sounds really heavy, and it makes sense that you feel that way. Let's try 5-4-3-2-1: name 5 things you can see, 4 you can touch, 3 you can hear, 2 you can smell, and 1 you can taste. Then take one slow breath with me. 💛"}
+function talkOut(){const el=wq('.wtalkout');if(el)el.textContent=W.talk}
+async function talkSend(){const el=wq('#wt'),t=el&&el.value.trim();if(!t)return;
+ if(/suicid|kill myself|end my life|self[- ]?harm|hurt myself|don'?t want to (live|be here)/i.test(t)){W.talk=`I'm really glad you told me. You matter, ${S.user.name}. Please reach out to someone who can help right now: in the US you can call or text 988 (Suicide & Crisis Lifeline), or contact your campus counseling center or local emergency number. If you're in immediate danger, call emergency services. I'm right here with you. 💛`;drawWidget();return}
+ W.talkBusy=true;W.talk='';drawWidget();
+ if(AI.sm){try{const r=await AI.sm(`${persona()}\n\nThe student is feeling stressed or low about school. Reply as a calm, caring study therapy dog: validate their feeling in one sentence, then give ONE tiny, concrete next step (under 2 minutes), then one warm closing line. Max 70 words, no lists, no medical advice.\nStudent (${S.user.name}, ${S.user.majors||'student'}) says: ${t}`,{cache:false,onText:({text})=>{W.talk=text;talkOut()}});W.talk=r.text}catch(e){W.talk=canned()}}else W.talk=canned();
+ W.talkBusy=false;drawWidget()}
+Object.assign(ACTIONS,{
+ wopen(){W.open=true;W.autoOpen=false;drawWidget()},
+ wclose(){W.open=false;W.autoOpen=false;if(W.breath)W.breath.stop=true;W.view='home';drawWidget()},
+ wview(d){if(W.breath)W.breath.stop=true;W.view=d.k;W.msg='';
+  if(d.k==='card'){W.qcard=shuffle(allItems())[0]||null;W.reveal=false}
+  if(d.k==='talk'){W.talk=''}
+  drawWidget();if(d.k==='breathe')runWBreath()},
+ wpet(){S.happy=Math.min(100,S.happy+1.5);W.cheerUntil=Date.now()+2200;W.msg=rnd(['Aww, that feels nice. 🐾','You\'re the best human! 💛','Pets make everything better.','*happy tail wag* 🐕']);save();drawWidget();wHearts()},
+ wfeel(d){const k=d.k;W.msg='';
+  if(k==='bored'){W.msg='Bored? Let\'s do a quick flashcard!';ACTIONS.wview({k:'card'});return}
+  if(k==='stressed'){ACTIONS.wview({k:'breathe'});return}
+  if(k==='unmotivated'){ACTIONS.wview({k:'boost'});return}
+  if(k==='okay'){W.msg='Okay! Let\'s get started. Pick a class and I\'ll be right here. 🐾';W.view='focus';drawWidget();return}
+  W.cheerUntil=Date.now()+4000;W.msg='YESSS!! Let\'s gooo!! 🔥';W.view='focus';const r=dayRec();if(!r.spark){r.spark=1;earn(2,'spark bonus! 🔥')}else drawWidget();burst(24)},
+ wfm(d){W.fm=+d.k;drawWidget()},
+ wfocusgo(){const sel=wq('#wfc');if(!sel)return;view.tcls=sel.value;W.view='home';W.msg='Focus time! I\'m right here with you. 🐾';startTimer(sel.value,W.fm||25)},
+ wfm3(){const c=S.classes[0];if(!c)return;W.view='home';W.msg='Just 3 minutes. You can do anything for 3 minutes. 💛';startTimer(S.classes.find(x=>x.id===view.tcls)?view.tcls:c.id,3)},
+ async wboostai(){const u=S.user;W.boost='…';drawWidget();try{const r=await AI.sm(`${persona()}\n\nWrite a warm, specific 3-sentence pep talk for ${u.name}, who feels unmotivated about studying. Remind them of their goals and how capable they are. Genuine, not cheesy.\nMajor: ${u.majors||'unknown'}. Personal goals: ${u.goals||'not shared'}. XP so far: ${S.earned}.`,{cache:false});W.boost=r.text}catch(e){W.boost='I couldn\'t think of the words just now — but I believe in you! 💛'}drawWidget()},
+ wsend(){talkSend()},
+ wnotego(){const t=(wq('#wnt')||{}).value;if(!t||!t.trim())return;
+  if(live){t.trim().split(/\n+/).forEach(l=>heard(l,{mine:true}))}
+  else{const c=S.classes.find(x=>x.id===(wq('#wnc')||{}).value)||S.classes[0];c.scratch=c.scratch||[];c.scratch.push({id:uid(),date:new Date().toLocaleString(),text:t.trim()});save()}
+  W.msg='Saved! I\'ll keep it safe. 📝';W.view='home';drawWidget()},
+ wshow(){W.reveal=true;drawWidget()},
+ wagain(){W.qcard=shuffle(allItems())[0]||null;W.reveal=false;drawWidget()},
+ wgot(){const r=dayRec();r.cards=(r.cards||0)+1;W.qcard=shuffle(allItems())[0]||null;W.reveal=false;W.msg='';if(r.cards<=10)earn(1,'quick card ✅');else drawWidget()},
+ goalset(){const t=(($('#tg')||{}).value||'').trim();if(!t)return toast('Type your goal for today');S.goalToday={date:todayIso(),text:t.slice(0,100),done:false};save();W.msg=`Today's goal: ${t}. Let's go get it! 🎯`;render();drawWidget()},
+ goaltoggle(){const g=goalToday();if(!g)return;g.done=!g.done;save();if(g.done){W.cheerUntil=Date.now()+4000;W.msg='YOU DID IT!! Proud of you! 🎉';burst(36);render();earn(3,'for finishing today\'s goal 🎯')}else{render();drawWidget()}},
+ goalclear(){S.goalToday=null;save();render();drawWidget()},
+ highpaw(){clearTimeout(pawCount);W.paw=false;if(W.autoOpen){W.open=false;W.autoOpen=false}drawWidget();earn(4,'high paw! 🐾')}});
 let pipWin=null;
-async function popOut(){
- if(!window.documentPictureInPicture)return toast('Pop-out works in desktop Chrome/Edge. Winston floats inside the page here.');
- try{const w=await documentPictureInPicture.requestWindow({width:260,height:340});pipWin=w;
-  [...document.styleSheets].forEach(ss=>{try{const st=document.createElement('style');st.textContent=[...ss.cssRules].map(r=>r.cssText).join('');w.document.head.append(st)}catch(e){}});
-  w.document.body.style.margin='0';w.document.body.append($('#defs').cloneNode(true));w.document.addEventListener('click',onClick);
-  const el=$('#widget');el.classList.add('pip','show');w.document.body.append(el);
-  w.addEventListener('pagehide',()=>{el.classList.remove('pip');document.body.append(el);pipWin=null})}
- catch(e){toast('Could not pop out Winston')}}
+async function popOut(auto){if(pipWin)return;
+ if(!window.documentPictureInPicture){if(!auto)toast('Floating windows work in desktop Chrome or Edge. Elsewhere, tap the 🐶 bubble — '+DN()+' stays on screen inside the app!');return}
+ try{const w=await documentPictureInPicture.requestWindow({width:320,height:480});pipWin=w;
+  document.querySelectorAll('link[rel=stylesheet]').forEach(l=>{const n=w.document.createElement('link');n.rel='stylesheet';n.href=l.href;w.document.head.append(n)});
+  [...document.styleSheets].forEach(ss=>{try{const st=w.document.createElement('style');st.textContent=[...ss.cssRules].map(r=>r.cssText).join('');w.document.head.append(st)}catch(e){}});
+  w.document.body.style.margin='0';w.document.body.style.background='#fffaf0';w.document.body.append($('#defs').cloneNode(true));w.document.addEventListener('click',onClick);
+  w.setInterval(tickTimer,1000);   // this window's own clock, so timers keep ticking while the Winston tab is in the background
+  W.popped=true;W.open=true;S.nextCheck=Date.now()+30*60000;w.document.body.append(WEL);
+  w.addEventListener('pagehide',()=>{W.popped=false;pipWin=null;document.body.append(WEL);drawWidget()});drawWidget();
+  if(auto)toast(`${DN()} is floating on your screen — he stays on top while you browse other tabs. Close the little window anytime.`)}
+ catch(e){pipWin=null;if(!auto){const nm=e&&e.name;toast(nm==='NotAllowedError'||nm==='SecurityError'?`Chrome blocked the floating window here. Open this page in its own browser tab (not inside a chat) and tap Float again.`:`Could not float ${DN()} — tap the button again.`)}}}
+function tickWidget(){if(!S.user)return;
+ if(W.popped&&!live&&!S.timer&&W.view==='home'&&S.nextCheck&&Date.now()>S.nextCheck){S.nextCheck=Date.now()+50*60000;W.view='mood';W.msg='Hey, how are you doing? Just checking in on you. 💛';drawWidget();return}
+ if(W.view==='home'&&!W.msg&&!W.paw&&Date.now()-W.drawn>60000&&(W.open||W.popped))drawWidget()}
+
 
 /* ======= recap ======= */
 function sentences(t){const s=t.split(/(?<=[.!?])\s+/).map(x=>x.trim()).filter(Boolean);return s.length?s:[t]}
 /* ---- Claude-powered Winston (works on the published Claude page; elsewhere falls back to notes search) ---- */
 const AI={sm:null,mcp:null};
+let aiChain=Promise.resolve();const aiSeq=fn=>{const p=aiChain.then(fn,fn);aiChain=p.catch(()=>{});return p};
+const aiJson=p=>aiSeq(()=>AI.sm.json(p));
 const persona=()=>PERSONA.replace(/Winston/g,DN());
 const PERSONA="You are Winston, a warm, playful Pomeranian study buddy and tutor. Help stressed students feel capable. Rules: plain friendly words, short sentences; break explanations into numbered steps (1., 2., 3.) with ONE idea per step; use a tiny everyday example when it helps; at most one emoji; no markdown headings; never talk down. Prefer the student's class materials and what the teacher said; if you go beyond them, start that part with 'Beyond your notes:'. Keep chat answers under 170 words.";
 const chat={};
-function ctxOf(c){const u=S.user;return `CLASS: ${c.name}\nSTUDENT: major ${u.majors||'unknown'}; career goals: ${u.careers.join(', ')}\nCLASS MATERIALS:\n${c.items.slice(0,40).map(i=>`- ${i.term}: ${i.text}`).join('\n')||'(none yet)'}\nUPLOADED COURSE DOCUMENTS (excerpts):\n${docsCtx(c)}\nWHAT THE TEACHER SAID RECENTLY:\n${c.sessions.flatMap(x=>x.lines).slice(-20).map(l=>'- '+l).join('\n')||'(nothing recorded)'}`}
+function ctxOf(c){const u=S.user;return `CLASS: ${c.name}\nSTUDENT: major ${u.majors||'unknown'}\nCLASS MATERIALS:\n${c.items.slice(0,40).map(i=>`- ${i.term}: ${i.text}`).join('\n')||'(none yet)'}\nUPLOADED COURSE DOCUMENTS (excerpts):\n${docsCtx(c)}\nWHAT THE TEACHER SAID RECENTLY:\n${c.sessions.flatMap(x=>x.lines).slice(-20).map(l=>'- '+l).join('\n')||'(nothing recorded)'}`}
 function md(t){const b=x=>x.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');return esc(t).split(/\n+/).filter(l=>l.trim()).map(l=>{const m=l.match(/^\s*(\d+)[.)]\s+(.*)/);return m?`<div class="step"><div class="n">${m[1]}</div><div>${b(m[2])}</div></div>`:`<p style="margin:6px 0">${b(l)}</p>`}).join('')}
 function chatHTML(id){return (chat[id]||[]).map(m=>m.role==='user'?`<div class="bubble" style="margin-left:28px;background:rgba(141,124,255,.22)">${esc(m.content)}</div>`:`<div class="bubble">🐶 ${m.pending&&!m.content?'<span class="mute">thinking…</span>':md(m.content)}</div>`).join('')}
 function paintChat(c){const el=$('#chat');if(el){el.innerHTML=chatHTML(c.id);el.lastElementChild&&el.lastElementChild.scrollIntoView({block:'nearest'})}}
@@ -489,7 +636,7 @@ function rRecap(c){
  let n=0;
  const local=`${items.map(({it,line})=>`<div class="step"><div class="n">${++n}</div><div><b>${esc(it.term)}</b>${line?`<div class="mute">Teacher: “${esc(line)}”</div>`:''}<ol style="margin:6px 0 0;padding-left:18px">${sentences(it.text).map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div></div>`).join('')||'<p class="mute">Nothing was matched in that class — add the materials, then use the “Teacher said” box next time.</p>'}`;
  let body;
- if(ses&&ses.ai){const r=ses.ai;body=`<div class="bubble">🐶 ${esc(r.big||'')}</div>`+(r.steps||[]).map((st,i)=>`<div class="step"><div class="n">${i+1}</div><div><b>${esc(st.title)}</b><div>${esc(st.body)}</div>${st.example?`<div class="mute">For example: ${esc(st.example)}</div>`:''}</div></div>`).join('')+(r.career?`<div class="bubble">🚀 ${esc(r.career)}</div>`:'')+((r.check||[]).length?`<h3 style="margin-top:12px">Quick self-check</h3><ul style="margin:6px 0;padding-left:18px">${r.check.map(q=>`<li>${esc(q)}</li>`).join('')}</ul>`:'')+`<details style="margin-top:10px"><summary class="mute">What Winston heard in class</summary>${local}</details>`}
+ if(ses&&ses.ai){const r=ses.ai;body=`<div class="bubble">🐶 ${esc(r.big||'')}</div>`+(r.steps||[]).map((st,i)=>`<div class="step"><div class="n">${i+1}</div><div><b>${esc(st.title)}</b><div>${esc(st.body)}</div>${st.example?`<div class="mute">For example: ${esc(st.example)}</div>`:''}</div></div>`).join('')+((r.check||[]).length?`<h3 style="margin-top:12px">Quick self-check</h3><ul style="margin:6px 0;padding-left:18px">${r.check.map(q=>`<li>${esc(q)}</li>`).join('')}</ul>`:'')+`<details style="margin-top:10px"><summary class="mute">What Winston heard in class</summary>${local}</details>`}
  else if(ses&&ses.aiState==='loading')body=`<p class="bubble">🐾 Winston is writing your step-by-step recap…</p>`+local;
  else body=local+(ses&&ses.aiState==='error'?`<p class="mute">Winston couldn't write the AI recap this time.</p>`:'');
  const picker=c.sessions.length>1?`<div style="margin-bottom:8px">${c.sessions.map((x,i)=>`<span class="chip ${x===ses?'on':''}" data-a="pickses" data-k="${i}">${esc(x.date)}</span>`).join('')}</div>`:'';
@@ -498,15 +645,15 @@ function rRecap(c){
  <div class="row" style="margin-top:10px"><button class="p purple" data-a="pc" data-k="${c.id}">✏️ Practice this class</button>${AI.sm&&ses&&ses.aiState!=='loading'?`<button class="s" data-a="genrecap">✨ ${ses.ai?'Rewrite with Winston':'Explain it step by step with Winston'}</button>`:''}</div></div>
  <div class="card"><h3>🐶 Ask Winston anything about this class</h3>
  <div id="chat">${chatHTML(c.id)}</div>
- <div class="row" style="margin:6px 0">${['Explain the big idea simply','Quiz me gently','Why does this matter for my career?'].map(q=>`<span class="chip" data-a="ask" data-q="${esc(q)}">${esc(q)}</span>`).join('')}</div>
+ <div class="row" style="margin:6px 0">${['Explain the big idea simply','Quiz me gently','Give me an example'].map(q=>`<span class="chip" data-a="ask" data-q="${esc(q)}">${esc(q)}</span>`).join('')}</div>
  <div class="row"><input class="grow" id="ask" placeholder="e.g. what's the difference between revenue and profit?"><button class="p" data-a="ask">Ask</button></div>
  ${AI.sm?'':'<p class="mute">Smart AI answers switch on in the published Claude page. Here, Winston searches your notes instead.</p>'}</div>`;
 }
 async function genRecap(c,ses){
  if(!AI.sm)return;ses.aiState='loading';const here=()=>tab==='class'&&view.cls===c.id&&view.sub==='recap';if(here())render();
  const cov=ses.hits.map(h=>c.items.find(i=>i.id===h.id)).filter(Boolean),use=cov.length?cov:c.items;
- const prompt=`${persona()}\n\nTASK: Write a calm, step-by-step recap of today's class so the student feels they understand it and is not overwhelmed. Use ONLY the information below. Teach in the order it was covered.\n\n${ctxOf(c)}\n\nTOPICS COVERED TODAY, IN ORDER:\n${use.map((i,k)=>`${k+1}. ${i.term}: ${i.text}`).join('\n')}\nTEACHER'S WORDS TODAY:\n${ses.lines.slice(-30).map(l=>'- '+l).join('\n')||'(not recorded)'}\n\nReturn ONLY JSON in exactly this shape: {"big":"one reassuring sentence about the big picture","steps":[{"title":"short title","body":"2-3 simple sentences","example":"one tiny everyday example"}],"career":"one sentence linking today to the student's career goals","check":["two quick self-check questions"]}. At most 7 steps.`;
- try{const r=await AI.sm.json(prompt);if(!r||!Array.isArray(r.steps)||!r.steps.length)throw 0;ses.ai=r;ses.aiState='done'}catch(e){ses.aiState='error';if(e&&e.code==='not_granted')AI.sm=null}
+ const prompt=`${persona()}\n\nTASK: Write a calm, step-by-step recap of today's class so the student feels they understand it and is not overwhelmed. Use ONLY the information below. Teach in the order it was covered.\n\n${ctxOf(c)}\n\nTOPICS COVERED TODAY, IN ORDER:\n${use.map((i,k)=>`${k+1}. ${i.term}: ${i.text}`).join('\n')}\nTEACHER'S WORDS TODAY:\n${ses.lines.slice(-30).map(l=>'- '+l).join('\n')||'(not recorded)'}\n\nReturn ONLY JSON in exactly this shape: {"big":"one reassuring sentence about the big picture","steps":[{"title":"short title","body":"2-3 simple sentences","example":"one tiny everyday example"}],"check":["two quick self-check questions"]}. At most 7 steps.`;
+ try{const r=await aiJson(prompt);if(!r||!Array.isArray(r.steps)||!r.steps.length)throw 0;ses.ai=r;ses.aiState='done'}catch(e){ses.aiState='error';if(e&&e.code==='not_granted')AI.sm=null}
  save();if(here())render()}
 Object.assign(ACTIONS,{pc(d){tab='practice';startPractice(d.k,d.w)},
  pickses(d){view.ses=+d.k;render()},
@@ -572,20 +719,6 @@ Object.assign(ACTIONS,{
  nextstep(){const q=P.qs[P.i];if(P.step+1<q.steps.length)P.step++;else{P.phase='retry';P.hint=false}render()},
  retrysub(){const q=P.qs[P.i];if(okFill($('#ans').value,q.answer)){P.walked++;P.coins+=3;earn(3,'you worked it out!');P.phase='fb';P.msg=`✅ That's it — <b>${esc(q.answer)}</b>! You figured it out with me. I'm proud of you. 🐶`}else{P.hint=true;toast('Almost — check the hint!')}render()},
  nextq(){if(P.i+1<P.qs.length){P.i++;P.phase='ask'}else{P.done=true;if(P.scope&&P.scope!=='all'&&!(S.timer&&S.timer.cls===P.scope))addLog(P.scope,(Date.now()-P.t0)/1000,'practice',P.t0)}render()}
-});
-
-/* ======= careers ======= */
-function rCareer(){
- const u=S.user;
- $('#main').innerHTML=`<div class="hero"><h2>Your why 🚀</h2><p>${esc(u.majors||'Your major')}${u.minors?' + '+esc(u.minors):''} → ${u.careers.map(esc).join(' · ')}</p>${u.exploring?'<p>You\'re still exploring — that\'s great. Try each path on for size below.</p>':''}</div>
- <div class="card"><h3>My goals</h3><p class="mute">I'll show these when you need a boost.</p><textarea id="gl2" placeholder="Why are you studying? What do you want your life to look like?">${esc(u.goals||'')}</textarea><button class="s" data-a="savegoals">Save goals</button></div>
- <div class="card"><h3>Careers I'm aiming for / exploring</h3><input id="cr2" value="${esc(u.careers.join(', '))}"><button class="s" data-a="savecr">Save</button></div>
- ${classes().map(c=>`<div class="card"><h3>${esc(c.name)}</h3>${c.items.slice(0,4).map(i=>{const k=c.id+'|'+i.id;const car=u.careers[c.items.indexOf(i)%u.careers.length]||'your future career';
-  return `<div class="bubble"><b>${esc(i.term)}</b> → <i>As a ${esc(car)}, where might you use this?</i><textarea id="n${i.id}" placeholder="Your idea…" data-c="${c.id}">${esc(c.careerNotes[i.id]||'')}</textarea><button class="s" data-a="savenote" data-c="${c.id}" data-k="${i.id}">Save idea (+2 🪙 first time)</button></div>`}).join('')||'<p class="mute">Add materials to connect them to your future.</p>'}</div>`).join('')}`;
-}
-Object.assign(ACTIONS,{
- savecr(){S.user.careers=$('#cr2').value.split(',').map(x=>x.trim()).filter(Boolean);S.user.exploring=false;save();render()},
- savenote(d){const c=classes().find(x=>x.id===d.c),v=$('#n'+d.k).value.trim();if(!v)return;const first=!c.careerNotes[d.k];c.careerNotes[d.k]=v;save();if(first)earn(2,'for linking class to career');else toast('Saved')}
 });
 
 /* ======= friends ======= */
@@ -688,17 +821,17 @@ ACTIONS.breathgo=async function(){const sh=$('#modal .sheet');if(!sh)return;
  if(tk.stop)return;const r=dayRec();let extra='';if(!r.breath){r.breath=1;extra=' (+2 coins for taking care of yourself)';earn(2,'for taking a calm moment 💙')}
  sh.innerHTML=`<button class="gear" data-a="closemodal" aria-label="Close">✕</button><h2>You did it! 💙</h2><div class="dogwrap">${dog(S.eq,'happy')}</div><p class="bubble">Nice work. You're doing better than you think${extra}. When you're ready, we can take just one tiny step together.</p><div class="row"><button class="p" data-a="gotoclass">Open my classes</button><button class="s" data-a="closemodal">I'm good, thanks</button></div>`};
 /* pep talk */
-function openPep(){const u=S.user,car=u.careers[0]||'what you dream of becoming',mins=Math.round(S.logs.reduce((a,l)=>a+l.secs,0)/60);
- const L=[`${u.name}, you are working toward becoming a ${car}. Every card you study is a real step toward that.`,
-  S.earned?`You've already earned ${S.earned} XP${mins?` and studied ${mins} minutes`:''}. That's proof you can do this.`:`You showed up even though you didn't feel like it. That's exactly what a future ${car} does.`,
+function openPep(){const u=S.user,mins=Math.round(S.logs.reduce((a,l)=>a+l.secs,0)/60);
+ const L=[`${u.name}, you are working toward something that matters to you. Every card you study is a real step forward.`,
+  S.earned?`You've already earned ${S.earned} XP${mins?` and studied ${mins} minutes`:''}. That's proof you can do this.`:`You showed up even though you didn't feel like it. That's exactly what strong students do.`,
   `You don't have to feel motivated to start. Motivation shows up AFTER you begin.`,
   `You are smarter and more capable than this tired moment makes you feel. You are amazing, and you're going to do great.`];
- openModal(`<h2>You've got this, ${esc(u.name)}! 💛</h2><div class="dogwrap">${dog(S.eq,'happy')}</div>${u.goals?`<div class="bubble"><b>Your why:</b> ${esc(u.goals)}</div>`:''}<div class="bubble"><b>Your goal:</b> ${u.careers.map(esc).join(' · ')}${u.majors?' — '+esc(u.majors):''}</div>${L.map(l=>`<div class="bubble">💛 ${esc(l)}</div>`).join('')}<div id="pepai"></div><div class="row"><button class="p" data-a="tiny">Just 3 questions</button>${AI.sm?'<button class="s" data-a="pepai">✨ Say something just for me</button>':''}</div>`);
+ openModal(`<h2>You've got this, ${esc(u.name)}! 💛</h2><div class="dogwrap">${dog(S.eq,'happy')}</div>${u.goals?`<div class="bubble"><b>Your why:</b> ${esc(u.goals)}</div>`:''}${L.map(l=>`<div class="bubble">💛 ${esc(l)}</div>`).join('')}<div id="pepai"></div><div class="row"><button class="p" data-a="tiny">Just 3 questions</button>${AI.sm?'<button class="s" data-a="pepai">✨ Say something just for me</button>':''}</div>`);
  setTimeout(()=>burst(12,$('#modal svg')),200)}
 Object.assign(ACTIONS,{
  tiny(){closeModal();tab='practice';startPractice('all',null,3)},
  async pepai(){const u=S.user,el=$('#pepai');el.innerHTML='<p class="bubble">🐾 …</p>';const up=upcoming(2,14).map(e=>`${e.title} (${e.cls}, ${when(e)})`).join('; ');
-  try{const r=await AI.sm(`${persona()}\n\nWrite a warm, specific 3-sentence pep talk for ${u.name}, who feels unmotivated about studying. Remind them of their goals and how capable they are. Be genuine, not cheesy.\nMajor: ${u.majors||'unknown'}. Career goals: ${u.careers.join(', ')}. Personal goals: ${u.goals||'not shared'}. Classes: ${S.classes.map(c=>c.name).join(', ')}. Coming up: ${up||'nothing scheduled'}. XP earned so far: ${S.earned}.`,{cache:false,onText:({text})=>{el.innerHTML=`<p class="bubble">🐶 ${esc(text)}</p>`}});el.innerHTML=`<p class="bubble">🐶 ${esc(r.text)}</p>`}
+  try{const r=await AI.sm(`${persona()}\n\nWrite a warm, specific 3-sentence pep talk for ${u.name}, who feels unmotivated about studying. Remind them of their goals and how capable they are. Be genuine, not cheesy.\nMajor: ${u.majors||'unknown'}. Personal goals: ${u.goals||'not shared'}. Classes: ${S.classes.map(c=>c.name).join(', ')}. Coming up: ${up||'nothing scheduled'}. XP earned so far: ${S.earned}.`,{cache:false,onText:({text})=>{el.innerHTML=`<p class="bubble">🐶 ${esc(text)}</p>`}});el.innerHTML=`<p class="bubble">🐶 ${esc(r.text)}</p>`}
   catch(e){el.innerHTML='<p class="bubble">🐶 I couldn\'t think of the words just now — but I believe in you! 💛</p>'}},
  gotoclass(){closeModal();go('class')},gopractice(){closeModal();tab='practice';startPractice('all')},
  gostart(d){closeModal();view.tcls=d.k;startTimer(d.k)}});
@@ -710,11 +843,11 @@ function openStart(excited){const u=S.user,cls=S.classes,t=cls.length?cls.map(c=
  if(excited){const r=dayRec();if(!r.spark){r.spark=1;earn(2,'spark bonus! 🔥')}setTimeout(()=>burst(40,$('#modal svg')),200);setTimeout(()=>burst(30,$('#modal svg')),900)}else setTimeout(()=>burst(12,$('#modal svg')),200)}
 
 /* ---- settings ---- */
-function openSettings(){const u=S.user;openModal(`<h2>⚙️ Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea><button class="p" data-a="savesettings" style="width:100%">Save</button><hr style="border:0;border-top:2px dotted #f1d9b5;margin:14px 0"><button class="${view.reset?'p bad':'s'}" data-a="resetall" style="width:100%">${view.reset?'Really erase everything?':'Erase everything & start over'}</button>`)}
+function openSettings(){const u=S.user;openModal(`<h2>⚙️ Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea><label style="display:block;margin-top:6px">Floating widget</label><div><span class="chip ${S.pref.autoFloat===false?'':'on'}" id="autof" data-a="toggleauto">${S.pref.autoFloat===false?'':'✓ '}Float ${esc(DN())} on my screen when I open the app</span></div><p class="mute" style="margin-top:0">Works in desktop Chrome or Edge. He stays on top of Brightspace, Google and other tabs.</p><button class="p" data-a="savesettings" style="width:100%">Save</button><hr style="border:0;border-top:2px dotted #f1d9b5;margin:14px 0"><button class="${view.reset?'p bad':'s'}" data-a="resetall" style="width:100%">${view.reset?'Really erase everything?':'Erase everything & start over'}</button>`)}
 Object.assign(ACTIONS,{settings(){view.reset=false;openSettings()},
- savesettings(){const u=S.user;u.name=$('#sn').value.trim()||u.name;u.dogName=($('#sd').value.trim()||'Winston').slice(0,20);u.goals=$('#sg').value.trim();save();closeModal();render();toast('Saved!')},
- resetall(){if(!view.reset){view.reset=true;openSettings();return}try{localStorage.removeItem(KEY)}catch(e){}S=load();S.logs=[];S.drive={root:null,classes:{}};S.pref={autoDocs:true};S.days={};ob=1;tab='home';view.reset=false;closeModal();render()},
- savegoals(){S.user.goals=$('#gl2').value.trim();save();toast('Saved! I\'ll remind you of these 💛')}});
+ toggleauto(){S.pref.autoFloat=S.pref.autoFloat===false;save();const e=$('#autof');if(e){e.classList.toggle('on',S.pref.autoFloat!==false);e.textContent=(S.pref.autoFloat!==false?'✓ ':'')+'Float '+DN()+' on my screen when I open the app'}},
+ savesettings(){const u=S.user;u.name=$('#sn').value.trim()||u.name;u.dogName=($('#sd').value.trim()||'Winston').slice(0,20);u.goals=$('#sg').value.trim();save();closeModal();render();drawWidget();toast('Saved!')},
+ resetall(){if(!view.reset){view.reset=true;openSettings();return}try{localStorage.removeItem(KEY)}catch(e){}S=load();S.logs=[];S.drive={root:null,classes:{}};S.pref={autoDocs:true};S.days={};ob=1;tab='home';view.reset=false;closeModal();render();drawWidget()}});
 
 /* ---- calendar ---- */
 function eventsOn(c,iso){const d=fromIso(iso),out=c.events.filter(e=>e.date===iso);
@@ -749,7 +882,7 @@ function parseDates(text){const out=[],now=new Date(),flat=text.replace(/[ \t]+/
  re=/\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/g;while((m=re.exec(flat)))push(+m[1]-1,+m[2],m[3]?+m[3]:0,m.index,m[0].length);
  return out.slice(0,80)}
 async function findDates(c,docs){let found=[];
- if(AI.sm){try{const text=docs.map(d=>d.text).join('\n\n').slice(0,14000),r=await AI.sm.json(`Today is ${todayIso()}. From this course syllabus text, extract dated events a student must track: exams, quizzes, assignments due, project deadlines, important readings. Do NOT list ordinary class meetings. Infer the year from today's date (courses run in the near future). Return ONLY JSON: {"events":[{"title":"short title","date":"YYYY-MM-DD","type":"exam|assignment|reading|other"}]} with at most 60 events.\n\nSYLLABUS:\n${text}`);
+ if(AI.sm){try{const text=docs.map(d=>d.text).join('\n\n').slice(0,14000),r=await aiJson(`Today is ${todayIso()}. From this course syllabus text, extract dated events a student must track: exams, quizzes, assignments due, project deadlines, important readings. Do NOT list ordinary class meetings. Infer the year from today's date (courses run in the near future). Return ONLY JSON: {"events":[{"title":"short title","date":"YYYY-MM-DD","type":"exam|assignment|reading|other"}]} with at most 60 events.\n\nSYLLABUS:\n${text}`);
    found=(r.events||[]).filter(e=>e&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)&&e.title).map(e=>({title:String(e.title).slice(0,80),date:e.date,type:EVT[e.type]?e.type:'other'}))}catch(e){if(e&&e.code==='not_granted')AI.sm=null}}
  if(!found.length)found=docs.flatMap(d=>parseDates(d.text));
  const have=new Set(c.events.map(e=>e.title.toLowerCase()+e.date));let n=0;
@@ -767,9 +900,17 @@ Object.assign(ACTIONS,{
 const secsFor=(cid,since)=>S.logs.filter(l=>l.cls===cid&&(!since||l.start>=since)).reduce((a,l)=>a+l.secs,0);
 const weekSecs=c=>secsFor(c.id,weekStart().getTime())+(S.timer&&S.timer.cls===c.id?(Date.now()-S.timer.start)/1000:0);
 function addLog(cid,secs,kind,start){if(!cid||secs<20)return;S.logs.push({id:uid(),cls:cid,start:start||Date.now()-secs*1000,secs:Math.round(secs),kind});if(S.logs.length>600)S.logs=S.logs.slice(-600);save()}
-function startTimer(cid){if(S.timer)return toast('A timer is already running');S.timer={cls:cid,start:Date.now()};save();tickTimer();toast('Timer started — go get it! ⏱️');render()}
-function stopTimer(){const t=S.timer;if(!t)return;const secs=(Date.now()-t.start)/1000;S.timer=null;addLog(t.cls,secs,'study',t.start);const mins=Math.floor(secs/60),coins=Math.min(6,Math.floor(mins/10));save();tickTimer();render();coins?earn(coins,`for ${mins} min of studying`):toast(`Saved ${fmtDur(secs)} of study time`)}
-function tickTimer(){const chip=$('#timerchip'),t=S.timer;if(!t||!S.user){chip.style.display='none';return}const c=S.classes.find(x=>x.id===t.cls),e=fmtClock((Date.now()-t.start)/1000);chip.style.display='block';chip.textContent='⏱ '+(c?c.name:'Study')+' '+e;document.querySelectorAll('.tmv').forEach(x=>x.textContent=e)}
+function startTimer(cid,mins){if(S.timer)return toast('A timer is already running');S.timer={cls:cid,start:Date.now(),target:mins?mins*60:0,m:{}};save();tickTimer();toast(mins?`Focus started: ${mins} min ⏱️`:'Timer started — go get it! ⏱️');render();drawWidget()}
+function stopTimer(){const t=S.timer;if(!t)return;const secs=(Date.now()-t.start)/1000;S.timer=null;addLog(t.cls,secs,'study',t.start);const mins=Math.floor(secs/60),coins=Math.min(6,Math.floor(mins/10));save();tickTimer();render();W.msg='';drawWidget();coins?earn(coins,`for ${mins} min of studying`):toast(`Saved ${fmtDur(secs)} of study time`)}
+const MILE={10:"10 minutes in — you started, and that's the hardest part! 🌟",25:"25 minutes of focus! That's a full Pomodoro. Amazing! 🍅",45:"45 minutes! Maybe stand up and stretch for a sec? 💛",60:"One whole hour! You are incredible. 🏆",90:"90 minutes! Time for a real break — water and fresh air. 💧"};
+function tickTimer(){const chip=$('#timerchip'),t=S.timer;if(!S.user)return;if(!t){chip.style.display='none';tickWidget();return}
+ const el=(Date.now()-t.start)/1000,c=S.classes.find(x=>x.id===t.cls),e=fmtClock(t.target?Math.max(0,t.target-el):el);
+ chip.style.display='block';chip.textContent='⏱ '+(c?c.name:'Study')+' '+e;
+ [...document.querySelectorAll('.tmv'),...(pipWin?pipWin.document.querySelectorAll('.tmv'):[])].forEach(x=>x.textContent=e);
+ t.m=t.m||{};const mins=Math.floor(el/60);
+ if(t.target&&el>=t.target&&!t.m.done){t.m.done=1;W.msg=`Time! 🎉 You finished your ${Math.round(t.target/60)}-minute focus. Take a 5-minute break — stretch, sip some water!`;W.cheerUntil=Date.now()+5000;toast('🎉 Focus session complete!');burst(30);earn(2,'for finishing a focus session');return}
+ for(const m of [10,25,45,60,90]){if(mins>=m&&!t.m[m]){t.m[m]=1;if(!(t.target&&m*60>=t.target)){W.msg=MILE[m];W.cheerUntil=Date.now()+3000;save();toast(MILE[m]);drawWidget()}}}
+ tickWidget()}
 setInterval(tickTimer,1000);
 function nudgeFor(c){const el=Math.min(1,(Date.now()-weekStart().getTime())/864e5/7+.05),gap=c.goalMin*60*el-weekSecs(c);
  if(weekSecs(c)>=c.goalMin*60)return `🎉 You hit your goal for ${esc(c.name)} this week!`;
@@ -807,8 +948,8 @@ const notesHtml=(c,ses,n)=>{const li=a=>`<ul>${a.map(x=>`<li>${esc(x)}</li>`).jo
  if(n.summary.length)h+='<h2>Summary</h2>'+li(n.summary);for(const x of n.sections)h+=`<h2>${esc(x.heading)}</h2>`+li(x.bullets);
  if(n.terms.length)h+='<h2>Key terms</h2><ul>'+n.terms.map(t=>`<li><b>${esc(t.term)}</b>: ${esc(t.def)}</li>`).join('')+'</ul>';
  if(n.todo.length)h+='<h2>To do / dates</h2>'+li(n.todo);if(n.questions.length)h+='<h2>Questions to review</h2>'+li(n.questions);return h};
-async function makeNotes(c,ses){let n=null;
- if(AI.sm&&ses.lines.length){try{n=normNotes(await AI.sm.json(`${persona()}\n\nTASK: Turn what the teacher said in class into clear, well-organized study notes. Group related points under short headings. Use the class materials for correct terms and spelling. Return ONLY JSON: {"title":"short title","summary":["1-3 bullets"],"sections":[{"heading":"...","bullets":["..."]}],"terms":[{"term":"...","def":"..."}],"todo":["assignments or dates mentioned"],"questions":["2-3 good review questions"]}\n\n${ctxOf(c)}\n\nTEACHER SAID TODAY (in order):\n${ses.lines.slice(-120).map(l=>'- '+l).join('\n')}`),c)}catch(e){if(e&&e.code==='not_granted')AI.sm=null}}
+async function makeNotes(c,ses){let n=null;if(!ses.lines.length)return;
+ if(AI.sm&&ses.lines.length){try{n=normNotes(await aiJson(`${persona()}\n\nTASK: Turn what the teacher said in class into clear, well-organized study notes. Group related points under short headings. Lines starting with [My note] are the student's own notes — include them. Use the class materials for correct terms and spelling. Return ONLY JSON: {"title":"short title","summary":["1-3 bullets"],"sections":[{"heading":"...","bullets":["..."]}],"terms":[{"term":"...","def":"..."}],"todo":["assignments or dates mentioned"],"questions":["2-3 good review questions"]}\n\n${ctxOf(c)}\n\nTEACHER SAID TODAY (in order):\n${ses.lines.slice(-120).map(l=>'- '+l).join('\n')}`),c)}catch(e){if(e&&e.code==='not_granted')AI.sm=null}}
  if(!n)n=normNotes(notesFallback(c,ses),c)||{title:`${c.name} — class notes`,summary:['Nothing was recorded in this class.'],sections:[],terms:[],todo:[],questions:[]};
  ses.notes={data:n,text:notesText(c,ses,n),html:notesHtml(c,ses,n),status:'',link:'',err:''};save();
  if(tab==='class'&&view.cls===c.id&&view.sub==='notes')render();
@@ -841,7 +982,7 @@ async function downloadText(name,text){const fn=name.replace(/[\\/:*?"<>|]/g,'-'
  try{const dl=window.claude&&claude.use?await claude.use('downloads'):null;if(dl){await dl.save({filename:fn,data:new Blob([text],{type:'text/markdown'})});return}}catch(e){if(e&&e.code==='declined')return}
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/markdown'}));a.download=fn;a.click()}
 function rNotes(c){const list=[...c.sessions].reverse();
- $('#sub').innerHTML=`<div class="card"><h2>🗒 ${esc(DN())}'s class notes</h2><p class="mute">During live class ${esc(DN())} jots down what your teacher says and organizes it for you. ${AI.mcp?`Notes can be saved to your Google Drive in <b>Winston Notes › ${esc(c.name)}</b>.`:'Saving to Google Docs works on the published Claude page.'}</p>${AI.mcp?`<span class="chip ${S.pref.autoDocs?'on':''}" data-a="toggledocs">${S.pref.autoDocs?'✓ ':''}Auto-save to Google Docs after class</span>`:''}</div>`+
+ $('#sub').innerHTML=`<div class="card"><h3>✍️ Make notes from text</h3><p class="mute">Paste or type anything — what you remember from class, raw notes, a transcript — and ${esc(DN())} will organize it.</p><textarea id="nt" placeholder="Paste or type here…"></textarea><button class="p" data-a="notesfromtext">Organize into notes</button></div>${c.scratch&&c.scratch.length?`<div class="card"><h3>📌 Quick notes</h3>${c.scratch.map(x=>`<div class="item"><div>${esc(x.text)}<div class="mute">${esc(x.date)}</div></div><button class="s" data-a="delscratch" data-k="${x.id}">✕</button></div>`).join('')}<button class="p" data-a="orgscratch">Turn into organized notes</button></div>`:''}<div class="card"><h2>🗒 ${esc(DN())}'s class notes</h2><p class="mute">During live class ${esc(DN())} jots down what your teacher says and organizes it for you. ${AI.mcp?`Notes can be saved to your Google Drive in <b>Winston Notes › ${esc(c.name)}</b>.`:'Saving to Google Docs works on the published Claude page.'}</p>${AI.mcp?`<span class="chip ${S.pref.autoDocs?'on':''}" data-a="toggledocs">${S.pref.autoDocs?'✓ ':''}Auto-save to Google Docs after class</span>`:''}</div>`+
  (list.map(ses=>{const n=ses.notes;return `<div class="card"><h3>${esc(ses.date)}</h3>${n?`<div class="mute">${esc(n.data.title)}</div><details style="margin:8px 0"><summary>View notes</summary><div class="nbox">${esc(n.text)}</div></details><div class="row"><button class="s" data-a="dlnote" data-k="${ses.id}">⬇ Download</button>${AI.mcp?`<button class="p" data-a="savedoc" data-k="${ses.id}">${n.status==='saved'?'Save another copy':'💾 Save to Google Docs'}</button>`:''}</div>${n.status==='saving'?'<p class="mute">Saving to Google Docs…</p>':''}${n.status==='saved'&&n.link?`<p class="mute">✅ Saved to Google Docs: <a href="${esc(n.link)}" target="_blank" rel="noopener">open the notes</a></p>`:''}${n.status==='error'?`<p class="mute">⚠️ ${esc(n.err)}</p>`:''}`:`<p class="mute">No notes yet for this class.</p><button class="p" data-a="mknotes" data-k="${ses.id}">📝 Make notes</button>`}</div>`}).join('')||`<div class="card"><p class="mute">No classes recorded yet. Start a live class and I'll take notes for you!</p></div>`)}
 Object.assign(ACTIONS,{
  toggledocs(){S.pref.autoDocs=!S.pref.autoDocs;save();render()},
@@ -870,13 +1011,24 @@ Object.assign(ACTIONS,{
  saveev(d){const c=cur(),e=c.events.find(x=>x.id===d.k),t=$('#eet').value.trim(),dt=$('#eed').value;if(!t||!dt)return toast('Title and date are needed');
   e.title=t;e.date=dt;e.type=$('#eey').value;e.time=$('#eem').value;view.calSel=dt;const x=fromIso(dt);view.cal={y:x.getFullYear(),m:x.getMonth()};save();closeModal();render();toast('Event updated ✏️')}});
 
+function goalCard(){const g=goalToday();
+ return `<div class="card"><h2>🎯 Today's goal</h2>${g?`<div class="wgoal ${g.done?'done':''}" data-a="goaltoggle" style="font-size:17px">${g.done?'✅':'⬜'} ${esc(g.text)}</div><p class="mute">${g.done?'You did it! 🎉':'Tap to check it off when you\'re done.'}</p><button class="s" data-a="goalclear">Change goal</button>`:`<p class="mute">Pick one thing to accomplish today. ${esc(DN())} will cheer you on.</p><div class="row"><input id="tg" class="grow" style="margin:0" placeholder="e.g. Finish chapter 3 notes"><button class="p" data-a="goalset">Set</button></div>`}</div>`}
+/* notes tab: make notes from text + quick notes */
+Object.assign(ACTIONS,{
+ async notesfromtext(){const c=cur(),t=($('#nt')||{}).value;if(!t||t.trim().length<15)return toast('Add a bit more text first');
+  const lines=t.split(/\n+/).map(x=>x.trim()).filter(Boolean),ses={id:uid(),date:new Date().toLocaleString(),hits:[],lines,typed:true};
+  lines.forEach(l=>{const hit=c.items.find(i=>matches(i,norm(l)));if(hit&&!ses.hits.some(h=>h.id===hit.id))ses.hits.push({id:hit.id,line:l})});
+  c.sessions.push(ses);view.ses=c.sessions.length-1;save();toast('Organizing your notes…');await makeNotes(c,ses);render()},
+ async orgscratch(){const c=cur();if(!c.scratch.length)return;const lines=c.scratch.map(x=>x.text),ses={id:uid(),date:new Date().toLocaleString(),hits:[],lines,typed:true};c.scratch=[];c.sessions.push(ses);save();await makeNotes(c,ses);render()},
+ delscratch(d){const c=cur();c.scratch=c.scratch.filter(x=>x.id!==d.k);save();render()}});
+
 /* ---- intro screen ---- */
 function showIntro(){const el=$('#intro'),u=S.user;let title,sub;
  if(u){const wk=S.classes.reduce((a,c)=>a+weekSecs(c),0),up=upcoming(1,14)[0];title=`Welcome back, ${esc(u.name)}!`;sub=`${esc(DN())} missed you! ${wk>60?`You've studied ${fmtDur(wk)} this week. `:''}${up?`Next up: ${esc(up.title)} (${esc(up.cls)}) ${when(up)}.`:'Ready to learn something fun today?'}`}
  else{title="Hi, I'm Winston!";sub="Your study buddy. Let's make studying fun — and a lot less scary."}
- el.innerHTML=`<h1 class="sign">${title}</h1>${dog(u?S.eq:{},'happy')}<p style="max-width:340px;font-size:17px">${sub}</p><button class="p" data-a="intro" style="font-size:20px;padding:12px 30px;margin-top:6px">Let's go! 🐾</button>`;
+ el.innerHTML=`<h1 class="sign">${title}</h1>${dog(u?S.eq:{},'cheer')}<p style="max-width:340px;font-size:17px">${sub}</p><button class="p" data-a="intro" style="font-size:20px;padding:12px 30px;margin-top:6px">Let's go! 🐾</button>`;
  el.className='';el.style.display='flex';setTimeout(()=>burst(14,el.querySelector('svg')),500)}
-ACTIONS.intro=()=>{const el=$('#intro');el.classList.add('out');setTimeout(()=>{el.style.display='none'},650)};
+ACTIONS.intro=()=>{const el=$('#intro');el.classList.add('out');setTimeout(()=>{el.style.display='none'},650);if(S.user&&!(S.pref&&S.pref.autoFloat===false))popOut(true)};
 
 function burst(n=14,el){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
  const r=(el||document.querySelector('.dogwrap svg')||document.body).getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+Math.min(r.height*.4,60);
@@ -924,7 +1076,7 @@ function burst(n=14,el){if(matchMedia('(prefers-reduced-motion: reduce)').matche
 S.classes.forEach(c=>c.sessions.forEach(x=>{if(x.aiState==='loading')x.aiState=''}));
 S.classes.forEach(ensure);
 (async()=>{try{AI.sm=window.claude&&claude.use?await claude.use('sample'):null}catch(e){AI.sm=null}try{AI.mcp=window.claude&&claude.use?await claude.use('mcp'):null}catch(e){AI.mcp=null}if((AI.sm||AI.mcp)&&S.user)render()})();
-render();tickTimer();showIntro();
+render();drawWidget();tickTimer();showIntro();
 </script>
 </body>
 </html>
