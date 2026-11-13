@@ -17,11 +17,41 @@
   "build": {
     "appId": "com.winston.studybuddy",
     "productName": "Winston",
-    "files": ["main.js", "preload.js", "app/**", "build/tray.png"],
-    "directories": { "buildResources": "build", "output": "dist" },
-    "mac": { "category": "public.app-category.education", "target": ["dmg", "zip"] },
-    "win": { "target": ["nsis", "portable"] },
-    "linux": { "target": ["AppImage"], "category": "Education" },
-    "nsis": { "oneClick": true, "perMachine": false }
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/**",
+      "build/tray.png"
+    ],
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "mac": {
+      "category": "public.app-category.education",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Winston listens to your class to write your notes."
+      }
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Education"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false
+    }
   }
 }

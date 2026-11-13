@@ -1,5 +1,5 @@
 // Winston desktop widget: a small always-on-top window that floats over whatever you're doing.
-const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, screen, nativeImage, shell } = require('electron');
+const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, screen, nativeImage, shell, session, systemPreferences } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -112,6 +112,11 @@ else {
   app.whenReady().then(() => {
     app.setAppUserModelId('com.winston.studybuddy');
     loadCfg();
+    // let the widget use your microphone (live class notes) and show notifications
+    const allowed = ['media', 'notifications', 'clipboard-sanitized-write'];
+    session.defaultSession.setPermissionRequestHandler((wc, perm, cb) => cb(allowed.includes(perm)));
+    session.defaultSession.setPermissionCheckHandler((wc, perm) => allowed.includes(perm));
+    if (process.platform === 'darwin' && systemPreferences.askForMediaAccess) systemPreferences.askForMediaAccess('microphone').catch(() => {});
     createWindow();
     createTray();
     globalShortcut.register('CommandOrControl+Shift+W', toggleShow);

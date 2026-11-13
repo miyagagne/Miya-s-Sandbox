@@ -26,5 +26,5 @@ npm start
 
 ## Good To Know
 - Your data is stored in the desktop app separately from the web version. Use Export / Import to move it across.
-- Live class listening (the microphone) is not available in the desktop widget; type or dictate notes instead, or use the web app for the mic.
+- **Live class listening works on your laptop's microphone.** The first time, Winston downloads a small speech model (about 40 MB) and then transcribes on your device; it needs internet only for that first download. Windows/Mac/Linux will ask for microphone permission the first time.
 - Claude-powered answers, AI recaps and saving notes straight to Google Docs only work in the web version inside Claude. Everything else works offline, and the live leaderboard needs internet.

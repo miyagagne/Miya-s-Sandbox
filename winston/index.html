@@ -470,16 +470,19 @@ function rLive(c){
  SUB().innerHTML=`<div class="row" style="margin-bottom:8px"><button class="p ok" data-a="endlive">■ End class &amp; get notes</button><button class="s" id="micbtn" data-a="mic">🎙 Listen</button><button class="s" data-a="popout">🪟 Float ${esc(DN())}</button></div>
  <div id="endwarn"></div>
  <div class="card"><h3>🎙 Capturing notes</h3><div id="micstat" class="mute"></div><div id="interim" class="mute" style="font-style:italic;min-height:20px"></div>
+ <select id="micdev" style="margin:4px 0" aria-label="Microphone"><option>Default microphone</option></select><div class="bar" style="height:10px;margin:4px 0 8px" title="Mic level"><i id="miclevel" style="width:0%;transition:width .08s"></i></div><div style="margin:0 0 6px"><span class="chip" id="micengine" data-a="micengine"></span></div>
  <div style="margin:6px 0"><span class="chip ${live.mine?'':'on'}" data-a="nsrc" data-k="teacher" id="nsT">Teacher said</span><span class="chip ${live.mine?'on':''}" data-a="nsrc" data-k="mine" id="nsM">My own note</span></div>
  <textarea id="said" placeholder="Type or dictate here — Enter adds it (Shift+Enter for a new line)"></textarea>
  <div class="row"><button class="p" data-a="say">Add to notes</button><span class="mute" id="capcount"></span></div></div>
  <div class="card"><h3>📝 ${esc(DN())} is taking notes</h3><div id="livenotes"></div></div>
  <div class="card"><h3>Teacher's materials · ${esc(wkLabel(c,live.wk||'all'))}</h3><div id="livemat"></div></div>`;
  const ta=$('#said');ta.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ACTIONS.say()}};
+ const md=$('#micdev');if(md)md.onchange=e=>{MIC.devId=e.target.value;const was=live&&live.listening;stopEngines();micClose();if(was)startListen()};
  micUI();paintLive()}
-function micUI(){const b=$('#micbtn'),st=$('#micstat');if(!live)return;
+function micUI(){const b=$('#micbtn'),st=$('#micstat'),eg=$('#micengine');if(!live)return;
  if(b)b.textContent=live.listening?'🔇 Stop mic':'🎙 Listen';
- if(st){st.className='mute'+(live.micWarn?' warn':'');st.textContent=live.micMsg||(live.listening?'🎙 Listening… I\'ll write down what I hear.':(SRC?'Mic is off. Tap 🎙 Listen, or type/dictate below.':NOSR)+(inFrame?' (Inside Claude the browser may block the mic.)':''))}}
+ if(eg)eg.textContent=(live.forceLocal||!SRC||DESK?'🧠 On-Device Speech':'🌐 Browser Speech')+(SRC&&!DESK?' ⇄':'');
+ if(st){st.className='mute'+(live.micWarn?' warn':'');st.textContent=live.micMsg||(live.listening?'🎙 Listening… I\'ll write down what I hear.':'Mic is off. Tap 🎙 Listen, or type/dictate below.')}}
 function micSay(msg,warn){if(!live)return;live.micMsg=msg;live.micWarn=!!warn;micUI()}
 const CIRC='<svg class="circ" viewBox="0 0 100 40" preserveAspectRatio="none"><path pathLength="1" d="M8 24 C2 8 56 0 90 8 C104 14 98 34 52 37 C14 38 -2 28 14 12"/></svg>';
 function paintLive(){const c=cur();if(!c||!live||!$('#livemat'))return;
@@ -500,31 +503,71 @@ function heard(line,opt){if(!live)return;line=String(line||'').trim();if(!line)r
  if(hit){live.focus=hit.id;if(!live.hits.some(h=>h.id===hit.id))live.hits.push({id:hit.id,line})}
  if(!mine)W.msg=hit?`${hit.term}: ${hit.text.split(/(?<=[.!?])\s/)[0]}`:'';
  saveDraft();paintLive();drawWidget();if(hit)setTimeout(()=>burst(7,$('#m'+hit.id)),60)}
-function startListen(){
- if(!SRC){micSay(DESK?NOSR:'This browser has no speech recognition. Type or dictate into the box below instead.',true);return}
- try{rec=new SRC()}catch(e){micSay('Could not start speech recognition. Type or dictate below instead.',true);return}
- rec.continuous=true;rec.interimResults=true;rec.lang=navigator.language||'en-US';
+/* ======= real microphone: device picker, level meter, on-device speech ======= */
+const MIC={stream:null,ctx:null,an:null,proc:null,raf:0,devId:'',engine:'',buf:[],bufLen:0,speechLen:0,silence:0,pre:null,asr:null,loading:null,queue:Promise.resolve(),quiet:0};
+function micErr(e){const n=e&&e.name,blocked=n==='NotAllowedError'||n==='SecurityError';
+ return (blocked?'Your browser blocked the microphone. Click the mic/lock icon in the address bar to allow it, then tap Listen.':n==='NotFoundError'?'No microphone was found on this device.':n==='NotReadableError'?'Another app is using your microphone.':"I couldn't open your microphone.")+' You can always type or dictate below.'+(inFrame&&blocked?' (Inside Claude the browser may block the mic; the standalone page or desktop widget lets it work.)':'')}
+async function micOpen(){if(MIC.stream)return true;
+ if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){micSay("This browser can't access a microphone. Type or dictate below.",true);return false}
+ try{MIC.stream=await navigator.mediaDevices.getUserMedia({audio:{...(MIC.devId?{deviceId:{exact:MIC.devId}}:{}),echoCancellation:true,noiseSuppression:true,channelCount:1}})}catch(e){micSay(micErr(e),true);return false}
+ const AC=window.AudioContext||window.webkitAudioContext;MIC.ctx=new AC();try{await MIC.ctx.resume()}catch(e){}
+ const src=MIC.ctx.createMediaStreamSource(MIC.stream);MIC.an=MIC.ctx.createAnalyser();MIC.an.fftSize=1024;src.connect(MIC.an);
+ MIC.proc=MIC.ctx.createScriptProcessor(4096,1,1);src.connect(MIC.proc);MIC.proc.connect(MIC.ctx.destination);MIC.proc.onaudioprocess=e=>micChunk(e.inputBuffer.getChannelData(0));
+ MIC.stream.getAudioTracks()[0].addEventListener('ended',()=>{micClose();if(live&&live.listening){live.listening=false;micSay('The microphone was disconnected. Plug it back in and tap Listen.',true)}});
+ micDevices();micMeter();return true}
+function micClose(){cancelAnimationFrame(MIC.raf);try{MIC.proc&&MIC.proc.disconnect()}catch(e){}try{MIC.stream&&MIC.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{MIC.ctx&&MIC.ctx.close()}catch(e){}
+ MIC.stream=null;MIC.ctx=null;MIC.an=null;MIC.proc=null;MIC.buf=[];MIC.bufLen=0;MIC.speechLen=0;MIC.silence=0;const l=$('#miclevel');if(l)l.style.width='0%'}
+async function micDevices(){try{const ds=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='audioinput'),sel=$('#micdev');if(!sel)return;const cur=MIC.stream&&MIC.stream.getAudioTracks()[0].getSettings().deviceId;
+ sel.innerHTML=ds.map((d,i)=>`<option value="${esc(d.deviceId)}" ${d.deviceId===cur?'selected':''}>${esc(d.label||'Microphone '+(i+1))}</option>`).join('')||'<option>Default microphone</option>'}catch(e){}}
+function micMeter(){const an=MIC.an;if(!an)return;const a=new Uint8Array(an.fftSize);an.getByteTimeDomainData(a);let sum=0;for(const v of a){const x=(v-128)/128;sum+=x*x}
+ const rms=Math.sqrt(sum/a.length),l=$('#miclevel');if(l)l.style.width=Math.min(100,Math.round(rms*400))+'%';
+ if(live&&live.listening){if(rms>0.012)MIC.quiet=0;else if(++MIC.quiet===400)micSay("I'm not hearing anything — check your mic isn't muted, or pick another microphone above.",true)}
+ MIC.raf=requestAnimationFrame(micMeter)}
+function micChunk(inp){if(!live||!live.listening||MIC.engine!=='local')return;const ratio=MIC.ctx.sampleRate/16000,n=Math.floor(inp.length/ratio),out=new Float32Array(n);
+ for(let i=0;i<n;i++){let sm=0,c=0;for(let j=Math.floor(i*ratio);j<Math.floor((i+1)*ratio)&&j<inp.length;j++){sm+=inp[j];c++}out[i]=c?sm/c:0}
+ let e=0;for(const v of out)e+=v*v;const voice=Math.sqrt(e/n)>0.012;
+ if(voice){if(!MIC.bufLen&&MIC.pre){MIC.buf.push(MIC.pre);MIC.bufLen+=MIC.pre.length;MIC.pre=null}MIC.speechLen+=n;MIC.silence=0;MIC.buf.push(out);MIC.bufLen+=n}
+ else if(MIC.bufLen){MIC.buf.push(out);MIC.bufLen+=n;MIC.silence+=n}else MIC.pre=out;
+ if(MIC.bufLen&&(MIC.silence>16000*.9||MIC.bufLen>16000*14)){const all=new Float32Array(MIC.bufLen);let o=0;for(const b of MIC.buf){all.set(b,o);o+=b.length}const sp=MIC.speechLen;MIC.buf=[];MIC.bufLen=0;MIC.silence=0;MIC.speechLen=0;if(sp>16000*.4)transcribe(all)}}
+function transcribe(f32){MIC.queue=MIC.queue.then(async()=>{if(!live)return;
+ try{const asr=await loadASR();if(!asr)return;micSay('✍️ Writing down what I heard…');const out=await asr(f32),t=String((out&&out.text)||'').trim();
+  if(live&&t.length>1&&!/^[\[(].*[\])]$/.test(t))heard(t);if(live&&live.listening)micSay('🎙 Listening on this device… speech is transcribed here, not sent anywhere.')}
+ catch(e){micSay('Could not transcribe that bit. Keep going — or type it below.',true)}})}
+async function loadASR(){if(MIC.asr)return MIC.asr;if(window.__asr){MIC.asr=window.__asr;return MIC.asr}if(MIC.loading)return MIC.loading;
+ MIC.loading=(async()=>{try{micSay('Getting the on-device speech model ready (one time, about 40 MB)…');const tf=await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');tf.env.allowLocalModels=false;
+  MIC.asr=await tf.pipeline('automatic-speech-recognition','Xenova/whisper-tiny.en',{progress_callback:p=>{if(p&&p.status==='progress'&&live&&live.listening)micSay(`Downloading the on-device speech model… ${Math.round(p.progress||0)}% (one time)`)}});return MIC.asr}
+  catch(e){micSay("Couldn't load the on-device speech model — it needs internet the first time. You can type or dictate below.",true);MIC.loading=null;return null}})();return MIC.loading}
+function stopEngines(){try{if(rec){rec.onend=null;rec.stop()}}catch(e){}MIC.engine=''}
+async function startListen(){const ok=await micOpen();if(!ok&&!SRC)return;if(!live)return;
+ if(SRC&&!DESK&&!live.forceLocal)startWebSpeech();else startLocal()}
+function startLocal(){if(!live)return;if(!MIC.stream){micSay('I need microphone access first — allow it, then tap Listen again.',true);return}
+ stopEngines();MIC.engine='local';live.listening=true;MIC.quiet=0;micSay('🎙 Listening on this device… speech is transcribed here, not sent anywhere.');loadASR()}
+function startWebSpeech(){
+ try{rec=new SRC()}catch(e){startLocal();return}
+ MIC.engine='cloud';rec.continuous=true;rec.interimResults=true;rec.lang=navigator.language||'en-US';
  rec.onstart=()=>{if(!live)return;live.listening=true;micSay('🎙 Listening… I\'ll write down what I hear.')};
  rec.onresult=e=>{if(!live)return;let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)heard(r[0].transcript);else interim+=r[0].transcript}
   const el=$('#interim');if(el)el.textContent=interim?'…'+interim:''};
  rec.onerror=e=>{if(!live)return;const c=e&&e.error;if(c==='no-speech'||c==='aborted')return;
+  if(MIC.stream&&['network','service-not-allowed','not-allowed','language-not-supported'].includes(c)){micSay('The browser speech service is unavailable here — switching to on-device listening…',true);startLocal();return}
   if(['not-allowed','service-not-allowed','audio-capture','language-not-supported'].includes(c)){live.listening=false;
    micSay((MIC_MSG[c]||'The mic stopped.')+' No problem — type or dictate into the box below and I\'ll still make your notes.'+(inFrame&&c.includes('allowed')?' (This can happen inside Claude. Opening the standalone page lets the mic work.)':''),true)}
   else micSay(`Mic hiccup (${c||'unknown'}). Retrying…`,true)};
- rec.onend=()=>{if(live&&live.listening)setTimeout(()=>{if(live&&live.listening)try{rec.start()}catch(e){}},350);else micUI()};
- live.listening=true;try{rec.start()}catch(e){live.listening=false;micSay('Could not start the mic. Type or dictate below instead.',true)}}
+ rec.onend=()=>{if(live&&live.listening&&MIC.engine==='cloud')setTimeout(()=>{if(live&&live.listening&&MIC.engine==='cloud')try{rec.start()}catch(e){}},350);else micUI()};
+ live.listening=true;try{rec.start()}catch(e){startLocal()}}
 Object.assign(ACTIONS,{
  startlive(){const c=cur();live={cls:c.id,wk:view.wk||'all',notes:[],hits:[],lines:[],focus:null,listening:false,t0:Date.now(),mine:false,ack:false};S.liveDraft=null;schedulePaw();drawWidget();render();startListen()},
  say(){if(!live)return;const el=$('#said'),v=el&&el.value.trim();if(!v)return;el.value='';v.split(/\n+/).forEach(l=>heard(l,{mine:live.mine}))},
  nsrc(d){if(!live)return;live.mine=d.k==='mine';const a=$('#nsT'),b=$('#nsM');if(a)a.classList.toggle('on',!live.mine);if(b)b.classList.toggle('on',live.mine)},
- mic(){if(!live)return;if(live.listening){live.listening=false;live.micMsg='';try{rec.stop()}catch(e){}micUI()}else{live.micMsg='';startListen()}},
+ mic(){if(!live)return;if(live.listening){live.listening=false;live.micMsg='';stopEngines();micClose();micUI()}else{live.micMsg='';startListen()}},
+ micengine(){if(!live)return;if(!SRC||DESK){toast('On-device speech is the engine here — it runs on your laptop.');return}live.forceLocal=!live.forceLocal;const was=live.listening;stopEngines();live.listening=false;micUI();if(was)startListen()},
  popout(){if(DESK)setDeskMode(deskMode==='widget'?'full':'widget');else popOut(false)},
  testpaw(){showPaw()},
  finishdraft(){const c=cur(),d=S.liveDraft;if(!c||!d)return;const ses={id:uid(),date:new Date(d.t0).toLocaleString(),hits:d.hits,lines:d.lines};c.sessions.push(ses);view.ses=c.sessions.length-1;S.liveDraft=null;save();view.sub='review';render();makeNotes(c,ses);genRecap(c,ses)},
  dropdraft(){S.liveDraft=null;save();render()},
  endlive(){const c=cur();if(!live)return;
   if(!live.lines.length&&!live.ack){live.ack=true;const w=$('#endwarn');if(w)w.innerHTML=`<div class="bubble">🐾 I haven't captured anything yet, so there'd be no notes. Type or dictate what you remember below — or tap <b>End class</b> again to finish without notes.</div>`;return}
-  clearTimeout(pawT);clearTimeout(pawCount);W.paw=false;if(rec){live.listening=false;try{rec.stop()}catch(e){}}
+  clearTimeout(pawT);clearTimeout(pawCount);W.paw=false;live.listening=false;stopEngines();micClose();
   const n=live.hits.length;addLog(c.id,(Date.now()-live.t0)/1000,'class',live.t0);
   const newSes={id:uid(),date:new Date().toLocaleString(),hits:live.hits,lines:live.lines};c.sessions.push(newSes);view.ses=c.sessions.length-1;
   setTimeout(()=>{makeNotes(c,newSes);genRecap(c,newSes)},0);

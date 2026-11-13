@@ -55,3 +55,6 @@ A daily affirmation, a mood check-in with a weekly mood strip, quick tools (brea
 1. GitHub repo, Settings, Pages, Build and deployment: Deploy from a branch.
 2. Pick the branch that holds `winston/` (this work is on `claude/modest-archimedes-a3823d`, or merge it into your default branch first) and the `/ (root)` folder, then Save.
 3. After a minute, open `https://miyagagne.github.io/Miya-s-Sandbox/winston/` (adjust if your repo name differs). In Chrome use the install icon in the address bar; on iPhone use Share, Add to Home Screen.
+
+## Microphone (Live Class)
+Winston opens your laptop's real microphone: pick the device, watch the live level meter, and see exactly what it hears. Speech becomes text in one of two ways: **Browser Speech** (Chrome/Edge's built-in service, sends audio to Google) or **On-Device Speech** (a small Whisper model that runs on your laptop; about 40 MB downloaded once, then private and offline). It switches to on-device automatically if the browser service is unavailable, and always works in the desktop widget. If the mic is blocked, the app says why and you can type or dictate instead.
