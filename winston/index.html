@@ -476,6 +476,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
+const APP_VERSION='2026-11-13.4 (dog-with-bubbles widget)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -885,6 +886,7 @@ function rSettings(){const u=S.user;
  <button class="p" data-a="savesettings" style="width:100%">Save</button></div>
  <div class="card"><h2>Study Reminders</h2><label>Daily Reminder Time</label><input id="rt" type="time" value="${esc(S.rem.time)}"><div class="row"><button class="s grow" data-a="remgcal">📅 Add To Google Calendar</button><button class="s grow" data-a="remics">⬇ Calendar File</button></div><div style="margin-top:8px"><span class="chip ${S.rem.notify?'on':''}" id="remn" data-a="remnotify">${S.rem.notify?'✓ ':''}Notify Me While The App Is Open</span></div><button class="p" data-a="remsave" style="width:100%;margin-top:8px">Save Time</button><p class="mute">Reminders repeat daily in your calendar. In-app alerts show when the app or floating widget is open; true background push notifications need a hosted version of the app.</p></div>
  ${DESK?'<div class="card" id="deskset"></div>':''}
+ <div class="card"><h2>About</h2><p class="mute">Version ${esc(APP_VERSION)}</p><button class="s" data-a="forceupdate" style="width:100%">🔄 Update Now (Clear Saved Copy)</button></div>
  <div class="card"><h2>Backup</h2><p class="mute">Move your streak, classes and notes between the web app and the desktop widget.</p><div class="row"><button class="s grow" data-a="exportdata">⬇ Export My Data</button><button class="s grow" data-a="importdata">⬆ Import My Data</button></div></div>
  <div class="card"><button class="${view.reset?'p bad':'s'}" data-a="resetall" style="width:100%">${view.reset?'Really erase everything?':'Erase everything & start over'}</button></div>`}
 ACTIONS.dsub=d=>{view.dsub=d.k;render()};
@@ -1336,6 +1338,7 @@ Object.assign(ACTIONS,{
  async dwpin(){if(!DESK)return;const st=await winstonDesktop.getSettings(),n=await winstonDesktop.setSettings({onTop:!st.onTop});toast(n.onTop?'Always on top: on 📌':'Always on top: off');deskUI()},
  async dwlogin(){const st=await winstonDesktop.getSettings();await winstonDesktop.setSettings({openAtLogin:!st.openAtLogin});deskUI()},
  async dwopacity(d,el){await winstonDesktop.setSettings({opacity:parseFloat(el&&el.value||1)})},
+ async forceupdate(){toast('Updating…');try{const rs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[];for(const r of rs)await r.unregister();if(window.caches){for(const k of await caches.keys())await caches.delete(k)}}catch(e){}location.href=location.pathname+'?v='+Date.now()},
  exportdata(){saveBlob('winston-data.json',new Blob([JSON.stringify(S)],{type:'application/json'})).then(()=>toast('Your data was exported. Keep it safe 💾'))},
  importdata(){const f=document.createElement('input');f.type='file';f.accept='.json';f.onchange=async()=>{try{const d=JSON.parse(await f.files[0].text());if(!d||d.v!==1||!Array.isArray(d.classes))throw 0;S=d;save();toast('Imported! Reloading…');setTimeout(()=>location.reload(),600)}catch(e){toast("That file isn't a Winston backup.")}};f.click()}});
 async function deskUI(){const box=$('#deskset');if(!box||!DESK)return;const st=await winstonDesktop.getSettings();
