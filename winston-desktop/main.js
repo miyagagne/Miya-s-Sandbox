@@ -3,11 +3,11 @@ const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, screen, nativeI
 const path = require('path');
 const fs = require('fs');
 
-const SIZES = { widget: { w: 340, h: 560 }, full: { w: 440, h: 860 } };
+const SIZES = { orb: { w: 112, h: 112 }, widget: { w: 340, h: 560 }, full: { w: 440, h: 860 } };
 let win = null;
 let tray = null;
 let quitting = false;
-let cfg = { mode: 'widget', onTop: true, opacity: 1, openAtLogin: false, bounds: {} };
+let cfg = { mode: 'orb', onTop: true, opacity: 1, openAtLogin: false, bounds: {} };
 
 const cfgFile = () => path.join(app.getPath('userData'), 'winston-settings.json');
 function loadCfg() { try { cfg = { ...cfg, ...JSON.parse(fs.readFileSync(cfgFile(), 'utf8')) }; } catch (e) { /* first run */ } }
@@ -74,7 +74,7 @@ function toggleShow() { if (!win) return; if (win.isVisible()) win.hide(); else 
 function buildTray() {
   const menu = Menu.buildFromTemplate([
     { label: win && win.isVisible() ? 'Hide Winston' : 'Show Winston', click: toggleShow },
-    { label: cfg.mode === 'widget' ? 'Open Full App' : 'Collapse To Widget', click: () => { win.webContents.executeJavaScript(`ACTIONS.${cfg.mode === 'widget' ? 'dwexpand' : 'dwcollapse'}()`); } },
+    ...[['orb', 'Floating Circle'], ['widget', 'Widget With Bubbles'], ['full', 'Full App']].map(([k, l]) => ({ label: l, type: 'radio', checked: cfg.mode === k, click: () => { win.webContents.executeJavaScript(`setDeskMode('${k}')`); } })),
     { type: 'separator' },
     { label: 'Always On Top', type: 'checkbox', checked: !!cfg.onTop, click: (i) => { cfg.onTop = i.checked; saveCfg(); applyTop(); } },
     { label: 'Start With My Computer', type: 'checkbox', checked: !!cfg.openAtLogin, click: (i) => { cfg.openAtLogin = i.checked; saveCfg(); app.setLoginItemSettings({ openAtLogin: i.checked }); } },
