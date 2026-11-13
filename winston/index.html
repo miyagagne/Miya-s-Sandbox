@@ -705,10 +705,10 @@ async function popOut(auto){if(pipWin)return;
  try{const w=await documentPictureInPicture.requestWindow({width:340,height:400});pipWin=w;
   document.querySelectorAll('link[rel=stylesheet]').forEach(l=>{const n=w.document.createElement('link');n.rel='stylesheet';n.href=l.href;w.document.head.append(n)});
   [...document.styleSheets].forEach(ss=>{try{const st=w.document.createElement('style');st.textContent=[...ss.cssRules].map(r=>r.cssText).join('');w.document.head.append(st)}catch(e){}});
-  w.document.body.style.margin='0';w.document.body.style.background='#fffaf0';w.document.body.append($('#defs').cloneNode(true));w.document.addEventListener('click',onClick);
+  w.document.body.style.margin='0';w.document.body.style.overflow='hidden';w.document.documentElement.style.overflow='hidden';w.document.body.style.background='#fffaf0';w.document.body.append($('#defs').cloneNode(true));w.document.addEventListener('click',onClick);
   w.setInterval(tickTimer,1000);   // this window's own clock, so timers keep ticking while the Winston tab is in the background
   W.popped=true;W.open=true;S.nextCheck=Date.now()+30*60000;w.document.body.append(WEL);
-  w.addEventListener('pagehide',()=>{W.popped=false;W.open=false;pipWin=null;document.body.append(WEL);drawWidget()});drawWidget();
+  w.addEventListener('pagehide',()=>{W.popped=false;W.open=false;pipWin=null;document.body.append(WEL);drawWidget()});W._lv=null;drawWidget();WEL.scrollTop=0;try{w.scrollTo(0,0)}catch(e){}
   if(auto)toast(`${DN()} is floating on your screen — he stays on top while you browse other tabs. Close the little window anytime.`)}
  catch(e){pipWin=null;if(!auto){const nm=e&&e.name;toast(nm==='NotAllowedError'||nm==='SecurityError'?`Chrome blocked the floating window here. Open this page in its own browser tab (not inside a chat) and tap Float again.`:`Could not float ${DN()} — tap the button again.`)}}}
 function tickWidget(){if(!S.user)return;if(Date.now()-(window.__remT||0)>30000){window.__remT=Date.now();remCheck()}
@@ -1418,7 +1418,7 @@ function burst(n=14,el){if(matchMedia('(prefers-reduced-motion: reduce)').matche
 S.classes.forEach(c=>c.sessions.forEach(x=>{if(x.aiState==='loading')x.aiState=''}));
 S.classes.forEach(ensure);
 (async()=>{try{AI.sm=window.claude&&claude.use?await claude.use('sample'):null}catch(e){AI.sm=null}try{AI.mcp=window.claude&&claude.use?await claude.use('mcp'):null}catch(e){AI.mcp=null}if((AI.sm||AI.mcp)&&S.user)render()})();
-if(!inFrame&&/^https?:/.test(location.protocol)){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest';document.head.append(l);if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{})}
+if(!inFrame&&/^https?:/.test(location.protocol)){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest';document.head.append(l);if('serviceWorker' in navigator){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!window.__rl){window.__rl=1;location.reload()}});navigator.serviceWorker.register('sw.js').catch(()=>{})}}
 if(DESK){const w=deskMode==='widget'&&!!S.user;if(!S.user)deskMode='full';winstonDesktop.setMode(deskMode);document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',deskMode==='full')}
 render();drawWidget();tickTimer();if(DESK&&deskMode==='widget')$('#intro').style.display='none';else showIntro();
 </script>
