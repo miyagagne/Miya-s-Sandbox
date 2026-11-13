@@ -35,3 +35,6 @@ Each class has a Materials tab with course-wide and weekly sections. Upload PDF,
 - **Daily Quests + Daily Chest:** finish today's goal, study 20 minutes, answer 10 questions, then open the chest for bonus coins.
 - **Ranks:** Pup Scholar up to Dean's List Legend as you level up.
 - **Share My Streak:** makes a postable picture of your dog, streak and stats (uses your device's share sheet, or downloads the PNG). **Invite A Friend** shares an invite message.
+
+## Motivation Hub (Boost Tab)
+A daily affirmation, a mood check-in with a weekly mood strip, quick tools (breathing, 5-4-3-2-1 grounding, talk it out, a memory game, a 25-minute focus session, 3 questions), **My Why** (your goals and reasons), a **Wins Wall** that earns coins, and **Milestones** badges for streaks and XP.

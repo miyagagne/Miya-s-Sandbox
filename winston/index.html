@@ -145,6 +145,9 @@ details>summary b::after{content:' ▾';color:var(--mute)}details[open]>summary 
 .chest{display:block;width:100%;border-radius:16px;border:3px dashed #f5b25a;background:#fff9e8;color:#a85a10;padding:10px;font:inherit;font-weight:700;text-align:center;margin-top:4px}
 .chest.ready{background:linear-gradient(#ffe08a,#ffb347);border:3px solid #d98a1b;color:#5a3300;animation:pulse2 1s infinite;cursor:pointer;box-shadow:0 4px 0 #d98a1b}.chest.open{border-style:solid;border-color:#7bd36a;background:#f1ffee;color:#2f7a38}
 .gear.l{left:10px;right:auto}
+.toolgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tool{background:var(--soft);border:2px solid #f6d57a;border-radius:16px;padding:10px 4px;font-size:26px;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}.tool span{font-size:12px;font-weight:700}
+.badges{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.bdg{text-align:center;background:#f4efe3;border-radius:14px;padding:8px 2px;opacity:.55}.bdg.on{background:#fff6cf;opacity:1;border:2px solid #f5b25a}.bdg b{font-size:24px;font-weight:400;display:block}.bdg span{font-size:11px;font-weight:600}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -292,7 +295,7 @@ function accIcon(id){return `<svg viewBox="${ICONVB[ACC[id].slot]}">${ACC[id].sv
 
 /* ======= navigation ======= */
 let tab='home',view={cls:null,sub:'live',ses:null,wk:'all',mwk:'course',delc:null,rmdoc:null},P=null,ob=1,obData={majors:'',minors:''};
-const TABS=[['home','🏠','Home'],['class','📚','Classes'],['practice','✏️','Practice'],['dog','🐶','My dog']];
+const TABS=[['home','🏠','Home'],['class','📚','Classes'],['practice','✏️','Practice'],['boost','💛','Boost'],['dog','🐶','My dog']];
 const ACTIONS={};
 function go(t){tab=t;P=null;render()}
 function refresh(){render(true);updateWidget()}
@@ -301,7 +304,7 @@ function render(keep){
  if(!S.user){n.style.display='none';return renderOnboard()}
  n.style.display='flex';
  n.innerHTML=TABS.map(([k,i,l])=>`<button data-a="tab" data-k="${k}" class="${k===tab?'on':''}"><b>${i}</b>${l}</button>`).join('');
- ({home:rHome,class:rClass,practice:rPractice,dog:rDog})[tab]();
+ ({home:rHome,class:rClass,practice:rPractice,boost:rBoost,dog:rDog})[tab]();
  if(Date.now()-joy<900)document.querySelectorAll('.dogwrap svg').forEach(x=>x.classList.add('hop'));
 }
 const classes=()=>S.classes;
@@ -590,7 +593,7 @@ Object.assign(ACTIONS,{
   if(d.k==='talk'){W.talk=''}
   drawWidget();if(d.k==='breathe')runWBreath()},
  wpet(){S.happy=Math.min(100,S.happy+1.5);W.cheerUntil=Date.now()+2200;W.msg=rnd(['Aww, that feels nice. 🐾','You\'re the best human! 💛','Pets make everything better.','*happy tail wag* 🐕']);save();drawWidget();wHearts()},
- wfeel(d){const k=d.k;W.msg='';
+ wfeel(d){const k=d.k;W.msg='';S.moodLog[todayIso()]=k;save();
   if(k==='bored'){W.msg='Bored? Let\'s do a quick flashcard!';ACTIONS.wview({k:'card'});return}
   if(k==='stressed'){ACTIONS.wview({k:'breathe'});return}
   if(k==='unmotivated'){ACTIONS.wview({k:'boost'});return}
@@ -815,7 +818,7 @@ const dayRec=()=>S.days[todayIso()]=S.days[todayIso()]||{};
 /* ---- feelings ---- */
 Object.assign(ACTIONS,{
  closemodal(){closeModal()},
- feel(d){S.checks++;save();const out=$('#feelout');
+ feel(d){S.checks++;S.moodLog[todayIso()]=d.k;save();const out=$('#feelout');
   if(d.k==='bored'){out.innerHTML=`<p class="bubble">🐶 Bored? Let's fix that! I made a little game out of YOUR study cards. Wanna play?</p><button class="p purple" data-a="opengame">🎮 Open the game</button>`}
   else{out.innerHTML='';({stressed:openBreath,unmotivated:openPep,okay:()=>openStart(false),sparked:()=>openStart(true)})[d.k]()}},
  opengame(){openGame()},gflip(d){gflip(+d.k)},gagain(){openGame()}});
@@ -1113,6 +1116,42 @@ Object.assign(ACTIONS,{
    await saveBlob('my-study-streak.png',blob);toast('Saved! Post it and tag a friend 🔥')}catch(e){toast('Could not make the card — try again')}},
  async invite(){const text=inviteText();try{if(navigator.share){await navigator.share({text,url:location.href});return}}catch(e){if(e&&e.name==='AbortError')return}
    try{await navigator.clipboard.writeText(text+' '+location.href);toast('Invite copied — paste it to a friend!')}catch(e){toast('Copy this to share: '+text)}}});
+
+/* ======= motivation hub ======= */
+S.why=S.why||[];S.wins=S.wins||[];S.moodLog=S.moodLog||{};
+const AFFIRM=["{n}, you're doing better than you think.","Small steps still move you forward.","You've handled hard things before — you can handle this.","Your effort today is a gift to future you.","You don't have to be perfect. You just have to begin.","You are allowed to rest and still be proud of yourself.","Every question you answer makes the next one easier.","You belong here, and you are going to do great.","Be as kind to yourself as you'd be to a friend.","Consistency beats intensity. Show up today."];
+const affirmToday=()=>{const d=Math.floor(Date.now()/864e5),a=AFFIRM[d%AFFIRM.length].replace('{n}',S.user.name);return S.user.goals&&d%3===0?`${a} Remember why: ${S.user.goals}`:a};
+function badges(){const st=Math.max(S.best||0,streakDays());S.best=st;const chest=Object.values(S.days||{}).some(v=>v&&v.chest);
+ return [['🔥','3-Day Streak',st>=3],['🔥','7-Day Streak',st>=7],['🔥','14-Day Streak',st>=14],['🏆','30-Day Streak',st>=30],['⭐','100 XP',S.earned>=100],['🌟','500 XP',S.earned>=500],['🎉','5 Wins Logged',S.wins.length>=5],['🎁','Daily Chest',chest]]}
+function rBoost(){const wk=[...Array(7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);const k=isoD(d),m=S.moodLog[k];return [DAYN[d.getDay()],m?(MOODS.find(x=>x[1]===m)||['·'])[0]:'·']});
+ $('#main').innerHTML=`<div class="card"><h2>Motivation Hub</h2><p class="bubble" style="font-size:16px">💛 ${esc(affirmToday())}</p>
+ <h3>How Are You Feeling?</h3><div class="moods">${MOODS.map(m=>`<button class="mood" data-a="feel" data-k="${m[1]}"><b>${m[0]}</b><span>${m[1]}</span></button>`).join('')}</div><div id="feelout"></div>
+ <div class="row" style="margin-top:10px"><button class="p purple grow" data-a="pepopen">💛 Hype Me Up</button></div></div>
+ <div class="card"><h3>Quick Tools</h3><div class="toolgrid">
+ <button class="tool" data-a="tbreathe">🌬️<span>Breathe</span></button><button class="tool" data-a="ground">🖐️<span>5-4-3-2-1</span></button><button class="tool" data-a="mtalk">💭<span>Talk It Out</span></button>
+ <button class="tool" data-a="opengame">🎮<span>Play A Game</span></button><button class="tool" data-a="openfocus">⏱<span>Focus 25</span></button><button class="tool" data-a="tiny">✏️<span>3 Questions</span></button></div></div>
+ <div class="card"><h3>My Why</h3><textarea id="hg" placeholder="Why are you studying? What do you want your life to look like?" style="min-height:70px">${esc(S.user.goals||'')}</textarea><button class="s" data-a="savewhy">Save</button>
+ ${S.why.map(w=>`<div class="item"><div>💛 ${esc(w.text)}</div><button class="s" data-a="delwhy" data-k="${w.id}">✕</button></div>`).join('')}
+ <div class="row" style="margin-top:8px"><input id="nw" class="grow" style="margin:0" placeholder="Add a reason you're doing this…"><button class="p" data-a="addwhy">Add</button></div></div>
+ <div class="card"><h3>Wins Wall</h3><div class="row"><input id="wn" class="grow" style="margin:0" placeholder="Log a win — big or small 🎉"><button class="p" data-a="addwin">Celebrate</button></div>
+ ${S.wins.slice(0,6).map(w=>`<div class="item"><div>🎉 ${esc(w.text)}<div class="mute">${esc(w.date)}</div></div></div>`).join('')||'<p class="mute">Your wins will live here. Finished an assignment? Understood a concept? Log it.</p>'}<p class="mute">${S.wins.length} win${S.wins.length===1?'':'s'} so far</p></div>
+ <div class="card"><h3>Milestones</h3><div class="badges">${badges().map(b=>`<div class="bdg ${b[2]?'on':''}"><b>${b[2]?b[0]:'🔒'}</b><span>${b[1]}</span></div>`).join('')}</div></div>
+ <div class="card"><h3>This Week's Moods</h3><div class="row" style="justify-content:space-between">${wk.map(d=>`<div style="text-align:center"><div style="font-size:24px">${d[1]}</div><div class="mute" style="font-size:11px">${d[0]}</div></div>`).join('')}</div></div>`}
+function supportReply(t,cb){if(/suicid|kill myself|end my life|self[- ]?harm|hurt myself|don'?t want to (live|be here)/i.test(t))return Promise.resolve(`I'm really glad you told me. You matter, ${S.user.name}. Please reach out to someone who can help right now: in the US you can call or text 988 (Suicide & Crisis Lifeline), or contact your campus counseling center or local emergency number. If you're in immediate danger, call emergency services. I'm right here with you. 💛`);
+ if(!AI.sm)return Promise.resolve(canned());
+ return AI.sm(`${persona()}\n\nThe student is feeling stressed or low about school. Reply as a calm, caring study therapy dog: validate their feeling in one sentence, then give ONE tiny, concrete next step (under 2 minutes), then one warm closing line. Max 70 words, no lists, no medical advice.\nStudent (${S.user.name}) says: ${t}`,{cache:false,onText:({text})=>cb&&cb(text)}).then(r=>r.text).catch(()=>canned())}
+const GROUND=['Name 5 things you can SEE around you.','Name 4 things you can TOUCH. Feel their texture.','Name 3 things you can HEAR right now.','Name 2 things you can SMELL (or like the smell of).','Name 1 thing you can TASTE — or take one slow sip of water.'];
+Object.assign(ACTIONS,{
+ pepopen(){openPep()},tbreathe(){openBreath()},
+ ground(){view.gi=0;paintGround(true)},gnext(){view.gi++;paintGround(false)},
+ mtalk(){openModal(`<h2>Talk It Out 💭</h2><p class="mute">Tell ${esc(DN())} what's on your mind. No judgment.</p><textarea id="mt" placeholder="Stressed, stuck, tired, worried…" style="min-height:90px"></textarea><button class="p" data-a="msend" style="width:100%">Tell ${esc(DN())}</button><div id="mtout"></div>`)},
+ async msend(){const t=($('#mt')||{}).value;if(!t||!t.trim())return;const o=$('#mtout');o.innerHTML='<p class="bubble">🐾 Listening…</p>';const r=await supportReply(t,x=>{if($('#mtout'))$('#mtout').innerHTML=`<p class="bubble">🐶 ${esc(x)}</p>`});if($('#mtout'))$('#mtout').innerHTML=`<p class="bubble">🐶 ${esc(r)}</p><div class="row"><button class="s" data-a="tbreathe">Breathe Together</button><button class="s" data-a="ground">Try 5-4-3-2-1</button></div>`},
+ savewhy(){S.user.goals=$('#hg').value.trim();save();toast('Saved! I\'ll remind you 💛')},
+ addwhy(){const t=($('#nw')||{}).value.trim();if(!t)return;S.why.push({id:uid(),text:t.slice(0,120)});save();render()},
+ delwhy(d){S.why=S.why.filter(w=>w.id!==d.k);save();render()},
+ addwin(){const t=($('#wn')||{}).value.trim();if(!t)return toast('What did you win today?');S.wins.unshift({id:uid(),text:t.slice(0,120),date:new Date().toLocaleDateString()});const r=dayRec();r.wins=(r.wins||0)+1;save();W.cheerUntil=Date.now()+3000;burst(30);render();if(r.wins<=3)earn(1,'for celebrating a win 🎉');else toast('Win logged! 🎉')}});
+function paintGround(first){const i=view.gi;if(first)openModal('<div id="gbody"></div>','calm');const b=$('#gbody');if(!b)return;
+ b.innerHTML=i>=GROUND.length?`<h2>You're Grounded 💙</h2><div class="dogwrap">${dog(S.eq,'calm')}</div><p class="bubble">Nice work. Notice how your body feels now. You've got this.</p><button class="p" data-a="closemodal" style="width:100%">Thanks, ${esc(DN())}</button>`:`<h2>5-4-3-2-1 Grounding</h2><div class="mute">Step ${i+1} of 5</div><p class="bubble" style="font-size:18px">${esc(GROUND[i])}</p><button class="p purple" data-a="gnext" style="width:100%">${i<4?'Done — Next':'Finish'}</button>`}
 
 /* ---- intro screen ---- */
 function showIntro(){const el=$('#intro'),u=S.user;let title,sub;
