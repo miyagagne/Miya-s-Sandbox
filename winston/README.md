@@ -29,3 +29,9 @@ Each class has a Materials tab with course-wide and weekly sections. Upload PDF,
 - **Practice:** quiz yourself on one class or all of them.
 - **My dog:** shop, friends and settings.
 - **Floating widget:** the 🪟 button on Home (or auto on open) pops Winston into a small always-on-top window that stays visible over Brightspace, Google and other tabs (desktop Chrome or Edge). Keep the Winston tab open.
+
+## Growth And Habit Features
+- **Title Case** everywhere (headings, buttons, tabs), e.g. "Welcome Back".
+- **Daily Quests + Daily Chest:** finish today's goal, study 20 minutes, answer 10 questions, then open the chest for bonus coins.
+- **Ranks:** Pup Scholar up to Dean's List Legend as you level up.
+- **Share My Streak:** makes a postable picture of your dog, streak and stats (uses your device's share sheet, or downloads the PNG). **Invite A Friend** shares an invite message.

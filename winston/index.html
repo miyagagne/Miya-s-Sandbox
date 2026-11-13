@@ -141,6 +141,10 @@ body.live{padding-bottom:340px}
 .classcard{cursor:pointer}.classcard:hover{border-color:var(--brand2)}
 details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-marker{display:none}details[open]>summary{margin-bottom:8px}
 details>summary b::after{content:' ▾';color:var(--mute)}details[open]>summary b::after{content:' ▴'}
+.quest{background:#fff;border:2px solid #f3e1bd;border-radius:14px;padding:8px 12px;margin-bottom:8px}.quest.done{border-color:#7bd36a;background:#f1ffee}.quest[data-a]{cursor:pointer}
+.chest{display:block;width:100%;border-radius:16px;border:3px dashed #f5b25a;background:#fff9e8;color:#a85a10;padding:10px;font:inherit;font-weight:700;text-align:center;margin-top:4px}
+.chest.ready{background:linear-gradient(#ffe08a,#ffb347);border:3px solid #d98a1b;color:#5a3300;animation:pulse2 1s infinite;cursor:pointer;box-shadow:0 4px 0 #d98a1b}.chest.open{border-style:solid;border-color:#7bd36a;background:#f1ffee;color:#2f7a38}
+.gear.l{left:10px;right:auto}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -203,7 +207,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('
 (function decay(){const h=(Date.now()-S.tick)/36e5;S.happy=Math.max(15,Math.min(S.happy,100)-h*1.5);S.tick=Date.now();save()})();
 
 const lvl=()=>Math.floor(Math.sqrt(S.earned/15))+1;
-function earn(n,why){const before=lvl();S.coins+=n;S.earned+=n;try{dayRec().act=1}catch(e){}S.happy=Math.min(100,S.happy+n*1.5);save();
+function earn(n,why){const before=lvl();S.coins+=n;S.earned+=n;try{dayRec().act=1;if(why==='correct!'||why==='you worked it out!')dayRec().qa=(dayRec().qa||0)+1}catch(e){}S.happy=Math.min(100,S.happy+n*1.5);save();
  toast(`+${n} 🪙 ${why}`);if(lvl()>before)setTimeout(()=>{toast(`🎉 Level ${lvl()}! Winston is so proud!`);burst(44)},2700);refresh();joy=Date.now();setTimeout(()=>burst(8+Math.min(n,8)),80)}
 const mood=()=>S.happy>=65?'happy':S.happy>=35?'ok':'sad';
 
@@ -332,18 +336,14 @@ const MOODS=[['😴','bored','bored'],['😫','stressed','stressed'],['😶','un
 function rHome(){
  const u=S.user,L=lvl(),lo=15*(L-1)**2,hi=15*L*L,pct=Math.round((S.earned-lo)/(hi-lo)*100),g=goalToday(),up=upcoming(1,14)[0],t=S.timer,tc=t&&S.classes.find(x=>x.id===t.cls);
  const wk=S.classes.reduce((a,c)=>a+weekSecs(c),0),goal=S.classes.reduce((a,c)=>a+c.goalMin*60,0);
- $('#main').innerHTML=`<div class="card dogwrap"><button class="gear" data-a="popout" aria-label="Float on my screen" title="Float ${esc(DN())} on my screen">🪟</button>
+ $('#main').innerHTML=`<div class="card dogwrap"><button class="gear l" data-a="sharecard" aria-label="Share my streak" title="Share my streak">📤</button><button class="gear" data-a="popout" aria-label="Float on my screen" title="Float ${esc(DN())} on my screen">🪟</button>
  <div class="dogwrap stage">${dog(S.eq,mood())}</div>
- <h2>${esc(DN())} · Level ${L}</h2>
+ <h2>${esc(DN())} · Level ${L}</h2><div class="mute" style="margin:-4px 0 8px">${rank(L)}</div>
  <div class="stats"><span class="stat">🪙 ${S.coins}</span><span class="stat">🔥 ${streakDays()}</span><span class="stat">❤️ ${Math.round(S.happy)}%</span></div>
  <div class="bar" style="margin:10px 0 4px"><i style="width:${pct}%"></i></div><div class="mute">${hi-S.earned} XP to level ${L+1}</div>
  <p class="bubble">${esc(mood()==='sad'?'I miss you! Studying together makes me happy 🥺':smartMsg())}</p></div>
  <div class="row" style="margin-bottom:14px">${t?'':'<button class="p grow" data-a="openfocus">⏱ Focus</button>'}<button class="p ${t?'':'purple '}grow" data-a="tab" data-k="class">🎙 Start class</button></div>
- <div class="card"><h3>Today</h3>
- ${t?`<div class="row" style="margin-bottom:8px"><div class="grow"><div class="mute">${t.target?'Focus':'Studying'} · ${esc(tc?tc.name:'')}</div><div class="tmv" style="font:600 28px var(--display)">${wClock()}</div></div><button class="p bad" data-a="stoptimer">■ Stop</button></div>`:''}
- ${g?`<div class="wgoal ${g.done?'done':''}" data-a="goaltoggle" style="margin:0 0 8px">${g.done?'✅':'⬜'} ${esc(g.text)}</div>`:`<div class="row" style="margin-bottom:8px"><input id="tg" class="grow" style="margin:0" placeholder="🎯 Today's goal — e.g. finish chapter 3 notes"><button class="p" data-a="goalset">Set</button></div>`}
- ${up?`<div class="item"><i class="dot" style="background:${EVT[up.type][1]}"></i><div><b>${esc(up.title)}</b> <span class="mute">· ${esc(up.cls)} · ${when(up)}</span></div></div>`:''}
- ${goal?`<div class="row" style="justify-content:space-between;margin-top:8px"><span class="mute">This week</span><span class="mute">${fmtDur(wk)} / ${fmtDur(goal)}</span></div><div class="bar"><i style="width:${Math.min(100,Math.round(wk/goal*100))}%"></i></div>`:''}</div>
+ ${questsCard()}
  <div class="card"><h3>How are you feeling?</h3><div class="moods">${MOODS.map(m=>`<button class="mood" data-a="feel" data-k="${m[1]}"><b>${m[0]}</b><span>${m[1]}</span></button>`).join('')}</div><div id="feelout"></div></div>`}
 function openFocus(){if(!S.classes.length){toast('Add a class first');tab='class';render();return}
  openModal(`<h2>⏱ Focus session</h2><p class="mute">Pick a class and a length. ${esc(DN())} will cheer you on.</p><select id="fcls">${S.classes.map(c=>`<option value="${c.id}" ${view.tcls===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select><div>${[15,25,45,0].map(m=>`<span class="chip ${(view.fm===undefined?25:view.fm)===m?'on':''}" data-a="fmpick" data-k="${m}">${m?m+' min':'No limit'}</span>`).join('')}</div><button class="p" data-a="fgo" style="width:100%;margin-top:8px">▶ Start</button>`)}
@@ -745,7 +745,8 @@ Object.assign(ACTIONS,{
 /* ======= friends ======= */
 const myCode=()=>btoa(unescape(encodeURIComponent(JSON.stringify({n:S.user.name,d:DN(),l:lvl(),h:Math.round(S.happy),e:S.eq}))));
 function rFriends(){
- MAIN().innerHTML=`<div class="card"><h2>Your friend code</h2><p class="mute">Send this to a friend. They paste it below to see Winston in his latest outfit.</p><textarea readonly id="mc" style="min-height:70px">${myCode()}</textarea><button class="s" data-a="copy">Copy</button></div>
+ MAIN().innerHTML=`<div class="card"><h2>Invite Friends</h2><p class="mute">Studying is better together. Share your streak card or send an invite.</p><div class="row"><button class="p grow" data-a="invite">📨 Invite A Friend</button><button class="s grow" data-a="sharecard">📤 Share My Streak</button></div></div>
+ <div class="card"><h2>Your friend code</h2><p class="mute">Send this to a friend. They paste it below to see Winston in his latest outfit.</p><textarea readonly id="mc" style="min-height:70px">${myCode()}</textarea><button class="s" data-a="copy">Copy</button></div>
  <div class="card"><h2>Add a friend</h2><textarea id="fc" placeholder="Paste a friend code"></textarea><button class="p" data-a="addf">Add friend</button>
  <p class="mute">Heads up: codes are a snapshot. Live updating and friend requests need an online account (the Supabase setup used elsewhere in this repo) — a good next step.</p></div>
  <div class="shopgrid">${S.friends.map((f,i)=>`<div class="card"><div class="dogwrap">${dog(f.e,f.h>=65?'happy':f.h>=35?'ok':'sad')}</div><b>${esc(f.d||'Winston')}​</b><div class="mute">${esc(f.n)}'s pup</div><div class="mute">Level ${f.l} · ❤️ ${f.h}%</div><button class="s" data-a="delf" data-k="${i}">Remove</button></div>`).join('')}</div>`}
@@ -1061,10 +1062,62 @@ Object.assign(ACTIONS,{
  async orgscratch(){const c=cur();if(!c.scratch.length)return;const lines=c.scratch.map(x=>x.text),ses={id:uid(),date:new Date().toLocaleString(),hits:[],lines,typed:true};c.scratch=[];c.sessions.push(ses);save();await makeNotes(c,ses);render()},
  delscratch(d){const c=cur();c.scratch=c.scratch.filter(x=>x.id!==d.k);save();render()}});
 
+/* ======= v4: title case, daily quests, ranks, share card ======= */
+const SMALLW=new Set('a an the and or but nor of to in on at by for vs with from as per via'.split(' '));
+function tc(str){const parts=str.split(/(\s+)/),n=parts.filter(x=>x.trim()).length;let i=0;
+ return parts.map(t=>{if(!t.trim())return t;i++;return t.split('-').map((q,j)=>{const m=q.match(/^([^A-Za-z]*)([A-Za-z][\s\S]*)$/);if(!m)return q;const pre=m[1],rest=m[2];
+  if(/\d/.test(rest))return q;if(rest.length>1&&rest===rest.toUpperCase())return q;
+  if(i>1&&i<n&&j===0&&SMALLW.has(rest.toLowerCase().replace(/[^a-z]/g,''))&&rest===rest.toLowerCase())return q;
+  return pre+rest[0].toUpperCase()+rest.slice(1)}).join('-')}).join('')}
+const TC_SEL='h1,h2,h3,summary b,nav button,.tabs button,button.p,button.s';
+function tcNode(el){for(const n of el.childNodes){if(n.nodeType===3){const v=tc(n.nodeValue);if(v!==n.nodeValue)n.nodeValue=v}}}
+new MutationObserver(ms=>{for(const m of ms){m.addedNodes.forEach(n=>{if(n.nodeType!==1)return;if(n.matches&&n.matches(TC_SEL))tcNode(n);if(n.querySelectorAll)n.querySelectorAll(TC_SEL).forEach(tcNode)});
+ const el=m.target.nodeType===1?m.target:m.target.parentElement,h=el&&el.closest&&el.closest(TC_SEL);if(h)tcNode(h)}}).observe(document.body,{childList:true,subtree:true});
+document.querySelectorAll(TC_SEL).forEach(tcNode);
+
+const RANKS=['Pup Scholar','Study Sidekick','Focus Fetcher','Flashcard Hero','Exam Champion',"Dean's List Legend"];
+const rank=L=>RANKS[Math.min(RANKS.length-1,Math.floor((L-1)/3))];
+function todayMins(){const a=new Date();a.setHours(0,0,0,0);return (S.logs.filter(l=>l.start>=a.getTime()).reduce((x,l)=>x+l.secs,0)+(S.timer?(Date.now()-S.timer.start)/1000:0))/60}
+function quests(){const r=dayRec(),g=goalToday(),mins=Math.floor(todayMins()),qa=(r.qa||0)+(r.cards||0);
+ return [{k:'goal',icon:'🎯',t:"Finish Today's Goal",done:!!(g&&g.done),v:g&&g.done?1:0,max:1},
+  {k:'time',icon:'⏱',t:'Study 20 Minutes',done:mins>=20,v:Math.min(20,mins),max:20},
+  {k:'qa',icon:'✏️',t:'Answer 10 Questions',done:qa>=10,v:Math.min(10,qa),max:10}]}
+function questsCard(){const qs=quests(),r=dayRec(),g=goalToday(),all=qs.every(q=>q.done),t=S.timer,tc2=t&&S.classes.find(x=>x.id===t.cls),up=upcoming(1,14)[0];
+ return `<div class="card"><h3>Today's Quests</h3>
+ ${t?`<div class="row" style="margin-bottom:8px"><div class="grow"><div class="mute">${t.target?'Focus':'Studying'} · ${esc(tc2?tc2.name:'')}</div><div class="tmv" style="font:600 28px var(--display)">${wClock()}</div></div><button class="p bad" data-a="stoptimer">■ Stop</button></div>`:''}
+ ${qs.map(q=>q.k==='goal'&&!g?`<div class="row" style="margin-bottom:8px"><input id="tg" class="grow" style="margin:0" placeholder="🎯 Set today's goal — e.g. finish chapter 3"><button class="p" data-a="goalset">Set</button></div>`
+  :`<div class="quest ${q.done?'done':''}" ${q.k==='goal'?'data-a="goaltoggle"':''}><div class="row" style="justify-content:space-between"><span>${q.done?'✅':q.icon} ${q.k==='goal'?esc(g.text):q.t}</span>${q.k==='goal'?'':`<span class="mute">${q.v}/${q.max}</span>`}</div>${q.k==='goal'?'':`<div class="bar" style="height:10px"><i style="width:${Math.round(q.v/q.max*100)}%"></i></div>`}</div>`).join('')}
+ ${r.chest?'<div class="chest open">🎁 Daily Chest Opened — See You Tomorrow!</div>':`<button class="chest ${all?'ready':''}" data-a="chest" ${all?'':'disabled'}>🎁 ${all?'Open Your Daily Chest!':'Finish All 3 To Unlock The Daily Chest'}</button>`}
+ ${up?`<div class="item" style="margin-top:8px"><i class="dot" style="background:${EVT[up.type][1]}"></i><div><b>${esc(up.title)}</b> <span class="mute">· ${esc(up.cls)} · ${when(up)}</span></div></div>`:''}</div>`}
+Object.assign(ACTIONS,{chest(){const r=dayRec();if(r.chest||!quests().every(q=>q.done))return;r.chest=1;save();W.cheerUntil=Date.now()+4000;burst(60);render();earn(10,'daily chest! 🎁')}});
+/* share card: a picture worth posting */
+async function makeShareCard(){const cv=document.createElement('canvas');cv.width=1080;cv.height=1350;const g=cv.getContext('2d'),st=streakDays(),L=lvl(),wk=Math.round(S.classes.reduce((a,c)=>a+weekSecs(c),0)/60);
+ const sky=g.createLinearGradient(0,0,0,1350);sky.addColorStop(0,'#7fd3ff');sky.addColorStop(.6,'#c4ecff');sky.addColorStop(1,'#fff4d4');g.fillStyle=sky;g.fillRect(0,0,1080,1350);
+ g.fillStyle='#82d672';g.beginPath();g.moveTo(0,1020);g.quadraticCurveTo(300,920,620,1010);g.quadraticCurveTo(900,1080,1080,980);g.lineTo(1080,1350);g.lineTo(0,1350);g.fill();
+ g.fillStyle='#5fc255';g.beginPath();g.moveTo(0,1130);g.quadraticCurveTo(400,1060,760,1140);g.quadraticCurveTo(940,1170,1080,1120);g.lineTo(1080,1350);g.lineTo(0,1350);g.fill();
+ let svg=dog(S.eq,'cheer').replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" ').replace(/(<svg[^>]*>)/,'$1'+$('#defs').innerHTML);
+ const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)});
+ g.drawImage(img,180,330,720,720);g.textAlign='center';g.fillStyle='#4a3426';
+ g.font='700 70px Fredoka,system-ui,sans-serif';g.fillText(`${S.user.name}'s Study Streak`,540,130);
+ g.fillStyle='#ff6a2b';g.font='700 140px Fredoka,system-ui,sans-serif';g.fillText(`🔥 ${st} Day${st===1?'':'s'}`,540,290);
+ g.fillStyle='#fff';g.strokeStyle='#ffb3d1';g.lineWidth=6;[[`Level ${L}`,190],[rank(L),540],[`${wk} Min This Week`,890]].forEach(([t,x],i)=>{const w=i===1?330:300;g.beginPath();g.roundRect(x-w/2,1180,w,84,42);g.fill();g.stroke()});
+ g.fillStyle='#4a3426';g.font='600 34px Fredoka,system-ui,sans-serif';[[`Level ${L}`,190],[rank(L),540],[`${wk} Min This Week`,890]].forEach(([t,x])=>g.fillText(t,x,1233));
+ g.font='600 36px Fredoka,system-ui,sans-serif';g.fillText(`Studying with ${DN()} 🐶`,540,1310);
+ return new Promise(r=>cv.toBlob(r,'image/png'))}
+async function saveBlob(name,blob){try{const dl=window.claude&&claude.use?await claude.use('downloads'):null;if(dl){await dl.save({filename:name,data:blob});return}}catch(e){if(e&&e.code==='declined')return}
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click()}
+const inviteText=()=>`I'm studying with ${DN()}, my study buddy dog 🐶 — ${streakDays()}-day streak and counting! Join me:`;
+Object.assign(ACTIONS,{
+ async sharecard(){toast('Making your streak card…');try{const blob=await makeShareCard(),f=new File([blob],'my-study-streak.png',{type:'image/png'});
+   try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],text:inviteText(),url:location.href});return}}catch(e){if(e&&e.name==='AbortError')return}
+   await saveBlob('my-study-streak.png',blob);toast('Saved! Post it and tag a friend 🔥')}catch(e){toast('Could not make the card — try again')}},
+ async invite(){const text=inviteText();try{if(navigator.share){await navigator.share({text,url:location.href});return}}catch(e){if(e&&e.name==='AbortError')return}
+   try{await navigator.clipboard.writeText(text+' '+location.href);toast('Invite copied — paste it to a friend!')}catch(e){toast('Copy this to share: '+text)}}});
+
 /* ---- intro screen ---- */
 function showIntro(){const el=$('#intro'),u=S.user;let title,sub;
  if(u){const wk=S.classes.reduce((a,c)=>a+weekSecs(c),0),up=upcoming(1,14)[0];title=`Welcome back, ${esc(u.name)}!`;sub=`${esc(DN())} missed you! ${wk>60?`You've studied ${fmtDur(wk)} this week. `:''}${up?`Next up: ${esc(up.title)} (${esc(up.cls)}) ${when(up)}.`:'Ready to learn something fun today?'}`}
- else{title="Hi, I'm Winston!";sub="Your study buddy. Let's make studying fun — and a lot less scary."}
+ else{title="Hi, I'm Winston!";sub="Your study buddy dog. Studying is better with a friend."}
  el.innerHTML=`<h1 class="sign">${title}</h1>${dog(u?S.eq:{},'cheer')}<p style="max-width:340px;font-size:17px">${sub}</p><button class="p" data-a="intro" style="font-size:20px;padding:12px 30px;margin-top:6px">Let's go! 🐾</button>`;
  el.className='';el.style.display='flex';setTimeout(()=>burst(14,el.querySelector('svg')),500)}
 ACTIONS.intro=()=>{const el=$('#intro');el.classList.add('out');setTimeout(()=>{el.style.display='none'},650);if(S.user&&!(S.pref&&S.pref.autoFloat===false))popOut(true)};
