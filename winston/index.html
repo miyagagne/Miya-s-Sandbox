@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#bfeaff">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#68cdfd">
+<meta name="apple-mobile-web-app-title" content="Winston"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Poppins:wght@600;700&family=Instrument+Sans:wght@400;500;600&display=swap">
@@ -209,6 +211,24 @@ html[data-theme=dark] nav{background:rgba(38,32,56,.93);border-color:#4d4170}htm
 html[data-theme=dark] .sign{background:#2e2745;border-color:#5f4f86;color:var(--ink)}
 html[data-theme=dark] .card{border-color:#5f4f86;box-shadow:0 5px 0 rgba(120,90,170,.35),0 12px 22px rgba(0,0,0,.4)}html[data-theme=dark] .p{background:#4f9a6c;box-shadow:none}html[data-theme=dark] .stat{background:#1f1a30;border-color:#4d4170}html[data-theme=dark] .chip,html[data-theme=dark] .mood,html[data-theme=dark] .tool{background:#3a3152;border-color:#5a4a7e}html[data-theme=dark] nav{border-color:#4d4170;box-shadow:0 8px 20px rgba(0,0,0,.4)}html[data-theme=dark] nav button.on{background:#3a3152;color:#f4ebdd}html[data-theme=dark] .sign{background:#3a3152;border-color:#8a6fd0;color:#ffd9a0;box-shadow:none}html[data-theme=dark] .bubble,html[data-theme=dark] .quest{border-color:#4d4170}html[data-theme=dark] .p.purple{background:#d4809b}html[data-theme=dark] .p.bad{background:#c76565}
 html[data-theme=dark] #widget{border-color:#4d4170}html[data-theme=dark] .sbub{border-color:#4d4170}
+
+/* ---- polish: glass, motion, desktop ---- */
+.card{background:rgba(255,255,255,.74);-webkit-backdrop-filter:blur(16px) saturate(1.25);backdrop-filter:blur(16px) saturate(1.25);border:1.5px solid rgba(255,255,255,.9);box-shadow:0 10px 38px rgba(50,110,170,.17),inset 0 1px 0 rgba(255,255,255,.95)}
+html[data-theme=dark] .card{background:rgba(40,33,64,.72);border-color:rgba(255,255,255,.14);box-shadow:0 10px 38px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.08)}
+.p{font-size:16px;letter-spacing:.2px;padding:12px 20px}.p:hover{transform:translateY(-1px)}
+.stage{background:radial-gradient(circle at 50% 46%,rgba(255,232,150,.6),rgba(255,232,150,0) 64%)}
+html[data-theme=dark] .stage{background:radial-gradient(circle at 50% 46%,rgba(150,120,255,.3),rgba(150,120,255,0) 64%)}
+.greet{font-family:var(--display);font-size:15px;color:var(--mute);text-align:center;margin:0 0 2px;letter-spacing:.3px}
+.bar i{animation:grow .9s cubic-bezier(.2,.8,.3,1)}@keyframes grow{from{width:0!important}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+main.enter>*{animation:rise .55s cubic-bezier(.2,.8,.3,1) both}main.enter>:nth-child(2){animation-delay:.07s}main.enter>:nth-child(3){animation-delay:.14s}main.enter>:nth-child(4){animation-delay:.21s}main.enter>:nth-child(n+5){animation-delay:.28s}
+nav{bottom:calc(10px + env(safe-area-inset-bottom))}
+body{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.instcard{background:rgba(255,255,255,.6);border:1.5px solid #cfe6e2;border-radius:18px;padding:12px;margin:6px 0 10px}
+html[data-theme=dark] .instcard{background:rgba(255,255,255,.06);border-color:#4d4170}
+@media(min-width:900px){main{max-width:780px;padding:34px 14px}.dogwrap svg{max-width:340px}nav{max-width:560px}h2{font-size:24px}}
+@media(prefers-reduced-motion:reduce){main.enter>*,.bar i{animation:none}}
+#toast{background:rgba(45,38,60,.92);border:0;box-shadow:0 8px 24px rgba(0,0,0,.25);text-shadow:none;font-size:14px;padding:9px 16px;border-radius:16px;top:calc(12px + env(safe-area-inset-top));max-width:min(92vw,440px);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -384,7 +404,7 @@ function accIcon(id){return `<svg viewBox="${ICONVB[ACC[id].slot]}">${ACC[id].sv
 let tab='home',view={cls:null,sub:'live',ses:null,wk:'all',mwk:'course',delc:null,rmdoc:null},P=null,ob=1,obData={majors:'',minors:''};
 const TABS=[['home','🏠','Home'],['class','📚','Classes'],['practice','✏️','Practice'],['boost','💛','Boost'],['dog','🐶','My dog']];
 const ACTIONS={};
-function go(t){tab=t;P=null;render()}
+function go(t){tab=t;P=null;const m=$('#main');if(m){m.classList.remove('enter');void m.offsetWidth;m.classList.add('enter')}render()}
 function refresh(){render(true);updateWidget()}
 function render(keep){
  const n=$('#nav');
@@ -423,12 +443,13 @@ Object.assign(ACTIONS,{
 
 /* ======= home ======= */
 const MOODS=[['😴','bored','bored'],['😫','stressed','stressed'],['😶','unmotivated','unmotivated'],['🙂','okay','okay — let\'s get started'],['🔥','sparked','sparked!']];
+function greeting(){const h=new Date().getHours();return h<5?'Still Up':h<12?'Good Morning':h<17?'Good Afternoon':'Good Evening'}
 function rHome(){
  const u=S.user,L=lvl(),lo=15*(L-1)**2,hi=15*L*L,pct=Math.round((S.earned-lo)/(hi-lo)*100),g=goalToday(),up=upcoming(1,14)[0],t=S.timer,tc=t&&S.classes.find(x=>x.id===t.cls);
  const wk=S.classes.reduce((a,c)=>a+weekSecs(c),0),goal=S.classes.reduce((a,c)=>a+c.goalMin*60,0);
  $('#main').innerHTML=`<div class="card dogwrap"><button class="gear l" data-a="sharecard" aria-label="Share my streak" title="Share my streak">📤</button><button class="gear" data-a="popout" aria-label="Float on my screen" title="Float ${esc(DN())} on my screen">🪟</button>
  <div class="dogwrap stage">${dog(S.eq,mood())}</div>
- <h2>${esc(DN())} · Level ${L}</h2><div class="mute" style="margin:-4px 0 8px">${rank(L)}</div>
+ <div class="greet">${greeting()}, ${esc(u.name)}</div><h2>${esc(DN())} · Level ${L}</h2><div class="mute" style="margin:-4px 0 8px">${rank(L)}</div>
  <div class="stats"><span class="stat">🪙 ${S.coins}</span><span class="stat">🔥 ${streakDays()}</span><span class="stat">❤️ ${Math.round(S.happy)}%</span></div>
  <div class="bar" style="margin:10px 0 4px"><i style="width:${pct}%"></i></div><div class="mute">${hi-S.earned} XP to level ${L+1}</div>
  <p class="bubble">${esc(mood()==='sad'?'I miss you! Studying together makes me happy 🥺':smartMsg())}</p></div>
@@ -533,7 +554,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-13.14 (bright & happy)';
+const APP_VERSION='2026-11-13.15 (premium glass, installable)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -940,12 +961,18 @@ Object.assign(ACTIONS,{
 });
 
 /* ======= shop ======= */
+
+let deferredInstall=null;addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;const b=$('#instbtn');if(b)b.textContent='⬇ Install Winston'});
+const isStandalone=()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone}catch(e){return false}};
+function installCard(){if(DESK||isStandalone())return '';const site='https://miyagagne.github.io/Miya-s-Sandbox/winston/';
+ return `<label style="display:block;margin-top:6px">Get The App</label><div class="instcard">${inFrame?`<p class="mute" style="margin:0">To put ${esc(DN())} on your phone or computer, open the Winston website and install it from there:<br><b>${site}</b></p>`:`<button class="p" id="instbtn" data-a="install" style="width:100%">⬇ Install ${esc(DN())}</button><p class="mute" style="margin:8px 0 0"><b>iPhone:</b> Safari → Share → Add To Home Screen<br><b>Android:</b> Chrome ⋮ → Install App<br><b>Computer:</b> Chrome or Edge → install icon in the address bar</p>`}</div>`}
 function rDog(){const sub=view.dsub||'shop';
  $('#main').innerHTML=`<div class="tabs">${[['shop','🛍️ Shop'],['friends','👥 Friends'],['me','⚙️ Settings']].map(([k,l])=>`<button data-a="dsub" data-k="${k}" class="${k===sub?'on':''}">${l}</button>`).join('')}</div><div id="dsub"></div>`;
  mainT=$('#dsub');try{({shop:rShop,friends:rFriends,me:rSettings})[sub]()}finally{mainT=null}
  if(sub==='me'&&DESK)deskUI()}
 function rSettings(){const u=S.user;
  MAIN().innerHTML=`<div class="card"><h2>Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea>
+ ${installCard()}
  <label style="display:block;margin-top:6px">Look</label><div class="themeopts">${[['auto','🖥 Auto'],['light','☀️ Light'],['dark','🌙 Dark']].map(([k,l])=>`<span class="chip thm ${(S.pref.theme||'auto')===k?'on':''}" data-a="theme" data-k="${k}">${l}</span>`).join('')}</div>
  <label style="display:block;margin-top:6px">Floating widget</label><div><span class="chip ${S.pref.autoFloat===false?'':'on'}" id="autof" data-a="toggleauto">${S.pref.autoFloat===false?'':'✓ '}Float ${esc(DN())} on my screen when I open the app</span></div><p class="mute" style="margin-top:0">Works in desktop Chrome or Edge. He stays on top of Brightspace, Google and other tabs.</p>
  <button class="p" data-a="savesettings" style="width:100%">Save</button></div>
@@ -1442,6 +1469,7 @@ function showIntro(){const el=$('#intro'),u=S.user;let title,sub;
  else{title="Hi, I'm Winston!";sub="Your study buddy dog. Studying is better with a friend."}
  el.innerHTML=`<h1 class="sign">${title}</h1>${dog(u?S.eq:{},'cheer')}<p style="max-width:340px;font-size:17px">${sub}</p><button class="p" data-a="intro" style="font-size:20px;padding:12px 30px;margin-top:6px">Let's go! 🐾</button>`;
  el.className='';el.style.display='flex';setTimeout(()=>burst(14,el.querySelector('svg')),500)}
+ACTIONS.install=async()=>{if(deferredInstall){deferredInstall.prompt();try{await deferredInstall.userChoice}catch(e){}deferredInstall=null}else toast('Use your browser menu: Share → Add To Home Screen (iPhone) or ⋮ → Install App (Android/Chrome)')};
 ACTIONS.theme=d=>{S.pref.theme=d.k;save();applyTheme()};
 ACTIONS.intro=()=>{const el=$('#intro');el.classList.add('out');setTimeout(()=>{el.style.display='none'},650);if(S.user&&!DESK&&!(S.pref&&S.pref.autoFloat===false))popOut(true)};
 
@@ -1480,6 +1508,7 @@ function burst(n=14,el){if(matchMedia('(prefers-reduced-motion: reduce)').matche
    const mx=W*.84,my=H*.11,mg=g.createRadialGradient(mx,my,0,mx,my,H*.2);mg.addColorStop(0,'rgba(255,250,215,.5)');mg.addColorStop(1,'rgba(255,250,215,0)');g.fillStyle=mg;g.fillRect(0,0,W,H);g.fillStyle='#fff7d6';g.beginPath();g.arc(mx,my,26*D,0,TAU);g.fill();g.fillStyle='#0b1330';g.beginPath();g.arc(mx+11*D,my-5*D,22*D,0,TAU);g.fill();g.fillStyle='rgba(255,247,214,.0)';
    hill(FAR);hill(MID);hill(NEAR);for(const s of stamps){g.fillStyle=`rgba(255,111,168,${Math.max(0,s.a)})`;paw(s.x,s.y,s.s,s.rot)}return}
   const sk=g.createLinearGradient(0,0,0,H);sk.addColorStop(0,'#68cdfd');sk.addColorStop(.55,'#b9e9ff');sk.addColorStop(.88,'#fff4cf');g.fillStyle=sk;g.fillRect(0,0,W,H);
+  {const hg=g.createRadialGradient(W*.5,H*.82,0,W*.5,H*.82,W*.8);hg.addColorStop(0,'rgba(255,214,160,.45)');hg.addColorStop(1,'rgba(255,214,160,0)');g.fillStyle=hg;g.fillRect(0,0,W,H)}
   const sx=W*.86,sy=H*.11,sg=g.createRadialGradient(sx,sy,0,sx,sy,H*.3);sg.addColorStop(0,'rgba(255,246,176,.9)');sg.addColorStop(.35,'rgba(255,240,150,.3)');sg.addColorStop(1,'rgba(255,240,150,0)');g.fillStyle=sg;g.fillRect(0,0,W,H);
   
   
