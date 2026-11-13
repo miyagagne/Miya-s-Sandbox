@@ -117,7 +117,7 @@ a{color:#c4691a;font-weight:600}
 #widget.show{display:block}
 #widget.mini{width:auto;max-height:none;overflow:visible;padding:0;border:0;background:none;box-shadow:none}
 body.live{padding-bottom:340px}
-.wbtn{width:76px;height:76px;border-radius:50%;border:4px solid #49c6bd;background:radial-gradient(circle,#fffdf5,#e8f8f6);box-shadow:0 4px 0 #2a9d97,0 8px 16px rgba(0,0,0,.25);padding:0;overflow:hidden;cursor:pointer;display:block}
+.wbtn{width:92px;height:92px;border:0;background:none;filter:drop-shadow(0 6px 5px rgba(60,40,10,.3));padding:0;overflow:visible;cursor:pointer;display:block}
 .wbtn svg{width:100%;height:100%;display:block}
 .wcap{position:absolute;right:84px;bottom:6px;width:max-content;max-width:190px;background:#fff;border:2px solid #49c6bd;border-radius:14px;padding:5px 9px;font-size:12px;box-shadow:0 3px 0 #2a9d97;color:var(--ink)}
 #widget.pip{position:relative;width:100%;max-height:none;height:100vh;min-height:0;box-sizing:border-box;border-radius:0;border:0;box-shadow:none;display:block;overflow:auto}
@@ -156,8 +156,8 @@ html.wm,body.wm{background:transparent}
 body.wm{padding:0;overflow:hidden;min-height:0}
 body.wm #main,body.wm nav,body.wm #timerchip,body.wm #bg,body.wm #intro,body.wm #modal{display:none!important}
 #widget.orb{position:fixed;left:0;top:0;right:0;bottom:0;width:auto;max-height:none;overflow:visible;padding:0;border:0;background:none;box-shadow:none;display:flex;align-items:center;justify-content:center}
-.orbring{width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,#fffdf5,#e8f8f6);border:5px solid #49c6bd;box-shadow:0 4px 0 #2a9d97,0 8px 14px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center;-webkit-app-region:drag;cursor:grab;position:relative}
-.orbbtn{width:76px;height:76px;border:0;border-radius:50%;padding:0;background:none;overflow:hidden;-webkit-app-region:no-drag;cursor:pointer}.orbbtn svg{width:100%;height:100%;display:block}
+.orbring{width:104px;height:104px;display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.orbbtn{width:104px;height:104px;border:0;padding:0;background:none;cursor:pointer;pointer-events:none;filter:drop-shadow(0 6px 5px rgba(60,40,10,.35))}.orbbtn svg{width:100%;height:100%;display:block;animation:bob 3.2s ease-in-out infinite}
 .orbbtn.alert{animation:pulse2 1s infinite}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
@@ -484,7 +484,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-13.8 (desktop floating circle)';
+const APP_VERSION='2026-11-13.9 (just the dog)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -621,7 +621,7 @@ const wClock=()=>{const t=S.timer;if(!t)return'';const el=(Date.now()-t.start)/1
 function drawWidget(){
  if(!S.user){WEL.className='';WEL.innerHTML='';document.body.classList.remove('live');return}
 
- if(DESK&&deskMode==='orb'){WEL.className='orb show';WEL.innerHTML=`<div class="orbring"><button class="orbbtn${W.paw?' alert':''}" data-a="dworb" title="Open ${esc(DN())}" aria-label="Open ${esc(DN())}">${dog(S.eq,dogMood(),'28 8 144 150')}</button></div>`;return}
+ if(DESK&&deskMode==='orb'){WEL.className='orb show';WEL.innerHTML=`<div class="orbring"><div class="orbbtn${W.paw?' alert':''}" title="Open ${esc(DN())}" aria-label="Open ${esc(DN())}">${dog(S.eq,dogMood(),'28 8 144 150')}</div></div>`;return}
  const desk=DESK&&deskMode==='widget',open=W.popped||W.open||desk;W.drawn=Date.now();
  document.body.classList.toggle('live',!!(open&&!W.popped&&innerWidth>=700));
  if(W.msg!==W._lm){W._lm=W.msg;W.msgAt=Date.now()}
@@ -1343,6 +1343,10 @@ Object.assign(ACTIONS,{
 /* ======= v7: desktop widget mode ======= */
 function setDeskMode(m){if(!DESK)return;deskMode=m;winstonDesktop.setMode(m);const w=m==='widget'||m==='orb';document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',!w);
  if(!w){const i=$('#intro');if(i)i.style.display='none'}drawWidget();if(!w)render()}
+(function(){let d=null;
+ document.addEventListener('pointerdown',e=>{const o=e.target.closest&&e.target.closest('.orbring');if(!o||!DESK)return;d={x:e.screenX,y:e.screenY,moved:false};try{o.setPointerCapture(e.pointerId)}catch(_){}},true);
+ document.addEventListener('pointermove',e=>{if(!d)return;const dx=e.screenX-d.x,dy=e.screenY-d.y;if(!d.moved&&Math.abs(dx)+Math.abs(dy)<5)return;d.moved=true;d.x=e.screenX;d.y=e.screenY;winstonDesktop.moveBy(dx,dy)},true);
+ document.addEventListener('pointerup',()=>{if(!d)return;const m=d.moved;d=null;if(!m)ACTIONS.dworb()},true)})();
 Object.assign(ACTIONS,{
  dwexpand(){setDeskMode('full')},dwcollapse(){setDeskMode('orb')},dworb(){setDeskMode('widget')},dwhide(){if(DESK)winstonDesktop.hide()},
  async dwpin(){if(!DESK)return;const st=await winstonDesktop.getSettings(),n=await winstonDesktop.setSettings({onTop:!st.onTop});toast(n.onTop?'Always on top: on 📌':'Always on top: off');deskUI()},

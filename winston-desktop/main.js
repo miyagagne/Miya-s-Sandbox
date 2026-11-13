@@ -94,6 +94,7 @@ function createTray() {
 }
 
 ipcMain.on('mode', (e, m) => setMode(m));
+ipcMain.on('moveby', (e, dx, dy) => { if (!win || !Number.isFinite(dx) || !Number.isFinite(dy)) return; const b = win.getBounds(); win.setPosition(Math.round(b.x + dx), Math.round(b.y + dy)); cfg.bounds[cfg.mode] = { x: Math.round(b.x + dx), y: Math.round(b.y + dy) }; });
 ipcMain.on('hide', () => { if (win) win.hide(); });
 ipcMain.on('quit', () => { quitting = true; app.quit(); });
 ipcMain.handle('get-settings', () => ({ onTop: cfg.onTop, opacity: cfg.opacity, openAtLogin: cfg.openAtLogin, mode: cfg.mode }));
