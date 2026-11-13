@@ -58,3 +58,8 @@ A daily affirmation, a mood check-in with a weekly mood strip, quick tools (brea
 
 ## Microphone (Live Class)
 Winston opens your laptop's real microphone: pick the device, watch the live level meter, and see exactly what it hears. Speech becomes text in one of two ways: **Browser Speech** (Chrome/Edge's built-in service, sends audio to Google) or **On-Device Speech** (a small Whisper model that runs on your laptop; about 40 MB downloaded once, then private and offline). It switches to on-device automatically if the browser service is unavailable, and always works in the desktop widget. If the mic is blocked, the app says why and you can type or dictate instead.
+
+## Class Summary And Notes
+- After class, the recap is a short **bullet-point summary** of what the teacher said (key points, topics from your materials, dates and to-dos, your own notes, a quick self-check), whether or not you uploaded study cards. Filler words and repeats are removed.
+- The **Notes** use the same structure and are readable (headings and bullets). Tap **Edit** to change them as simple text (`#` title, `##` headings, `-` bullets); edited notes can be saved to Google Docs again.
+- The floating widget shows Winston on the left with speech bubbles beside him. The **high paw** pops up as a bubble with a countdown while he waves his paw; catch it for 4 coins, miss it and he gets a little sad.
