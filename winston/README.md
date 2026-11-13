@@ -38,3 +38,9 @@ Each class has a Materials tab with course-wide and weekly sections. Upload PDF,
 
 ## Motivation Hub (Boost Tab)
 A daily affirmation, a mood check-in with a weekly mood strip, quick tools (breathing, 5-4-3-2-1 grounding, talk it out, a memory game, a 25-minute focus session, 3 questions), **My Why** (your goals and reasons), a **Wins Wall** that earns coins, and **Milestones** badges for streaks and XP.
+
+## Leaderboard, Reminders, Social Sharing
+- **Leaderboard** (My Dog → Friends): ranks you and your friends by weekly study minutes or streak. Friends appear when they send you a friend code; a fresh code updates their numbers (codes older than a week are marked "Old Code"). Live auto-sync would need an online account system (the Supabase setup in this repo is the natural next step).
+- **Reminders** (My Dog → Settings): pick a time, then add a daily repeating reminder to Google Calendar or download a calendar file (.ics) for Apple/Outlook. "Notify Me While The App Is Open" shows an alert (and a browser notification if allowed) when you haven't studied yet today. True background push notifications need a hosted app plus a push server.
+- **Install As An App:** when hosted over HTTPS (for example GitHub Pages, folder `/winston/`), the page registers `manifest.webmanifest` and `sw.js`, so it can be added to your home screen and works offline.
+- **Social Sharing:** Share My Streak, Instagram Story and TikTok make a 1080x1920 story image of your dog and stats. If your device has a share sheet, you pick the app; otherwise the image is saved, the caption is copied, and Instagram or TikTok opens. Web pages cannot post straight into those apps.

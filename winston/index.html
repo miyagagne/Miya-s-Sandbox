@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#bfeaff">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Instrument+Sans:wght@400;500;600&display=swap">
 <title>Winston Study Buddy</title>
@@ -627,7 +628,7 @@ async function popOut(auto){if(pipWin)return;
   w.addEventListener('pagehide',()=>{W.popped=false;W.open=false;pipWin=null;document.body.append(WEL);drawWidget()});drawWidget();
   if(auto)toast(`${DN()} is floating on your screen — he stays on top while you browse other tabs. Close the little window anytime.`)}
  catch(e){pipWin=null;if(!auto){const nm=e&&e.name;toast(nm==='NotAllowedError'||nm==='SecurityError'?`Chrome blocked the floating window here. Open this page in its own browser tab (not inside a chat) and tap Float again.`:`Could not float ${DN()} — tap the button again.`)}}}
-function tickWidget(){if(!S.user)return;
+function tickWidget(){if(!S.user)return;if(Date.now()-(window.__remT||0)>30000){window.__remT=Date.now();remCheck()}
  if(W.popped&&!live&&!S.timer&&W.view==='home'&&S.nextCheck&&Date.now()>S.nextCheck){S.nextCheck=Date.now()+50*60000;W.view='mood';W.msg='Hey, how are you doing? Just checking in on you. 💛';drawWidget();return}
  if(W.view==='home'&&!W.msg&&!W.paw&&Date.now()-W.drawn>60000&&(W.open||W.popped))drawWidget()}
 
@@ -746,9 +747,9 @@ Object.assign(ACTIONS,{
 });
 
 /* ======= friends ======= */
-const myCode=()=>btoa(unescape(encodeURIComponent(JSON.stringify({n:S.user.name,d:DN(),l:lvl(),h:Math.round(S.happy),e:S.eq}))));
+const myCode=()=>btoa(unescape(encodeURIComponent(JSON.stringify({n:S.user.name,d:DN(),l:lvl(),w:weekMins(),s:streakDays(),t:Date.now(),h:Math.round(S.happy),e:S.eq}))));
 function rFriends(){
- MAIN().innerHTML=`<div class="card"><h2>Invite Friends</h2><p class="mute">Studying is better together. Share your streak card or send an invite.</p><div class="row"><button class="p grow" data-a="invite">📨 Invite A Friend</button><button class="s grow" data-a="sharecard">📤 Share My Streak</button></div></div>
+ MAIN().innerHTML=`${lbCard()}<div class="card"><h2>Invite Friends</h2><p class="mute">Studying is better together. Share your streak card or send an invite.</p><div class="row"><button class="p grow" data-a="invite">📨 Invite A Friend</button><button class="s grow" data-a="sharecard">📤 Share My Streak</button></div><div class="row" style="margin-top:8px"><button class="s grow" data-a="shareig">📸 Instagram Story</button><button class="s grow" data-a="sharett">🎵 TikTok</button></div></div>
  <div class="card"><h2>Your friend code</h2><p class="mute">Send this to a friend. They paste it below to see Winston in his latest outfit.</p><textarea readonly id="mc" style="min-height:70px">${myCode()}</textarea><button class="s" data-a="copy">Copy</button></div>
  <div class="card"><h2>Add a friend</h2><textarea id="fc" placeholder="Paste a friend code"></textarea><button class="p" data-a="addf">Add friend</button>
  <p class="mute">Heads up: codes are a snapshot. Live updating and friend requests need an online account (the Supabase setup used elsewhere in this repo) — a good next step.</p></div>
@@ -767,6 +768,7 @@ function rSettings(){const u=S.user;
  MAIN().innerHTML=`<div class="card"><h2>Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea>
  <label style="display:block;margin-top:6px">Floating widget</label><div><span class="chip ${S.pref.autoFloat===false?'':'on'}" id="autof" data-a="toggleauto">${S.pref.autoFloat===false?'':'✓ '}Float ${esc(DN())} on my screen when I open the app</span></div><p class="mute" style="margin-top:0">Works in desktop Chrome or Edge. He stays on top of Brightspace, Google and other tabs.</p>
  <button class="p" data-a="savesettings" style="width:100%">Save</button></div>
+ <div class="card"><h2>Study Reminders</h2><label>Daily Reminder Time</label><input id="rt" type="time" value="${esc(S.rem.time)}"><div class="row"><button class="s grow" data-a="remgcal">📅 Add To Google Calendar</button><button class="s grow" data-a="remics">⬇ Calendar File</button></div><div style="margin-top:8px"><span class="chip ${S.rem.notify?'on':''}" id="remn" data-a="remnotify">${S.rem.notify?'✓ ':''}Notify Me While The App Is Open</span></div><button class="p" data-a="remsave" style="width:100%;margin-top:8px">Save Time</button><p class="mute">Reminders repeat daily in your calendar. In-app alerts show when the app or floating widget is open; true background push notifications need a hosted version of the app.</p></div>
  <div class="card"><button class="${view.reset?'p bad':'s'}" data-a="resetall" style="width:100%">${view.reset?'Really erase everything?':'Erase everything & start over'}</button></div>`}
 ACTIONS.dsub=d=>{view.dsub=d.k;render()};
 function rShop(){
@@ -1094,18 +1096,18 @@ function questsCard(){const qs=quests(),r=dayRec(),g=goalToday(),all=qs.every(q=
  ${up?`<div class="item" style="margin-top:8px"><i class="dot" style="background:${EVT[up.type][1]}"></i><div><b>${esc(up.title)}</b> <span class="mute">· ${esc(up.cls)} · ${when(up)}</span></div></div>`:''}</div>`}
 Object.assign(ACTIONS,{chest(){const r=dayRec();if(r.chest||!quests().every(q=>q.done))return;r.chest=1;save();W.cheerUntil=Date.now()+4000;burst(60);render();earn(10,'daily chest! 🎁')}});
 /* share card: a picture worth posting */
-async function makeShareCard(){const cv=document.createElement('canvas');cv.width=1080;cv.height=1350;const g=cv.getContext('2d'),st=streakDays(),L=lvl(),wk=Math.round(S.classes.reduce((a,c)=>a+weekSecs(c),0)/60);
- const sky=g.createLinearGradient(0,0,0,1350);sky.addColorStop(0,'#7fd3ff');sky.addColorStop(.6,'#c4ecff');sky.addColorStop(1,'#fff4d4');g.fillStyle=sky;g.fillRect(0,0,1080,1350);
- g.fillStyle='#82d672';g.beginPath();g.moveTo(0,1020);g.quadraticCurveTo(300,920,620,1010);g.quadraticCurveTo(900,1080,1080,980);g.lineTo(1080,1350);g.lineTo(0,1350);g.fill();
- g.fillStyle='#5fc255';g.beginPath();g.moveTo(0,1130);g.quadraticCurveTo(400,1060,760,1140);g.quadraticCurveTo(940,1170,1080,1120);g.lineTo(1080,1350);g.lineTo(0,1350);g.fill();
+async function makeShareCard(story){const H=story?1920:1350,oy=story?285:0,cv=document.createElement('canvas');cv.width=1080;cv.height=H;const g=cv.getContext('2d'),st=streakDays(),L=lvl(),wk=weekMins();
+ const sky=g.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#7fd3ff');sky.addColorStop(.6,'#c4ecff');sky.addColorStop(1,'#fff4d4');g.fillStyle=sky;g.fillRect(0,0,1080,H);
+ g.fillStyle='#82d672';g.beginPath();g.moveTo(0,1020+oy);g.quadraticCurveTo(300,920+oy,620,1010+oy);g.quadraticCurveTo(900,1080+oy,1080,980+oy);g.lineTo(1080,H);g.lineTo(0,H);g.fill();
+ g.fillStyle='#5fc255';g.beginPath();g.moveTo(0,1130+oy);g.quadraticCurveTo(400,1060+oy,760,1140+oy);g.quadraticCurveTo(940,1170+oy,1080,1120+oy);g.lineTo(1080,H);g.lineTo(0,H);g.fill();
  let svg=dog(S.eq,'cheer').replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" ').replace(/(<svg[^>]*>)/,'$1'+$('#defs').innerHTML);
  const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)});
- g.drawImage(img,180,330,720,720);g.textAlign='center';g.fillStyle='#4a3426';
- g.font='700 70px Fredoka,system-ui,sans-serif';g.fillText(`${S.user.name}'s Study Streak`,540,130);
- g.fillStyle='#ff6a2b';g.font='700 140px Fredoka,system-ui,sans-serif';g.fillText(`🔥 ${st} Day${st===1?'':'s'}`,540,290);
- g.fillStyle='#fff';g.strokeStyle='#ffb3d1';g.lineWidth=6;[[`Level ${L}`,190],[rank(L),540],[`${wk} Min This Week`,890]].forEach(([t,x],i)=>{const w=i===1?330:300;g.beginPath();g.roundRect(x-w/2,1180,w,84,42);g.fill();g.stroke()});
- g.fillStyle='#4a3426';g.font='600 34px Fredoka,system-ui,sans-serif';[[`Level ${L}`,190],[rank(L),540],[`${wk} Min This Week`,890]].forEach(([t,x])=>g.fillText(t,x,1233));
- g.font='600 36px Fredoka,system-ui,sans-serif';g.fillText(`Studying with ${DN()} 🐶`,540,1310);
+ g.drawImage(img,180,330+oy,720,720);g.textAlign='center';g.fillStyle='#4a3426';
+ g.font='700 70px Fredoka,system-ui,sans-serif';g.fillText(`${S.user.name}'s Study Streak`,540,130+oy);
+ g.fillStyle='#ff6a2b';g.font='700 140px Fredoka,system-ui,sans-serif';g.fillText(`🔥 ${st} Day${st===1?'':'s'}`,540,290+oy);
+ const pills=[[`Level ${L}`,190],[rank(L),540],[`${wk} Min This Week`,890]];g.fillStyle='#fff';g.strokeStyle='#ffb3d1';g.lineWidth=6;pills.forEach(([t,x],i)=>{const w=i===1?330:300;g.beginPath();g.roundRect(x-w/2,1180+oy,w,84,42);g.fill();g.stroke()});
+ g.fillStyle='#4a3426';g.font='600 34px Fredoka,system-ui,sans-serif';pills.forEach(([t,x])=>g.fillText(t,x,1233+oy));
+ g.font='600 36px Fredoka,system-ui,sans-serif';g.fillText(`Studying with ${DN()} 🐶`,540,1310+oy);
  return new Promise(r=>cv.toBlob(r,'image/png'))}
 async function saveBlob(name,blob){try{const dl=window.claude&&claude.use?await claude.use('downloads'):null;if(dl){await dl.save({filename:name,data:blob});return}}catch(e){if(e&&e.code==='declined')return}
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click()}
@@ -1152,6 +1154,39 @@ Object.assign(ACTIONS,{
  addwin(){const t=($('#wn')||{}).value.trim();if(!t)return toast('What did you win today?');S.wins.unshift({id:uid(),text:t.slice(0,120),date:new Date().toLocaleDateString()});const r=dayRec();r.wins=(r.wins||0)+1;save();W.cheerUntil=Date.now()+3000;burst(30);render();if(r.wins<=3)earn(1,'for celebrating a win 🎉');else toast('Win logged! 🎉')}});
 function paintGround(first){const i=view.gi;if(first)openModal('<div id="gbody"></div>','calm');const b=$('#gbody');if(!b)return;
  b.innerHTML=i>=GROUND.length?`<h2>You're Grounded 💙</h2><div class="dogwrap">${dog(S.eq,'calm')}</div><p class="bubble">Nice work. Notice how your body feels now. You've got this.</p><button class="p" data-a="closemodal" style="width:100%">Thanks, ${esc(DN())}</button>`:`<h2>5-4-3-2-1 Grounding</h2><div class="mute">Step ${i+1} of 5</div><p class="bubble" style="font-size:18px">${esc(GROUND[i])}</p><button class="p purple" data-a="gnext" style="width:100%">${i<4?'Done — Next':'Finish'}</button>`}
+
+/* ======= v5: leaderboard, reminders, social share ======= */
+S.rem=S.rem||{time:'19:00',notify:false};
+const weekMins=()=>Math.round(S.classes.reduce((a,c)=>a+weekSecs(c),0)/60);
+function lbCard(){const m=view.lb||'w',me={n:S.user.name,d:DN(),w:weekMins(),s:streakDays(),me:1};
+ const rows=[me,...S.friends.map(f=>({...f,stale:f.t&&Date.now()-f.t>7*864e5}))].sort((a,b)=>(b[m]||0)-(a[m]||0));
+ return `<div class="card"><h2>Leaderboard</h2><div class="tabs">${[['w','Study Minutes'],['s','Streak']].map(([k,l])=>`<button data-a="lbmode" data-k="${k}" class="${k===m?'on':''}">${l}</button>`).join('')}</div>
+ ${rows.map((r,i)=>`<div class="item"><b style="width:30px;font-size:20px">${['🥇','🥈','🥉'][i]||i+1}</b><div class="grow"><b>${esc(r.d||'Winston')}​</b> <span class="mute">${esc(r.n)}${r.me?' (You)':''}</span>${r.stale?' <span class="mute">· Old Code</span>':''}</div><b>${m==='w'?(r.w||0)+' Min':(r.s||0)+' 🔥'}</b></div>`).join('')}
+ <p class="mute">Friends update when they send you a fresh code. Add friends below to compete!</p></div>`}
+const icsDate=d=>`${d.getFullYear()}${pad2(d.getMonth()+1)}${pad2(d.getDate())}T${pad2(d.getHours())}${pad2(d.getMinutes())}00`;
+function remStart(){const [h,m]=S.rem.time.split(':').map(Number),d=new Date();d.setHours(h,m,0,0);if(d<new Date())d.setDate(d.getDate()+1);return d}
+function gcalUrl(){const a=remStart(),b=new Date(a.getTime()+15*60000);return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(`Study With ${DN()} 🐶`)+'&details='+encodeURIComponent('Your streak is waiting! Open Winston and do one small thing.')+`&dates=${icsDate(a)}/${icsDate(b)}&recur=RRULE:FREQ=DAILY`}
+function icsText(){const a=remStart(),b=new Date(a.getTime()+15*60000);return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Winston//Study Reminder//EN','BEGIN:VEVENT','UID:winston-daily-'+Date.now()+'@winston','DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z','DTSTART:'+icsDate(a),'DTEND:'+icsDate(b),'RRULE:FREQ=DAILY',`SUMMARY:Study With ${DN()}`,'DESCRIPTION:Your streak is waiting! Open Winston and do one small thing.','BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:Study time!','TRIGGER:-PT0M','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n')}
+function remCheck(){if(!S.rem)return;const now=new Date(),hm=pad2(now.getHours())+':'+pad2(now.getMinutes());if(hm<S.rem.time)return;const r=dayRec();if(r.act||r.remDone)return;
+ const day0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();if(S.logs.some(l=>l.start>=day0))return;
+ r.remDone=1;save();const st=streakDays(),msg=st?`Your ${st}-day streak is waiting! One small session keeps it alive. 🔥`:`Time to study with ${DN()}! One small step counts. 🐾`;
+ W.msg=msg;W.cheerUntil=Date.now()+3000;drawWidget();toast(msg);
+ if(S.rem.notify&&window.Notification&&Notification.permission==='granted')try{new Notification(`${DN()} misses you!`,{body:msg})}catch(e){}}
+async function shareSocial(app){toast('Making your story card…');
+ try{const blob=await makeShareCard(true),f=new File([blob],'winston-story.png',{type:'image/png'}),cap=inviteText()+' #studywithme #studytok';
+  try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],text:cap});return}}catch(e){if(e&&e.name==='AbortError')return}
+  await saveBlob('winston-story.png',blob);try{await navigator.clipboard.writeText(cap)}catch(e){}
+  toast(`Saved + caption copied! Opening ${app==='ig'?'Instagram':'TikTok'}…`);setTimeout(()=>{window.open(app==='ig'?'https://www.instagram.com/':'https://www.tiktok.com/upload','_blank')},900)}
+ catch(e){toast('Could not make the card — try again')}}
+Object.assign(ACTIONS,{
+ lbmode(d){view.lb=d.k;render()},
+ shareig(){shareSocial('ig')},sharett(){shareSocial('tt')},
+ remsave(){const v=($('#rt')||{}).value;if(v)S.rem.time=v;save();toast('Reminder time saved ⏰')},
+ remgcal(){const v=($('#rt')||{}).value;if(v){S.rem.time=v;save()}const u=gcalUrl();const w=window.open(u,'_blank');if(!w){try{navigator.clipboard.writeText(u)}catch(e){}toast('Popup blocked — link copied. Paste it in a new tab.')}},
+ async remics(){const v=($('#rt')||{}).value;if(v){S.rem.time=v;save()}await saveBlob('study-reminder.ics',new Blob([icsText()],{type:'text/calendar'}));toast('Calendar file ready — open it to add the daily reminder 📅')},
+ remnotify(){if(!window.Notification){toast('This browser doesn\'t support notifications.');return}
+  if(S.rem.notify){S.rem.notify=false;save();const c=$('#remn');if(c){c.classList.remove('on');c.textContent='Notify Me While The App Is Open'}return}
+  Notification.requestPermission().then(p=>{S.rem.notify=p==='granted';save();const c=$('#remn');if(c){c.classList.toggle('on',S.rem.notify);c.textContent=(S.rem.notify?'✓ ':'')+'Notify Me While The App Is Open'}toast(S.rem.notify?'Notifications on! 🔔':'Notifications are blocked in this browser.')}).catch(()=>toast('Could not turn on notifications.'))}});
 
 /* ---- intro screen ---- */
 function showIntro(){const el=$('#intro'),u=S.user;let title,sub;
@@ -1207,6 +1242,7 @@ function burst(n=14,el){if(matchMedia('(prefers-reduced-motion: reduce)').matche
 S.classes.forEach(c=>c.sessions.forEach(x=>{if(x.aiState==='loading')x.aiState=''}));
 S.classes.forEach(ensure);
 (async()=>{try{AI.sm=window.claude&&claude.use?await claude.use('sample'):null}catch(e){AI.sm=null}try{AI.mcp=window.claude&&claude.use?await claude.use('mcp'):null}catch(e){AI.mcp=null}if((AI.sm||AI.mcp)&&S.user)render()})();
+if(!inFrame&&/^https?:/.test(location.protocol)){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest';document.head.append(l);if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{})}
 render();drawWidget();tickTimer();showIntro();
 </script>
 </body>
