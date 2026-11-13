@@ -747,8 +747,8 @@ Object.assign(ACTIONS,{
 });
 
 /* ======= friends ======= */
-const myCode=()=>btoa(unescape(encodeURIComponent(JSON.stringify({n:S.user.name,d:DN(),l:lvl(),w:weekMins(),s:streakDays(),t:Date.now(),h:Math.round(S.happy),e:S.eq}))));
-function rFriends(){
+const myCode=()=>btoa(unescape(encodeURIComponent(JSON.stringify({n:S.user.name,d:DN(),l:lvl(),w:weekMins(),s:streakDays(),t:Date.now(),u:S.live&&S.live.on?S.live.uid:undefined,h:Math.round(S.happy),e:S.eq}))));
+function rFriends(){liveKick();
  MAIN().innerHTML=`${lbCard()}<div class="card"><h2>Invite Friends</h2><p class="mute">Studying is better together. Share your streak card or send an invite.</p><div class="row"><button class="p grow" data-a="invite">📨 Invite A Friend</button><button class="s grow" data-a="sharecard">📤 Share My Streak</button></div><div class="row" style="margin-top:8px"><button class="s grow" data-a="shareig">📸 Instagram Story</button><button class="s grow" data-a="sharett">🎵 TikTok</button></div></div>
  <div class="card"><h2>Your friend code</h2><p class="mute">Send this to a friend. They paste it below to see Winston in his latest outfit.</p><textarea readonly id="mc" style="min-height:70px">${myCode()}</textarea><button class="s" data-a="copy">Copy</button></div>
  <div class="card"><h2>Add a friend</h2><textarea id="fc" placeholder="Paste a friend code"></textarea><button class="p" data-a="addf">Add friend</button>
@@ -1162,7 +1162,8 @@ function lbCard(){const m=view.lb||'w',me={n:S.user.name,d:DN(),w:weekMins(),s:s
  const rows=[me,...S.friends.map(f=>({...f,stale:f.t&&Date.now()-f.t>7*864e5}))].sort((a,b)=>(b[m]||0)-(a[m]||0));
  return `<div class="card"><h2>Leaderboard</h2><div class="tabs">${[['w','Study Minutes'],['s','Streak']].map(([k,l])=>`<button data-a="lbmode" data-k="${k}" class="${k===m?'on':''}">${l}</button>`).join('')}</div>
  ${rows.map((r,i)=>`<div class="item"><b style="width:30px;font-size:20px">${['🥇','🥈','🥉'][i]||i+1}</b><div class="grow"><b>${esc(r.d||'Winston')}​</b> <span class="mute">${esc(r.n)}${r.me?' (You)':''}</span>${r.stale?' <span class="mute">· Old Code</span>':''}</div><b>${m==='w'?(r.w||0)+' Min':(r.s||0)+' 🔥'}</b></div>`).join('')}
- <p class="mute">Friends update when they send you a fresh code. Add friends below to compete!</p></div>`}
+ <div class="row" style="justify-content:space-between;margin-top:8px"><span class="chip ${liveStatus==='live'?'on':''}" style="margin:0">${liveChip()}</span><span class="chip ${S.live.on?'on':''}" data-a="livetoggle" style="margin:0">${S.live.on?'✓ ':''}Share My Stats Live</span></div>
+ <p class="mute">${S.live.on?'Your name, dog name, weekly minutes, streak and level are shared with friends who have your code. ':'Friends update when they send you a fresh code, or turn on live sharing for automatic updates. '}${liveStatus==='setup'?'Live sync needs a one-time database setup: run winston/supabase-leaderboard.sql in Supabase. ':''}</p>${S.live.on?'<button class="s" data-a="livedelete">Delete My Live Data</button>':''}</div>`}
 const icsDate=d=>`${d.getFullYear()}${pad2(d.getMonth()+1)}${pad2(d.getDate())}T${pad2(d.getHours())}${pad2(d.getMinutes())}00`;
 function remStart(){const [h,m]=S.rem.time.split(':').map(Number),d=new Date();d.setHours(h,m,0,0);if(d<new Date())d.setDate(d.getDate()+1);return d}
 function gcalUrl(){const a=remStart(),b=new Date(a.getTime()+15*60000);return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(`Study With ${DN()} 🐶`)+'&details='+encodeURIComponent('Your streak is waiting! Open Winston and do one small thing.')+`&dates=${icsDate(a)}/${icsDate(b)}&recur=RRULE:FREQ=DAILY`}
@@ -1187,6 +1188,27 @@ Object.assign(ACTIONS,{
  remnotify(){if(!window.Notification){toast('This browser doesn\'t support notifications.');return}
   if(S.rem.notify){S.rem.notify=false;save();const c=$('#remn');if(c){c.classList.remove('on');c.textContent='Notify Me While The App Is Open'}return}
   Notification.requestPermission().then(p=>{S.rem.notify=p==='granted';save();const c=$('#remn');if(c){c.classList.toggle('on',S.rem.notify);c.textContent=(S.rem.notify?'✓ ':'')+'Notify Me While The App Is Open'}toast(S.rem.notify?'Notifications on! 🔔':'Notifications are blocked in this browser.')}).catch(()=>toast('Could not turn on notifications.'))}});
+
+/* ======= v6: live leaderboard (Supabase) ======= */
+const LIVE={url:'https://odsrrlaxhyqfkxtxynep.supabase.co',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kc3JybGF4aHlxZmt4dHh5bmVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwNDQ5OTEsImV4cCI6MjEwNjYyMDk5MX0.V8aPFRu9_LWOiNvAfJOzQFY7mBtioa6AX9J8upe2r44'};
+S.live=S.live||{on:false,uid:'',secret:''};let liveStatus='',liveLast=0,liveBusy=false;
+async function liveCall(fn,body){const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),8000);
+ try{const r=await fetch(LIVE.url+'/rest/v1/rpc/'+fn,{method:'POST',signal:ctl.signal,headers:{apikey:LIVE.key,Authorization:'Bearer '+LIVE.key,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(r.status===404){liveStatus='setup';return null}if(!r.ok){liveStatus='offline';return null}const tx=await r.text();return tx?JSON.parse(tx):true}
+ catch(e){liveStatus='offline';return null}finally{clearTimeout(t)}}
+async function liveSync(){if(!S.live.on||!S.live.uid||liveBusy)return;liveBusy=true;liveLast=Date.now();
+ try{const up=await liveCall('winston_upsert',{p_uid:S.live.uid,p_secret:S.live.secret,p_name:S.user.name,p_dog:DN(),p_minutes:weekMins(),p_streak:streakDays(),p_level:lvl()});if(up===null)return;
+  liveStatus='live';const ids=S.friends.map(f=>f.u).filter(Boolean);
+  if(ids.length){const rows=await liveCall('winston_board',{p_uids:ids});if(Array.isArray(rows)){rows.forEach(r=>{const f=S.friends.find(x=>x.u===r.uid);if(f){f.n=r.name;f.d=r.dog;f.w=r.minutes;f.s=r.streak;f.l=r.level;f.t=Date.parse(r.updated_at)||Date.now();f.live=1}});save()}}}
+ finally{liveBusy=false}}
+function liveKick(){if(S.live.on&&Date.now()-liveLast>60000)liveSync().then(()=>{if(tab==='dog'&&view.dsub==='friends')render()})}
+setInterval(()=>{if(S.user&&S.live.on)liveSync()},300000);
+const liveChip=()=>S.live.on?(liveStatus==='live'?'● Live':liveStatus==='setup'?'Needs One-Time Setup':liveStatus==='offline'?'Offline — Showing Snapshots':'Connecting…'):'Snapshot Mode';
+Object.assign(ACTIONS,{
+ async livetoggle(){if(S.live.on){S.live.on=false;save();render();return}
+  if(!S.live.uid){S.live.uid=crypto.randomUUID();S.live.secret=crypto.randomUUID()+crypto.randomUUID()}S.live.on=true;save();liveStatus='';render();await liveSync();render();
+  toast(liveStatus==='live'?'Live leaderboard on! 🏆 Send friends a fresh code.':liveStatus==='setup'?'Live sync needs the one-time database setup (see supabase-leaderboard.sql).':"Couldn't reach the live leaderboard from here — snapshots still work.")},
+ async livedelete(){if(!S.live.uid)return;const r=await liveCall('winston_delete',{p_uid:S.live.uid,p_secret:S.live.secret});S.live={on:false,uid:'',secret:''};save();render();toast(r===null?"Live sharing off. (Couldn't reach the server to delete — your data there stays until you can.)":'Your live data was deleted 🗑️')}});
 
 /* ---- intro screen ---- */
 function showIntro(){const el=$('#intro'),u=S.user;let title,sub;

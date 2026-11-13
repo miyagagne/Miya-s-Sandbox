@@ -44,3 +44,14 @@ A daily affirmation, a mood check-in with a weekly mood strip, quick tools (brea
 - **Reminders** (My Dog → Settings): pick a time, then add a daily repeating reminder to Google Calendar or download a calendar file (.ics) for Apple/Outlook. "Notify Me While The App Is Open" shows an alert (and a browser notification if allowed) when you haven't studied yet today. True background push notifications need a hosted app plus a push server.
 - **Install As An App:** when hosted over HTTPS (for example GitHub Pages, folder `/winston/`), the page registers `manifest.webmanifest` and `sw.js`, so it can be added to your home screen and works offline.
 - **Social Sharing:** Share My Streak, Instagram Story and TikTok make a 1080x1920 story image of your dog and stats. If your device has a share sheet, you pick the app; otherwise the image is saved, the caption is copied, and Instagram or TikTok opens. Web pages cannot post straight into those apps.
+
+## Live Leaderboard Setup (One Time)
+1. In your Supabase project (the same one the Rock Garden app uses): SQL Editor, New query, paste `winston/supabase-leaderboard.sql`, Run.
+2. In the app: My Dog, Friends, tap **Share My Stats Live**. Send friends your fresh friend code; when they add it, their numbers update automatically.
+- Nothing is sent until you opt in. Shared: name, dog name, weekly minutes, streak, level. The table has no public access; it is only reachable through three functions, and only the holder of your secret (kept in your browser) can update your row. **Delete My Live Data** removes it.
+- Live sync needs network access, so it works in the hosted/installed app. Inside Claude's page it may be blocked, in which case it falls back to snapshot mode.
+
+## Host It (GitHub Pages) So It Installs And Syncs
+1. GitHub repo, Settings, Pages, Build and deployment: Deploy from a branch.
+2. Pick the branch that holds `winston/` (this work is on `claude/modest-archimedes-a3823d`, or merge it into your default branch first) and the `/ (root)` folder, then Save.
+3. After a minute, open `https://miyagagne.github.io/Miya-s-Sandbox/winston/` (adjust if your repo name differs). In Chrome use the install icon in the address bar; on iPhone use Share, Add to Home Screen.
