@@ -22,3 +22,10 @@ Each class has a Materials tab with course-wide and weekly sections. Upload PDF,
 - **Calendar** per class: add events, set when the class meets, and pull exam and assignment dates out of an uploaded syllabus.
 - **Study timer**: track time per class against a weekly goal; live class and practice rounds are logged automatically.
 - **Class notes**: during live class the dog takes notes; afterwards they are organized (by Claude on the published page) and can be saved to Google Docs in `Winston Notes > <class>` on your Drive (needs the Google Drive connector and your OK), or downloaded.
+
+## How the app is organized
+- **Home:** your dog, one "Today" card (goal, next date, weekly study time), Focus and Start class buttons, and how-are-you-feeling.
+- **Classes:** one card per class. Inside a class: **Live** (take notes in class), **Review** (recap, Ask Winston, notes saved to Google Docs), **Materials** (files, weeks, study cards), **Plan** (study time, calendar, schedule).
+- **Practice:** quiz yourself on one class or all of them.
+- **My dog:** shop, friends and settings.
+- **Floating widget:** the 🪟 button on Home (or auto on open) pops Winston into a small always-on-top window that stays visible over Brightspace, Google and other tabs (desktop Chrome or Edge). Keep the Winston tab open.

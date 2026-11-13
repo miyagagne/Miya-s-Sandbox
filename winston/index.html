@@ -70,6 +70,7 @@ nav button.on{background:#fff3cf;color:#a85a10;font-weight:700;text-shadow:none;
 .shopgrid .card{margin:0;text-align:center;padding:10px}.shopgrid svg{width:78px;height:62px}
 .item{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:2px dotted #f1d9b5}.item>div{flex:1;min-width:0;overflow-wrap:anywhere}
 .upl{display:block;border:3px dashed #f5b25a;border-radius:22px;padding:18px;text-align:center;background:#fff9e8;cursor:pointer;color:var(--ink)}
+.upl.sm{padding:10px}
 .upl.drag{border-color:var(--brand2);background:#ffe9f3}
 #toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:linear-gradient(#ffa9cc,#ff6fa8);color:#fff;border:3px solid #d94d86;padding:9px 20px;border-radius:99px;z-index:50;opacity:0;transition:.3s;pointer-events:none;max-width:90vw;text-align:center;font-weight:600;text-shadow:0 1px 0 #d94d86;box-shadow:0 4px 0 #d94d86}
 #toast.on{opacity:1}
@@ -83,7 +84,7 @@ nav button.on{background:#fff3cf;color:#a85a10;font-weight:700;text-shadow:none;
 .hrt{transform-box:fill-box;transform-origin:center;animation:rise 3.4s ease-in infinite}@keyframes rise{0%{opacity:0;transform:translateY(8px) scale(.6)}30%{opacity:1}100%{opacity:0;transform:translateY(-28px) scale(1.1)}}
 .dogwrap svg.hop{animation:hop .65s ease-out}@keyframes hop{30%{transform:translateY(-24px) scale(1.05)}60%{transform:translateY(0) scaleY(.93)}}
 .card{position:relative}
-.tabs{overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px}.tabs button{flex:none;padding:9px 14px;white-space:nowrap}
+.tabs{overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px}.tabs button{flex:1 0 auto;padding:9px 10px;white-space:nowrap}
 #modal{position:fixed;inset:0;z-index:80;background:rgba(60,40,20,.45);display:none;justify-content:center;padding:14px;overflow:auto}
 #modal.on{display:flex}
 .sheet{background:#fffaf0;border:4px solid #ff9a3d;border-radius:28px;max-width:520px;width:100%;margin:auto;padding:18px;position:relative;box-shadow:0 8px 0 #c4691a,0 20px 40px rgba(0,0,0,.3)}
@@ -134,6 +135,12 @@ body.live{padding-bottom:340px}
 .fheart{position:absolute;pointer-events:none;font-size:20px;animation:fh 1.4s ease-out forwards}@keyframes fh{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-60px)}}
 .breathe{transform-box:fill-box;transform-origin:50% 100%;animation:breathe 3.4s ease-in-out infinite}@keyframes breathe{50%{transform:scale(1.015,1.025)}}
 .warn{color:#b3541e;font-weight:600}
+.moods{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.mood{background:var(--soft);border:2px solid #f6d57a;border-radius:16px;padding:8px 2px;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}.mood b{font-size:24px;font-weight:400}.mood span{font-size:11px;font-weight:600}
+.mood:active{transform:scale(.96)}
+.classcard{cursor:pointer}.classcard:hover{border-color:var(--brand2)}
+details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-marker{display:none}details[open]>summary{margin-bottom:8px}
+details>summary b::after{content:' ▾';color:var(--mute)}details[open]>summary b::after{content:' ▴'}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -281,7 +288,7 @@ function accIcon(id){return `<svg viewBox="${ICONVB[ACC[id].slot]}">${ACC[id].sv
 
 /* ======= navigation ======= */
 let tab='home',view={cls:null,sub:'live',ses:null,wk:'all',mwk:'course',delc:null,rmdoc:null},P=null,ob=1,obData={majors:'',minors:''};
-const TABS=[['home','🏠','Home'],['class','📚','Classes'],['practice','✏️','Practice'],['friends','👥','Friends'],['shop','🛍️','Shop']];
+const TABS=[['home','🏠','Home'],['class','📚','Classes'],['practice','✏️','Practice'],['dog','🐶','My dog']];
 const ACTIONS={};
 function go(t){tab=t;P=null;render()}
 function refresh(){render(true);updateWidget()}
@@ -290,10 +297,12 @@ function render(keep){
  if(!S.user){n.style.display='none';return renderOnboard()}
  n.style.display='flex';
  n.innerHTML=TABS.map(([k,i,l])=>`<button data-a="tab" data-k="${k}" class="${k===tab?'on':''}"><b>${i}</b>${l}</button>`).join('');
- ({home:rHome,class:rClass,practice:rPractice,friends:rFriends,shop:rShop})[tab]();
+ ({home:rHome,class:rClass,practice:rPractice,dog:rDog})[tab]();
  if(Date.now()-joy<900)document.querySelectorAll('.dogwrap svg').forEach(x=>x.classList.add('hop'));
 }
 const classes=()=>S.classes;
+let subT=null,mainT=null;const SUB=()=>subT||$('#sub'),MAIN=()=>mainT||$('#main');
+function keepOpen(sel,key){const d=document.querySelector(sel);if(d)d.ontoggle=()=>{view[key]=d.open}}
 const allItems=()=>S.classes.flatMap(c=>c.items.map(i=>({...i,cls:c.id,clsName:c.name})));
 
 /* ======= onboarding ======= */
@@ -321,36 +330,45 @@ Object.assign(ACTIONS,{
 /* ======= home ======= */
 const MOODS=[['😴','bored','bored'],['😫','stressed','stressed'],['😶','unmotivated','unmotivated'],['🙂','okay','okay — let\'s get started'],['🔥','sparked','sparked!']];
 function rHome(){
- const u=S.user,L=lvl(),lo=15*(L-1)**2,hi=15*L*L;
- const pct=Math.round((S.earned-lo)/(hi-lo)*100);
- $('#main').innerHTML=`<div class="card dogwrap"><button class="gear" data-a="settings" aria-label="Settings">⚙️</button><h1 class="sign">Winston</h1><div class="dogwrap stage">${dog(S.eq,mood())}<span class="lotus">🌼</span><span class="fly">🦋</span></div>
- <h2>Winston · Level ${L}</h2><div class="badge">🩺 Study Therapy Dog</div>
- <div class="stats"><span class="stat">🪙 ${S.coins}</span><span class="stat">❤️ ${Math.round(S.happy)}%</span><span class="stat">⭐ ${S.earned} XP</span><span class="stat">🔥 ${streakDays()}-day streak</span></div>
+ const u=S.user,L=lvl(),lo=15*(L-1)**2,hi=15*L*L,pct=Math.round((S.earned-lo)/(hi-lo)*100),g=goalToday(),up=upcoming(1,14)[0],t=S.timer,tc=t&&S.classes.find(x=>x.id===t.cls);
+ const wk=S.classes.reduce((a,c)=>a+weekSecs(c),0),goal=S.classes.reduce((a,c)=>a+c.goalMin*60,0);
+ $('#main').innerHTML=`<div class="card dogwrap"><button class="gear" data-a="popout" aria-label="Float on my screen" title="Float ${esc(DN())} on my screen">🪟</button>
+ <div class="dogwrap stage">${dog(S.eq,mood())}</div>
+ <h2>${esc(DN())} · Level ${L}</h2>
+ <div class="stats"><span class="stat">🪙 ${S.coins}</span><span class="stat">🔥 ${streakDays()}</span><span class="stat">❤️ ${Math.round(S.happy)}%</span></div>
  <div class="bar" style="margin:10px 0 4px"><i style="width:${pct}%"></i></div><div class="mute">${hi-S.earned} XP to level ${L+1}</div>
- <p class="bubble">${mood()==='sad'?'I miss you! Studying together makes me happy 🥺':'Hi '+esc(u.name)+'! Every concept you learn is a step forward ✨'}</p></div>
- <div class="card"><h2>How are you feeling about studying right now?</h2><div>${MOODS.map(m=>`<span class="chip" data-a="feel" data-k="${m[1]}">${m[0]} ${m[1]}</span>`).join('')}</div><div id="feelout"></div></div>
- ${goalCard()}<button class="s" style="width:100%;margin-bottom:12px" data-a="popout">🪟 Float ${DN()} on my screen</button><div class="mute" style="margin:-6px 0 12px;text-align:center;font-size:13px">Stays on top while you browse Brightspace, Google or any tab (desktop Chrome or Edge). Keep this tab open.</div>${upCard()}${weekCard()}<div class="row"><button class="p grow" data-a="tab" data-k="class">▶ Start class</button><button class="p purple grow" data-a="tab" data-k="practice">✏️ Practice</button></div>`;
-}
+ <p class="bubble">${esc(mood()==='sad'?'I miss you! Studying together makes me happy 🥺':smartMsg())}</p></div>
+ <div class="row" style="margin-bottom:14px">${t?'':'<button class="p grow" data-a="openfocus">⏱ Focus</button>'}<button class="p ${t?'':'purple '}grow" data-a="tab" data-k="class">🎙 Start class</button></div>
+ <div class="card"><h3>Today</h3>
+ ${t?`<div class="row" style="margin-bottom:8px"><div class="grow"><div class="mute">${t.target?'Focus':'Studying'} · ${esc(tc?tc.name:'')}</div><div class="tmv" style="font:600 28px var(--display)">${wClock()}</div></div><button class="p bad" data-a="stoptimer">■ Stop</button></div>`:''}
+ ${g?`<div class="wgoal ${g.done?'done':''}" data-a="goaltoggle" style="margin:0 0 8px">${g.done?'✅':'⬜'} ${esc(g.text)}</div>`:`<div class="row" style="margin-bottom:8px"><input id="tg" class="grow" style="margin:0" placeholder="🎯 Today's goal — e.g. finish chapter 3 notes"><button class="p" data-a="goalset">Set</button></div>`}
+ ${up?`<div class="item"><i class="dot" style="background:${EVT[up.type][1]}"></i><div><b>${esc(up.title)}</b> <span class="mute">· ${esc(up.cls)} · ${when(up)}</span></div></div>`:''}
+ ${goal?`<div class="row" style="justify-content:space-between;margin-top:8px"><span class="mute">This week</span><span class="mute">${fmtDur(wk)} / ${fmtDur(goal)}</span></div><div class="bar"><i style="width:${Math.min(100,Math.round(wk/goal*100))}%"></i></div>`:''}</div>
+ <div class="card"><h3>How are you feeling?</h3><div class="moods">${MOODS.map(m=>`<button class="mood" data-a="feel" data-k="${m[1]}"><b>${m[0]}</b><span>${m[1]}</span></button>`).join('')}</div><div id="feelout"></div></div>`}
+function openFocus(){if(!S.classes.length){toast('Add a class first');tab='class';render();return}
+ openModal(`<h2>⏱ Focus session</h2><p class="mute">Pick a class and a length. ${esc(DN())} will cheer you on.</p><select id="fcls">${S.classes.map(c=>`<option value="${c.id}" ${view.tcls===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select><div>${[15,25,45,0].map(m=>`<span class="chip ${(view.fm===undefined?25:view.fm)===m?'on':''}" data-a="fmpick" data-k="${m}">${m?m+' min':'No limit'}</span>`).join('')}</div><button class="p" data-a="fgo" style="width:100%;margin-top:8px">▶ Start</button>`)}
+Object.assign(ACTIONS,{openfocus(){openFocus()},
+ fmpick(d){view.fm=+d.k;document.querySelectorAll('#modal [data-a=fmpick]').forEach(e=>e.classList.toggle('on',+e.dataset.k===view.fm))},
+ fgo(){const id=$('#fcls').value;view.tcls=id;closeModal();startTimer(id,view.fm===undefined?25:view.fm)}});
 /*FEEL*/
 
 /* ======= classes ======= */
 function rClass(){
  const c=classes().find(x=>x.id===view.cls);
- if(!c){$('#main').innerHTML=`<div class="card"><h2>Your classes</h2>${classes().map(x=>`<div class="row" style="margin:8px 0"><button class="s grow" data-a="openc" data-k="${x.id}">${esc(x.name)} <span class="mute">· ${x.items.length} items · ${x.sessions.length} recaps</span></button><button class="s" data-a="editc" data-k="${x.id}" aria-label="Edit class">✎</button><button class="${view.delc===x.id?'p bad':'s'}" data-a="delc" data-k="${x.id}">${view.delc===x.id?'Delete?':'✕'}</button></div>`).join('')||'<p class="mute">No classes yet.</p>'}</div>
- <div class="card"><h2>Add a class</h2><label>Class name</label><input id="cn" placeholder="BUAD 112">
- <label>Materials from your teacher — one per line: <code>term :: explanation</code></label><textarea id="cm" placeholder="Opportunity cost :: What you give up when you choose..."></textarea>
- <label>Syllabus &amp; course materials (optional) — PDF, Word, PowerPoint or text</label><input id="cf" type="file" multiple accept=".pdf,.docx,.pptx,.txt,.md,.csv"><button class="p" data-a="addc">Add class</button></div>`;return}
+ if(!c){$('#main').innerHTML=`<h2 style="margin:0 0 10px">Your classes</h2>${classes().map(x=>{const nx=upcoming(30,60).find(e=>e.cid===x.id),sec=weekSecs(x),goal=x.goalMin*60;
+  return `<div class="card classcard" data-a="openc" data-k="${x.id}"><div class="row"><div class="grow"><b style="font-size:18px">${esc(x.name)}</b>${x.instructor?`<div class="mute">${esc(x.instructor)}</div>`:''}</div><button class="s" data-a="editc" data-k="${x.id}" aria-label="Edit class">✎</button></div>${nx?`<div class="mute" style="margin-top:6px"><i class="dot" style="background:${EVT[nx.type][1]}"></i> ${esc(nx.title)} · ${when(nx)}</div>`:''}<div class="bar" style="margin-top:8px"><i style="width:${Math.min(100,Math.round(sec/goal*100))}%"></i></div><div class="mute" style="font-size:12px">${fmtDur(sec)} of ${fmtDur(goal)} this week</div></div>`}).join('')||'<div class="card"><p class="mute">Add your first class to get started.</p></div>'}
+ <details class="card" ${classes().length?'':'open'}><summary><b>＋ Add a class</b></summary><label>Class name</label><input id="cn" placeholder="BUAD 112"><label>Syllabus (optional) — PDF, Word, PowerPoint or text</label><input id="cf" type="file" multiple accept=".pdf,.docx,.pptx,.txt,.md,.csv"><button class="p" data-a="addc">Add class</button></details>`;return}
  const sub=view.sub;
  $('#main').innerHTML=`<button class="s" data-a="openc" data-k="">← All classes</button><div class="row" style="margin-top:10px"><h2 class="grow" style="margin:0">${esc(c.name)}</h2><button class="s" data-a="editc" data-k="${c.id}">✏️ Edit</button></div>${c.instructor||c.room?`<p class="mute" style="margin:4px 0 8px">${[c.instructor&&'👩‍🏫 '+esc(c.instructor),c.room&&'📍 '+esc(c.room)].filter(Boolean).join(' · ')}</p>`:''}
- <div class="tabs">${[['live','🎙 Live'],['recap','📝 Recaps'],['notes','🗒 Notes'],['mat','📄 Materials'],['cal','📅 Calendar'],['time','⏱ Time']].map(([k,l])=>`<button data-a="sub" data-k="${k}" class="${k===sub?'on':''}">${l}</button>`).join('')}</div><div id="sub"></div>`;
- ({live:rLive,recap:rRecap,notes:rNotes,mat:rMat,cal:rCal,time:rTime})[sub](c);
+ <div class="tabs">${[['live','🎙 Live'],['review','📝 Review'],['mat','📄 Materials'],['plan','📅 Plan']].map(([k,l])=>`<button data-a="sub" data-k="${k}" class="${k===sub?'on':''}">${l}</button>`).join('')}</div><div id="sub"></div>`;
+ ({live:rLive,review:rReview,mat:rMat,plan:rPlan})[sub](c);
 }
 Object.assign(ACTIONS,{
  openc(d){view.cls=d.k||null;view.sub='live';render()},
  sub(d){view.sub=d.k;render()},
  delc(d){if(view.delc===d.k){S.classes=S.classes.filter(c=>c.id!==d.k);view.delc=null;save();render()}else{view.delc=d.k;render();setTimeout(()=>{if(view.delc===d.k){view.delc=null;if(tab==='class'&&!view.cls)render()}},3500)}},
  async addc(){const n=$('#cn').value.trim();if(!n)return toast('Name your class');const files=[...(($('#cf')||{}).files||[])];
-  S.classes=S.classes.filter(c=>c.id!=='demo'||c.sessions.length);const nc={id:uid(),name:n,sessions:[],items:parseItems($('#cm').value)};ensure(nc);S.classes.push(nc);save();render();
+  S.classes=S.classes.filter(c=>c.id!=='demo'||c.sessions.length);const nc={id:uid(),name:n,sessions:[],items:parseItems((($('#cm')||{}).value)||'')};ensure(nc);S.classes.push(nc);save();render();
   if(files.length){view.cls=nc.id;view.sub='mat';view.mwk='course';render();await addFiles(nc,files,'course',true)}},
  addm(){const c=cur();c.items.push(...parseItems($('#mm').value,view.mwk));save();render()},
  delm(d){const c=cur();c.items=c.items.filter(i=>i.id!==d.k);save();render()}
@@ -399,19 +417,20 @@ async function addFiles(c,files,wk,syl){let msg='';
 function rMat(c){
  const wk=view.mwk==='course'||c.weeks.some(w=>w.id===view.mwk)?view.mwk:'course';view.mwk=wk;
  const docs=c.docs.filter(d=>d.wk===wk),its=c.items.filter(i=>i.wk===wk),lab=wkLabel(c,wk);
- $('#sub').innerHTML=`<div class="card"><h3>Where do these go?</h3><div>${wkChips(c,'mwk',wk,false)}<span class="chip" data-a="addwk">＋ Add week</span></div><p class="mute">Course-wide = syllabus, textbook, big-picture notes. Weekly = that week's slides and handouts.</p></div>
- <div class="card"><h3>Upload for ${esc(lab)}</h3>
- <label class="upl" id="upl" for="fi"><div style="font-size:34px">📂🐾</div><b>Tap to choose files</b> or drop them here<div class="mute">PDF, Word (.docx), PowerPoint (.pptx) or text files</div></label>
+ SUB().innerHTML=`<div class="card"><div>${wkChips(c,'mwk',wk,false)}<span class="chip" data-a="addwk">＋ Week</span></div>
+ <label class="upl sm" id="upl" for="fi" style="margin-top:8px"><b>📂 Add files for ${esc(lab)}</b><div class="mute">PDF, Word, PowerPoint or text — tap or drop</div></label>
  <input id="fi" type="file" multiple accept=".pdf,.docx,.pptx,.txt,.md,.csv" style="display:none"><div id="upstat" class="mute" style="margin-top:6px"></div>
- <label style="margin-top:8px;display:block">Or paste notes</label><textarea id="pn" placeholder="Paste your notes, a syllabus, a chapter summary…"></textarea><button class="s" data-a="addnotes">Add notes</button>
- <p class="mute">${AI.sm?'Winston uses AI to turn files into study cards.':'Cards are found from definitions in your files (AI makes better ones on the published Claude page).'} Files stay in this browser.</p></div>
- <div class="card"><h3>Files (${docs.length})</h3>${docs.map(d=>`<div class="item"><div><b>${esc(d.name)}</b>${d.kind==='syllabus'?' <span class="chip on" style="padding:1px 8px;font-size:12px">syllabus</span>':''}<div class="mute">${d.chars.toLocaleString()} characters · ${d.cards||0} cards</div></div><button class="s" data-a="mkcards" data-k="${d.id}">${d.cards?'More cards':'Make cards'}</button><button class="${view.rmdoc===d.id?'p bad':'s'}" data-a="rmdoc" data-k="${d.id}">${view.rmdoc===d.id?'Remove file + cards?':'✕'}</button></div>`).join('')||'<p class="mute">No files here yet.</p>'}</div>
- <div class="card"><h3>Study cards (${its.length})</h3>${its.map(i=>`<div class="mat"><span class="term">${esc(i.term)}</span> <button class="s" style="float:right;padding:0 10px" data-a="delm" data-k="${i.id}">✕</button><button class="s" style="float:right;padding:0 10px;margin-right:6px" data-a="editcard" data-k="${i.id}" aria-label="Edit card">✎</button><br><span class="mute">${esc(i.text)}</span></div>`).join('')||'<p class="mute">No cards yet — upload a file or add some below.</p>'}
- <h3 style="margin-top:12px">Add cards by hand</h3><textarea id="mm" placeholder="term :: explanation (one per line)"></textarea><button class="p" data-a="addm">Add cards</button></div>`;
+ <div class="mute" style="font-size:12px">${AI.sm?'AI turns your files into study cards.':'Study cards are found from definitions in your files.'}</div>
+ <details id="pastemore" style="margin-top:8px" ${view.pastemore?'open':''}><summary><b>Paste notes instead</b></summary><textarea id="pn" placeholder="Paste your notes, a syllabus, a chapter summary…"></textarea><button class="s" data-a="addnotes">Add notes</button></details></div>
+ ${docs.length?`<div class="card"><h3>Files · ${docs.length}</h3>${docs.map(d=>`<div class="item"><div><b>${esc(d.name)}</b>${d.kind==='syllabus'?' <span class="chip on" style="padding:1px 8px;font-size:12px">syllabus</span>':''}<div class="mute">${(d.cards||0)} cards</div></div><button class="s" data-a="mkcards" data-k="${d.id}">${d.cards?'More cards':'Make cards'}</button><button class="${view.rmdoc===d.id?'p bad':'s'}" data-a="rmdoc" data-k="${d.id}">${view.rmdoc===d.id?'Remove file + cards?':'✕'}</button></div>`).join('')}</div>`:''}
+ <details id="cardsmore" class="card" ${view.cardsmore?'open':''}><summary><b>Study cards · ${its.length}</b></summary>${its.map(i=>`<div class="mat"><span class="term">${esc(i.term)}</span> <button class="s" style="float:right;padding:0 10px" data-a="delm" data-k="${i.id}">✕</button><button class="s" style="float:right;padding:0 10px;margin-right:6px" data-a="editcard" data-k="${i.id}" aria-label="Edit card">✎</button><br><span class="mute">${esc(i.text)}</span></div>`).join('')||'<p class="mute">No cards yet — add a file or write some below.</p>'}
+ <h3 style="margin-top:12px">Add cards by hand</h3><textarea id="mm" placeholder="term :: explanation (one per line)"></textarea><button class="p" data-a="addm">Add cards</button></details>`;
  const fi=$('#fi'),u=$('#upl');fi.onchange=()=>{const fs=[...fi.files];fi.value='';addFiles(c,fs,wk)};
  ['dragover','dragenter'].forEach(e=>u.addEventListener(e,ev=>{ev.preventDefault();u.classList.add('drag')}));
  ['dragleave','drop'].forEach(e=>u.addEventListener(e,ev=>{ev.preventDefault();u.classList.remove('drag')}));
- u.addEventListener('drop',ev=>addFiles(c,[...ev.dataTransfer.files],wk))}
+ u.addEventListener('drop',ev=>addFiles(c,[...ev.dataTransfer.files],wk));
+ keepOpen('#pastemore','pastemore');keepOpen('#cardsmore','cardsmore')}
+
 Object.assign(ACTIONS,{
  mwk(d){view.mwk=d.k;render()},vwk(d){view.wk=d.k;render()},
  addwk(){const c=cur(),n=c.weeks.reduce((m,w)=>Math.max(m,w.n),0)+1;c.weeks.push({id:'w'+n,n});view.mwk='w'+n;save();render()},
@@ -428,19 +447,18 @@ const SRC=window.SpeechRecognition||window.webkitSpeechRecognition;
 const inFrame=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 function rLive(c){
  if(!live||live.cls!==c.id){const dr=S.liveDraft&&S.liveDraft.cls===c.id&&S.liveDraft.lines.length?S.liveDraft:null;
-  $('#sub').innerHTML=`${dr?`<div class="card"><h3>🛟 Unfinished class found</h3><p class="mute">${esc(DN())} saved ${dr.lines.length} lines from a class that didn't get finished.</p><div class="row"><button class="p" data-a="finishdraft">Finish &amp; make notes</button><button class="s" data-a="dropdraft">Discard</button></div></div>`:''}
+  SUB().innerHTML=`${dr?`<div class="card"><h3>🛟 Unfinished class found</h3><p class="mute">${esc(DN())} saved ${dr.lines.length} lines from a class that didn't get finished.</p><div class="row"><button class="p" data-a="finishdraft">Finish &amp; make notes</button><button class="s" data-a="dropdraft">Discard</button></div></div>`:''}
  <div class="card"><h2>Ready for class?</h2><p>${esc(DN())} will take notes while your teacher talks, light up your teacher's materials as they're mentioned, and pop up for a surprise <b>high paw</b> now and then. 🐾</p>
  <p class="mute" style="margin-bottom:2px">Which materials is class on today?</p><div style="margin-bottom:10px">${wkChips(c,'vwk',view.wk,true)}</div><button class="p" data-a="startlive">▶ Start class with ${esc(DN())}</button>
  <p class="mute">${esc(DN())} listens with your browser's speech recognition and <b>you can always type or dictate notes too</b> (tap the 🎙 on your phone keyboard). Audio is processed by your browser vendor's service.</p></div>`;return}
- $('#sub').innerHTML=`<div class="row" style="margin-bottom:8px"><button class="p ok" data-a="endlive">■ End class &amp; get notes</button><button class="s" id="micbtn" data-a="mic">🎙 Listen</button><button class="s" data-a="popout">🪟 Float ${esc(DN())}</button></div>
+ SUB().innerHTML=`<div class="row" style="margin-bottom:8px"><button class="p ok" data-a="endlive">■ End class &amp; get notes</button><button class="s" id="micbtn" data-a="mic">🎙 Listen</button><button class="s" data-a="popout">🪟 Float ${esc(DN())}</button></div>
  <div id="endwarn"></div>
  <div class="card"><h3>🎙 Capturing notes</h3><div id="micstat" class="mute"></div><div id="interim" class="mute" style="font-style:italic;min-height:20px"></div>
  <div style="margin:6px 0"><span class="chip ${live.mine?'':'on'}" data-a="nsrc" data-k="teacher" id="nsT">Teacher said</span><span class="chip ${live.mine?'on':''}" data-a="nsrc" data-k="mine" id="nsM">My own note</span></div>
  <textarea id="said" placeholder="Type or dictate here — Enter adds it (Shift+Enter for a new line)"></textarea>
  <div class="row"><button class="p" data-a="say">Add to notes</button><span class="mute" id="capcount"></span></div></div>
  <div class="card"><h3>📝 ${esc(DN())} is taking notes</h3><div id="livenotes"></div></div>
- <div class="card"><h3>Teacher's materials · ${esc(wkLabel(c,live.wk||'all'))}</h3><div id="livemat"></div></div>
- <div class="card"><div id="livelog" class="mute"></div><button class="s" data-a="testpaw" style="margin-top:8px">🐾 Test high-paw popup</button></div>`;
+ <div class="card"><h3>Teacher's materials · ${esc(wkLabel(c,live.wk||'all'))}</h3><div id="livemat"></div></div>`;
  const ta=$('#said');ta.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ACTIONS.say()}};
  micUI();paintLive()}
 function micUI(){const b=$('#micbtn'),st=$('#micstat');if(!live)return;
@@ -450,7 +468,6 @@ function micSay(msg,warn){if(!live)return;live.micMsg=msg;live.micWarn=!!warn;mi
 const CIRC='<svg class="circ" viewBox="0 0 100 40" preserveAspectRatio="none"><path pathLength="1" d="M8 24 C2 8 56 0 90 8 C104 14 98 34 52 37 C14 38 -2 28 14 12"/></svg>';
 function paintLive(){const c=cur();if(!c||!live||!$('#livemat'))return;
  $('#livemat').innerHTML=(liveItems(c).map(i=>`<div class="mat ${live.focus===i.id?'glow':''} ${live.hits.some(h=>h.id===i.id)?'seen':''}" id="m${i.id}"><span class="term">${esc(i.term)}${live.focus===i.id?CIRC:''}</span><br><span class="mute">${esc(i.text)}</span></div>`).join('')||'<p class="mute">No cards in this section yet — add some in Materials.</p>');
- $('#livelog').innerHTML=live.lines.slice(-4).map(l=>`<div>“${esc(l)}”</div>`).join('');
  const cc=$('#capcount');if(cc)cc.textContent=`${live.lines.length} line${live.lines.length===1?'':'s'} captured`;
  const ln=$('#livenotes');if(ln)ln.innerHTML=live.notes.slice(-6).map(n=>n.term?`<div class="bubble"><b>${esc(n.term)}</b> — ${esc(n.text.split(/(?<=[.!?])\s/)[0])}<div class="mute">teacher: “${esc(n.line)}”</div></div>`:`<div class="bubble">${n.mine?'📌 ':'• '}${esc(n.line)}</div>`).join('')||'<p class="mute">Nothing captured yet. When I hear (or you type) something, it shows up here.</p>';
  const f=$('#m'+live.focus);if(f)f.scrollIntoView({block:'center',behavior:'smooth'})}
@@ -487,7 +504,7 @@ Object.assign(ACTIONS,{
  mic(){if(!live)return;if(live.listening){live.listening=false;live.micMsg='';try{rec.stop()}catch(e){}micUI()}else{live.micMsg='';startListen()}},
  popout(){popOut(false)},
  testpaw(){showPaw()},
- finishdraft(){const c=cur(),d=S.liveDraft;if(!c||!d)return;const ses={id:uid(),date:new Date(d.t0).toLocaleString(),hits:d.hits,lines:d.lines};c.sessions.push(ses);view.ses=c.sessions.length-1;S.liveDraft=null;save();view.sub='notes';render();makeNotes(c,ses);genRecap(c,ses)},
+ finishdraft(){const c=cur(),d=S.liveDraft;if(!c||!d)return;const ses={id:uid(),date:new Date(d.t0).toLocaleString(),hits:d.hits,lines:d.lines};c.sessions.push(ses);view.ses=c.sessions.length-1;S.liveDraft=null;save();view.sub='review';render();makeNotes(c,ses);genRecap(c,ses)},
  dropdraft(){S.liveDraft=null;save();render()},
  endlive(){const c=cur();if(!live)return;
   if(!live.lines.length&&!live.ack){live.ack=true;const w=$('#endwarn');if(w)w.innerHTML=`<div class="bubble">🐾 I haven't captured anything yet, so there'd be no notes. Type or dictate what you remember below — or tap <b>End class</b> again to finish without notes.</div>`;return}
@@ -496,7 +513,7 @@ Object.assign(ACTIONS,{
   const newSes={id:uid(),date:new Date().toLocaleString(),hits:live.hits,lines:live.lines};c.sessions.push(newSes);view.ses=c.sessions.length-1;
   setTimeout(()=>{makeNotes(c,newSes);genRecap(c,newSes)},0);
   live=null;S.liveDraft=null;document.body.classList.remove('live');drawWidget();
-  const out=Math.min(20,n*2);if(out)earn(out,`for engaging in class (${n} topics)`);save();view.sub=newSes.lines.length?'notes':'recap';render()}
+  const out=Math.min(20,n*2);if(out)earn(out,`for engaging in class (${n} topics)`);save();view.sub='review';render()}
 });
 
 /* ======= companion widget: your study therapy dog ======= */
@@ -604,7 +621,7 @@ async function popOut(auto){if(pipWin)return;
   w.document.body.style.margin='0';w.document.body.style.background='#fffaf0';w.document.body.append($('#defs').cloneNode(true));w.document.addEventListener('click',onClick);
   w.setInterval(tickTimer,1000);   // this window's own clock, so timers keep ticking while the Winston tab is in the background
   W.popped=true;W.open=true;S.nextCheck=Date.now()+30*60000;w.document.body.append(WEL);
-  w.addEventListener('pagehide',()=>{W.popped=false;pipWin=null;document.body.append(WEL);drawWidget()});drawWidget();
+  w.addEventListener('pagehide',()=>{W.popped=false;W.open=false;pipWin=null;document.body.append(WEL);drawWidget()});drawWidget();
   if(auto)toast(`${DN()} is floating on your screen — he stays on top while you browse other tabs. Close the little window anytime.`)}
  catch(e){pipWin=null;if(!auto){const nm=e&&e.name;toast(nm==='NotAllowedError'||nm==='SecurityError'?`Chrome blocked the floating window here. Open this page in its own browser tab (not inside a chat) and tap Float again.`:`Could not float ${DN()} — tap the button again.`)}}}
 function tickWidget(){if(!S.user)return;
@@ -630,6 +647,10 @@ function localAnswer(c,q){const n=norm(q),qw=n.split(' ').filter(w=>w.length>2&&
  const sc=pool.map(p=>({p,n:qw.filter(w=>norm(p.t+' '+p.s).includes(w.slice(0,5))).length})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n).slice(0,3);
  return sc.length?`Woof! Here's how I'd explain it, step by step:\n`+sc.map((x,i)=>`${i+1}. **${x.p.t}:** ${x.p.s}`).join('\n'):`Hmm, I couldn't find that in this class's materials or what your teacher said. Add it to Materials and I'll learn it too! 🐾`}
 const curSes=c=>{const i=view.ses!=null&&c.sessions[view.ses]?view.ses:c.sessions.length-1;return c.sessions[i]};
+function rReview(c){SUB().innerHTML='<div id="rv1"></div><div id="rv2"></div>';
+ subT=$('#rv1');try{rRecap(c)}finally{subT=null}subT=$('#rv2');try{rNotes(c)}finally{subT=null}}
+function rPlan(c){SUB().innerHTML='<div id="pl1"></div><div id="pl2"></div>';
+ subT=$('#pl1');try{rTime(c)}finally{subT=null}subT=$('#pl2');try{rCal(c)}finally{subT=null}}
 function rRecap(c){
  const ses=curSes(c);
  const items=ses?ses.hits.map(h=>({it:c.items.find(i=>i.id===h.id),line:h.line})).filter(x=>x.it):c.items.map(it=>({it}));
@@ -640,7 +661,7 @@ function rRecap(c){
  else if(ses&&ses.aiState==='loading')body=`<p class="bubble">🐾 Winston is writing your step-by-step recap…</p>`+local;
  else body=local+(ses&&ses.aiState==='error'?`<p class="mute">Winston couldn't write the AI recap this time.</p>`:'');
  const picker=c.sessions.length>1?`<div style="margin-bottom:8px">${c.sessions.map((x,i)=>`<span class="chip ${x===ses?'on':''}" data-a="pickses" data-k="${i}">${esc(x.date)}</span>`).join('')}</div>`:'';
- $('#sub').innerHTML=`<div class="card"><h2>${ses?'Recap · '+esc(ses.date):'Primer from your materials'}</h2>${picker}
+ SUB().innerHTML=`<div class="card"><h2>${ses?'Recap · '+esc(ses.date):'Primer from your materials'}</h2>${picker}
  <p class="mute">${ses?'Here\'s what happened, one small step at a time. You only need to understand one step at a time. 💛':'No live class recorded yet, so here\'s a gentle walkthrough of your materials.'}</p>${body}
  <div class="row" style="margin-top:10px"><button class="p purple" data-a="pc" data-k="${c.id}">✏️ Practice this class</button>${AI.sm&&ses&&ses.aiState!=='loading'?`<button class="s" data-a="genrecap">✨ ${ses.ai?'Rewrite with Winston':'Explain it step by step with Winston'}</button>`:''}</div></div>
  <div class="card"><h3>🐶 Ask Winston anything about this class</h3>
@@ -650,7 +671,7 @@ function rRecap(c){
  ${AI.sm?'':'<p class="mute">Smart AI answers switch on in the published Claude page. Here, Winston searches your notes instead.</p>'}</div>`;
 }
 async function genRecap(c,ses){
- if(!AI.sm)return;ses.aiState='loading';const here=()=>tab==='class'&&view.cls===c.id&&view.sub==='recap';if(here())render();
+ if(!AI.sm)return;ses.aiState='loading';const here=()=>tab==='class'&&view.cls===c.id&&view.sub==='review';if(here())render();
  const cov=ses.hits.map(h=>c.items.find(i=>i.id===h.id)).filter(Boolean),use=cov.length?cov:c.items;
  const prompt=`${persona()}\n\nTASK: Write a calm, step-by-step recap of today's class so the student feels they understand it and is not overwhelmed. Use ONLY the information below. Teach in the order it was covered.\n\n${ctxOf(c)}\n\nTOPICS COVERED TODAY, IN ORDER:\n${use.map((i,k)=>`${k+1}. ${i.term}: ${i.text}`).join('\n')}\nTEACHER'S WORDS TODAY:\n${ses.lines.slice(-30).map(l=>'- '+l).join('\n')||'(not recorded)'}\n\nReturn ONLY JSON in exactly this shape: {"big":"one reassuring sentence about the big picture","steps":[{"title":"short title","body":"2-3 simple sentences","example":"one tiny everyday example"}],"check":["two quick self-check questions"]}. At most 7 steps.`;
  try{const r=await aiJson(prompt);if(!r||!Array.isArray(r.steps)||!r.steps.length)throw 0;ses.ai=r;ses.aiState='done'}catch(e){ses.aiState='error';if(e&&e.code==='not_granted')AI.sm=null}
@@ -724,7 +745,7 @@ Object.assign(ACTIONS,{
 /* ======= friends ======= */
 const myCode=()=>btoa(unescape(encodeURIComponent(JSON.stringify({n:S.user.name,d:DN(),l:lvl(),h:Math.round(S.happy),e:S.eq}))));
 function rFriends(){
- $('#main').innerHTML=`<div class="card"><h2>Your friend code</h2><p class="mute">Send this to a friend. They paste it below to see Winston in his latest outfit.</p><textarea readonly id="mc" style="min-height:70px">${myCode()}</textarea><button class="s" data-a="copy">Copy</button></div>
+ MAIN().innerHTML=`<div class="card"><h2>Your friend code</h2><p class="mute">Send this to a friend. They paste it below to see Winston in his latest outfit.</p><textarea readonly id="mc" style="min-height:70px">${myCode()}</textarea><button class="s" data-a="copy">Copy</button></div>
  <div class="card"><h2>Add a friend</h2><textarea id="fc" placeholder="Paste a friend code"></textarea><button class="p" data-a="addf">Add friend</button>
  <p class="mute">Heads up: codes are a snapshot. Live updating and friend requests need an online account (the Supabase setup used elsewhere in this repo) — a good next step.</p></div>
  <div class="shopgrid">${S.friends.map((f,i)=>`<div class="card"><div class="dogwrap">${dog(f.e,f.h>=65?'happy':f.h>=35?'ok':'sad')}</div><b>${esc(f.d||'Winston')}​</b><div class="mute">${esc(f.n)}'s pup</div><div class="mute">Level ${f.l} · ❤️ ${f.h}%</div><button class="s" data-a="delf" data-k="${i}">Remove</button></div>`).join('')}</div>`}
@@ -735,8 +756,17 @@ Object.assign(ACTIONS,{
 });
 
 /* ======= shop ======= */
+function rDog(){const sub=view.dsub||'shop';
+ $('#main').innerHTML=`<div class="tabs">${[['shop','🛍️ Shop'],['friends','👥 Friends'],['me','⚙️ Settings']].map(([k,l])=>`<button data-a="dsub" data-k="${k}" class="${k===sub?'on':''}">${l}</button>`).join('')}</div><div id="dsub"></div>`;
+ mainT=$('#dsub');try{({shop:rShop,friends:rFriends,me:rSettings})[sub]()}finally{mainT=null}}
+function rSettings(){const u=S.user;
+ MAIN().innerHTML=`<div class="card"><h2>Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea>
+ <label style="display:block;margin-top:6px">Floating widget</label><div><span class="chip ${S.pref.autoFloat===false?'':'on'}" id="autof" data-a="toggleauto">${S.pref.autoFloat===false?'':'✓ '}Float ${esc(DN())} on my screen when I open the app</span></div><p class="mute" style="margin-top:0">Works in desktop Chrome or Edge. He stays on top of Brightspace, Google and other tabs.</p>
+ <button class="p" data-a="savesettings" style="width:100%">Save</button></div>
+ <div class="card"><button class="${view.reset?'p bad':'s'}" data-a="resetall" style="width:100%">${view.reset?'Really erase everything?':'Erase everything & start over'}</button></div>`}
+ACTIONS.dsub=d=>{view.dsub=d.k;render()};
 function rShop(){
- $('#main').innerHTML=`<div class="card dogwrap"><div class="dogwrap">${dog(S.eq,mood())}</div><div class="stats"><span class="stat">🪙 ${S.coins}</span><span class="stat">❤️ ${Math.round(S.happy)}%</span></div></div>
+ MAIN().innerHTML=`<div class="card dogwrap"><div class="dogwrap">${dog(S.eq,mood())}</div><div class="stats"><span class="stat">🪙 ${S.coins}</span><span class="stat">❤️ ${Math.round(S.happy)}%</span></div></div>
  <div class="card"><h2>Treats &amp; toys</h2><div class="shopgrid">${TREATS.map(t=>`<div class="card"><div style="font-size:40px">${t.e}</div><b>${t.name}</b><div class="mute">+${t.h} ❤️</div><button class="p" data-a="treat" data-k="${t.id}">${t.price} 🪙</button></div>`).join('')}</div></div>
  <div class="card"><h2>Accessories</h2><div class="shopgrid">${Object.entries(ACC).map(([id,a])=>{const own=S.owned.includes(id),on=S.eq[a.slot]===id;
   return `<div class="card">${accIcon(id)}<br><b>${a.name}</b><br>${own?`<button class="${on?'p':'s'}" data-a="equip" data-k="${id}">${on?'Wearing ✓':'Wear'}</button>`:`<button class="p" data-a="buy" data-k="${id}">${a.price} 🪙</button>`}</div>`}).join('')}</div></div>`}
@@ -844,10 +874,10 @@ function openStart(excited){const u=S.user,cls=S.classes,t=cls.length?cls.map(c=
 
 /* ---- settings ---- */
 function openSettings(){const u=S.user;openModal(`<h2>⚙️ Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea><label style="display:block;margin-top:6px">Floating widget</label><div><span class="chip ${S.pref.autoFloat===false?'':'on'}" id="autof" data-a="toggleauto">${S.pref.autoFloat===false?'':'✓ '}Float ${esc(DN())} on my screen when I open the app</span></div><p class="mute" style="margin-top:0">Works in desktop Chrome or Edge. He stays on top of Brightspace, Google and other tabs.</p><button class="p" data-a="savesettings" style="width:100%">Save</button><hr style="border:0;border-top:2px dotted #f1d9b5;margin:14px 0"><button class="${view.reset?'p bad':'s'}" data-a="resetall" style="width:100%">${view.reset?'Really erase everything?':'Erase everything & start over'}</button>`)}
-Object.assign(ACTIONS,{settings(){view.reset=false;openSettings()},
+Object.assign(ACTIONS,{settings(){view.reset=false;tab='dog';view.dsub='me';render()},
  toggleauto(){S.pref.autoFloat=S.pref.autoFloat===false;save();const e=$('#autof');if(e){e.classList.toggle('on',S.pref.autoFloat!==false);e.textContent=(S.pref.autoFloat!==false?'✓ ':'')+'Float '+DN()+' on my screen when I open the app'}},
  savesettings(){const u=S.user;u.name=$('#sn').value.trim()||u.name;u.dogName=($('#sd').value.trim()||'Winston').slice(0,20);u.goals=$('#sg').value.trim();save();closeModal();render();drawWidget();toast('Saved!')},
- resetall(){if(!view.reset){view.reset=true;openSettings();return}try{localStorage.removeItem(KEY)}catch(e){}S=load();S.logs=[];S.drive={root:null,classes:{}};S.pref={autoDocs:true};S.days={};ob=1;tab='home';view.reset=false;closeModal();render();drawWidget()}});
+ resetall(){if(!view.reset){view.reset=true;render();return}try{localStorage.removeItem(KEY)}catch(e){}S=load();S.logs=[];S.drive={root:null,classes:{}};S.pref={autoDocs:true};S.days={};ob=1;tab='home';view.reset=false;closeModal();render();drawWidget()}});
 
 /* ---- calendar ---- */
 function eventsOn(c,iso){const d=fromIso(iso),out=c.events.filter(e=>e.date===iso);
@@ -861,16 +891,18 @@ function rCal(c){const now=new Date(),cv=view.cal||(view.cal={y:now.getFullYear(
  const sel=view.calSel||todayIso();view.calSel=sel;let cells='';
  for(let i=0;i<42;i++){const d=new Date(st);d.setDate(st.getDate()+i);const iso=isoD(d),ev=eventsOn(c,iso);
   cells+=`<div class="day ${d.getMonth()!==cv.m?'other':''} ${iso===todayIso()?'today':''} ${iso===sel?'sel':''}" data-a="calsel" data-k="${iso}">${d.getDate()}<div class="dots">${ev.slice(0,3).map(e=>`<i style="background:${EVT[e.type][1]}"></i>`).join('')}</div></div>`}
- const dayEv=eventsOn(c,sel),up=c.events.filter(e=>e.date>=todayIso()).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,8);
- $('#sub').innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><button class="s" data-a="calnav" data-k="-1">‹</button><h3 style="margin:0">${first.toLocaleString(undefined,{month:'long',year:'numeric'})}</h3><button class="s" data-a="calnav" data-k="1">›</button></div>
+ const dayEv=eventsOn(c,sel),up=c.events.filter(e=>e.date>=todayIso()).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,6);
+ SUB().innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><button class="s" data-a="calnav" data-k="-1">‹</button><h3 style="margin:0">📅 ${first.toLocaleString(undefined,{month:'long',year:'numeric'})}</h3><button class="s" data-a="calnav" data-k="1">›</button></div>
   <div class="cal" style="margin-top:8px">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(x=>`<div class="dow">${x}</div>`).join('')}${cells}</div>
-  <div class="mute" style="margin-top:8px">${Object.values(EVT).map(([n,col])=>`<span style="margin-right:8px"><i class="dot" style="background:${col};width:8px;height:8px"></i> ${n}</span>`).join('')}</div></div>
- <div class="card"><h3>${fromIso(sel).toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}</h3>
-  ${dayEv.map(e=>`<div class="item"><i class="dot" style="background:${EVT[e.type][1]}"></i><div><b>${esc(e.title)}</b><div class="mute">${EVT[e.type][0]}${e.time?' · '+esc(e.time):''}${e.rec?' · every week':''}</div></div>${e.rec?'':`<button class="s" data-a="editev" data-k="${e.id}" aria-label="Edit event">✎</button><button class="s" data-a="delev" data-k="${e.id}">✕</button>`}</div>`).join('')||'<p class="mute">Nothing on this day.</p>'}
-  <h3 style="margin-top:12px">Add to this day</h3><input id="et" placeholder="e.g. Midterm exam, Essay due"><div class="row"><select id="ety" class="grow">${Object.entries(EVT).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join('')}</select><input id="etm" type="time" class="grow"></div><button class="p" data-a="addev">Add</button></div>
- <div class="card"><h3>Coming up in ${esc(c.name)}</h3>${up.map(e=>`<div class="item"><i class="dot" style="background:${EVT[e.type][1]}"></i><div><b>${esc(e.title)}</b><div class="mute">${fromIso(e.date).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}${e.time?' · '+esc(e.time):''}</div></div></div>`).join('')||'<p class="mute">No dates yet.</p>'}
-  <button class="s" data-a="finddates" style="margin-top:8px">📄 Find dates in my syllabus &amp; materials</button><div id="datestat" class="mute"></div></div>
- <div class="card"><h3>When does ${esc(c.name)} meet?</h3><div>${[1,2,3,4,5,6,0].map(n=>`<span class="chip ${c.meet.days.includes(n)?'on':''}" data-a="meetday" data-k="${n}">${DAYN[n]}</span>`).join('')}</div><div class="row"><input id="ms" type="time" value="${esc(c.meet.start||'')}" class="grow"><span>to</span><input id="me" type="time" value="${esc(c.meet.end||'')}" class="grow"></div><button class="s" data-a="savemeet">Save schedule</button></div>`}
+  <h3 style="margin-top:12px">${fromIso(sel).toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}</h3>
+  ${dayEv.map(e=>`<div class="item"><i class="dot" style="background:${EVT[e.type][1]}"></i><div><b>${esc(e.title)}</b><div class="mute">${EVT[e.type][0]}${e.time?' · '+esc(e.time):''}${e.rec?' · every week':''}</div></div>${e.rec?'':`<button class="s" data-a="editev" data-k="${e.id}" aria-label="Edit event">✎</button><button class="s" data-a="delev" data-k="${e.id}">✕</button>`}</div>`).join('')||'<p class="mute" style="margin:0 0 6px">Nothing on this day.</p>'}
+  <div class="row" style="margin-top:8px"><input id="et" class="grow" style="margin:0;min-width:140px" placeholder="Add an event…"><select id="ety" style="width:auto;margin:0">${Object.entries(EVT).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join('')}</select><input id="etm" type="time" style="width:auto;margin:0"><button class="p" data-a="addev">Add</button></div></div>
+ <details id="sched" class="card" ${view.sched?'open':''}><summary><b>Schedule &amp; syllabus dates</b></summary>
+  <h3>Coming up</h3>${up.map(e=>`<div class="item"><i class="dot" style="background:${EVT[e.type][1]}"></i><div><b>${esc(e.title)}</b><div class="mute">${fromIso(e.date).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}${e.time?' · '+esc(e.time):''}</div></div></div>`).join('')||'<p class="mute">No dates yet.</p>'}
+  <button class="s" data-a="finddates" style="margin-top:6px">📄 Find dates in my syllabus</button>
+  <h3 style="margin-top:12px">When does it meet?</h3><div>${[1,2,3,4,5,6,0].map(n=>`<span class="chip ${c.meet.days.includes(n)?'on':''}" data-a="meetday" data-k="${n}">${DAYN[n]}</span>`).join('')}</div><div class="row"><input id="ms" type="time" value="${esc(c.meet.start||'')}" class="grow"><span>to</span><input id="me" type="time" value="${esc(c.meet.end||'')}" class="grow"></div><button class="s" data-a="savemeet">Save schedule</button></details>`;
+ keepOpen('#sched','sched')}
+
 const MON={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
 const guessType=t=>{t=t.toLowerCase();return /exam|midterm|final|quiz|test/.test(t)?'exam':/due|assign|homework|\bhw\b|paper|project|essay|submit|case/.test(t)?'assignment':/read|chapter|\bch\./.test(t)?'reading':'other'};
 function parseDates(text){const out=[],now=new Date(),flat=text.replace(/[ \t]+/g,' ');
@@ -894,7 +926,7 @@ Object.assign(ACTIONS,{
  delev(d){const c=cur();c.events=c.events.filter(e=>e.id!==d.k);save();render()},
  meetday(d){const c=cur(),n=+d.k,i=c.meet.days.indexOf(n);i<0?c.meet.days.push(n):c.meet.days.splice(i,1);save();render()},
  savemeet(){const c=cur();c.meet.start=$('#ms').value;c.meet.end=$('#me').value;save();toast('Class schedule saved');render()},
- async finddates(){const c=cur();if(!c.docs.length)return toast('Upload your syllabus in Materials first');$('#datestat').textContent='Looking for dates…';const n=await findDates(c,c.docs);render();$('#datestat').textContent=n?`✅ Added ${n} dates to your calendar.`:'No new dates found.'}});
+ async finddates(){const c=cur();if(!c.docs.length)return toast('Upload your syllabus in Materials first');toast('Looking for dates…');const n=await findDates(c,c.docs);view.sched=true;render();toast(n?`✅ Added ${n} dates to your calendar.`:'No new dates found.')}});
 
 /* ---- study timer ---- */
 const secsFor=(cid,since)=>S.logs.filter(l=>l.cls===cid&&(!since||l.start>=since)).reduce((a,l)=>a+l.secs,0);
@@ -922,11 +954,15 @@ function weekCard(){if(!S.classes.length)return'';const worst=[...S.classes].sor
 function rTime(c){const days=[...Array(7)].map((_,i)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-6+i);const a=d.getTime(),b=a+864e5;return [DAYN[d.getDay()],S.logs.filter(l=>l.cls===c.id&&l.start>=a&&l.start<b).reduce((x,l)=>x+l.secs,0)]});
  const mx=Math.max(600,...days.map(d=>d[1])),kinds={study:0,class:0,practice:0};S.logs.filter(l=>l.cls===c.id&&l.start>=weekStart().getTime()).forEach(l=>kinds[l.kind]=(kinds[l.kind]||0)+l.secs);
  const sec=weekSecs(c),goal=c.goalMin*60,t=S.timer;
- $('#sub').innerHTML=`<div class="card"><h2>⏱ Study time</h2>${t&&t.cls===c.id?timerBlock():t?'<p class="mute">A timer is running for another class. Stop it first.</p>':`<button class="p" data-a="starttimer" data-k="${c.id}">▶ Start studying ${esc(c.name)}</button>`}
-  <div style="margin:12px 0"><div class="row" style="justify-content:space-between"><b>This week</b><span class="mute">${fmtDur(sec)} / ${fmtDur(goal)}</span></div><div class="bar"><i style="width:${Math.min(100,Math.round(sec/goal*100))}%"></i></div></div><p class="bubble">${nudgeFor(c)}</p></div>
- <div class="card"><h3>Last 7 days</h3><div class="row" style="align-items:flex-end;height:110px;gap:6px">${days.map(d=>`<div style="flex:1;text-align:center"><div class="mute" style="font-size:11px">${d[1]?Math.round(d[1]/60)+'m':''}</div><div style="background:linear-gradient(#97ee78,#4cc455);height:${Math.max(3,d[1]/mx*70)}px;border-radius:6px 6px 0 0"></div><div class="mute" style="font-size:11px">${d[0]}</div></div>`).join('')}</div><p class="mute">This week: ${fmtDur(kinds.study)} studying · ${fmtDur(kinds.class)} in class · ${fmtDur(kinds.practice)} practicing</p></div>
- <div class="card"><h3>Weekly goal</h3><p class="mute">A common rule of thumb is 2–3 hours of study per credit hour each week.</p><div class="row"><input id="goal" type="number" step="0.5" min="0.5" max="40" value="${c.goalMin/60}" style="width:110px;margin:0"><span>hours per week</span><button class="s" data-a="savegoal">Save</button></div><h3 style="margin-top:12px">Add time by hand</h3><div class="row"><input id="man" type="number" min="1" max="600" placeholder="minutes" style="width:120px;margin:0"><button class="s" data-a="addmanual">Add</button></div></div>
- <div class="card"><h3>Recent sessions</h3>${S.logs.filter(l=>l.cls===c.id).slice(-8).reverse().map(l=>`<div class="item"><div><b>${fmtDur(l.secs)}</b> <span class="mute">${esc(l.kind)} · ${esc(new Date(l.start).toLocaleString())}</span></div><button class="s" data-a="dellog" data-k="${l.id}">✕</button></div>`).join('')||'<p class="mute">No sessions yet.</p>'}</div>`}
+ SUB().innerHTML=`<div class="card"><h3>⏱ Study time this week</h3><div class="row" style="justify-content:space-between"><span class="mute">${fmtDur(sec)} of ${fmtDur(goal)}</span><span class="mute">goal ${c.goalMin/60}h</span></div><div class="bar" style="margin-bottom:8px"><i style="width:${Math.min(100,Math.round(sec/goal*100))}%"></i></div><p class="bubble" style="margin:6px 0 10px">${nudgeFor(c)}</p>
+ ${t&&t.cls===c.id?timerBlock():t?'<p class="mute">A timer is running for another class.</p>':`<button class="p" data-a="starttimer" data-k="${c.id}">▶ Start studying</button>`}
+ <details id="tmore" style="margin-top:10px" ${view.tmore?'open':''}><summary><b>More: goal, history, add time</b></summary>
+ <div class="row"><input id="goal" type="number" step="0.5" min="0.5" max="40" value="${c.goalMin/60}" style="width:100px;margin:0"><span>hours per week</span><button class="s" data-a="savegoal">Save</button></div>
+ <div class="row" style="margin-top:8px"><input id="man" type="number" min="1" max="600" placeholder="minutes" style="width:100px;margin:0"><button class="s" data-a="addmanual">Add time by hand</button></div>
+ <h3 style="margin-top:12px">Last 7 days</h3><div class="row" style="align-items:flex-end;height:100px;gap:6px">${days.map(d=>`<div style="flex:1;text-align:center"><div class="mute" style="font-size:11px">${d[1]?Math.round(d[1]/60)+'m':''}</div><div style="background:linear-gradient(#97ee78,#4cc455);height:${Math.max(3,d[1]/mx*60)}px;border-radius:6px 6px 0 0"></div><div class="mute" style="font-size:11px">${d[0]}</div></div>`).join('')}</div><p class="mute">${fmtDur(kinds.study)} studying · ${fmtDur(kinds.class)} in class · ${fmtDur(kinds.practice)} practicing</p>
+ <h3 style="margin-top:8px">Recent sessions</h3>${S.logs.filter(l=>l.cls===c.id).slice(-6).reverse().map(l=>`<div class="item"><div><b>${fmtDur(l.secs)}</b> <span class="mute">${esc(l.kind)} · ${esc(new Date(l.start).toLocaleDateString())}</span></div><button class="s" data-a="dellog" data-k="${l.id}">✕</button></div>`).join('')||'<p class="mute">No sessions yet.</p>'}</details></div>`;
+ keepOpen('#tmore','tmore')}
+
 Object.assign(ACTIONS,{
  starttimer(d){const cid=d.k||($('#tcls')&&$('#tcls').value);if(!cid)return;view.tcls=cid;startTimer(cid)},
  stoptimer(){stopTimer()},
@@ -952,7 +988,7 @@ async function makeNotes(c,ses){let n=null;if(!ses.lines.length)return;
  if(AI.sm&&ses.lines.length){try{n=normNotes(await aiJson(`${persona()}\n\nTASK: Turn what the teacher said in class into clear, well-organized study notes. Group related points under short headings. Lines starting with [My note] are the student's own notes — include them. Use the class materials for correct terms and spelling. Return ONLY JSON: {"title":"short title","summary":["1-3 bullets"],"sections":[{"heading":"...","bullets":["..."]}],"terms":[{"term":"...","def":"..."}],"todo":["assignments or dates mentioned"],"questions":["2-3 good review questions"]}\n\n${ctxOf(c)}\n\nTEACHER SAID TODAY (in order):\n${ses.lines.slice(-120).map(l=>'- '+l).join('\n')}`),c)}catch(e){if(e&&e.code==='not_granted')AI.sm=null}}
  if(!n)n=normNotes(notesFallback(c,ses),c)||{title:`${c.name} — class notes`,summary:['Nothing was recorded in this class.'],sections:[],terms:[],todo:[],questions:[]};
  ses.notes={data:n,text:notesText(c,ses,n),html:notesHtml(c,ses,n),status:'',link:'',err:''};save();
- if(tab==='class'&&view.cls===c.id&&view.sub==='notes')render();
+ if(tab==='class'&&view.cls===c.id&&view.sub==='review')render();
  if(S.pref.autoDocs&&AI.mcp)driveSave(c,ses)}
 const GD='Google Drive';
 function idOf(p){const seen=new Set(),f=o=>{if(!o||typeof o!=='object'||seen.has(o))return null;seen.add(o);if(typeof o.id==='string'&&o.id)return o.id;if(typeof o.fileId==='string'&&o.fileId)return o.fileId;for(const v of Object.values(o)){const r=f(v);if(r)return r}return null};
@@ -970,20 +1006,23 @@ function driveErr(e){const c=e&&e.code;
  if(c==='blocked_by_policy')return 'Your organization blocks Google Drive for this page.';
  if(c==='server_unavailable'||c==='upstream_error')return 'Google Drive didn\'t answer. Tap Save again to retry.';
  return 'Couldn\'t save to Google Drive'+(e&&e.message?': '+String(e.message).slice(0,120):'.')}
-async function driveSave(c,ses){const mcp=AI.mcp,nt=ses&&ses.notes;if(!mcp||!nt)return;nt.status='saving';nt.err='';save();if(view.sub==='notes'&&tab==='class')render();
+async function driveSave(c,ses){const mcp=AI.mcp,nt=ses&&ses.notes;if(!mcp||!nt)return;nt.status='saving';nt.err='';save();if(view.sub==='review'&&tab==='class')render();
  const attempt=async fresh=>{if(fresh)S.drive={root:null,classes:{}};
   const root=S.drive.root||(S.drive.root=await gFolder(mcp,'Winston Notes')),cf=S.drive.classes[c.id]||(S.drive.classes[c.id]=await gFolder(mcp,c.name,root));
   const r=await mcp.callTool(GD,'create_file',{title:`${ses.date.split(',')[0]} — ${nt.data.title}`.slice(0,150),parentId:cf,contentMimeType:'text/html',textContent:nt.html}),id=idOf(r.payload);
   nt.link=urlOf(r.payload)||(id?`https://docs.google.com/document/d/${id}/edit`:'');nt.status='saved';save()};
  try{try{await attempt(false)}catch(e){if(e&&e.code==='tool_error'&&S.drive.root)await attempt(true);else throw e}}
  catch(e){nt.status='error';nt.err=driveErr(e);save()}
- if(tab==='class'&&view.cls===c.id&&view.sub==='notes')render();else if(nt.status==='saved')toast('📝 Notes saved to Google Docs!')}
+ if(tab==='class'&&view.cls===c.id&&view.sub==='review')render();else if(nt.status==='saved')toast('📝 Notes saved to Google Docs!')}
 async function downloadText(name,text){const fn=name.replace(/[\\/:*?"<>|]/g,'-');
  try{const dl=window.claude&&claude.use?await claude.use('downloads'):null;if(dl){await dl.save({filename:fn,data:new Blob([text],{type:'text/markdown'})});return}}catch(e){if(e&&e.code==='declined')return}
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/markdown'}));a.download=fn;a.click()}
-function rNotes(c){const list=[...c.sessions].reverse();
- $('#sub').innerHTML=`<div class="card"><h3>✍️ Make notes from text</h3><p class="mute">Paste or type anything — what you remember from class, raw notes, a transcript — and ${esc(DN())} will organize it.</p><textarea id="nt" placeholder="Paste or type here…"></textarea><button class="p" data-a="notesfromtext">Organize into notes</button></div>${c.scratch&&c.scratch.length?`<div class="card"><h3>📌 Quick notes</h3>${c.scratch.map(x=>`<div class="item"><div>${esc(x.text)}<div class="mute">${esc(x.date)}</div></div><button class="s" data-a="delscratch" data-k="${x.id}">✕</button></div>`).join('')}<button class="p" data-a="orgscratch">Turn into organized notes</button></div>`:''}<div class="card"><h2>🗒 ${esc(DN())}'s class notes</h2><p class="mute">During live class ${esc(DN())} jots down what your teacher says and organizes it for you. ${AI.mcp?`Notes can be saved to your Google Drive in <b>Winston Notes › ${esc(c.name)}</b>.`:'Saving to Google Docs works on the published Claude page.'}</p>${AI.mcp?`<span class="chip ${S.pref.autoDocs?'on':''}" data-a="toggledocs">${S.pref.autoDocs?'✓ ':''}Auto-save to Google Docs after class</span>`:''}</div>`+
- (list.map(ses=>{const n=ses.notes;return `<div class="card"><h3>${esc(ses.date)}</h3>${n?`<div class="mute">${esc(n.data.title)}</div><details style="margin:8px 0"><summary>View notes</summary><div class="nbox">${esc(n.text)}</div></details><div class="row"><button class="s" data-a="dlnote" data-k="${ses.id}">⬇ Download</button>${AI.mcp?`<button class="p" data-a="savedoc" data-k="${ses.id}">${n.status==='saved'?'Save another copy':'💾 Save to Google Docs'}</button>`:''}</div>${n.status==='saving'?'<p class="mute">Saving to Google Docs…</p>':''}${n.status==='saved'&&n.link?`<p class="mute">✅ Saved to Google Docs: <a href="${esc(n.link)}" target="_blank" rel="noopener">open the notes</a></p>`:''}${n.status==='error'?`<p class="mute">⚠️ ${esc(n.err)}</p>`:''}`:`<p class="mute">No notes yet for this class.</p><button class="p" data-a="mknotes" data-k="${ses.id}">📝 Make notes</button>`}</div>`}).join('')||`<div class="card"><p class="mute">No classes recorded yet. Start a live class and I'll take notes for you!</p></div>`)}
+function rNotes(c){const list=[...c.sessions].reverse().filter(x=>x.lines&&x.lines.length);
+ SUB().innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">🗒 Notes</h3>${AI.mcp?`<span class="chip ${S.pref.autoDocs?'on':''}" data-a="toggledocs">${S.pref.autoDocs?'✓ ':''}Auto-save to Google Docs</span>`:''}</div>
+ ${list.map(ses=>{const n=ses.notes;return `<div class="item" style="display:block"><b>${esc(ses.date.split(',')[0])}${n?' · '+esc(n.data.title):''}</b>${n?`<details><summary class="mute">View notes</summary><div class="nbox">${esc(n.text)}</div></details><div class="row" style="margin-top:6px"><button class="s" data-a="dlnote" data-k="${ses.id}">⬇ Download</button>${AI.mcp?`<button class="${n.status==='saved'?'s':'p'}" data-a="savedoc" data-k="${ses.id}">${n.status==='saved'?'Save another copy':'💾 Save to Google Docs'}</button>`:''}</div>${n.status==='saving'?'<p class="mute">Saving to Google Docs…</p>':''}${n.status==='saved'&&n.link?`<p class="mute">✅ Saved: <a href="${esc(n.link)}" target="_blank" rel="noopener">open the notes</a></p>`:''}${n.status==='error'?`<p class="mute">⚠️ ${esc(n.err)}</p>`:''}`:`<div><button class="p" data-a="mknotes" data-k="${ses.id}">📝 Make notes</button></div>`}</div>`}).join('')||'<p class="mute">Notes from your live classes show up here.</p>'}
+ <details id="byhand" style="margin-top:10px" ${view.byhand?'open':''}><summary><b>✍️ Add notes by hand</b></summary><textarea id="nt" placeholder="Paste or type what you remember, or your own notes…"></textarea><button class="p" data-a="notesfromtext">Organize into notes</button>
+ ${c.scratch&&c.scratch.length?`<h3 style="margin-top:12px">📌 Quick notes</h3>${c.scratch.map(x=>`<div class="item"><div>${esc(x.text)}<div class="mute">${esc(x.date)}</div></div><button class="s" data-a="delscratch" data-k="${x.id}">✕</button></div>`).join('')}<button class="p" data-a="orgscratch">Turn into organized notes</button>`:''}</details></div>`;
+ keepOpen('#byhand','byhand')}
 Object.assign(ACTIONS,{
  toggledocs(){S.pref.autoDocs=!S.pref.autoDocs;save();render()},
  dlnote(d){const c=cur(),ses=c.sessions.find(x=>x.id===d.k);downloadText(`${c.name} notes ${ses.date.split(',')[0]}.md`,ses.notes.text)},
