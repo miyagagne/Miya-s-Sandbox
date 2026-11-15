@@ -28,7 +28,7 @@ button.pri{background:var(--grad);color:#fff}
 button.sm{padding:6px 10px;font-size:13px}
 button:disabled{opacity:.5}
 nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:5}
-nav button{flex:1;background:none;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px}
+nav button{flex:1;padding:6px 2px;background:none;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px}
 nav button span{font-size:22px}
 nav button.on{color:var(--b)}
 .hook{display:flex;gap:8px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
@@ -47,12 +47,23 @@ video{width:100%;max-height:340px;border-radius:14px;background:#000}
 #toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;opacity:0;transition:.25s;pointer-events:none;z-index:9}
 #toast.on{opacity:1}
 .hide{display:none}
+.types{display:grid;gap:10px}
+.type{border:2px solid var(--line);border-radius:18px;padding:14px;cursor:pointer;background:var(--card)}
+.type.on{border-color:var(--b);box-shadow:0 0 0 3px color-mix(in srgb,var(--b) 20%,transparent)}
+.type b{font-size:17px}.type p{margin:4px 0 0;color:var(--mute);font-size:14px}
+.hero{background:var(--grad);color:#fff;border:0}.hero .mute{color:#ffeaf5}.hero button{background:#ffffff33;color:#fff}
+.trend{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.trend:first-of-type{border-top:0}.trend>div{flex:1}.trend p{margin:2px 0 0}
+.day{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);align-items:center}
+.day:first-of-type{border-top:0}.day>b{width:38px;color:var(--b)}.day>div{flex:1}.day p{margin:0}
 </style>
 </head>
 <body>
-<header><img src="icon.svg" alt=""><div><h1>Social Butterfly</h1><small>One idea. Every short-form platform.</small></div></header>
+<header><img src="icon.svg" alt=""><div style="flex:1"><h1>Social Butterfly</h1><small>Your guide to social media</small></div><button class="sm" id="who" style="flex:none"></button></header>
 <main id="app"></main>
 <nav>
+  <button data-t="home"><span>🏠</span>Home</button>
+  <button data-t="trends"><span>🔥</span>Trends</button>
   <button data-t="create"><span>✨</span>Create</button>
   <button data-t="studio"><span>🎬</span>Studio</button>
   <button data-t="queue"><span>🗓️</span>Queue</button>
@@ -81,7 +92,8 @@ const PLAT={
 };
 
 /* ---------- content generator (works offline, no account needed) ---------- */
-const HOOKS=[
+const HOOKS={
+ influencer:[
  t=>`Stop scrolling if you want to get better at ${t}.`,
  t=>`Nobody tells you this about ${t}…`,
  t=>`I tried ${t} for 30 days. Here's what happened.`,
@@ -89,45 +101,164 @@ const HOOKS=[
  t=>`The easiest way to level up your ${t} (takes 60 seconds).`,
  t=>`POV: you finally figured out ${t}.`,
  t=>`Here's what I wish I knew before starting ${t}.`,
- t=>`If your ${t} isn't working, try this one thing.`,
  t=>`Unpopular opinion: ${t} is way easier than people say.`,
- t=>`Steal my ${t} routine — it's free.`,
- t=>`Watch this before you try ${t} again.`,
- t=>`Day in my life, but make it ${t}.`
-];
-const CTAS=['Follow for more!','Save this for later 💾','Send this to a friend who needs it','Comment "YES" and I\'ll share part 2','Which one surprised you? Tell me below 👇'];
-const NICHE_TAGS={fitness:['fitness','workout','gymtok','healthylifestyle'],beauty:['beauty','makeup','skincare','grwm'],food:['foodie','recipe','easyrecipes','cooking'],fashion:['fashion','ootd','style','outfitideas'],travel:['travel','wanderlust','traveltok','explore'],tech:['tech','gadgets','techtok','productivity'],lifestyle:['lifestyle','dayinmylife','routine','aesthetic'],gaming:['gaming','gamer','gametok','streamer'],business:['smallbusiness','sidehustle','entrepreneur','creatoreconomy'],comedy:['comedy','funny','relatable','skit']};
-function buildPack({topic,niche,tone,takeaway}){
+ t=>`Steal my ${t} routine — it's free.`],
+ personal:[
+ t=>`Okay, we need to talk about ${t}.`,
+ t=>`A little peek at ${t} ✨`,
+ t=>`Things that made my week: ${t}.`,
+ t=>`Tell me I'm not the only one who loves ${t}.`,
+ t=>`My honest take on ${t}.`,
+ t=>`Sharing ${t} with you all today.`,
+ t=>`Weekend mood: ${t}.`],
+ business:[
+ t=>`Here's what makes our ${t} different.`,
+ t=>`Behind the scenes of ${t}.`,
+ t=>`3 questions customers always ask about ${t}.`,
+ t=>`Why customers keep coming back for ${t}.`,
+ t=>`Watch how we make ${t}.`,
+ t=>`If you need ${t}, watch this first.`,
+ t=>`The truth about ${t} nobody in our industry says.`]
+};
+const CTAS={influencer:['Follow for more!','Save this for later 💾','Send this to a friend who needs it','Comment "YES" and I\'ll share part 2'],
+ personal:['Tag a friend who gets it 💛','Tell me yours below 👇','Send this to someone you miss','Share your favorite in the comments'],
+ business:['Link in bio 🔗','Tap the link in bio to shop','DM us "INFO" and we\'ll help','Follow us for more tips & offers']};
+const TYPE_TAGS={influencer:['fyp','viral','creator'],personal:['fyp','mood'],business:['smallbusiness','shopsmall','brand']};
+const NICHE_TAGS={fitness:['fitness','workout','gymtok','healthylifestyle'],beauty:['beauty','makeup','skincare','grwm'],food:['foodie','recipe','easyrecipes','cooking'],fashion:['fashion','ootd','style','outfitideas'],travel:['travel','wanderlust','traveltok','explore'],tech:['tech','gadgets','techtok','productivity'],lifestyle:['lifestyle','dayinmylife','routine','aesthetic'],gaming:['gaming','gamer','gametok','streamer'],business:['smallbusiness','sidehustle','entrepreneur','creatoreconomy'],comedy:['comedy','funny','relatable','skit'],retail:['shopsmall','newarrivals','boutique','productreview'],restaurant:['foodie','restaurant','localeats','chefsoftiktok'],services:['smallbiz','beforeandafter','behindthescenes','customerlove'],education:['learnontiktok','studytok','tipsandtricks','edutok']};
+function buildPack({topic,niche,tone,takeaway,type='influencer',hook,trendTag}){
   topic=topic.trim();const slug=w=>w.toLowerCase().replace(/[^a-z0-9]/g,'');
-  const topicTags=[...new Set(topic.split(/\s+/).map(slug).filter(w=>w.length>2).concat([slug(topic)]))].slice(0,3);
-  const tags=[...new Set([...topicTags,...(NICHE_TAGS[niche]||[]),'fyp','viral','shorts','reels','creator'])];
+  const STOP=new Set('our the and for with how what your you that this from are was why who about into black'.split(' '));
+  const topicTags=[...new Set([slug(trendTag||'')].concat(topic.split(/\s+/).map(slug).filter(w=>w.length>3&&!STOP.has(w))))].filter(Boolean).slice(0,2);
+  const tags=[...new Set([...(trendTag?[slug(trendTag)]:[]),...topicTags,...(NICHE_TAGS[niche]||[]),...TYPE_TAGS[type],'shorts','reels'])];
   const em={fun:'😂🔥',chill:'✨',bold:'🚨💥',helpful:'💡✅'}[tone]||'✨';
-  const hooks=pick(HOOKS,6).map(h=>h(topic));
-  const cta=pick(CTAS)[0];
-  const beats=[
+  const hooks=pick(HOOKS[type],6).map(h=>h(topic));if(hook)hooks.unshift(hook);
+  const cta=pick(CTAS[type])[0];
+  const beats=type==='business'?[
+   {t:'0–3s',n:'Hook',d:`Show the product/result first, with text: "${hooks[0]}"`},
+   {t:'3–10s',n:'Problem',d:`Name the customer problem ${topic} solves.`},
+   {t:'10–40s',n:'Solution',d:takeaway?`Show it in action: ${takeaway}.`:'Show it in action — 3 quick shots of how it works.'},
+   {t:'40–50s',n:'Proof',d:'Customer result, review or before/after.'},
+   {t:'50–60s',n:'CTA',d:cta}]:[
    {t:'0–3s',n:'Hook',d:`Say it on camera, big on-screen text: "${hooks[0]}"`},
    {t:'3–10s',n:'Setup',d:`Quick context — who it's for and why ${topic} matters.`},
-   {t:'10–40s',n:'Value',d:takeaway?`Deliver your main point: ${takeaway}. Break into 3 fast cuts.`:`Deliver 3 fast tips or steps. One cut per tip, keep each under 8 seconds.`},
-   {t:'40–50s',n:'Payoff',d:'Show the result / punchline. This is the part people rewatch.'},
-   {t:'50–60s',n:'CTA',d:cta}
-  ];
-  const core=takeaway||`everything I know about ${topic}`;
+   {t:'10–40s',n:type==='personal'?'Moment':'Value',d:takeaway?`Main point: ${takeaway}. Break into 3 quick cuts.`:'Share 3 quick moments or tips. One cut each, under 8 seconds.'},
+   {t:'40–50s',n:'Payoff',d:'Show the result / punchline — the part people rewatch.'},
+   {t:'50–60s',n:'CTA',d:cta}];
+  const core=takeaway||`everything about ${topic}`;
   const caps={
    tiktok:`${hooks[0]} ${em}\n${cta}`,
-   instagram:`${hooks[1]} ${em}\n\n${core.charAt(0).toUpperCase()+core.slice(1)}.\n\n${cta}`,
-   youtube:`${topic} — ${hooks[2].replace(/\.$/,'')}`.slice(0,100)
+   instagram:`${hooks[1]||hooks[0]} ${em}\n\n${core.charAt(0).toUpperCase()+core.slice(1)}.\n\n${cta}`,
+   youtube:`${topic} — ${(hooks[2]||hooks[0]).replace(/\.$/,'')}`.slice(0,100)
   };
-  return {topic,hooks,beats,tags,caps};
+  return {topic,hooks,beats,tags,caps,type};
 }
 
+/* ---------- account types: recommendations & weekly plans ---------- */
+const TYPES={
+ personal:{label:'Personal',emoji:'🙋',blurb:'Share your life, stay close to friends, have fun with no pressure.',cadence:'2–3 posts a week',tone:'chill',maxTags:3,
+  goals:[['Stay in touch with friends','Post Stories and short clips of everyday moments — friends engage most with casual, real posts.'],['Share memories','Make a monthly photo dump or recap video so your memories are easy to look back on.'],['Build a hobby page','Pick one hobby and post it consistently — a niche page grows faster than a mixed one.'],['Just have fun','Try one trend a week for fun. No pressure to be perfect.']],
+  tips:['Keep it casual — natural beats polished on personal accounts.','Use trending sounds from the app\'s own library; they\'re licensed for personal use.','Review your privacy settings: choose who sees your posts and who can DM or tag you.','Reply to friends\' comments — it keeps your circle active and the algorithm happy.'],
+  plan:[['Mon','Photo dump','best moments from my week'],['Tue',null,null],['Wed','Quick clip','a small thing that made me smile this week'],['Thu',null,null],['Fri','Weekend plans','my weekend plans'],['Sat','Trend of the week',null],['Sun',null,null]]},
+ influencer:{label:'Influencer / Creator',emoji:'🌟',blurb:'Grow an audience, build a brand, land partnerships.',cadence:'4–7 posts a week',tone:'fun',maxTags:5,
+  goals:[['Grow followers','Post daily short-form with a strong 3-second hook, and reuse the same video across all three platforms.'],['Land brand deals','Pin your best 3 videos, keep a consistent niche, and track engagement rate — brands ask for it.'],['Go viral','Test 2–3 hooks on the same idea. Posts that keep viewers to the end get pushed hardest.'],['Build community','Reply to comments with video replies and run a weekly Q&A to turn viewers into regulars.']],
+  tips:['Hook in the first 3 seconds — most viewers decide there.','Post at the same times each week so followers know when to expect you.','Batch-film 3–5 videos in one session, then schedule them in the Queue.','Disclose partnerships clearly (#ad or the platform\'s paid-partnership label) — it\'s required in many regions.','Repurpose: one idea → TikTok, Reels and Shorts with platform-specific captions.'],
+  plan:[['Mon','Value tutorial','a quick tutorial in my niche'],['Tue','Trend','Use a trend from the Trends tab'],['Wed','Storytime','a story from my week that taught me something'],['Thu','Behind the scenes','how I make my content'],['Fri','Collab / duet','a reaction or duet with another creator'],['Sat','Day in my life','a day in my life'],['Sun','Community Q&A','answering your questions']]},
+ business:{label:'Business',emoji:'🏪',blurb:'Reach customers, show off what you sell, drive sales and visits.',cadence:'3–5 posts a week',tone:'helpful',maxTags:5,
+  goals:[['Get more customers','Show the problem you solve in the first 3 seconds and end every video with one clear call to action.'],['Build brand awareness','Be consistent: same look, same voice, 3–5 posts a week. Behind-the-scenes builds trust fast.'],['Showcase products','Demo products in use — real hands, real results — instead of static product shots.'],['Drive website traffic','Put your link in bio, say "link in bio" in the video, and pin a comment with the link.']],
+  tips:['Customer proof (reviews, before/after) outperforms ads for small brands.','Use a business account: you get analytics, a contact button and a link in bio.','Reply to every comment in the first hour — it boosts reach.','Use trending sounds from the Commercial Music Library — regular trending sounds are often not cleared for business use.','Plan around sales dates: start posting 7–10 days before big shopping days.'],
+  plan:[['Mon','Product demo','how to use our best seller'],['Tue','Customer review','a happy customer review'],['Wed','How it\'s made','behind the scenes: how we make our product'],['Thu','Myth vs fact','myths about our industry'],['Fri','Offer','this weekend\'s special offer'],['Sat','Meet the team','meet the team behind the business'],['Sun',null,null]]}
+};
+
+/* ---------- trend finder ---------- */
+const nth=(y,m,wd,n)=>{const d=new Date(y,m,1);d.setDate(1+((wd-d.getDay()+7)%7)+7*(n-1));return d};
+function moments(y){const tg=nth(y,10,4,4);const bf=new Date(tg);bf.setDate(bf.getDate()+1);const cm=new Date(tg);cm.setDate(cm.getDate()+4);
+ return[['New Year\'s Day',new Date(y,0,1),0],['Valentine\'s Day',new Date(y,1,14),1],['Earth Day',new Date(y,3,22),0],['Mother\'s Day',nth(y,4,0,2),1],['Father\'s Day',nth(y,5,0,3),1],['Back to School',new Date(y,7,15),1],['Halloween',new Date(y,9,31),1],['Thanksgiving',tg,0],['Black Friday',bf,1],['Cyber Monday',cm,1],['Christmas',new Date(y,11,25),1],['New Year\'s Eve',new Date(y,11,31),0]]}
+const ANGLE={personal:n=>`how I'm celebrating ${n}`,influencer:n=>`${n} content idea that your followers will love`,business:n=>`our ${n} offer and what's new for customers`};
+const FORMATS=[
+ {name:'GRWM (Get Ready With Me)',why:'Chat to camera while doing something you already do — easy and personal.',hook:'Get ready with me for…',types:['personal','influencer'],plat:'TikTok · Reels'},
+ {name:'POV skit',why:'30-second relatable scene shot from the viewer\'s point of view.',hook:'POV: …',types:['influencer','personal','business'],plat:'TikTok · Reels'},
+ {name:'Things I wish I knew',why:'Quick list of lessons. Highly saveable and shareable.',hook:'Things I wish I knew before…',types:['influencer','business'],plat:'All three'},
+ {name:'Day in my life / day at the shop',why:'Fast montage with text captions of your day.',hook:'A day in my life…',types:['personal','influencer','business'],plat:'All three'},
+ {name:'Before & after',why:'Transformation shown in 5 seconds — viewers watch to the end.',hook:'Wait for the after…',types:['business','influencer'],plat:'All three'},
+ {name:'Storytime',why:'Tell a short story with a twist at the end.',hook:'Okay so this happened…',types:['personal','influencer'],plat:'TikTok · Shorts'},
+ {name:'Behind the scenes / how it\'s made',why:'Show the process — builds trust and curiosity.',hook:'Here\'s how we actually make…',types:['business','influencer'],plat:'All three'},
+ {name:'Myth vs fact',why:'Bust a common belief in your niche. Great for comments.',hook:'Stop believing this myth about…',types:['business','influencer'],plat:'All three'},
+ {name:'Reply to a comment with a video',why:'Answer a real comment — instant content idea and community builder.',hook:'Replying to a comment from…',types:['influencer','business'],plat:'TikTok · Reels'},
+ {name:'Customer review spotlight',why:'Show real feedback — social proof beats any ad.',hook:'What customers say about…',types:['business'],plat:'All three'},
+ {name:'Photo dump / carousel',why:'Swipeable photos with a caption — low effort, high engagement.',hook:'Random moments from…',types:['personal','influencer'],plat:'Instagram'},
+ {name:'Tier list / rating things',why:'Rank things in your niche — people love to disagree.',hook:'Ranking every… (fight me)',types:['influencer','personal'],plat:'TikTok · Shorts'}
+];
+let TRENDS=[],LIVE=[];
+fetch('trends.json').then(r=>r.ok?r.json():[]).then(j=>{LIVE=Array.isArray(j)?j:[];if(tab==='trends'||tab==='home')render()}).catch(()=>{});
+function getTrends(){
+  const type=S.profile.type,today=new Date();today.setHours(0,0,0,0);const out=[];
+  LIVE.filter(t=>!t.types||t.types.includes(type)).forEach(t=>out.push({badge:'Live feed',name:t.name,why:t.why||'',topic:t.topic||t.name,hook:t.hook,live:1}));
+  const ms=[];[today.getFullYear(),today.getFullYear()+1].forEach(y=>moments(y).forEach(([n,d,c])=>{const days=Math.round((d-today)/864e5);if(days>=0&&days<=45)ms.push({n,d,c,days})}));
+  ms.sort((a,b)=>a.days-b.days).forEach(m=>out.push({badge:m.days===0?'Today':`in ${m.days} day${m.days>1?'s':''}`,name:m.n,
+    why:m.days>10?`Start planning now — post ${m.days>17?'about a week':'a few days'} ahead for best reach.`:m.days>3?'Film now and post this week.':'Post today or tomorrow while it\'s peak.',
+    topic:ANGLE[type](m.n),trendTag:m.n,moment:1,boost:(type==='business'&&m.c)?1:0}));
+  out.sort((a,b)=>(b.boost||0)-(a.boost||0));
+  const f=pick(FORMATS.filter(x=>x.types.includes(type)),FORMATS.length);
+  f.forEach(x=>out.push({badge:'Evergreen format',name:x.name,why:`${x.why} Best on: ${x.plat}.`,topic:`${x.name.split('/')[0].trim()} — ${S.profile.niche}`,hook:x.hook,format:1}));
+  return out;
+}
+function trendHTML(list,off=0){return list.map((t,i)=>`<div class="trend"><div><b>${esc(t.name)}</b> <span class="chip">${esc(t.badge)}</span><p class="mute">${esc(t.why)}</p></div><button class="sm pri" data-tr="${off+i}">Use</button></div>`).join('')}
+function bindTrends(){document.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{const t=TRENDS[b.dataset.tr];useIdea(t.topic,{hook:t.hook,trendTag:t.moment?t.trendTag:null,trend:t.name})})}
+function useIdea(topic,{hook,trendTag,trend}={}){
+  S.draft={...buildPack({topic,niche:S.profile.niche,tone:S.tone,type:S.profile.type,hook,trendTag}),takeaway:'',trend};
+  save();tab='create';render();scrollTo(0,0)}
+
 /* ---------- state ---------- */
-let S=LS.get('sb_state',{posts:[],draft:null,niche:'lifestyle',tone:'fun'});
+let S=LS.get('sb_state',{posts:[],draft:null,profile:null,tone:'fun'});
+let onboarding=false;
 const save=()=>LS.set('sb_state',S);
-let tab='create',curFile=null,curMeta=null; // video file in memory + {duration,w,h}
+let tab='home',curFile=null,curMeta=null; // video file in memory + {duration,w,h}
 
 /* ---------- views ---------- */
 const app=$('#app');
-function render(){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));({create:vCreate,studio:vStudio,queue:vQueue})[tab]()}
+function render(){
+  const nav=document.querySelector('nav'),who=$('#who');
+  if(!S.profile||onboarding){nav.style.display='none';who.style.display='none';return vOnboard()}
+  nav.style.display='flex';who.style.display='';who.textContent=TYPES[S.profile.type].emoji+' '+TYPES[S.profile.type].label.split(' ')[0];
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+  ({home:vHome,trends:vTrends,create:vCreate,studio:vStudio,queue:vQueue})[tab]()}
+$('#who').onclick=()=>{onboarding=true;render()};
+function vOnboard(){
+  const p=S.profile||{},ob=window._ob=window._ob||{type:p.type||null,goal:p.goal,niche:p.niche||'lifestyle',name:p.name||''};
+  const T=ob.type&&TYPES[ob.type];
+  app.innerHTML=`<div class="card"><h2>Welcome! 🦋 What kind of account are you running?</h2><div class="types">
+    ${Object.entries(TYPES).map(([k,v])=>`<div class="type ${ob.type===k?'on':''}" data-type="${k}"><b>${v.emoji} ${v.label}</b><p>${v.blurb}</p></div>`).join('')}</div></div>
+    ${T?`<div class="card"><h2>A bit more about you</h2><label>Name (optional)</label><input id="nm" value="${esc(ob.name)}">
+    <label>Main goal</label><select id="goal">${T.goals.map(g=>`<option ${ob.goal===g[0]?'selected':''}>${g[0]}</option>`).join('')}</select>
+    <label>${ob.type==='business'?'Type of business / content':'Your niche'}</label><select id="niche">${Object.keys(NICHE_TAGS).map(n=>`<option ${ob.niche===n?'selected':''}>${n}</option>`).join('')}</select>
+    <p><button class="pri" id="done" style="width:100%">Build my plan →</button></p></div>`:''}`;
+  document.querySelectorAll('[data-type]').forEach(c=>c.onclick=()=>{ob.type=c.dataset.type;ob.goal=TYPES[ob.type].goals[0][0];if(!p.niche)ob.niche=ob.type==='business'?'retail':'lifestyle';if($('#nm'))ob.name=$('#nm').value;vOnboard()});
+  if(T){$('#done').onclick=()=>{S.profile={type:ob.type,goal:$('#goal').value,niche:$('#niche').value,name:$('#nm').value.trim()};
+    S.tone=TYPES[ob.type].tone;S.draft=null;onboarding=false;window._ob=null;tab='home';save();render();scrollTo(0,0)}}
+}
+function vHome(){
+  const P=S.profile,T=TYPES[P.type],goalTip=T.goals.find(g=>g[0]===P.goal)?.[1]||'';
+  TRENDS=getTrends();const top=TRENDS.slice(0,3);
+  const jd=new Date().getDay();
+  app.innerHTML=`<div class="card hero"><h2>Hi${P.name?' '+esc(P.name):''}! ${T.emoji}</h2><p style="margin:0">${esc(T.blurb)}<br>Goal: <b>${esc(P.goal)}</b> · Aim for <b>${T.cadence}</b>.</p></div>
+   <div class="card"><h2>🔥 Trends for you right now</h2>${trendHTML(top)}<p><button class="sm" id="more">See all trends</button></p></div>
+   <div class="card"><h2>📅 Your week</h2>${T.plan.map((d,i)=>`<div class="day"><b>${d[0]}</b><div>${d[1]?`<p><b>${esc(d[1])}</b></p><p class="mute">${esc(d[2]||'Pick a trend from the Trends tab')}</p>`:'<p class="mute">Rest & engage — reply to comments and messages</p>'}</div>${d[1]?`<button class="sm" data-plan="${i}">Make</button>`:''}</div>`).join('')}</div>
+   <div class="card"><h2>💡 Picked for you</h2><div class="beat"><b>Your goal</b><br>${esc(goalTip)}</div>${T.tips.map(t=>`<div class="beat">${esc(t)}</div>`).join('')}</div>`;
+  $('#more').onclick=()=>{tab='trends';render()};
+  bindTrends();
+  document.querySelectorAll('[data-plan]').forEach(b=>b.onclick=()=>{const d=T.plan[b.dataset.plan];if(d[2])useIdea(d[2]);else{tab='trends';render()}});
+}
+function vTrends(){
+  TRENDS=getTrends();const live=TRENDS.filter(t=>t.live),mom=TRENDS.filter(t=>t.moment),fmt=TRENDS.filter(t=>t.format);
+  const off=l=>TRENDS.indexOf(l[0]);
+  app.innerHTML=`<div class="card"><h2>🔥 Trends picked for ${esc(TYPES[S.profile.type].label)}</h2><p class="mute">Tap <b>Use</b> to turn any trend into a ready-made hook, script and captions.</p></div>
+   ${live.length?`<div class="card"><h2>⚡ Live feed</h2>${trendHTML(live,off(live))}</div>`:''}
+   <div class="card"><h2>📆 Upcoming moments</h2>${mom.length?trendHTML(mom,off(mom)):'<p class="mute">No big dates in the next 45 days.</p>'}</div>
+   <div class="card"><h2>🎞️ Formats that always work</h2>${trendHTML(fmt,off(fmt))}<p><button class="sm" id="sh">Shuffle</button></p></div>
+   <p class="mute" style="padding:0 6px">Moments are calculated from today's date. Formats are proven evergreen styles. TikTok, Instagram and YouTube don't offer a free public feed of live viral sounds, so for those, check each app's Trending / Creative Center — or add your own entries to <code>trends.json</code> and they'll appear in the Live feed.</p>`;
+  bindTrends();$('#sh').onclick=vTrends;
+}
+
 document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(b){tab=b.dataset.t;render();scrollTo(0,0)}};
 
 function vCreate(){
@@ -135,19 +266,19 @@ function vCreate(){
   app.innerHTML=`<div class="card"><h2>What are you posting about?</h2>
     <label>Topic or idea</label><input id="topic" placeholder="e.g. 5-minute morning routine" value="${esc(d?.topic||'')}">
     <label>What's the one takeaway? (optional)</label><input id="take" placeholder="e.g. wake up earlier without feeling tired" value="${esc(d?.takeaway||'')}">
-    <div class="row"><div><label>Niche</label><select id="niche">${Object.keys(NICHE_TAGS).map(n=>`<option ${S.niche===n?'selected':''}>${n}</option>`).join('')}</select></div>
+    <div class="row"><div><label>Niche</label><select id="niche">${Object.keys(NICHE_TAGS).map(n=>`<option ${S.profile.niche===n?'selected':''}>${n}</option>`).join('')}</select></div>
     <div><label>Vibe</label><select id="tone">${['fun','chill','bold','helpful'].map(n=>`<option ${S.tone===n?'selected':''}>${n}</option>`).join('')}</select></div></div>
     <p><button class="pri" id="gen" style="width:100%">✨ Generate my content pack</button></p></div>
     <div id="pack"></div>`;
   $('#gen').onclick=()=>{const topic=$('#topic').value.trim();if(!topic)return toast('Add a topic first');
-    S.niche=$('#niche').value;S.tone=$('#tone').value;
-    S.draft={...buildPack({topic,niche:S.niche,tone:S.tone,takeaway:$('#take').value.trim()}),takeaway:$('#take').value.trim()};
+    S.profile.niche=$('#niche').value;S.tone=$('#tone').value;
+    S.draft={...buildPack({topic,niche:S.profile.niche,tone:S.tone,type:S.profile.type,takeaway:$('#take').value.trim()}),takeaway:$('#take').value.trim()};
     save();showPack()};
   if(d)showPack();
 }
 function showPack(){
   const d=S.draft;
-  $('#pack').innerHTML=`
+  $('#pack').innerHTML=`${d.trend?`<div class="card"><span class="chip">🔥 Using: ${esc(d.trend)}</span></div>`:''}
    <div class="card"><h2>🎣 Hooks <button class="sm" id="re" style="float:right">Shuffle</button></h2>
      ${d.hooks.map((h,i)=>`<div class="hook"><p>${esc(h)}</p><button class="sm" data-c="${i}">Copy</button></div>`).join('')}</div>
    <div class="card"><h2>📋 60-second script</h2>
@@ -155,7 +286,7 @@ function showPack(){
    <div class="card"><h2>#️⃣ Hashtags</h2><div class="chips">${d.tags.map(t=>`<span class="chip">#${esc(t)}</span>`).join('')}</div>
      <p><button class="sm" id="ct">Copy all</button></p></div>
    <button class="pri" id="go" style="width:100%">🎬 Take this to Studio →</button>`;
-  $('#re').onclick=()=>{S.draft={...buildPack({topic:d.topic,niche:S.niche,tone:S.tone,takeaway:d.takeaway}),takeaway:d.takeaway};save();showPack()};
+  $('#re').onclick=()=>{S.draft={...buildPack({topic:d.topic,niche:S.profile.niche,tone:S.tone,type:S.profile.type,takeaway:d.takeaway}),takeaway:d.takeaway};save();showPack()};
   document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>copy(d.hooks[b.dataset.c]));
   $('#ct').onclick=()=>copy(d.tags.map(t=>'#'+t).join(' '));
   $('#go').onclick=()=>{tab='studio';render()};
@@ -163,8 +294,8 @@ function showPack(){
 
 function checks(p,key){
   const P=PLAT[key],out=[],cap=p.caps[key]||'',tags=(p.tagSel[key]||[]);
-  const full=cap+(tags.length?'\n\n'+tags.map(t=>'#'+t).join(' '):'');
-  out.push(full.length<=P.maxCap?['ok',`Caption length ${full.length}/${P.maxCap}`]:['bad',`Caption too long (${full.length}/${P.maxCap})`]);
+  const full=cap+(tags.length?'\n\n'+tags.map(t=>'#'+t).join(' '):'');const lenTxt=key==='youtube'?cap:full;
+  out.push(lenTxt.length<=P.maxCap?['ok',`${key==='youtube'?'Title':'Caption'} length ${lenTxt.length}/${P.maxCap}`]:['bad',`${key==='youtube'?'Title':'Caption'} too long (${lenTxt.length}/${P.maxCap})`]);
   out.push(tags.length<=P.maxTags?['ok',`${tags.length} hashtags (best ≤ ${P.maxTags})`]:['warn',`${tags.length} hashtags — ${P.maxTags} or fewer performs best`]);
   if(curMeta){
     out.push(curMeta.h>curMeta.w?['ok','Vertical 9:16 ✓']:['bad','Not vertical — crop to 9:16']);
@@ -174,7 +305,7 @@ function checks(p,key){
 }
 function postObj(){
   const d=S.draft;if(!d)return null;
-  d.tagSel=d.tagSel||{tiktok:d.tags.slice(0,5),instagram:d.tags.slice(0,5),youtube:d.tags.slice(0,3)};
+  const m=TYPES[S.profile.type].maxTags;d.tagSel=d.tagSel||{tiktok:d.tags.slice(0,m),instagram:d.tags.slice(0,m),youtube:d.tags.slice(0,Math.min(3,m))};
   return d;
 }
 function vStudio(){
