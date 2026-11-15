@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Social Butterfly</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<meta name="theme-color" content="#7c5cff">
+<style>
+:root{--bg:#fff5fa;--card:#fff;--ink:#2a1f3d;--mute:#7b6f92;--line:#eadff3;--a:#ff5fa2;--b:#7c5cff;--ok:#1fa971;--warn:#e08a00;--bad:#d6335a;--grad:linear-gradient(135deg,var(--a),var(--b))}
+@media(prefers-color-scheme:dark){:root{--bg:#151022;--card:#201833;--ink:#f4eeff;--mute:#a99bc4;--line:#352a4f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding-bottom:84px}
+header{padding:18px 16px 6px;max-width:720px;margin:0 auto;display:flex;align-items:center;gap:10px}
+header img{width:38px;height:38px;border-radius:10px}
+h1{font-size:22px;margin:0;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+header small{color:var(--mute);display:block;margin-top:-2px}
+main{max-width:720px;margin:0 auto;padding:8px 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0}
+h2{font-size:17px;margin:0 0 10px}
+label{display:block;font-size:13px;color:var(--mute);margin:10px 0 4px}
+input,textarea,select{width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
+textarea{min-height:88px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1}
+button{font:inherit;border:0;border-radius:12px;padding:11px 14px;cursor:pointer;background:var(--line);color:var(--ink);font-weight:600}
+button.pri{background:var(--grad);color:#fff}
+button.sm{padding:6px 10px;font-size:13px}
+button:disabled{opacity:.5}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:5}
+nav button{flex:1;background:none;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px}
+nav button span{font-size:22px}
+nav button.on{color:var(--b)}
+.hook{display:flex;gap:8px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.hook:first-of-type{border-top:0}.hook p{margin:0;flex:1}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip{background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:13px}
+.plat{border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px}
+.plat h3{margin:0 0 6px;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+.chk{font-size:13px;margin:4px 0}.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.beat{padding:8px 0;border-top:1px solid var(--line)}.beat:first-of-type{border-top:0}.beat b{color:var(--b)}
+video{width:100%;max-height:340px;border-radius:14px;background:#000}
+.item{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}.item>div{flex:1;min-width:0}.item p{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mute{color:var(--mute);font-size:13px}
+.stat{display:flex;gap:8px}.stat div{flex:1;text-align:center;background:var(--bg);border-radius:14px;padding:10px}.stat b{display:block;font-size:22px}
+#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;opacity:0;transition:.25s;pointer-events:none;z-index:9}
+#toast.on{opacity:1}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header><img src="icon.svg" alt=""><div><h1>Social Butterfly</h1><small>One idea. Every short-form platform.</small></div></header>
+<main id="app"></main>
+<nav>
+  <button data-t="create"><span>✨</span>Create</button>
+  <button data-t="studio"><span>🎬</span>Studio</button>
+  <button data-t="queue"><span>🗓️</span>Queue</button>
+</nav>
+<div id="toast"></div>
+
+<script>
+/* ---------- tiny helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s), esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pick=(a,n=1)=>[...a].sort(()=>Math.random()-.5).slice(0,n);
+const uid=()=>Math.random().toString(36).slice(2,9);
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),1800)}
+async function copy(txt){try{await navigator.clipboard.writeText(txt);toast('Copied!')}catch{prompt('Copy this:',txt)}}
+
+/* ---------- storage: localStorage for data, IndexedDB for video files ---------- */
+const LS={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+const idb=()=>new Promise((res,rej)=>{const r=indexedDB.open('sb',1);r.onupgradeneeded=()=>r.result.createObjectStore('v');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+async function vPut(k,f){try{const d=await idb();d.transaction('v','readwrite').objectStore('v').put(f,k)}catch{}}
+async function vGet(k){try{const d=await idb();return await new Promise(r=>{const q=d.transaction('v').objectStore('v').get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)})}catch{return null}}
+
+/* ---------- platforms ---------- */
+const PLAT={
+  tiktok:{name:'TikTok',emoji:'🎵',maxCap:2200,maxTags:5,maxSec:600,openUrl:'https://www.tiktok.com/upload'},
+  instagram:{name:'Instagram Reels',emoji:'📸',maxCap:2200,maxTags:5,maxSec:180,openUrl:'https://www.instagram.com/'},
+  youtube:{name:'YouTube Shorts',emoji:'▶️',maxCap:100,maxTags:3,maxSec:180,openUrl:'https://studio.youtube.com/'}
+};
+
+/* ---------- content generator (works offline, no account needed) ---------- */
+const HOOKS=[
+ t=>`Stop scrolling if you want to get better at ${t}.`,
+ t=>`Nobody tells you this about ${t}…`,
+ t=>`I tried ${t} for 30 days. Here's what happened.`,
+ t=>`3 ${t} mistakes you're probably making right now.`,
+ t=>`The easiest way to level up your ${t} (takes 60 seconds).`,
+ t=>`POV: you finally figured out ${t}.`,
+ t=>`Here's what I wish I knew before starting ${t}.`,
+ t=>`If your ${t} isn't working, try this one thing.`,
+ t=>`Unpopular opinion: ${t} is way easier than people say.`,
+ t=>`Steal my ${t} routine — it's free.`,
+ t=>`Watch this before you try ${t} again.`,
+ t=>`Day in my life, but make it ${t}.`
+];
+const CTAS=['Follow for more!','Save this for later 💾','Send this to a friend who needs it','Comment "YES" and I\'ll share part 2','Which one surprised you? Tell me below 👇'];
+const NICHE_TAGS={fitness:['fitness','workout','gymtok','healthylifestyle'],beauty:['beauty','makeup','skincare','grwm'],food:['foodie','recipe','easyrecipes','cooking'],fashion:['fashion','ootd','style','outfitideas'],travel:['travel','wanderlust','traveltok','explore'],tech:['tech','gadgets','techtok','productivity'],lifestyle:['lifestyle','dayinmylife','routine','aesthetic'],gaming:['gaming','gamer','gametok','streamer'],business:['smallbusiness','sidehustle','entrepreneur','creatoreconomy'],comedy:['comedy','funny','relatable','skit']};
+function buildPack({topic,niche,tone,takeaway}){
+  topic=topic.trim();const slug=w=>w.toLowerCase().replace(/[^a-z0-9]/g,'');
+  const topicTags=[...new Set(topic.split(/\s+/).map(slug).filter(w=>w.length>2).concat([slug(topic)]))].slice(0,3);
+  const tags=[...new Set([...topicTags,...(NICHE_TAGS[niche]||[]),'fyp','viral','shorts','reels','creator'])];
+  const em={fun:'😂🔥',chill:'✨',bold:'🚨💥',helpful:'💡✅'}[tone]||'✨';
+  const hooks=pick(HOOKS,6).map(h=>h(topic));
+  const cta=pick(CTAS)[0];
+  const beats=[
+   {t:'0–3s',n:'Hook',d:`Say it on camera, big on-screen text: "${hooks[0]}"`},
+   {t:'3–10s',n:'Setup',d:`Quick context — who it's for and why ${topic} matters.`},
+   {t:'10–40s',n:'Value',d:takeaway?`Deliver your main point: ${takeaway}. Break into 3 fast cuts.`:`Deliver 3 fast tips or steps. One cut per tip, keep each under 8 seconds.`},
+   {t:'40–50s',n:'Payoff',d:'Show the result / punchline. This is the part people rewatch.'},
+   {t:'50–60s',n:'CTA',d:cta}
+  ];
+  const core=takeaway||`everything I know about ${topic}`;
+  const caps={
+   tiktok:`${hooks[0]} ${em}\n${cta}`,
+   instagram:`${hooks[1]} ${em}\n\n${core.charAt(0).toUpperCase()+core.slice(1)}.\n\n${cta}`,
+   youtube:`${topic} — ${hooks[2].replace(/\.$/,'')}`.slice(0,100)
+  };
+  return {topic,hooks,beats,tags,caps};
+}
+
+/* ---------- state ---------- */
+let S=LS.get('sb_state',{posts:[],draft:null,niche:'lifestyle',tone:'fun'});
+const save=()=>LS.set('sb_state',S);
+let tab='create',curFile=null,curMeta=null; // video file in memory + {duration,w,h}
+
+/* ---------- views ---------- */
+const app=$('#app');
+function render(){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));({create:vCreate,studio:vStudio,queue:vQueue})[tab]()}
+document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(b){tab=b.dataset.t;render();scrollTo(0,0)}};
+
+function vCreate(){
+  const d=S.draft;
+  app.innerHTML=`<div class="card"><h2>What are you posting about?</h2>
+    <label>Topic or idea</label><input id="topic" placeholder="e.g. 5-minute morning routine" value="${esc(d?.topic||'')}">
+    <label>What's the one takeaway? (optional)</label><input id="take" placeholder="e.g. wake up earlier without feeling tired" value="${esc(d?.takeaway||'')}">
+    <div class="row"><div><label>Niche</label><select id="niche">${Object.keys(NICHE_TAGS).map(n=>`<option ${S.niche===n?'selected':''}>${n}</option>`).join('')}</select></div>
+    <div><label>Vibe</label><select id="tone">${['fun','chill','bold','helpful'].map(n=>`<option ${S.tone===n?'selected':''}>${n}</option>`).join('')}</select></div></div>
+    <p><button class="pri" id="gen" style="width:100%">✨ Generate my content pack</button></p></div>
+    <div id="pack"></div>`;
+  $('#gen').onclick=()=>{const topic=$('#topic').value.trim();if(!topic)return toast('Add a topic first');
+    S.niche=$('#niche').value;S.tone=$('#tone').value;
+    S.draft={...buildPack({topic,niche:S.niche,tone:S.tone,takeaway:$('#take').value.trim()}),takeaway:$('#take').value.trim()};
+    save();showPack()};
+  if(d)showPack();
+}
+function showPack(){
+  const d=S.draft;
+  $('#pack').innerHTML=`
+   <div class="card"><h2>🎣 Hooks <button class="sm" id="re" style="float:right">Shuffle</button></h2>
+     ${d.hooks.map((h,i)=>`<div class="hook"><p>${esc(h)}</p><button class="sm" data-c="${i}">Copy</button></div>`).join('')}</div>
+   <div class="card"><h2>📋 60-second script</h2>
+     ${d.beats.map(b=>`<div class="beat"><b>${b.t} · ${b.n}</b><br>${esc(b.d)}</div>`).join('')}</div>
+   <div class="card"><h2>#️⃣ Hashtags</h2><div class="chips">${d.tags.map(t=>`<span class="chip">#${esc(t)}</span>`).join('')}</div>
+     <p><button class="sm" id="ct">Copy all</button></p></div>
+   <button class="pri" id="go" style="width:100%">🎬 Take this to Studio →</button>`;
+  $('#re').onclick=()=>{S.draft={...buildPack({topic:d.topic,niche:S.niche,tone:S.tone,takeaway:d.takeaway}),takeaway:d.takeaway};save();showPack()};
+  document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>copy(d.hooks[b.dataset.c]));
+  $('#ct').onclick=()=>copy(d.tags.map(t=>'#'+t).join(' '));
+  $('#go').onclick=()=>{tab='studio';render()};
+}
+
+function checks(p,key){
+  const P=PLAT[key],out=[],cap=p.caps[key]||'',tags=(p.tagSel[key]||[]);
+  const full=cap+(tags.length?'\n\n'+tags.map(t=>'#'+t).join(' '):'');
+  out.push(full.length<=P.maxCap?['ok',`Caption length ${full.length}/${P.maxCap}`]:['bad',`Caption too long (${full.length}/${P.maxCap})`]);
+  out.push(tags.length<=P.maxTags?['ok',`${tags.length} hashtags (best ≤ ${P.maxTags})`]:['warn',`${tags.length} hashtags — ${P.maxTags} or fewer performs best`]);
+  if(curMeta){
+    out.push(curMeta.h>curMeta.w?['ok','Vertical 9:16 ✓']:['bad','Not vertical — crop to 9:16']);
+    out.push(curMeta.duration<=P.maxSec?['ok',`Length ${Math.round(curMeta.duration)}s (max ${P.maxSec}s)`]:['bad',`Too long: ${Math.round(curMeta.duration)}s (max ${P.maxSec}s)`]);
+  }else out.push(['warn','Add a video to check format & length']);
+  return {out,full};
+}
+function postObj(){
+  const d=S.draft;if(!d)return null;
+  d.tagSel=d.tagSel||{tiktok:d.tags.slice(0,5),instagram:d.tags.slice(0,5),youtube:d.tags.slice(0,3)};
+  return d;
+}
+function vStudio(){
+  const p=postObj();
+  if(!p){app.innerHTML=`<div class="card"><h2>Nothing here yet</h2><p class="mute">Generate a content pack in Create first, then come back to post it.</p><button class="pri" onclick="tab='create';render()">Go to Create</button></div>`;return}
+  app.innerHTML=`<div class="card"><h2>🎬 ${esc(p.topic)}</h2>
+    <input type="file" id="file" accept="video/*" class="hide">
+    <button id="pickv" style="width:100%">${curFile?'Change video':'📁 Choose your video'}</button>
+    <video id="vid" controls playsinline class="${curFile?'':'hide'}" style="margin-top:10px"></video>
+    <p class="mute" id="meta"></p></div>
+    ${Object.keys(PLAT).map(k=>`<div class="card plat" data-k="${k}" style="margin:12px 0"><h3><span>${PLAT[k].emoji} ${PLAT[k].name}</span></h3>
+      <textarea data-cap="${k}">${esc(p.caps[k])}</textarea>
+      <div class="chips" data-tags="${k}"></div><div data-chk="${k}"></div>
+      <div class="row" style="margin-top:8px"><button class="sm" data-copy="${k}">Copy caption</button><button class="sm pri" data-share="${k}">Post to ${PLAT[k].name.split(' ')[0]}</button></div></div>`).join('')}
+    <div class="card"><h2>🗓️ Schedule it</h2><label>When?</label><input type="datetime-local" id="when">
+      <div class="row" style="margin-top:10px"><button class="pri" id="sched">Add to queue</button></div>
+      <p class="mute">Butterfly reminds you when it's time and opens the share sheet so posting is one tap.</p></div>`;
+  const v=$('#vid');
+  if(curFile){v.src=URL.createObjectURL(curFile);showMeta()}
+  $('#pickv').onclick=()=>$('#file').click();
+  $('#file').onchange=e=>{const f=e.target.files[0];if(!f)return;curFile=f;const u=URL.createObjectURL(f);v.src=u;v.classList.remove('hide');
+    v.onloadedmetadata=()=>{curMeta={duration:v.duration,w:v.videoWidth,h:v.videoHeight};showMeta();refresh()}};
+  document.querySelectorAll('[data-cap]').forEach(t=>t.oninput=()=>{p.caps[t.dataset.cap]=t.value;save();refresh()});
+  document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copy(checks(p,b.dataset.copy).full));
+  document.querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>share(p,b.dataset.share));
+  $('#sched').onclick=async()=>{const w=$('#when').value;if(!w)return toast('Pick a date & time');
+    const id=uid();if(curFile)await vPut(id,curFile);
+    S.posts.push({id,topic:p.topic,caps:{...p.caps},tags:{...p.tagSel},when:new Date(w).getTime(),hasVideo:!!curFile,done:{}});save();toast('Scheduled! 🦋');tab='queue';render()};
+  refresh();
+  function showMeta(){if(curMeta)$('#meta').textContent=`${curMeta.w}×${curMeta.h} · ${Math.round(curMeta.duration)}s · ${(curFile.size/1048576).toFixed(1)} MB`}
+  function refresh(){for(const k of Object.keys(PLAT)){
+    $(`[data-chk="${k}"]`).innerHTML=checks(p,k).out.map(([c,m])=>`<div class="chk ${c}">${c==='ok'?'✓':c==='bad'?'✕':'!'} ${esc(m)}</div>`).join('');
+    $(`[data-tags="${k}"]`).innerHTML=p.tags.map(t=>`<span class="chip" data-tg="${k}|${t}" style="cursor:pointer;opacity:${p.tagSel[k].includes(t)?1:.4}">#${esc(t)}</span>`).join('')}
+    document.querySelectorAll('[data-tg]').forEach(c=>c.onclick=()=>{const[k,t]=c.dataset.tg.split('|'),a=p.tagSel[k];const i=a.indexOf(t);i>=0?a.splice(i,1):a.push(t);save();refresh()})}
+}
+
+/* Real posting path: Web Share API hands the video + caption to the installed app's own share sheet. */
+async function share(p,key,file=curFile,text){
+  const P=PLAT[key];text=text||checks(p,key).full;
+  try{await navigator.clipboard.writeText(text)}catch{}
+  if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],text,title:p.topic});toast(`Choose ${P.name.split(' ')[0]} in the share sheet`);return true}catch(e){if(e.name==='AbortError')return false}
+  }
+  toast('Caption copied — upload your video in the app');window.open(P.openUrl,'_blank');return true;
+}
+
+function vQueue(){
+  const now=Date.now(),ps=[...S.posts].sort((a,b)=>a.when-b.when);
+  const due=ps.filter(p=>p.when<=now&&Object.keys(PLAT).some(k=>!p.done[k])).length;
+  app.innerHTML=`<div class="card"><div class="stat"><div><b>${ps.length}</b>scheduled</div><div><b>${due}</b>ready now</div><div><b>${ps.filter(p=>Object.keys(PLAT).every(k=>p.done[k])).length}</b>posted</div></div></div>
+   <div class="card"><h2>Your queue</h2>${ps.length?ps.map(p=>`<div class="item"><div><p><b>${esc(p.topic)}</b></p><p class="mute">${new Date(p.when).toLocaleString([], {weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}${p.when<=now?' · <span class="warn">ready</span>':''}</p>
+     <div class="row" style="margin-top:6px">${Object.keys(PLAT).map(k=>`<button class="sm ${p.done[k]?'':'pri'}" data-p="${p.id}|${k}" ${p.done[k]?'disabled':''}>${p.done[k]?'✓ ':''}${PLAT[k].emoji}</button>`).join('')}<button class="sm" data-del="${p.id}">🗑</button></div></div></div>`).join(''):'<p class="mute">Nothing scheduled yet. Make a pack in Create, then schedule it from Studio.</p>'}</div>
+   <div class="card"><button id="notif" style="width:100%">🔔 Turn on reminders</button></div>`;
+  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=async()=>{const[id,k]=b.dataset.p.split('|'),p=S.posts.find(x=>x.id===id);
+    const f=p.hasVideo?await vGet(id):null;const caps=(p.caps[k]||'')+(p.tags[k]?.length?'\n\n'+p.tags[k].map(t=>'#'+t).join(' '):'');
+    const ok=await share(p,k,f,caps);if(ok){p.done[k]=true;save();vQueue()}});
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{S.posts=S.posts.filter(x=>x.id!==b.dataset.del);save();vQueue()});
+  $('#notif').onclick=async()=>{if(!('Notification'in window))return toast('Not supported here');toast((await Notification.requestPermission())==='granted'?'Reminders on 🔔':'Reminders blocked')};
+}
+
+/* reminders while the app is open */
+setInterval(()=>{if(!('Notification'in window)||Notification.permission!=='granted')return;
+  S.posts.forEach(p=>{if(p.when<=Date.now()&&!p.notified&&Object.keys(PLAT).some(k=>!p.done[k])){p.notified=true;save();new Notification('Time to post 🦋',{body:p.topic})}})},30000);
+
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+render();
+</script>
+</body>
+</html>
