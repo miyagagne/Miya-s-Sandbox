@@ -439,6 +439,7 @@ html[data-theme=dark] .tabs .on{--c:#1f5a0e;background:linear-gradient(#bff58a,#
 html[data-theme=dark] .cmb,html[data-theme=dark] .cmtimer,html[data-theme=dark] .cmbar button{background:linear-gradient(#a8783e,#7a5530);color:#fff;border-color:#2a1a0c}
 html[data-theme=dark] .breed.on{background:#2f4a26;border-color:#58c632}
 html[data-theme=dark] .sign{color:#fff}
+.hero{background:none!important;border:0!important;box-shadow:none!important;padding:0 0 4px}.hero h1{color:#fff;text-shadow:-2px -2px 0 #5a3414,2px -2px 0 #5a3414,-2px 2px 0 #5a3414,2px 2px 0 #5a3414,0 4px 0 #5a3414;font-size:30px}.hero p{color:#fff;font-weight:600;text-shadow:0 2px 6px rgba(20,60,110,.7)}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -663,26 +664,33 @@ const allItems=()=>S.classes.flatMap(c=>c.items.map(i=>({...i,cls:c.id,clsName:c
 /* ======= onboarding ======= */
 function renderOnboard(){
  const M=$('#main');
- if(ob===1){M.innerHTML=`<div class="hero dogwrap"><div class="dogwrap">${dog({},'happy')}</div><h1>Hi, I'm Winston! 🐾</h1><p>Study with me and I'll help you actually enjoy it. Let's get to know you first.</p></div>
- <div class="card"><h2>Sign in</h2>
- ${GOOGLE_CLIENT_ID?'<div id="gbtn"></div>':'<p class="mute">Google sign-in turns on once a Google client ID is added in the app config. For now, just tell me your name:</p>'}
- <label>Your name</label><input id="nm" placeholder="e.g. Miya"><label>Email (optional)</label><input id="em" type="email">
- <button class="p" data-a="ob1">Continue</button></div>`;
+ if(ob===1){M.innerHTML=`<div class="hero dogwrap"><div class="dogwrap">${dog({},'happy')}</div><h1>Let's Make Your Account! 🐾</h1><p>Set up your profile, pick a pet and give them a name. It only takes a minute.</p></div>
+ <div class="card"><h2>Create Your Account</h2>
+ ${GOOGLE_CLIENT_ID?'<div id="gbtn"></div><p class="mute" style="text-align:center">or create one yourself:</p>':''}
+ <label>Your name</label><input id="nm" placeholder="e.g. Miya" maxlength="30" autocomplete="name">
+ <label>Choose a username</label><input id="un" placeholder="e.g. miya_studies" maxlength="20" autocomplete="username" autocapitalize="off" spellcheck="false"><div class="mute" style="font-size:12px;margin:-6px 0 10px">Your friends see this. Use 3–20 letters, numbers or _.</div>
+ <label>Email (optional)</label><input id="em" type="email" placeholder="for reminders and account recovery" autocomplete="email">
+ <button class="p" data-a="ob1" style="width:100%">Create My Account</button>
+ <p class="mute" style="text-align:center;margin:12px 0 6px">Already have an account?</p><button class="s" data-a="restore" style="width:100%">📂 Restore From Backup</button><input id="rf" type="file" accept=".json,application/json" style="display:none">
+ <p class="mute" style="font-size:12px;margin:10px 0 0">Your account is stored privately on this device. Back it up any time in Settings to move it to another device.</p></div>`;
   if(GOOGLE_CLIENT_ID)loadGoogle()}
  if(ob===2){M.innerHTML=`<div class="card"><h2>What are you studying?</h2><label>Major(s)</label><input id="mj" value="${esc(obData.majors)}" placeholder="e.g. Business Administration"><label>Minor(s) (optional)</label><input id="mn" value="${esc(obData.minors)}">
  <button class="p" data-a="ob2">Next</button></div>`}
  if(ob===3){const grp=(sp,ttl)=>`<h3 class="petsec">${ttl}</h3><div class="breedgrid">${Object.entries(BREEDS).filter(([k,b])=>b.sp===sp).map(([k,b])=>`<button class="breed ${obData.pet.breed===k?'on':''}" data-a="petbreed" data-k="${k}">${dog({},'happy','0 0 200 200',k)}<b>${b.name}</b></button>`).join('')}</div>`;
   M.innerHTML=`<div class="card"><h2>Pick Your Study Buddy</h2><p class="mute" style="margin:0 0 4px">Who's going to class with you?</p>${grp('dog','🐶 Dogs')}${grp('cat','🐱 Cats')}<button class="p" data-a="ob3" style="width:100%;margin-top:10px">Continue</button></div>`}
- if(ob===4){M.innerHTML=`<div class="card dogwrap"><h2>Name Your ${obData.pet.species==='cat'?'Cat! 🐱':'Pup! 🐶'}</h2><div class="dogwrap stage">${dog({},'happy','0 0 200 200',obData.pet.breed)}</div><label>Your pet's name</label><input id="dn" value="Winston" maxlength="20"><div>${['Winston','Biscuit','Mochi','Pepper','Waffles','Cosmo','Luna','Peanut'].map(n=>`<span class="chip" data-a="pick" data-k="${n}">${n}</span>`).join('')}</div><label style="display:block;margin-top:8px">One big goal you're studying for (optional)</label><textarea id="gl" placeholder="e.g. Graduate with honors and land my dream marketing job"></textarea><button class="p" data-a="ob4">Let's go! 🐾</button></div>`}
+ if(ob===4){M.innerHTML=`<div class="card dogwrap"><h2>Name Your ${obData.pet.species==='cat'?'Cat! 🐱':'Pup! 🐶'}</h2><div class="dogwrap stage">${dog({},'happy','0 0 200 200',obData.pet.breed)}</div><label>Give your pet a name</label><input id="dn" placeholder="Type a name, or tap one below" maxlength="20" autocomplete="off"><div>${['Winston','Biscuit','Mochi','Pepper','Waffles','Cosmo','Luna','Peanut'].map(n=>`<span class="chip" data-a="pick" data-k="${n}">${n}</span>`).join('')}</div><label style="display:block;margin-top:8px">One big goal you're studying for (optional)</label><textarea id="gl" placeholder="e.g. Graduate with honors and land my dream marketing job"></textarea><button class="p" data-a="ob4" style="width:100%;margin-top:10px">Let's Go! 🐾</button></div>`}
 }
 function loadGoogle(){const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=()=>{google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:r=>{try{const p=JSON.parse(atob(r.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));obData.name=p.name;obData.email=p.email;ob=2;render()}catch(e){toast('Google sign-in failed')}}});google.accounts.id.renderButton($('#gbtn'),{theme:'outline',size:'large'})};document.head.append(s)}
 Object.assign(ACTIONS,{
- ob1(){const n=$('#nm').value.trim()||obData.name;if(!n)return toast('Tell me your name!');obData.name=n;obData.email=$('#em').value.trim();ob=2;render()},
+ ob1(){const n=($('#nm').value.trim()||obData.name||'').trim();if(!n)return toast('Tell me your name!');
+  const un=(($('#un')||{}).value||'').trim().toLowerCase().replace(/^@/,'');if(!/^[a-z0-9_]{3,20}$/.test(un))return toast('Pick a username: 3–20 letters, numbers or _');
+  const em=($('#em').value||'').trim();if(em&&!/^\S+@\S+\.\S+$/.test(em))return toast("That email doesn't look right");
+  obData.name=n;obData.username=un;obData.email=em;ob=2;render()},
  ob2(){obData.majors=$('#mj').value.trim();obData.minors=$('#mn').value.trim();ob=3;render()},
  petbreed(d){if(!BREEDS[d.k])return;obData.pet={species:BREEDS[d.k].sp,breed:d.k};render()},
  ob3(){ob=4;render()},
  pick(d){$('#dn').value=d.k},
- ob4(){const dn=($('#dn').value.trim()||'Winston').slice(0,20);S.pet=Object.assign({},obData.pet);S.user={name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,dogName:dn,goals:($('#gl')?$('#gl').value.trim():'')};save();tab='home';render();drawWidget();toast(`Welcome, ${S.user.name}! Say hi to ${dn}! ${petNoun()==='cat'?'🐱':'🐶'}`);setTimeout(()=>maybeTour(),1400);if(DESK)setDeskMode('orb');else if(!(S.pref&&S.pref.autoFloat===false))popOut(true)},
+ ob4(){const dn=($('#dn').value.trim()).slice(0,20);if(!dn)return toast('Give your pet a name first! 🐾');S.pet=Object.assign({},obData.pet);const un=obData.username||((obData.name||'student').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,14)||'student')+Math.floor(100+Math.random()*900);S.user={id:uid(),created:Date.now(),username:un,name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,dogName:dn,goals:($('#gl')?$('#gl').value.trim():'')};save();tab='home';render();drawWidget();toast(`Welcome, ${S.user.name}! Say hi to ${dn}! ${petNoun()==='cat'?'🐱':'🐶'}`);setTimeout(()=>maybeTour(),1400);if(DESK)setDeskMode('orb');else if(!(S.pref&&S.pref.autoFloat===false))popOut(true)},
  tab(d){go(d.k)}
 });
 
@@ -805,7 +813,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.19 (Hay Day style)';
+const APP_VERSION='2026-11-20.20 (create account, name your pet)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -1201,7 +1209,7 @@ Object.assign(ACTIONS,{
 });
 
 /* ======= friends ======= */
-const myCode=()=>btoa(unescape(encodeURIComponent(JSON.stringify({n:S.user.name,d:DN(),l:lvl(),w:weekMins(),s:streakDays(),t:Date.now(),u:S.live&&S.live.on?S.live.uid:undefined,h:Math.round(S.happy),e:S.eq,b:petBreed()}))));
+const myCode=()=>btoa(unescape(encodeURIComponent(JSON.stringify({n:S.user.name,d:DN(),l:lvl(),w:weekMins(),s:streakDays(),t:Date.now(),u:S.live&&S.live.on?S.live.uid:undefined,h:Math.round(S.happy),e:S.eq,b:petBreed(),un:S.user.username}))));
 function rFriends(){liveKick();
  MAIN().innerHTML=`${peerCard()}${lbCard()}<div class="card"><h2>Invite Friends</h2><p class="mute">Studying is better together. Share your streak card or send an invite.</p><div class="row"><button class="p grow" data-a="invite">📨 Invite A Friend</button><button class="s grow" data-a="sharecard">📤 Share My Streak</button></div><div class="row" style="margin-top:8px"><button class="s grow" data-a="shareig">📸 Instagram Story</button><button class="s grow" data-a="sharett">🎵 TikTok</button></div></div>
  <div class="card"><h2>Your friend code</h2><p class="mute">Send this to a friend. They paste it below to see Winston in his latest outfit.</p><textarea readonly id="mc" style="min-height:70px">${myCode()}</textarea><button class="s" data-a="copy">Copy</button></div>
@@ -1225,7 +1233,8 @@ function rDog(){const sub=view.dsub||'shop';
  mainT=$('#dsub');try{({shop:rShop,me:rSettings})[sub]()}finally{mainT=null}
  if(sub==='me'&&DESK)deskUI()}
 function rSettings(){const u=S.user;
- MAIN().innerHTML=`<div class="card"><h2>Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea>
+ MAIN().innerHTML=`<div class="card"><h2>Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Username</label><input id="su" value="${esc(u.username||slugName(u.name))}" maxlength="20" autocapitalize="off"><label>Email (optional)</label><input id="se" type="email" value="${esc(u.email||'')}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea>
+ ${accountCard()}
  ${installCard()}
  ${S.pref.apiKey?'':''}<label style="display:block;margin-top:6px">Winston AI Key (Optional)</label><div class="instcard"><input id="akey" type="password" placeholder="Paste an Anthropic API key" value="${esc(S.pref.apiKey||'')}" autocomplete="off"><button class="s" data-a="savekey" style="width:100%">${S.pref.apiKey?'Update Key':'Save Key'}</button><p class="mute" style="margin:8px 0 0;font-size:12px">Turns on smart AI answers everywhere (phone, laptop, desktop app). Stored only on this device and sent only to api.anthropic.com. Use a key with a spending limit.${AI.sm?' <b>✨ AI is on.</b>':''}</p></div><button class="s" data-a="tour" style="width:100%;margin:2px 0 10px">🎓 Replay The Tutorial</button>
  <label style="display:block;margin-top:6px">My Pet</label>${['dog','cat'].map(sp=>`<div class="mute" style="margin:6px 0 2px;font-weight:600">${sp==='dog'?'🐶 Dogs':'🐱 Cats'}</div><div>${Object.entries(BREEDS).filter(([k,b])=>b.sp===sp).map(([k,b])=>`<span class="chip ${S.pet.breed===k?'on':''}" data-a="setbreed" data-k="${k}">${b.name}</span>`).join('')}</div>`).join('')}
@@ -1355,7 +1364,7 @@ function openStart(excited){const u=S.user,cls=S.classes,t=cls.length?cls.map(c=
 function openSettings(){const u=S.user;openModal(`<h2>⚙️ Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea><label style="display:block;margin-top:6px">Floating widget</label><div><span class="chip ${S.pref.autoFloat===false?'':'on'}" id="autof" data-a="toggleauto">${S.pref.autoFloat===false?'':'✓ '}Float ${esc(DN())} on my screen when I open the app</span></div><p class="mute" style="margin-top:0">Works in desktop Chrome or Edge. He stays on top of Brightspace, Google and other tabs.</p><button class="p" data-a="savesettings" style="width:100%">Save</button><hr style="border:0;border-top:2px solid #f6e8cf;margin:14px 0"><button class="${view.reset?'p bad':'s'}" data-a="resetall" style="width:100%">${view.reset?'Really erase everything?':'Erase everything & start over'}</button>`)}
 Object.assign(ACTIONS,{settings(){view.reset=false;tab='dog';view.dsub='me';render()},
  toggleauto(){S.pref.autoFloat=S.pref.autoFloat===false;save();const e=$('#autof');if(e){e.classList.toggle('on',S.pref.autoFloat!==false);e.textContent=(S.pref.autoFloat!==false?'✓ ':'')+'Float '+DN()+' on my screen when I open the app'}},
- savesettings(){const u=S.user;u.name=$('#sn').value.trim()||u.name;u.dogName=($('#sd').value.trim()||'Winston').slice(0,20);u.goals=$('#sg').value.trim();save();closeModal();render();drawWidget();toast('Saved!')},
+ savesettings(){const u=S.user;u.name=$('#sn').value.trim()||u.name;const su=$('#su');if(su){const v=su.value.trim().toLowerCase().replace(/^@/,'');if(!/^[a-z0-9_]{3,20}$/.test(v))return toast('Username: 3–20 letters, numbers or _');u.username=v}const se=$('#se');if(se){const v=se.value.trim();if(v&&!/^\S+@\S+\.\S+$/.test(v))return toast("That email doesn't look right");u.email=v}u.dogName=($('#sd').value.trim()||'Winston').slice(0,20);u.goals=$('#sg').value.trim();save();closeModal();render();drawWidget();toast('Saved!')},
  resetall(){if(!view.reset){view.reset=true;render();return}try{localStorage.removeItem(KEY)}catch(e){}S=load();S.logs=[];S.drive={root:null,classes:{}};S.pref={autoDocs:true};S.days={};ob=1;tab='home';view.reset=false;closeModal();render();drawWidget()}});
 
 /* ---- calendar ---- */
@@ -1632,10 +1641,10 @@ function paintGround(first){const i=view.gi;if(first)openModal('<div id="gbody">
 /* ======= v5: leaderboard, reminders, social share ======= */
 S.rem=S.rem||{time:'19:00',notify:false};
 const weekMins=()=>Math.round(S.classes.reduce((a,c)=>a+weekSecs(c),0)/60);
-function lbCard(){const m=view.lb||'w',me={n:S.user.name,d:DN(),w:weekMins(),s:streakDays(),me:1};
+function lbCard(){const m=view.lb||'w',me={n:S.user.name,un:S.user.username,d:DN(),w:weekMins(),s:streakDays(),me:1};
  const rows=[me,...S.friends.map(f=>({...f,stale:f.t&&Date.now()-f.t>7*864e5}))].sort((a,b)=>(b[m]||0)-(a[m]||0));
  return `<div class="card"><h2>Leaderboard</h2><div class="tabs">${[['w','Study Minutes'],['s','Streak']].map(([k,l])=>`<button data-a="lbmode" data-k="${k}" class="${k===m?'on':''}">${l}</button>`).join('')}</div>
- ${rows.map((r,i)=>`<div class="item"><b style="width:30px;font-size:20px">${['🥇','🥈','🥉'][i]||i+1}</b><div class="grow"><b>${esc(r.d||'Winston')}​</b> <span class="mute">${esc(r.n)}${r.me?' (You)':''}</span>${r.stale?' <span class="mute">· Old Code</span>':''}</div><b>${m==='w'?(r.w||0)+' Min':(r.s||0)+' 🔥'}</b></div>`).join('')}
+ ${rows.map((r,i)=>`<div class="item"><b style="width:30px;font-size:20px">${['🥇','🥈','🥉'][i]||i+1}</b><div class="grow"><b>${esc(r.d||'Winston')}​</b> <span class="mute">${esc(r.n)}${r.un?' @'+esc(r.un):''}${r.me?' (You)':''}</span>${r.stale?' <span class="mute">· Old Code</span>':''}</div><b>${m==='w'?(r.w||0)+' Min':(r.s||0)+' 🔥'}</b></div>`).join('')}
  <div class="row" style="justify-content:space-between;margin-top:8px"><span class="chip ${liveStatus==='live'?'on':''}" style="margin:0">${liveChip()}</span><span class="chip ${S.live.on?'on':''}" data-a="livetoggle" style="margin:0">${S.live.on?'✓ ':''}Share My Stats Live</span></div>
  <p class="mute">${S.live.on?'Your name, dog name, weekly minutes, streak and level are shared with friends who have your code. ':'Friends update when they send you a fresh code, or turn on live sharing for automatic updates. '}${liveStatus==='setup'?'Live sync needs a one-time database setup: run winston/supabase-leaderboard.sql in Supabase. ':''}</p>${S.live.on?'<button class="s" data-a="livedelete">Delete My Live Data</button>':''}</div>`}
 const icsDate=d=>`${d.getFullYear()}${pad2(d.getMonth()+1)}${pad2(d.getDate())}T${pad2(d.getHours())}${pad2(d.getMinutes())}00`;
@@ -1893,6 +1902,19 @@ Object.assign(ACTIONS,{
   const doc={id:uid(),name:('Brightspace: '+first.trim()).slice(0,48),wk,text:t.slice(0,40000),chars:t.length,cards:0};c.docs.push(doc);save();closeModal();view.cls=c.id;view.sub='mat';view.mwk=wk;render();stat('Making study cards…');makeCards(c,doc).then(n=>{render();stat(`✅ ${n} study cards added from Brightspace`)})},
  bsfiles(){closeModal();view.sub='mat';render()},
  bscopy(){const v=BOOKMARKLET;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast('Copied! Save it as a bookmark 🔖'),()=>toast('Select the text and copy it'))}});
+
+
+/* ======= account: username, backup & restore ======= */
+const slugName=t=>String(t||'').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,20);
+document.addEventListener('input',e=>{const t=e.target;if(!t||!t.id)return;if(t.id==='un')t.dataset.touched='1';if(t.id==='nm'){const un=$('#un');if(un&&!un.dataset.touched)un.value=slugName(t.value)}});
+document.addEventListener('change',e=>{const t=e.target;if(!t||t.id!=='rf'||!t.files||!t.files[0])return;const f=t.files[0],r=new FileReader();
+ r.onload=()=>{try{const o=JSON.parse(r.result);if(!o||o.v!==1||!Array.isArray(o.classes)||!o.user||!o.user.name)throw 0;localStorage.setItem(KEY,JSON.stringify(o));toast('Account restored! Loading…');setTimeout(()=>location.reload(),600)}catch(err){toast("That doesn't look like a Winston backup file")}};r.readAsText(f)});
+function accountCard(){const u=S.user;return `<label style="display:block;margin-top:6px">My Account</label><div class="instcard"><div style="font:400 18px var(--display)">@${esc(u.username||slugName(u.name)||'student')}</div><div class="mute" style="font-size:13px">${esc(u.name)}${u.email?' · '+esc(u.email):''}${u.created?' · Member since '+new Date(u.created).toLocaleDateString(undefined,{month:'short',year:'numeric'}):''}</div>
+ <div class="row" style="margin-top:8px"><button class="s grow" data-a="exportacct">💾 Export Backup</button><button class="s grow" data-a="restore">📂 Restore</button></div><input id="rf" type="file" accept=".json,application/json" style="display:none">
+ <p class="mute" style="margin:8px 0 0;font-size:12px">Your account lives on this device. Export a backup to move it to another phone or computer, then choose Restore there. Backups never include your AI key.</p></div>`}
+Object.assign(ACTIONS,{
+ restore(){const f=$('#rf');if(f){f.value='';f.click()}},
+ async exportacct(){const b=JSON.parse(JSON.stringify(S));if(b.pref)delete b.pref.apiKey;const nm=`winston-account-${(S.user.username||'me')}.json`;await saveBlob(nm,new Blob([JSON.stringify(b)],{type:'application/json'}));toast('Backup saved 💾 Keep it somewhere safe')}});
 
 /* ======= v7: desktop widget mode ======= */
 function setDeskMode(m){if(!DESK)return;deskMode=m;winstonDesktop.setMode(m);const w=m==='widget'||m==='orb';document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',!w);
