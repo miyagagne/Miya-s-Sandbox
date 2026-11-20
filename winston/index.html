@@ -472,6 +472,25 @@ html[data-theme=dark] #intro .iburst{opacity:.35}
 @keyframes ipulse{50%{filter:brightness(1.12) drop-shadow(0 0 12px rgba(190,255,120,.9))}}
 #intro .ibtn .ic{width:1.1em;height:1.1em}
 #intro .ipet.ihero{--w:min(52vw,230px)!important}
+/* ---- laptop: balanced, symmetric layout ---- */
+@media(min-width:900px){
+ main{max-width:1060px;padding:30px 24px 110px}
+ main.two,#ssub.two{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
+ main.two>*,#ssub.two>*{margin:0!important;min-width:0}
+ main.two>.dogwrap,main.two>.row,main.two>h2,main.two>.span2,#ssub.two>.nudge{grid-column:1/-1}
+ main.two>.card.dogwrap{display:grid;grid-template-columns:1fr 1fr;align-items:center;column-gap:34px;padding:28px 40px;text-align:center}
+ main.two>.card.dogwrap>.stage{grid-column:1;grid-row:1/8}
+ main.two>.card.dogwrap>*:not(.stage):not(.gear):not(.lvbadge){grid-column:2}
+ main.two>.card.dogwrap .dogwrap svg,main.two>.card.dogwrap svg{max-width:360px;width:100%}
+ main.two>.row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+ main.two>.row>*{width:100%}
+ .lvcard{margin-top:34px}
+ nav{max-width:620px}
+ #ssub.two>.lbcard{grid-row:span 2}
+ .park{height:360px}
+ .shopgrid{grid-template-columns:repeat(4,1fr)}
+}
+@media(min-width:1300px){main{max-width:1180px}}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -686,6 +705,7 @@ function render(keep){
  n.style.display='flex';
  n.innerHTML=TABS.map(([k,i,l])=>`<button data-a="tab" data-k="${k}" class="${k===tab?'on':''}"><b>${k==='dog'&&S.pet&&S.pet.species==='cat'?'🐱':i}</b>${l}</button>`).join('');
  ({home:rHome,class:rClass,practice:rPractice,boost:rBoost,social:rSocial,dog:rDog})[tab]();
+ {const m=$('#main');if(m)m.classList.toggle('two',tab==='home'||tab==='boost');const ss=$('#ssub');if(ss)ss.classList.add('two')}
  if(Date.now()-joy<900)document.querySelectorAll('.dogwrap svg').forEach(x=>x.classList.add('hop'));
 }
 const classes=()=>S.classes;
@@ -707,7 +727,7 @@ function renderOnboard(){
  <p class="mute" style="text-align:center;margin:12px 0 6px">Already have an account?</p><button class="s" data-a="signinscreen" style="width:100%;margin-bottom:10px">Sign In</button><button class="s" data-a="restore" style="width:100%">📂 Restore From Backup</button><input id="rf" type="file" accept=".json,application/json" style="display:none">
  <p class="mute" style="font-size:12px;margin:10px 0 0">Add an email and your account (and password) is kept on our secure server so it works on any device. Leave it blank to keep everything on this device only.</p></div>`}
  if(ob==='signin'){M.innerHTML=`<div class="hero dogwrap"><div class="dogwrap">${dog({},'happy')}</div><h1>Welcome Back! 🐾</h1><p>Sign in to get your pet, classes and notes.</p></div><div class="card"><h2>Sign In</h2>${cloudGoogleBtn(true)}<label>Email</label><input id="sie" type="email" placeholder="you@example.com" value="${esc(obData.signinEmail||'')}" autocomplete="email"><label>Password</label><input id="sip" type="password" placeholder="Your password" autocomplete="current-password"><button class="p" data-a="signin" style="width:100%">Sign In</button><button class="s" data-a="cforgot" style="width:100%;margin-top:10px">Forgot Password?</button><button class="s" data-a="restore" style="width:100%;margin-top:10px">📂 Restore From Backup</button><input id="rf" type="file" accept=".json,application/json" style="display:none"><button class="s" data-a="signupscreen" style="width:100%;margin-top:10px">← Create A New Account</button></div>`}
- if(ob===2){M.innerHTML=`<div class="card"><h2>What are you studying?</h2><label>Major(s)</label><input id="mj" value="${esc(obData.majors)}" placeholder="e.g. Business Administration"><label>Minor(s) (optional)</label><input id="mn" value="${esc(obData.minors)}">
+ if(ob===2){M.innerHTML=`<div class="card"><h2>What are you studying?</h2><label>Major(s)</label><input id="mj" value="${esc(obData.majors)}" placeholder="e.g. Business Administration"><label>Minor(s) (optional)</label><input id="mn" value="${esc(obData.minors)}">${locFields(obData.loc||{})}
  <button class="p" data-a="ob2">Next</button></div>`}
  if(ob===3){const grp=(sp,ttl)=>`<h3 class="petsec">${ttl}</h3><div class="breedgrid">${Object.entries(BREEDS).filter(([k,b])=>b.sp===sp).map(([k,b])=>`<button class="breed ${obData.pet.breed===k?'on':''}" data-a="petbreed" data-k="${k}">${dog({},'happy','0 0 200 200',k)}<b>${b.name}</b></button>`).join('')}</div>`;
   M.innerHTML=`<div class="card"><h2>Pick Your Study Buddy</h2><p class="mute" style="margin:0 0 4px">Who's going to class with you?</p>${grp('dog','🐶 Dogs')}${grp('cat','🐱 Cats')}<button class="p" data-a="ob3" style="width:100%;margin-top:10px">Continue</button></div>`}
@@ -728,11 +748,11 @@ Object.assign(ACTIONS,{
   obData.name=n;obData.username=un;obData.email=em;obData.pw=pw;ob=2;render()},
  ob1local(){const q=obData.pending||{};closeModal();obData.cloud=null;obData.name=q.n;obData.username=q.un;obData.email=q.em;obData.pw=q.pw;ob=2;render()},
  signinscreen(){ob='signin';render()},signupscreen(){ob=1;render()},
- ob2(){obData.majors=$('#mj').value.trim();obData.minors=$('#mn').value.trim();ob=3;render()},
+ ob2(){obData.majors=$('#mj').value.trim();obData.minors=$('#mn').value.trim();obData.loc=readLoc();ob=3;render()},
  petbreed(d){if(!BREEDS[d.k])return;obData.pet={species:BREEDS[d.k].sp,breed:d.k};render()},
  ob3(){ob=4;render()},
  pick(d){$('#dn').value=d.k},
- async ob4(){const dn=($('#dn').value.trim()).slice(0,20);if(!dn)return toast('Give your pet a name first! 🐾');S.pet=Object.assign({},obData.pet);const un=obData.username||((obData.name||'student').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,14)||'student')+Math.floor(100+Math.random()*900);S.user={id:uid(),created:Date.now(),username:un,name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,dogName:dn,goals:($('#gl')?$('#gl').value.trim():'')};if(obData.pw){await setPassword(obData.pw);obData.pw=''}try{sessionStorage.setItem('winston.ok','1')}catch(e){}if(obData.cloud){S.cloud=cloudObj(obData.cloud);obData.cloud=null}save();if(S.cloud)cloudPush();tab='home';render();drawWidget();toast(`Welcome, ${S.user.name}! Say hi to ${dn}! ${petNoun()==='cat'?'🐱':'🐶'}`);setTimeout(()=>maybeTour(),1400);if(DESK)setDeskMode('orb');else if(!(S.pref&&S.pref.autoFloat===false))popOut(true)},
+ async ob4(){const dn=($('#dn').value.trim()).slice(0,20);if(!dn)return toast('Give your pet a name first! 🐾');S.pet=Object.assign({},obData.pet);const un=obData.username||((obData.name||'student').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,14)||'student')+Math.floor(100+Math.random()*900);S.user={loc:obData.loc||{},id:uid(),created:Date.now(),username:un,name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,dogName:dn,goals:($('#gl')?$('#gl').value.trim():'')};if(obData.pw){await setPassword(obData.pw);obData.pw=''}try{sessionStorage.setItem('winston.ok','1')}catch(e){}if(obData.cloud){S.cloud=cloudObj(obData.cloud);obData.cloud=null}save();if(S.cloud)cloudPush();tab='home';render();drawWidget();toast(`Welcome, ${S.user.name}! Say hi to ${dn}! ${petNoun()==='cat'?'🐱':'🐶'}`);setTimeout(()=>maybeTour(),1400);if(DESK)setDeskMode('orb');else if(!(S.pref&&S.pref.autoFloat===false))popOut(true)},
  tab(d){go(d.k)}
 });
 
@@ -856,7 +876,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.25 (cloud accounts, one-click connections)';
+const APP_VERSION='2026-11-20.26 (scoped leaderboards, laptop layout)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -1252,9 +1272,9 @@ Object.assign(ACTIONS,{
 });
 
 /* ======= friends ======= */
-const myCode=()=>btoa(unescape(encodeURIComponent(JSON.stringify({n:S.user.name,d:DN(),l:lvl(),w:weekMins(),s:streakDays(),t:Date.now(),u:S.live&&S.live.on?S.live.uid:undefined,h:Math.round(S.happy),e:S.eq,b:petBreed(),un:S.user.username}))));
+const myCode=()=>btoa(unescape(encodeURIComponent(JSON.stringify({n:S.user.name,d:DN(),l:lvl(),w:weekMins(),s:streakDays(),t:Date.now(),u:S.live&&S.live.on?S.live.uid:undefined,h:Math.round(S.happy),e:S.eq,b:petBreed(),un:S.user.username,lc:S.user.loc}))));
 function rFriends(){liveKick();
- MAIN().innerHTML=`${peerCard()}${lbCard()}<div class="card"><h2>Invite Friends</h2><p class="mute">Studying is better together. Share your streak card or send an invite.</p><div class="row"><button class="p grow" data-a="invite">📨 Invite A Friend</button><button class="s grow" data-a="sharecard">📤 Share My Streak</button></div><div class="row" style="margin-top:8px"><button class="s grow" data-a="shareig">📸 Instagram Story</button><button class="s grow" data-a="sharett">🎵 TikTok</button></div></div>
+ MAIN().innerHTML=`${peerCard()}${lbCard()}${schoolCard()}<div class="card"><h2>Invite Friends</h2><p class="mute">Studying is better together. Share your streak card or send an invite.</p><div class="row"><button class="p grow" data-a="invite">📨 Invite A Friend</button><button class="s grow" data-a="sharecard">📤 Share My Streak</button></div><div class="row" style="margin-top:8px"><button class="s grow" data-a="shareig">📸 Instagram Story</button><button class="s grow" data-a="sharett">🎵 TikTok</button></div></div>
  <div class="card"><h2>Your friend code</h2><p class="mute">Send this to a friend. They paste it below to see Winston in his latest outfit.</p><textarea readonly id="mc" style="min-height:70px">${myCode()}</textarea><button class="s" data-a="copy">Copy</button></div>
  <div class="card"><h2>Add a friend</h2><textarea id="fc" placeholder="Paste a friend code"></textarea><button class="p" data-a="addf">Add friend</button>
  <p class="mute">Heads up: codes are a snapshot. Live updating and friend requests need an online account (the Supabase setup used elsewhere in this repo) — a good next step.</p></div>
@@ -1278,6 +1298,7 @@ function rDog(){const sub=view.dsub||'shop';
 function rSettings(){const u=S.user;
  MAIN().innerHTML=`<div class="card"><h2>Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Username</label><input id="su" value="${esc(u.username||slugName(u.name))}" maxlength="20" autocapitalize="off"><label>Email (optional)</label><input id="se" type="email" value="${esc(u.email||'')}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea>
  ${accountCard()}
+ <label style="display:block;margin-top:6px">School &amp; Location</label><div class="instcard"><div>${esc(myLoc().school||'No school yet')}</div><div class="mute" style="font-size:13px">${esc([myLoc().city,myLoc().state,myLoc().country].filter(Boolean).join(', '))}</div><button class="s" data-a="locedit" style="width:100%;margin-top:8px">${myLoc().school?'Edit':'Join Your School'}</button></div>
  ${passwordCard()}
  <label style="display:block;margin-top:6px">Class Connections</label><div class="instcard"><div class="row"><button class="s grow" data-a="gc">🎓 Google Classroom</button><button class="s grow" data-a="bsconnect">📚 Brightspace</button></div><div style="margin-top:8px"><span class="chip ${S.pref.gdrive?'on':''}" data-a="gcdrive">${S.pref.gdrive?'✓ ':''}Include Google Drive Files</span></div></div>
  ${installCard()}
@@ -1686,12 +1707,33 @@ function paintGround(first){const i=view.gi;if(first)openModal('<div id="gbody">
 /* ======= v5: leaderboard, reminders, social share ======= */
 S.rem=S.rem||{time:'19:00',notify:false};
 const weekMins=()=>Math.round(S.classes.reduce((a,c)=>a+weekSecs(c),0)/60);
-function lbCard(){const m=view.lb||'w',me={n:S.user.name,un:S.user.username,d:DN(),w:weekMins(),s:streakDays(),me:1};
- const rows=[me,...S.friends.map(f=>({...f,stale:f.t&&Date.now()-f.t>7*864e5}))].sort((a,b)=>(b[m]||0)-(a[m]||0));
- return `<div class="card"><h2>Leaderboard</h2><div class="tabs">${[['w','Study Minutes'],['s','Streak']].map(([k,l])=>`<button data-a="lbmode" data-k="${k}" class="${k===m?'on':''}">${l}</button>`).join('')}</div>
- ${rows.map((r,i)=>`<div class="item"><b style="width:30px;font-size:20px">${['🥇','🥈','🥉'][i]||i+1}</b><div class="grow"><b>${esc(r.d||'Winston')}​</b> <span class="mute">${esc(r.n)}${r.un?' @'+esc(r.un):''}${r.me?' (You)':''}</span>${r.stale?' <span class="mute">· Old Code</span>':''}</div><b>${m==='w'?(r.w||0)+' Min':(r.s||0)+' 🔥'}</b></div>`).join('')}
+const SCOPES=[['f','Friends'],['s','School'],['st','State'],['c','Country']],SCF={s:'school',st:'state',c:'country'};
+const COUNTRIES=['United States','Canada','United Kingdom','Australia','India','Germany','France','Mexico','Brazil','China','Japan','South Korea','Spain','Italy','Netherlands','Nigeria','Philippines','Singapore','Other'];
+const myLoc=()=>(S.user&&S.user.loc)||{};
+function locFields(l){return `<label>School (optional)</label><input id="lsc" value="${esc(l.school||'')}" placeholder="e.g. University of Southern California" maxlength="80" autocomplete="organization"><div class="row"><div class="grow"><label>City</label><input id="lci" value="${esc(l.city||'')}" placeholder="Los Angeles" maxlength="40"></div><div class="grow"><label>State / Region</label><input id="lst" value="${esc(l.state||'')}" placeholder="California" maxlength="40"></div></div><label>Country</label><input id="lco" list="lcl" value="${esc(l.country||'')}" placeholder="United States" maxlength="40"><datalist id="lcl">${COUNTRIES.map(c=>`<option value="${c}">`).join('')}</datalist>`}
+const readLoc=()=>{const v=id=>(($(id)||{}).value||'').trim();return {school:v('#lsc'),city:v('#lci'),state:v('#lst'),country:v('#lco')}};
+let lbRemote={};
+function lbRows(sc){const l=myLoc(),me={n:S.user.name,un:S.user.username,d:DN(),w:weekMins(),s:streakDays(),me:1,lc:l};
+ let rows=[me,...S.friends.map(f=>({...f,stale:f.t&&Date.now()-f.t>7*864e5}))];
+ if(sc!=='f'){const key=SCF[sc],mine=norm(l[key]||'');if(!mine)return null;rows=rows.filter(r=>r.me||norm((r.lc||{})[key]||'')===mine);
+  (lbRemote[sc]||[]).forEach(r=>{if(!rows.some(x=>x.u===r.uid||(!x.u&&x.n===r.name&&x.d===r.dog)))rows.push({u:r.uid,n:r.name,d:r.dog,w:r.minutes,s:r.streak,l:r.level,remote:1})})}
+ return rows}
+async function lbFetch(sc){const key=SCF[sc],v=(myLoc()[key]||'').trim();if(!key||!v||!S.live.on)return;const r=await liveCall('winston_scope_board',{p_field:key,p_value:v});if(Array.isArray(r)){lbRemote[sc]=r.filter(x=>x.uid!==S.live.uid);if(tab==='social'&&(view.lbs||'f')===sc)render()}}
+function lbCard(){const m=view.lb||'w',sc=view.lbs||'f',rows0=lbRows(sc),l=myLoc();
+ const head=`<h2>Leaderboard</h2><div class="tabs">${SCOPES.map(([k,t])=>`<button data-a="lbscope" data-k="${k}" class="${k===sc?'on':''}">${t}</button>`).join('')}</div><div class="tabs" style="margin-top:-4px">${[['w','Study Minutes'],['s','Streak']].map(([k,t])=>`<button data-a="lbmode" data-k="${k}" class="${k===m?'on':''}">${t}</button>`).join('')}</div>`;
+ if(!rows0)return `<div class="card lbcard">${head}<div class="bubble">Add your ${sc==='s'?'school':sc==='st'?'state':'country'} to see how you rank${sc==='s'?' at your school':''}.</div><button class="p" data-a="locedit" style="width:100%">${sc==='s'?'Join Your School':'Set My Location'}</button></div>`;
+ const rows=[...rows0].sort((a,b)=>(b[m]||0)-(a[m]||0));
+ const scopeName=sc==='f'?'':sc==='s'?l.school:sc==='st'?l.state:l.country;
+ return `<div class="card lbcard">${head}${scopeName?`<div class="mute" style="margin:0 0 6px;font-weight:600">${esc(scopeName)}</div>`:''}
+ ${rows.map((r,i)=>`<div class="item"><b style="width:30px;font-size:20px">${['🥇','🥈','🥉'][i]||i+1}</b><div class="grow"><b>${esc(r.d||'Winston')}</b> <span class="mute">${esc(r.n)}${r.un?' @'+esc(r.un):''}${r.me?' (You)':''}</span>${r.stale?' <span class="mute">· Old Code</span>':''}</div><b>${m==='w'?(r.w||0)+' Min':(r.s||0)+' 🔥'}</b></div>`).join('')}
+ ${sc!=='f'&&rows.length===1?`<p class="mute" style="margin:8px 0 0">You're the first here! Invite classmates and turn on live sharing so they show up.</p>`:''}
  <div class="row" style="justify-content:space-between;margin-top:8px"><span class="chip ${liveStatus==='live'?'on':''}" style="margin:0">${liveChip()}</span><span class="chip ${S.live.on?'on':''}" data-a="livetoggle" style="margin:0">${S.live.on?'✓ ':''}Share My Stats Live</span></div>
- <p class="mute">${S.live.on?'Your name, dog name, weekly minutes, streak and level are shared with friends who have your code. ':'Friends update when they send you a fresh code, or turn on live sharing for automatic updates. '}${liveStatus==='setup'?'Live sync needs a one-time database setup: run winston/supabase-leaderboard.sql in Supabase. ':''}</p>${S.live.on?'<button class="s" data-a="livedelete">Delete My Live Data</button>':''}</div>`}
+ <p class="mute">${sc==='f'?(S.live.on?'Your name, dog name, weekly minutes, streak and level are shared with friends who have your code. ':'Friends update when they send you a fresh code, or turn on live sharing for automatic updates. '):(S.live.on?'School, state and country boards show everyone who shares live with the same place. ':'Turn on Share My Stats Live to appear on, and see, the school, state and country boards. ')}${liveStatus==='setup'?'Live sync needs a one-time database setup: run winston/supabase-leaderboard.sql and winston/supabase-scoped-board.sql in Supabase. ':''}</p>${S.live.on?'<button class="s" data-a="livedelete">Delete My Live Data</button>':''}</div>`}
+function schoolCard(){const l=myLoc();return l.school?`<div class="card"><h3>🎓 My School</h3><div style="font:400 20px var(--display)">${esc(l.school)}</div><div class="mute">${esc([l.city,l.state,l.country].filter(Boolean).join(', '))||'Add your location'}</div><div class="row" style="margin-top:10px"><button class="p grow" data-a="lbscope" data-k="s">School Leaderboard</button><button class="s grow" data-a="locedit">Edit</button></div></div>`:`<div class="card"><h3>🎓 Join Your School</h3><p class="mute" style="margin:0 0 8px">Add your school and where it is to compete with classmates, your state and your country.</p><button class="p" data-a="locedit" style="width:100%">Join Your School</button></div>`}
+Object.assign(ACTIONS,{
+ lbscope(d){view.lbs=d.k;if(tab!=='social'){tab='social';view.ssub='friends'}render();if(d.k!=='f')lbFetch(d.k)},
+ locedit(){openModal(`<h2>🎓 School &amp; Location</h2><p class="mute" style="margin:0 0 6px">Used only for the school, state and country leaderboards. Leave anything blank to skip it.</p>${locFields(myLoc())}<button class="p" data-a="locsave" style="width:100%;margin-top:6px">Save</button>`)},
+ locsave(){S.user.loc=readLoc();save();closeModal();render();toast(S.user.loc.school?'Welcome to '+S.user.loc.school+'!':'Location saved');if(S.live.on){liveLast=0;liveSync()}}});
 const icsDate=d=>`${d.getFullYear()}${pad2(d.getMonth()+1)}${pad2(d.getDate())}T${pad2(d.getHours())}${pad2(d.getMinutes())}00`;
 function remStart(){const [h,m]=S.rem.time.split(':').map(Number),d=new Date();d.setHours(h,m,0,0);if(d<new Date())d.setDate(d.getDate()+1);return d}
 function gcalUrl(){const a=remStart(),b=new Date(a.getTime()+15*60000);return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(`Study With ${DN()} 🐶`)+'&details='+encodeURIComponent('Your streak is waiting! Open Winston and do one small thing.')+`&dates=${icsDate(a)}/${icsDate(b)}&recur=RRULE:FREQ=DAILY`}
@@ -1726,7 +1768,7 @@ async function liveCall(fn,body){const ctl=new AbortController(),t=setTimeout(()
  catch(e){liveStatus='offline';return null}finally{clearTimeout(t)}}
 async function liveSync(){if(!S.live.on||!S.live.uid||liveBusy)return;liveBusy=true;liveLast=Date.now();
  try{const up=await liveCall('winston_upsert',{p_uid:S.live.uid,p_secret:S.live.secret,p_name:S.user.name,p_dog:DN(),p_minutes:weekMins(),p_streak:streakDays(),p_level:lvl()});if(up===null)return;
-  liveStatus='live';const ids=S.friends.map(f=>f.u).filter(Boolean);
+  liveStatus='live';{const l=S.user.loc||{};liveCall('winston_scope_upsert',{p_uid:S.live.uid,p_secret:S.live.secret,p_name:S.user.name,p_dog:DN(),p_minutes:weekMins(),p_streak:streakDays(),p_level:lvl(),p_school:l.school||'',p_state:l.state||'',p_country:l.country||''}).then(()=>{const sc=view.lbs;if(sc&&sc!=='f')lbFetch(sc)})}const ids=S.friends.map(f=>f.u).filter(Boolean);
   if(ids.length){const rows=await liveCall('winston_board',{p_uids:ids});if(Array.isArray(rows)){rows.forEach(r=>{const f=S.friends.find(x=>x.u===r.uid);if(f){f.n=r.name;f.d=r.dog;f.w=r.minutes;f.s=r.streak;f.l=r.level;f.t=Date.parse(r.updated_at)||Date.now();f.live=1}});save()}}}
  finally{liveBusy=false}}
 function liveKick(){if(S.live.on&&Date.now()-liveLast>60000)liveSync().then(()=>{if(tab==='social'&&(view.ssub||'friends')==='friends')render()})}
@@ -2130,7 +2172,7 @@ async function gcGet(url,params){const u=new URL(url);for(const [k,v] of Object.
 async function gcAll(path,key,params){let out=[],pt='';for(let i=0;i<6;i++){const j=await (await gcGet('https://classroom.googleapis.com/v1/'+path,{pageSize:100,...(params||{}),...(pt?{pageToken:pt}:{})})).json();out=out.concat(j[key]||[]);pt=j.nextPageToken;if(!pt)break}return out}
 const gcDueLocal=(d,t)=>{if(!d||!d.year)return {};if(t&&(t.hours!==undefined||t.minutes!==undefined)){const x=new Date(Date.UTC(d.year,d.month-1,d.day,t.hours||0,t.minutes||0));return {date:isoD(x),time:pad2(x.getHours())+':'+pad2(x.getMinutes())}}return {date:`${d.year}-${pad2(d.month)}-${pad2(d.day)}`}};
 const gcLinks=a=>(a||[]).map(m=>m.link?`${m.link.title||'Link'}: ${m.link.url}`:m.youTubeVideo?`Video: ${m.youTubeVideo.title||''} ${m.youTubeVideo.alternateLink||''}`:m.form?`Form: ${m.form.title||''} ${m.form.formUrl||''}`:m.driveFile&&m.driveFile.driveFile?`File: ${m.driveFile.driveFile.title||''}`:'').filter(Boolean).join('\n');
-function gcSetup(){openModal(`<h2>🎓 Connect Google Classroom</h2><p class="mute" style="margin:0 0 8px">Google needs a free <b>Client ID</b> so only you can sign in. One-time setup, about 5 minutes:</p><ol style="padding-left:20px;margin:0 0 10px"><li>Open <b>console.cloud.google.com</b> and create a project.</li><li><b>APIs &amp; Services → Library</b>: enable <b>Google Classroom API</b> (and <b>Google Drive API</b> if you want files).</li><li><b>OAuth consent screen</b>: choose External and add your own email as a <b>Test user</b>.</li><li><b>Credentials → Create credentials → OAuth client ID → Web application</b>. Under <b>Authorized JavaScript origins</b> add <b>https://miyagagne.github.io</b>.</li><li>Paste the Client ID below.</li></ol><input id="gcid" placeholder="123456-abc.apps.googleusercontent.com" value="${esc(gcClient())}" autocomplete="off"><button class="p" data-a="gcsave" style="width:100%">Save And Continue</button><p class="mute" style="margin:8px 0 0;font-size:12px">Winston only reads your classes, assignments, announcements and materials. Nothing is posted to Classroom, and the sign-in token stays in this tab.</p>`)}
+function gcSetup(){openModal(`<h2>🎓 Google Classroom</h2><p>Google Classroom isn't switched on for this copy of Winston yet. The app owner turns it on once, and then everyone connects with a single tap.</p><details style="margin:8px 0"><summary><b>For the app owner (one time, 5 minutes)</b></summary><ol style="padding-left:20px;margin:6px 0"><li>In <b>console.cloud.google.com</b> create a project and enable the <b>Google Classroom API</b> (and Drive API).</li><li>Set up the OAuth consent screen and publish it.</li><li>Create an <b>OAuth client ID → Web application</b> and add <b>https://miyagagne.github.io</b> as an authorized JavaScript origin.</li><li>Paste the Client ID into <b>winston/config.js</b> (googleClientId) and redeploy. Or paste it here to try it on this device:</li></ol><input id="gcid" placeholder="123456-abc.apps.googleusercontent.com" value="${esc(gcClient())}" autocomplete="off"><button class="s" data-a="gcsave" style="width:100%">Use This Client ID</button></details>`)}
 function gcPanel(){openModal(`<h2>🎓 Google Classroom</h2><p class="mute" style="margin:0 0 8px">Sign in with Google and pick the classes to bring in. Winston copies class names, due dates, announcements and materials.</p><div style="margin:6px 0"><span class="chip ${S.pref.gdrive?'on':''}" data-a="gcdrive">${S.pref.gdrive?'✓ ':''}Also Import Google Drive Files</span></div><button class="p" data-a="gcquick" style="width:100%">Connect And Import</button><div id="gcout" class="mute" style="margin-top:8px"></div><div id="gclist"></div><p class="mute" style="margin:8px 0 0;font-size:12px"><span data-a="gcsetup" style="text-decoration:underline;cursor:pointer">Change Client ID</span></p>`)}
 function gcListHtml(){return `<h3 class="petsec">Choose Classes</h3>${gcCourses.map((c,i)=>`<div style="margin:4px 0"><span class="chip ${c._on?'on':''}" data-a="gcpick" data-k="${i}">${c._on?'✓ ':''}${esc(c.name)}${c.section?' · '+esc(c.section):''}</span></div>`).join('')||'<p class="mute">No active classes found.</p>'}${gcCourses.length?`<button class="p" data-a="gcimport" style="width:100%;margin-top:10px">Import ${gcCourses.filter(c=>c._on).length} Class${gcCourses.filter(c=>c._on).length===1?'':'es'}</button>`:''}`}
 async function gcImportDrive(c,att,say){const out=[];for(const m of att||[]){const f=m.driveFile&&m.driveFile.driveFile;if(!f||!f.id)continue;try{const meta=await (await gcGet('https://www.googleapis.com/drive/v3/files/'+f.id,{fields:'id,name,mimeType'})).json();const mt=meta.mimeType||'';
@@ -2162,11 +2204,12 @@ const BS_SRC="javascript:(async()=>{try{const o=location.origin,g=async u=>{cons
 const bsBookmark=()=>BS_SRC.split('__ORIGIN__').join((/^https?:/.test(location.protocol)&&!inFrame)?location.origin:'*');
 let bsWin=null;
 const isoLocal=iso=>{const d=new Date(iso);return isNaN(d)?null:{date:isoD(d),time:pad2(d.getHours())+':'+pad2(d.getMinutes())}};
-function bsConnectHtml(){return `<h2>📚 Connect Brightspace</h2><p class="mute" style="margin:0 0 8px">Brightspace doesn't let outside apps log in for you, so ${esc(DN())} works from your own signed-in tab. Your password never leaves Brightspace.</p>
- <label>Your school's Brightspace link</label><input id="bsurl" placeholder="e.g. brightspace.yourschool.edu" value="${esc(S.pref.bsurl||'')}" autocomplete="off" autocapitalize="off">
- <details ${S.pref.bsDone?'':'open'} style="margin:6px 0"><summary><b>One-time setup: save the bookmark</b></summary><p class="mute" style="margin:6px 0">Copy this code and save it as a bookmark named <b>Send To Winston</b>.</p><textarea readonly id="bsbm2" style="min-height:70px;font-size:11px">${esc(bsBookmark())}</textarea><button class="s" data-a="bscopy2" style="width:100%">Copy Bookmark Code</button><div style="margin-top:8px"><span class="chip ${S.pref.bsDone?'on':''}" data-a="bsdone">${S.pref.bsDone?'✓ ':''}I Saved The Bookmark</span></div></details>
- <button class="p" data-a="bsopen" style="width:100%;margin-top:6px">Open Brightspace</button><p class="mute" style="margin:8px 0">Sign in if asked, then click your <b>Send To Winston</b> bookmark. Your classes come straight back here.</p><div id="bsout2" class="mute"></div>
- <details style="margin-top:8px"><summary><b>Or paste instead</b></summary><textarea id="bsjson" placeholder="Paste what the bookmark copied" style="min-height:80px"></textarea><button class="s" data-a="bsimport" style="width:100%">Import Pasted Data</button></details>`}
+function bsConnectHtml(){const has=!!S.pref.bsurl;return `<h2>📚 Connect Brightspace</h2><p class="mute" style="margin:0 0 8px">Two quick taps. Your password never leaves Brightspace.</p>
+ <label>Your school's Brightspace address</label><input id="bsurl" placeholder="brightspace.yourschool.edu" value="${esc(S.pref.bsurl||'')}" autocomplete="off" autocapitalize="off">
+ ${S.pref.bsDone?'':`<div class="bubble" style="margin:8px 0"><b>First time only:</b> drag this button up to your bookmarks bar.<div style="text-align:center;margin:8px 0"><a class="p" id="bsdrag" href="${esc(bsBookmark())}" onclick="event.preventDefault();return false" style="display:inline-flex;text-decoration:none;padding:0 18px">📚 Send To Winston</a></div><span class="mute" style="font-size:12px">On a phone or without a bookmarks bar? <span data-a="bscopy2" style="text-decoration:underline;cursor:pointer">Copy it instead</span>.</span></div>`}
+ <button class="p" data-a="bsopen" style="width:100%;margin-top:6px">${S.pref.bsDone?'Connect Brightspace':'Open Brightspace'}</button>
+ <p class="mute" style="margin:8px 0">Sign in if asked, then click <b>Send To Winston</b> in your bookmarks. Your classes land here automatically.</p><div id="bsout2" class="mute"></div>
+ <details style="margin-top:8px"><summary>Trouble? Paste instead</summary><textarea id="bsjson" placeholder="Paste what the bookmark copied" style="min-height:80px"></textarea><button class="s" data-a="bsimport" style="width:100%">Import Pasted Data</button></details>`}
 async function importBS(o,say){let nc=0,ne=0,nd=0,nk=0;for(const bc of o.c){try{const nm=String(bc.name||bc.code||'Class').replace(/\s+/g,' ').trim();say(`Importing ${nm}…`);const c=ensureClass(nm);nc++;const docs=[];
   for(const w of bc.work||[]){const l=w.d?isoLocal(w.d):null;if(l&&addEventOnce(c,w.t,l.date,evKind(w.t),l.time))ne++;const dd=addDocOnce(c,'bs:w:'+bc.id+':'+w.t,'Assignment: '+w.t,`${w.t}\n${w.x||''}`);if(dd)docs.push(dd)}
   for(const a of bc.news||[]){const dd=addDocOnce(c,'bs:n:'+bc.id+':'+a.t,'Announcement: '+a.t,`${a.t}\n${a.b||''}`);if(dd)docs.push(dd)}
@@ -2179,8 +2222,8 @@ Object.assign(ACTIONS,{
  bsconnect(){openModal(bsConnectHtml())},
  bsdone(){S.pref.bsDone=!S.pref.bsDone;save();const c=$('[data-a=bsdone]');if(c){c.classList.toggle('on',!!S.pref.bsDone);c.textContent=(S.pref.bsDone?'✓ ':'')+'I Saved The Bookmark'}},
  bsopen(){const raw=(($('#bsurl')||{}).value||'').trim();let u;try{u=new URL(/^https?:/i.test(raw)?raw:'https://'+raw);if(!/\./.test(u.hostname))throw 0}catch(e){return toast("Type your school's Brightspace link first (like brightspace.yourschool.edu)")}
-  if(!S.pref.bsDone)return toast('Save the bookmark first, then tap "I Saved The Bookmark"');S.pref.bsurl=u.origin;save();bsWin=window.open(u.origin,'winston-bs','popup=yes,width=1000,height=780');if(!bsWin)return toast('Your browser blocked the window. Allow pop-ups for Winston and try again.');
-  const el=$('#bsout2');if(el)el.textContent='Brightspace is open. Sign in, then click your "Send To Winston" bookmark…'},
+  S.pref.bsurl=u.origin;save();S.pref.bsDone=true;bsWin=window.open(u.origin,'winston-bs','popup=yes,width=1000,height=780');if(!bsWin)return toast('Your browser blocked the window. Allow pop-ups for Winston and try again.');
+  const el=$('#bsout2');if(el)el.textContent='Brightspace is open. Sign in, then click Send To Winston in your bookmarks…'},
  bscopy2(){(navigator.clipboard?navigator.clipboard.writeText(bsBookmark()):Promise.reject()).then(()=>toast('Copied! Save it as a bookmark 🔖'),()=>{const t=$('#bsbm2');if(t){t.select();toast('Select the text and copy it')}})},
  async bsimport(){const say=t=>{if($('#bsout2'))$('#bsout2').textContent=t};let o;try{o=JSON.parse((($('#bsjson')||{}).value||'').trim())}catch(e){return say("That doesn't look like what the bookmark copied. Run the bookmark again and paste it here.")}
   if(!o||o.w!=='winston-bs'||!Array.isArray(o.c)||!o.c.length)return say('No Brightspace classes found in that. Run the bookmark on a Brightspace page and paste again.');await importBS(o,say)}});
