@@ -309,6 +309,9 @@ html[data-theme=dark] .s,html[data-theme=dark] .tabs button{color:#5de0e6}
 .p.grow,.s.grow{flex:1 1 0}
 .row>.p,.row>.s{min-width:0}
 .cmbar button{min-height:64px}
+nav button{width:100%;min-width:0;justify-self:stretch;height:58px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;white-space:nowrap}
+nav button b{line-height:1}
+@media(max-width:360px){nav button{font-size:9px;letter-spacing:.2px}}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -636,7 +639,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.7 (flat sticker dog, uniform buttons)';
+const APP_VERSION='2026-11-20.8 (equal tabs)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
