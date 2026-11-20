@@ -510,6 +510,7 @@ html[data-theme=dark] #intro .iburst{opacity:.45}
 #intro .tl.tpaw .ic{width:1em;height:1em}
 @keyframes tlpop{0%{opacity:0;transform:translateY(-30px) scale(.4) rotate(var(--r,0deg))}100%{opacity:1;transform:rotate(var(--r,0deg))}}
 @media(prefers-reduced-motion:reduce){#intro .tl{animation:none}}
+main.onb{max-width:620px!important;margin:0 auto;display:block!important}main.onb .hero{text-align:center}main.onb .hero h1{text-align:center;display:block}main.onb .hero .dogwrap svg{max-width:220px}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -557,7 +558,7 @@ body.fullbar #deskbar{display:flex}body.fullbar{padding-top:32px}body.fullbar #b
 <nav id="nav"></nav>
 <div id="widget"></div>
 <div id="toast"></div>
-<div id="deskbar"><span>🐶 Winston</span><span><button data-a="dwpin" title="Always on top">📌</button><button data-a="dwcollapse" title="Shrink to a floating circle">◯ Circle</button><button data-a="dwhide" title="Hide to tray">–</button></span></div>
+<div id="deskbar"><span>🐾 Study Paws</span><span><button data-a="dwpin" title="Always on top">📌</button><button data-a="dwcollapse" title="Shrink to a floating circle">◯ Circle</button><button data-a="dwhide" title="Hide to tray">–</button></span></div>
 <div id="cm"></div>
 <div id="modal"></div>
 <div id="intro"></div>
@@ -721,6 +722,7 @@ function go(t){tab=t;P=null;const m=$('#main');if(m){m.classList.remove('enter')
 function refresh(){render(true);updateWidget()}
 function render(keep){
  const n=$('#nav');
+ {const mm=$('#main');if(mm)mm.classList.toggle('onb',!S.user)}
  if(!S.user){n.style.display='none';return renderOnboard()}
  n.style.display='flex';
  n.innerHTML=TABS.map(([k,i,l])=>`<button data-a="tab" data-k="${k}" class="${k===tab?'on':''}"><b>${k==='dog'&&S.pet&&S.pet.species==='cat'?'🐱':i}</b>${l}</button>`).join('');
@@ -896,7 +898,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.32 (lighter logo outline)';
+const APP_VERSION='2026-11-20.33 (laptop-size desktop window)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';

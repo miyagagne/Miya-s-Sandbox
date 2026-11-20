@@ -3,7 +3,15 @@ const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, screen, nativeI
 const path = require('path');
 const fs = require('fs');
 
-const SIZES = { orb: { w: 112, h: 112 }, widget: { w: 340, h: 560 }, full: { w: 440, h: 860 } };
+const SIZES = { orb: { w: 112, h: 112 }, widget: { w: 340, h: 560 }, full: { w: 1180, h: 800 } };
+// The full app is a normal laptop-sized, resizable window (fits any screen); orb and widget stay small.
+function sizeFor(mode) {
+  const s = SIZES[mode];
+  if (mode !== 'full') return s;
+  const wa = screen.getPrimaryDisplay().workArea;
+  return { w: Math.max(720, Math.min(s.w, wa.width - 60)), h: Math.max(560, Math.min(s.h, wa.height - 60)) };
+}
+function centered(w, h) { const wa = screen.getPrimaryDisplay().workArea; return { x: Math.round(wa.x + (wa.width - w) / 2), y: Math.round(wa.y + (wa.height - h) / 2) }; }
 let win = null;
 let tray = null;
 let quitting = false;
@@ -36,13 +44,13 @@ function clampToScreen(b, w, h) {
 }
 
 function createWindow() {
-  const { w, h } = SIZES[cfg.mode];
+  const { w, h } = sizeFor(cfg.mode);
   const wa = screen.getPrimaryDisplay().workArea;
   const saved = cfg.bounds[cfg.mode];
-  const pos = clampToScreen(saved || { x: wa.x + wa.width - w - 24, y: wa.y + wa.height - h - 24 }, w, h);
+  const pos = cfg.mode === 'full' ? centered(w, h) : clampToScreen(saved || { x: wa.x + wa.width - w - 24, y: wa.y + wa.height - h - 24 }, w, h);
   win = new BrowserWindow({
     width: w, height: h, x: pos.x, y: pos.y,
-    frame: false, transparent: true, hasShadow: false, resizable: false, maximizable: false, fullscreenable: false,
+    frame: false, transparent: true, hasShadow: false, resizable: cfg.mode === 'full', minWidth: 360, minHeight: 300, maximizable: false, fullscreenable: false,
     show: false, title: 'Study Paws', backgroundColor: '#00000000',
     icon: path.join(__dirname, 'build', 'icon.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, backgroundThrottling: false }
@@ -67,13 +75,14 @@ function createWindow() {
 function setMode(m) {
   if (!win || !SIZES[m] || m === cfg.mode) return;
   const old = win.getBounds();
-  const { w, h } = SIZES[m];
+  const { w, h } = sizeFor(m);
   // keep the bottom-right corner where it is, so the widget grows up and to the left
-  const pos = clampToScreen({ x: old.x + old.width - w, y: old.y + old.height - h }, w, h);
+  const pos = m === 'full' ? centered(w, h) : clampToScreen({ x: old.x + old.width - w, y: old.y + old.height - h }, w, h);
   cfg.mode = m;
   win.setResizable(true);
+  win.setMinimumSize(m === 'full' ? 720 : 0, m === 'full' ? 560 : 0);
   win.setBounds({ x: pos.x, y: pos.y, width: w, height: h });
-  win.setResizable(false);
+  win.setResizable(m === 'full');
   cfg.bounds[m] = { x: pos.x, y: pos.y };
   saveCfg();
   if (tray) buildTray();
