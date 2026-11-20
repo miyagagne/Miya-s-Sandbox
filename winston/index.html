@@ -304,6 +304,11 @@ nav button.on{color:#111;background:linear-gradient(#ece6ff,#d6caff);border-colo
 html[data-theme=dark] nav button{color:#f4f0ff;background:linear-gradient(#2d2566,#211b4c);border-color:#41368a;box-shadow:0 2px 0 #120d30,0 5px 10px rgba(0,0,0,.4)}
 html[data-theme=dark] nav button.on{color:#fff;background:linear-gradient(#5240b8,#3b2d8c);border-color:#8068ff;box-shadow:0 2px 0 #241a63,0 5px 14px rgba(124,92,255,.4)}
 html[data-theme=dark] .s,html[data-theme=dark] .tabs button{color:#5de0e6}
+/* ---- one button size everywhere ---- */
+.p,.s{min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 20px;font-size:15px;line-height:1.1;border-radius:14px;text-align:center}
+.p.grow,.s.grow{flex:1 1 0}
+.row>.p,.row>.s{min-width:0}
+.cmbar button{min-height:64px}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -332,20 +337,20 @@ body.fullbar #deskbar{display:flex}body.fullbar{padding-top:32px}body.fullbar #b
 </head>
 <body>
 <svg id="defs" width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-<radialGradient id="fur" cx=".5" cy=".3" r=".8"><stop offset="0" stop-color="#ffcb86"/><stop offset=".55" stop-color="#f5a24a"/><stop offset="1" stop-color="#d27a2c"/></radialGradient>
-<radialGradient id="cream" cx=".5" cy=".3" r=".8"><stop offset="0" stop-color="#fffaf0"/><stop offset=".6" stop-color="#fde6c4"/><stop offset="1" stop-color="#efc592"/></radialGradient>
-<radialGradient id="eye" cx=".5" cy=".35" r=".7"><stop offset="0" stop-color="#6b4430"/><stop offset="1" stop-color="#1b1015"/></radialGradient>
+<linearGradient id="fur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6a54e"/><stop offset="1" stop-color="#f6a54e"/></linearGradient>
+<linearGradient id="cream" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1d9"/><stop offset="1" stop-color="#fff1d9"/></linearGradient>
+<linearGradient id="eye" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b1a14"/><stop offset="1" stop-color="#2b1a14"/></linearGradient>
 <radialGradient id="blush" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ff8fa8" stop-opacity=".85"/><stop offset="1" stop-color="#ff8fa8" stop-opacity="0"/></radialGradient>
 <radialGradient id="aura" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff3a8" stop-opacity=".65"/><stop offset="1" stop-color="#fff3a8" stop-opacity="0"/></radialGradient>
-<linearGradient id="ear" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc2d0"/><stop offset="1" stop-color="#ff98b0"/></linearGradient>
-<linearGradient id="tongue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9fb4"/><stop offset="1" stop-color="#f0617f"/></linearGradient>
+<linearGradient id="ear" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9db6"/><stop offset="1" stop-color="#ff9db6"/></linearGradient>
+<linearGradient id="tongue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7f9c"/><stop offset="1" stop-color="#ff7f9c"/></linearGradient>
 <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0a0"/><stop offset=".5" stop-color="#ffc400"/><stop offset="1" stop-color="#d99200"/></linearGradient>
 <linearGradient id="blue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6cb2ff"/><stop offset="1" stop-color="#3566d6"/></linearGradient>
 <linearGradient id="purp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9a8ff"/><stop offset="1" stop-color="#6a4fe0"/></linearGradient>
 <linearGradient id="pink" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa8cf"/><stop offset="1" stop-color="#e5468f"/></linearGradient>
 <linearGradient id="red" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7b7b"/><stop offset="1" stop-color="#c92a3b"/></linearGradient>
 <linearGradient id="wing" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4fbff" stop-opacity=".95"/><stop offset="1" stop-color="#e6c8ff" stop-opacity=".65"/></linearGradient>
-<linearGradient id="hshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".1"/><stop offset=".55" stop-color="#a8581a" stop-opacity="0"/><stop offset="1" stop-color="#8a3d0c" stop-opacity=".2"/></linearGradient><linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2cf" stop-opacity=".95"/><stop offset=".5" stop-color="#ffd9a0" stop-opacity=".25"/><stop offset="1" stop-color="#a8581a" stop-opacity=".55"/></linearGradient><radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="shine" cx=".5" cy=".3" r=".6"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="nose" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#5c4852"/><stop offset="1" stop-color="#1b1216"/></radialGradient></defs></svg>
+<linearGradient id="hshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".1"/><stop offset=".55" stop-color="#a8581a" stop-opacity="0"/><stop offset="1" stop-color="#8a3d0c" stop-opacity=".2"/></linearGradient><linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2cf" stop-opacity=".95"/><stop offset=".5" stop-color="#ffd9a0" stop-opacity=".25"/><stop offset="1" stop-color="#a8581a" stop-opacity=".55"/></linearGradient><radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="shine" cx=".5" cy=".3" r=".6"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><linearGradient id="nose" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2830"/><stop offset="1" stop-color="#3a2830"/></linearGradient></defs></svg>
 <canvas id="bg"></canvas>
 <main id="main"></main>
 <nav id="nav"></nav>
@@ -451,26 +456,26 @@ function dog(eq={},m='happy',vb='0 0 200 200'){
  const furLines=H('<path d="M124 64 q7 4 10 13M146 98 q4 7 3 15" fill="none" stroke="#b86a22" stroke-opacity=".3" stroke-width="1.6" stroke-linecap="round"/><path d="M128 70 q5 3 7 10M140 84 q4 4 5 11" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="1.4" stroke-linecap="round"/>');
  return `<svg viewBox="${vb}" role="img" aria-label="Winston the study therapy dog">
  <circle cx="100" cy="104" r="98" fill="url(#aura)" opacity="0"/>
- <ellipse cx="100" cy="197" rx="62" ry="6" fill="#5a3a10" opacity=".2"/>
+ <ellipse cx="100" cy="197" rx="56" ry="5" fill="#3b2a50" opacity=".14"/>
  ${g('back')}
  <g class="breathe">
- <ellipse cx="100" cy="164" rx="48" ry="32" fill="url(#fur)"/>
- ${H('<ellipse cx="146" cy="171" rx="22" ry="20" fill="url(#fur)"/><ellipse cx="156" cy="190" rx="15" ry="7.5" fill="url(#cream)"/><path d="M150 188v4M156 187v5M162 188v4" stroke="#d2a574" stroke-width="1.4" stroke-linecap="round"/>')}
- <path d="${fluff(100,150,36,26,12,.03,.05,1.1)}" fill="url(#cream)"/>
- <ellipse cx="100" cy="152" rx="34" ry="9" fill="#9a4f12" opacity=".24"/><ellipse cx="100" cy="150" rx="28" ry="7" fill="#b86a22" opacity=".16"/>
- ${H('<path d="M103 156 Q127 152 127 172 L126 187 Q125 195 115 195 Q104 195 103 187Z" fill="url(#cream)"/><path d="M109 189v5M115 188v6M121 189v5" stroke="#d2a574" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="115" cy="193" rx="9" ry="2.4" fill="#ffc9cf" opacity=".6"/>')}
+ <ellipse cx="100" cy="164" rx="48" ry="32" fill="url(#fur)" stroke="#b9661c" stroke-width="2.4" stroke-linejoin="round"/>
+ ${H('<ellipse cx="146" cy="171" rx="22" ry="20" fill="url(#fur)" stroke="#b9661c" stroke-width="2.4" stroke-linejoin="round"/><ellipse cx="156" cy="190" rx="15" ry="7.5" fill="url(#cream)" stroke="#e3bf8e" stroke-width="1.6" stroke-linejoin="round"/><path d="M150 188v4M156 187v5M162 188v4" stroke="#d2a574" stroke-width="1.4" stroke-linecap="round"/>')}
+ <path d="${fluff(100,150,36,26,12,.03,.05,1.1)}" fill="url(#cream)" stroke="#e3bf8e" stroke-width="1.6" stroke-linejoin="round"/>
+ 
+ ${H('<path d="M103 156 Q127 152 127 172 L126 187 Q125 195 115 195 Q104 195 103 187Z" fill="url(#cream)" stroke="#e3bf8e" stroke-width="1.6" stroke-linejoin="round"/><path d="M109 189v5M115 188v6M121 189v5" stroke="#d2a574" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="115" cy="193" rx="9" ry="2.4" fill="#ffc9cf" opacity=".6"/>')}
  </g>
- ${H('<path d="M114 64 C122 48 134 34 146 26 C158 46 164 64 160 84 C146 76 128 70 114 64Z" fill="url(#fur)"/><path d="M127 64 C133 54 140 44 146 40 C153 54 156 64 154 76 C144 72 134 68 127 64Z" fill="url(#ear)"/><ellipse cx="138" cy="70" rx="9" ry="5" fill="url(#cream)" opacity=".9" transform="rotate(-35 138 70)"/><path d="M118 62 C124 46 134 34 144 28" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="2" stroke-linecap="round"/><path d="M160 84 C164 64 158 46 146 26" fill="none" stroke="#b8681f" stroke-opacity=".4" stroke-width="2" stroke-linecap="round"/>')}
- <path d="${HP}" fill="url(#fur)"/><path d="${HP}" fill="url(#hshade)"/>
- <ellipse cx="100" cy="76" rx="42" ry="26" fill="url(#shine)"/>
- <ellipse cx="100" cy="80" rx="7" ry="18" fill="url(#cream)" opacity=".9"/>
- <ellipse cx="100" cy="122" rx="24" ry="18" fill="url(#cream)"/><ellipse cx="100" cy="138" rx="13" ry="7" fill="url(#cream)"/>${H('<ellipse cx="116" cy="126" rx="14" ry="12" fill="url(#cream)"/>'+C(112,126,1.5,'#b8845a')+C(117,130,1.5,'#b8845a')+C(108,131,1.5,'#b8845a')+C(124,82,3.2,'#ffe6bd')+(glad?'<circle cx="142" cy="120" r="10" fill="url(#blush)"/>':''))}
+ ${H('<path d="M114 64 C122 48 134 34 146 26 C158 46 164 64 160 84 C146 76 128 70 114 64Z" fill="url(#fur)" stroke="#b9661c" stroke-width="2.4" stroke-linejoin="round"/><path d="M127 64 C133 54 140 44 146 40 C153 54 156 64 154 76 C144 72 134 68 127 64Z" fill="url(#ear)"/><ellipse cx="138" cy="70" rx="9" ry="5" fill="url(#cream)" stroke="#e3bf8e" stroke-width="1.6" stroke-linejoin="round" opacity=".9" transform="rotate(-35 138 70)"/><path d="M118 62 C124 46 134 34 144 28" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="2" stroke-linecap="round"/><path d="M160 84 C164 64 158 46 146 26" fill="none" stroke="#b8681f" stroke-opacity=".4" stroke-width="2" stroke-linecap="round"/>')}
+ <path d="${HP}" fill="url(#fur)" stroke="#b9661c" stroke-width="2.4" stroke-linejoin="round"/>
+ 
+ <ellipse cx="100" cy="80" rx="7" ry="18" fill="#fff1d9" opacity=".95"/>
+ <ellipse cx="100" cy="122" rx="24" ry="18" fill="url(#cream)" stroke="#e3bf8e" stroke-width="1.6" stroke-linejoin="round"/><ellipse cx="100" cy="138" rx="13" ry="7" fill="url(#cream)" stroke="#e3bf8e" stroke-width="1.6" stroke-linejoin="round"/>${H('<ellipse cx="116" cy="126" rx="14" ry="12" fill="url(#cream)" stroke="#e3bf8e" stroke-width="1.6" stroke-linejoin="round"/>'+C(112,126,1.5,'#b8845a')+C(117,130,1.5,'#b8845a')+C(108,131,1.5,'#b8845a')+C(124,82,3.2,'#ffe6bd')+(glad?'<circle cx="142" cy="120" r="10" fill="url(#blush)"/>':''))}
  ${eyes}
  <path d="M90 110 Q100 103 110 110 Q108 120 100 121 Q92 120 90 110Z" fill="url(#nose)"/><ellipse cx="99" cy="107" rx="5.5" ry="2.2" fill="#fff" opacity=".8"/><path d="M95 114 q2 2 4 0M101 114 q2 2 4 0" stroke="#0f0a0c" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".7"/>
  ${mouth}
  <path d="M72 148 Q100 166 128 148 L128 156 Q100 174 72 156Z" fill="#e8484f" stroke="#a52a30" stroke-width="1.5"/><circle cx="100" cy="168" r="7" fill="url(#gold)" stroke="#b97a00" stroke-width="1.5"/><path transform="translate(100 168) scale(.5)" d="${hd}" fill="#e8484f"/>
  ${g('neck')}${g('face')}${g('hat')}
- ${raise?'<path d="M134 160 Q150 152 155 140" fill="none" stroke="#f5a24a" stroke-width="14" stroke-linecap="round"/><g class="pawup"><ellipse cx="158" cy="126" rx="13" ry="16" fill="url(#cream)" stroke="#d2a574" stroke-opacity=".8"/><path d="M152 116v6M158 114v7M164 116v6" stroke="#d2a574" stroke-width="1.6" stroke-linecap="round"/><ellipse cx="158" cy="132" rx="7" ry="5" fill="#ffc9cf"/></g>':''}
+ ${raise?'<path d="M134 160 Q150 152 155 140" fill="none" stroke="#f5a24a" stroke-width="14" stroke-linecap="round"/><g class="pawup"><ellipse cx="158" cy="126" rx="13" ry="16" fill="url(#cream)" stroke="#e3bf8e" stroke-width="1.6" stroke-linejoin="round" stroke="#d2a574" stroke-opacity=".8"/><path d="M152 116v6M158 114v7M164 116v6" stroke="#d2a574" stroke-width="1.6" stroke-linecap="round"/><ellipse cx="158" cy="132" rx="7" ry="5" fill="#ffc9cf"/></g>':''}
  
  </svg>`}
 const ICONVB={hat:'40 -16 120 86',face:'52 78 96 44',neck:'56 134 88 62',back:'0 52 200 148'};
@@ -631,7 +636,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.6 (shaded tabs)';
+const APP_VERSION='2026-11-20.7 (flat sticker dog, uniform buttons)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';

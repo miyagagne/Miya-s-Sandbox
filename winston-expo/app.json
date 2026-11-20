@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "splash": { "image": "./assets/splash.png", "resizeMode": "contain", "backgroundColor": "#68cdfd" },
+    "splash": { "image": "./assets/splash.png", "resizeMode": "contain", "backgroundColor": "#ffb999" },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.winston.studybuddy",
@@ -16,7 +16,7 @@
     },
     "android": {
       "package": "com.winston.studybuddy",
-      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#68cdfd" },
+      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#ffb999" },
       "permissions": ["RECORD_AUDIO", "MODIFY_AUDIO_SETTINGS"]
     },
     "plugins": [
