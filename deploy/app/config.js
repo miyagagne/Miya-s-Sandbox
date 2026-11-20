@@ -2,7 +2,7 @@
  *
  * googleClientId : OAuth "Web application" Client ID from Google Cloud Console.
  *                  Setting this makes "Connect Google Classroom" ONE CLICK for every student.
- *                  Add your site (e.g. https://studypaws.netlify.app) as an Authorized JavaScript origin,
+ *                  Add your site (e.g. your site address) as an Authorized JavaScript origin,
  *                  enable the Google Classroom API (and Drive API), and publish the consent screen.
  * supabaseUrl / supabaseKey : your Supabase project (the anon key is public by design). Leave blank to use the built-in project.
  */
