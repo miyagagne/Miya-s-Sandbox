@@ -554,7 +554,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-13.15 (premium glass, installable)';
+const APP_VERSION='2026-11-20.1 (Expo Go app)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -963,7 +963,7 @@ Object.assign(ACTIONS,{
 /* ======= shop ======= */
 
 let deferredInstall=null;addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;const b=$('#instbtn');if(b)b.textContent='⬇ Install Winston'});
-const isStandalone=()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone}catch(e){return false}};
+const isStandalone=()=>{try{return !!window.__NATIVE_APP||!!window.ReactNativeWebView||matchMedia('(display-mode: standalone)').matches||navigator.standalone}catch(e){return false}};
 function installCard(){if(DESK||isStandalone())return '';const site='https://miyagagne.github.io/Miya-s-Sandbox/winston/';
  return `<label style="display:block;margin-top:6px">Get The App</label><div class="instcard">${inFrame?`<p class="mute" style="margin:0">To put ${esc(DN())} on your phone or computer, open the Winston website and install it from there:<br><b>${site}</b></p>`:`<button class="p" id="instbtn" data-a="install" style="width:100%">⬇ Install ${esc(DN())}</button><p class="mute" style="margin:8px 0 0"><b>iPhone:</b> Safari → Share → Add To Home Screen<br><b>Android:</b> Chrome ⋮ → Install App<br><b>Computer:</b> Chrome or Edge → install icon in the address bar</p>`}</div>`}
 function rDog(){const sub=view.dsub||'shop';

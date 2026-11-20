@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Winston",
+    "slug": "winston-study-buddy",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": { "image": "./assets/splash.png", "resizeMode": "contain", "backgroundColor": "#68cdfd" },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.winston.studybuddy",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Winston listens during class to take notes for you."
+      }
+    },
+    "android": {
+      "package": "com.winston.studybuddy",
+      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#68cdfd" },
+      "permissions": ["RECORD_AUDIO", "MODIFY_AUDIO_SETTINGS"]
+    },
+    "plugins": [
+      ["expo-audio", { "microphonePermission": "Winston listens during class to take notes for you." }]
+    ]
+  }
+}
