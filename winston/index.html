@@ -294,6 +294,16 @@ body.cm #modal{z-index:130}
 html[data-theme=dark] .cmb,html[data-theme=dark] .cmtimer,html[data-theme=dark] .cmbar button{background:#181240;color:var(--ink)}
 html[data-theme=dark] .cmx{background:rgba(255,255,255,.16)}
 @media(max-height:520px){.cmdog{width:36vh}.cmmid{flex-direction:row;gap:24px}}
+/* ---- shaded tab buttons, black text ---- */
+nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:6px}nav button{min-width:0;padding-left:0;padding-right:0}
+nav button{color:#111;background:linear-gradient(#fff,#efeaf8);border:1px solid #ddd5ec;border-radius:14px;box-shadow:0 2px 0 #d3c9e6,0 5px 10px rgba(60,40,110,.12);padding:6px 2px;text-shadow:none;transition:transform .1s,box-shadow .1s}
+nav button:active{transform:translateY(2px);box-shadow:0 0 0 #d3c9e6,inset 0 2px 5px rgba(60,40,110,.18)}
+nav button.on{color:#111;background:linear-gradient(#ece6ff,#d6caff);border-color:#b3a1ff;box-shadow:0 2px 0 #a592f0,0 5px 12px rgba(108,77,240,.28)}
+.s,.tabs button{color:#111}.tabs .on{color:#111}
+.s{background:linear-gradient(#fff,#f3effa);box-shadow:0 2px 0 #d9d0ee}.s:active{box-shadow:none}
+html[data-theme=dark] nav button{color:#f4f0ff;background:linear-gradient(#2d2566,#211b4c);border-color:#41368a;box-shadow:0 2px 0 #120d30,0 5px 10px rgba(0,0,0,.4)}
+html[data-theme=dark] nav button.on{color:#fff;background:linear-gradient(#5240b8,#3b2d8c);border-color:#8068ff;box-shadow:0 2px 0 #241a63,0 5px 14px rgba(124,92,255,.4)}
+html[data-theme=dark] .s,html[data-theme=dark] .tabs button{color:#5de0e6}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -621,7 +631,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.5 (Class Mode)';
+const APP_VERSION='2026-11-20.6 (shaded tabs)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
