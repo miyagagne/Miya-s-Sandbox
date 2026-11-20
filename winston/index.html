@@ -499,6 +499,17 @@ html[data-theme=dark] #intro .iburst{opacity:.45}
 .pipname{font:400 16px 'Lilita One',system-ui,sans-serif;color:#fff;text-shadow:-1.5px -1.5px 0 #5a3414,1.5px -1.5px 0 #5a3414,-1.5px 1.5px 0 #5a3414,1.5px 1.5px 0 #5a3414}
 .pipstage .sbub{margin:0 0 4px;max-width:96%;text-align:center}
 #widget .dogcol .ic,#widget small .ic{width:1.2em!important;height:1.2em!important;max-width:none!important;animation:none!important;filter:none!important}
+/* ---- STUDY PAWS logo ---- */
+#intro .ititle{font-size:0;line-height:0;text-shadow:none}
+#intro .ititle small{font-size:18px;line-height:1.2}
+#intro .logo{display:flex;flex-direction:column;align-items:center;gap:0;margin-top:2px}
+#intro .logo .trow{display:flex;justify-content:center;align-items:center;gap:1px;line-height:.9}
+#intro .tl{display:inline-block;font:400 clamp(66px,20vw,118px)/.92 'Lilita One','Poppins',sans-serif;letter-spacing:1px;color:#ffd23f;background:linear-gradient(#fff7ae 0,#ffd93f 42%,#ff9d2e 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;-webkit-text-stroke:10px #6b3410;paint-order:stroke fill;transform:rotate(var(--r,0deg));filter:drop-shadow(0 7px 0 #6b3410) drop-shadow(0 12px 12px rgba(20,40,80,.35));animation:tlpop .55s cubic-bezier(.2,1.5,.4,1) both;animation-delay:var(--d,0s)}
+#intro .logo .trow:nth-child(2) .tl:not(.tpaw){background-image:linear-gradient(#fff0c8 0,#ffc23f 40%,#ff7a3a 100%)}
+#intro .tl.tpaw{font-size:clamp(46px,14vw,80px);-webkit-text-fill-color:initial;background:none;-webkit-text-stroke:0;filter:drop-shadow(0 5px 0 #6b3410);margin-left:6px;--r:12deg}
+#intro .tl.tpaw .ic{width:1em;height:1em}
+@keyframes tlpop{0%{opacity:0;transform:translateY(-30px) scale(.4) rotate(var(--r,0deg))}100%{opacity:1;transform:rotate(var(--r,0deg))}}
+@media(prefers-reduced-motion:reduce){#intro .tl{animation:none}}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -885,7 +896,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.30 (Study Paws)';
+const APP_VERSION='2026-11-20.31 (STUDY PAWS logo)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -2403,9 +2414,10 @@ function introPets(hero){const ks=Object.keys(BREEDS).filter(k=>k!==hero).slice(
  const slots=[['8%','2%','min(21vw,92px)'],['22%','13%','min(16vw,72px)'],['36%','27%','min(14vw,62px)'],['64%','27%','min(14vw,62px)'],['78%','13%','min(16vw,72px)'],['92%','2%','min(21vw,92px)']];
  const eqs=[{hat:hats[2%hats.length]},{face:faces[0]},{},{},{hat:hats[0]},{face:faces[1%faces.length]}];
  return ks.map((k,i)=>`<div class="ipet" style="--x:${slots[i][0]};--b:${slots[i][1]};--w:${slots[i][2]};--dl:${(.18+i*.1).toFixed(2)}s">${dog(eqs[i]||{},i%2?'happy':'cheer','0 0 200 200',k)}</div>`).join('')}
+const logoHtml=()=>{const row=(w,x)=>`<span class="trow">${[...w].map((c,i)=>`<span class="tl" style="--r:${[-5,3,-2,5,-3][i%5]}deg;--d:${(x+i)*.07}s">${c}</span>`).join('')}</span>`;return `<span class="logo" aria-label="Study Paws">${row('STUDY',0)}<span class="trow">${[...'PAWS'].map((c,i)=>`<span class="tl" style="--r:${[3,-4,2,-5][i]}deg;--d:${(5+i)*.07}s">${c}</span>`).join('')}<span class="tl tpaw" style="--d:.65s">🐾</span></span></span>`};
 function showIntro(){const el=$('#intro'),u=S.user;let title,sub;
- if(u){const wk=S.classes.reduce((a,c)=>a+weekSecs(c),0),up=upcoming(1,14)[0];title=`<small>Welcome Back</small>${esc(u.name)}!`;sub=`${esc(DN())} missed you! ${wk>60?`You've studied ${fmtDur(wk)} this week. `:''}${up?`Next up: ${esc(up.title)} (${esc(up.cls)}) ${when(up)}.`:'Ready to learn something fun today?'}`}
- else{title='<small>Meet</small>Study Paws';sub='Your study buddy for class. Pick a pet, join the pack and make studying fun.'}
+ if(u){const wk=S.classes.reduce((a,c)=>a+weekSecs(c),0),up=upcoming(1,14)[0];title=`<small>Welcome Back, ${esc(u.name)}!</small>${logoHtml()}`;sub=`${esc(DN())} missed you! ${wk>60?`You've studied ${fmtDur(wk)} this week. `:''}${up?`Next up: ${esc(up.title)} (${esc(up.cls)}) ${when(up)}.`:'Ready to learn something fun today?'}`}
+ else{title=`<small>Meet</small>${logoHtml()}`;sub='Your study buddy for class. Pick a pet, join the pack and make studying fun.'}
  const hero=petBreed();
  el.innerHTML=`${introScene()}<div class="iburst"></div><h1 class="ititle">${title}</h1><p class="isub">${sub}</p><div class="ichips"><span>📝 Live Notes</span><span>🎯 Daily Quests</span><span>👥 Friends</span><span>🌳 Dog Park</span><span>✏️ Practice</span></div>
  <div class="istage">${introPets(hero)}<div class="ipet ihero" style="--x:50%;--b:-1%;--w:min(44vw,200px);--dl:.05s">${dog(u?S.eq:{},'cheer','0 0 200 200',hero)}</div></div>
