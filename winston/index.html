@@ -444,6 +444,12 @@ html[data-theme=dark] .sign{color:#fff}
 .iosSteps{}
 .instban .iosteps{}
 .instban ol{margin:0;padding-left:22px}.instban li{margin:5px 0}.instban .shareic{display:inline-block;background:#fff;border:2px solid #b27a35;border-radius:6px;padding:0 5px;font-size:13px}
+/* ---- custom icons ---- */
+:root{--io:#5a3414}html[data-theme=dark]{--io:#1c1008}
+.ic{width:1.18em;height:1.18em;display:inline-block;vertical-align:-.24em;flex:none;overflow:visible}
+.ic-y{--c1:#ffd24a}.ic-b{--c1:#4aa3f2}.ic-p{--c1:#ff8ac0}.ic-s{--c1:#cfd8e3}.ic-z{--c1:#d9894a}
+nav button b .ic{width:27px;height:27px;vertical-align:middle}.mood b .ic{width:32px;height:32px}.tool .ic{width:32px;height:32px}.gear .ic{width:26px;height:26px}
+.stat .ic{width:1.3em;height:1.3em}.wgrid .ic,.wm .ic{width:1.3em;height:1.3em}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -818,7 +824,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.21 (free iPhone install prompt)';
+const APP_VERSION='2026-11-20.22 (custom icons)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -1057,7 +1063,7 @@ async function popOut(auto){if(pipWin)return;
  try{const w=await documentPictureInPicture.requestWindow({width:340,height:400});pipWin=w;
   document.querySelectorAll('link[rel=stylesheet]').forEach(l=>{const n=w.document.createElement('link');n.rel='stylesheet';n.href=l.href;w.document.head.append(n)});
   [...document.styleSheets].forEach(ss=>{try{const st=w.document.createElement('style');st.textContent=[...ss.cssRules].map(r=>r.cssText).join('');w.document.head.append(st)}catch(e){}});
-  w.document.body.style.margin='0';w.document.body.style.overflow='hidden';w.document.documentElement.style.overflow='hidden';w.document.documentElement.setAttribute('data-theme',themeIsDark()?'dark':'light');w.document.body.style.background=themeIsDark()?'#292240':'#fffaf0';w.document.body.append($('#defs').cloneNode(true));w.document.addEventListener('click',onClick);
+  w.document.body.style.margin='0';w.document.body.style.overflow='hidden';w.document.documentElement.style.overflow='hidden';w.document.documentElement.setAttribute('data-theme',themeIsDark()?'dark':'light');w.document.body.style.background=themeIsDark()?'#292240':'#fffaf0';w.document.body.append($('#defs').cloneNode(true));w.document.body.append($('#icons').cloneNode(true));iconWatch(w.document);w.document.addEventListener('click',onClick);
   w.setInterval(tickTimer,1000);   // this window's own clock, so timers keep ticking while the Winston tab is in the background
   W.popped=true;W.open=true;S.nextCheck=Date.now()+30*60000;w.document.body.append(WEL);
   w.addEventListener('pagehide',()=>{W.popped=false;W.open=false;pipWin=null;document.body.append(WEL);drawWidget()});W._lv=null;drawWidget();WEL.scrollTop=0;try{w.scrollTo(0,0)}catch(e){}
@@ -1578,7 +1584,7 @@ function quests(){const r=dayRec(),g=goalToday(),mins=Math.floor(todayMins()),qa
 function questsCard(){const qs=quests(),r=dayRec(),g=goalToday(),all=qs.every(q=>q.done),t=S.timer,tc2=t&&S.classes.find(x=>x.id===t.cls),up=upcoming(1,14)[0];
  return `<div class="card"><h3>Today's Quests</h3>
  ${t?`<div class="row" style="margin-bottom:8px"><div class="grow"><div class="mute">${t.target?'Focus':'Studying'} · ${esc(tc2?tc2.name:'')}</div><div class="tmv" style="font:600 28px var(--display)">${wClock()}</div></div><button class="p bad" data-a="stoptimer">■ Stop</button></div>`:''}
- ${qs.map(q=>q.k==='goal'&&!g?`<div class="row" style="margin-bottom:8px"><input id="tg" class="grow" style="margin:0" placeholder="🎯 Set today's goal — e.g. finish chapter 3"><button class="p" data-a="goalset">Set</button></div>`
+ ${qs.map(q=>q.k==='goal'&&!g?`<div class="row" style="margin-bottom:8px"><input id="tg" class="grow" style="margin:0" placeholder="Set today's goal — e.g. finish chapter 3"><button class="p" data-a="goalset">Set</button></div>`
   :`<div class="quest ${q.done?'done':''}" ${q.k==='goal'?'data-a="goaltoggle"':''}><div class="row" style="justify-content:space-between"><span>${q.done?'✅':q.icon} ${q.k==='goal'?esc(g.text):q.t}</span>${q.k==='goal'?'':`<span class="mute">${q.v}/${q.max}</span>`}</div>${q.k==='goal'?'':`<div class="bar" style="height:10px"><i style="width:${Math.round(q.v/q.max*100)}%"></i></div>`}</div>`).join('')}
  ${r.chest?'<div class="chest open">🎁 Daily Chest Opened — See You Tomorrow!</div>':`<button class="chest ${all?'ready':''}" data-a="chest" ${all?'':'disabled'}>🎁 ${all?'Open Your Daily Chest!':'Finish All 3 To Unlock The Daily Chest'}</button>`}
  ${up?`<div class="item" style="margin-top:8px"><i class="dot" style="background:${EVT[up.type][1]}"></i><div><b>${esc(up.title)}</b> <span class="mute">· ${esc(up.cls)} · ${when(up)}</span></div></div>`:''}</div>`}
@@ -1623,7 +1629,7 @@ function rBoost(){const wk=[...Array(7)].map((_,i)=>{const d=new Date();d.setDat
  <div class="card"><h3>My Why</h3><textarea id="hg" placeholder="Why are you studying? What do you want your life to look like?" style="min-height:70px">${esc(S.user.goals||'')}</textarea><button class="s" data-a="savewhy">Save</button>
  ${S.why.map(w=>`<div class="item"><div>💛 ${esc(w.text)}</div><button class="s" data-a="delwhy" data-k="${w.id}">✕</button></div>`).join('')}
  <div class="row" style="margin-top:8px"><input id="nw" class="grow" style="margin:0" placeholder="Add a reason you're doing this…"><button class="p" data-a="addwhy">Add</button></div></div>
- <div class="card"><h3>Wins Wall</h3><div class="row"><input id="wn" class="grow" style="margin:0" placeholder="Log a win — big or small 🎉"><button class="p" data-a="addwin">Celebrate</button></div>
+ <div class="card"><h3>Wins Wall</h3><div class="row"><input id="wn" class="grow" style="margin:0" placeholder="Log a win — big or small "><button class="p" data-a="addwin">Celebrate</button></div>
  ${S.wins.slice(0,6).map(w=>`<div class="item"><div>🎉 ${esc(w.text)}<div class="mute">${esc(w.date)}</div></div></div>`).join('')||'<p class="mute">Your wins will live here. Finished an assignment? Understood a concept? Log it.</p>'}<p class="mute">${S.wins.length} win${S.wins.length===1?'':'s'} so far</p></div>
  <div class="card"><h3>Milestones</h3><div class="badges">${badges().map(b=>`<div class="bdg ${b[2]?'on':''}"><b>${b[2]?b[0]:'🔒'}</b><span>${b[1]}</span></div>`).join('')}</div></div>
  <div class="card"><h3>This Week's Moods</h3><div class="row" style="justify-content:space-between">${wk.map(d=>`<div style="text-align:center"><div style="font-size:24px">${d[1]}</div><div class="mute" style="font-size:11px">${d[0]}</div></div>`).join('')}</div></div>`}
@@ -1932,6 +1938,116 @@ function installBanner(){if(DESK||inFrame||!/^https?:/.test(location.protocol)||
  return ''}
 ACTIONS.insthide=()=>{S.pref.instHide=Date.now();save();render()};
 
+/* ======= custom icon set (replaces emojis): chunky outlined game style ======= */
+const ICONS=(()=>{const OL='var(--io)',G='#58c632',Y='#ffd24a',O='#ff9a2e',R='#ff5a5a',B='#4aa3f2',BR='#c98c4a',CR='#fff3d0',PK='#ff8ac0',PU='#a58bff',GR='#cfd8e3',W='#fff',DK='#2b1a14';
+ const S=(d,f,w=1.6)=>`<path d="${d}" fill="${f}" stroke="${OL}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"/>`;
+ const C=(x,y,r,f,w=1.6)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${f}"${w?` stroke="${OL}" stroke-width="${w}"`:''}/>`;
+ const E=(x,y,rx,ry,f,w=1.6)=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${f}"${w?` stroke="${OL}" stroke-width="${w}"`:''}/>`;
+ const Rc=(x,y,w,h,r,f,sw=1.6)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${f}"${sw?` stroke="${OL}" stroke-width="${sw}"`:''} stroke-linejoin="round"/>`;
+ const L=(d,c,w=2.6)=>`<path d="${d}" fill="none" stroke="${OL}" stroke-width="${w+2.4}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+ const T=(d,c=DK,w=1.4)=>`<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+ const HL=d=>`<path d="${d}" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.3" stroke-linecap="round"/>`;
+ const face=(f,extra)=>C(12,12,9.2,f)+extra;
+ const star=(cx,cy,r,f,w=1.5)=>{let d='';for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;d+=(i?'L':'M')+(cx+Math.cos(a)*rr).toFixed(2)+' '+(cy+Math.sin(a)*rr).toFixed(2)}return S(d+'Z',f,w)};
+ return {
+ paw:S('M12 11.2c3.2 0 5.6 2.6 5.6 5 0 2.1-1.8 3-3.4 2.6-1.1-.3-1.6-.6-2.2-.6s-1.1.3-2.2.6c-1.6.4-3.4-.5-3.4-2.6 0-2.4 2.4-5 5.6-5z',BR)+C(5.4,10.4,2,BR)+C(9.3,6.3,2.2,BR)+C(14.7,6.3,2.2,BR)+C(18.6,10.4,2,BR)+HL('M10 14.2c.5-.6 1.3-.9 1.8-.9'),
+ dog:S('M7.6 6.4C5 5.4 3.2 7.6 3.5 10.6l.5 4c.2 1.6 2.5 1.8 3.1.2l1.3-5.2z','#c9742c')+S('M16.4 6.4c2.6-1 4.4 1.2 4.1 4.2l-.5 4c-.2 1.6-2.5 1.8-3.1.2l-1.3-5.2z','#c9742c')+E(12,13,6.7,7,'#f6a54e')+E(12,15.6,3.7,3,CR,1.3)+E(12,14.3,1.7,1.2,DK,0)+C(9.2,11.4,1,DK,0)+C(14.8,11.4,1,DK,0)+T('M12 15.2v1.6M10.5 17.2q1.5 1.3 3 0')+HL('M8 8.8q1.2-1.2 2.6-1.2'),
+ cat:S('M5.4 10L4.6 3.8l5 3.3z','#f09a40')+S('M18.6 10l.8-6.2-5 3.3z','#f09a40')+E(12,13.6,7.5,6.6,'#f09a40')+T('M12 7.6v2.4M9.4 8.2l.5 1.8M14.6 8.2l-.5 1.8','#c8651b',1.2)+C(9.2,12.4,1,DK,0)+C(14.8,12.4,1,DK,0)+S('M10.8 14.2h2.4l-1.2 1.4z',PK,1)+T('M12 15.6v.8M10.6 17q1.4 1 2.8 0M10 15l-4-.7M10 16l-3.8 1M14 15l4-.7M14 16l3.8 1','#5a3414',1.1),
+ heart:S('M12 20.6C4 15 3 9.5 6.8 6.8c2.5-1.7 4.4-.3 5.2 1.5.8-1.8 2.7-3.2 5.2-1.5 3.8 2.7 2.8 8.2-5.2 13.8z','var(--c1,#ff5a6a)')+HL('M7.2 9.4q.7-1.5 2.2-1.4'),
+ pencil:S('M4 20l1.1-4.4L16.6 4.1c1-1 2.3-.9 3.2.1l.1.1c1 .9 1 2.3 0 3.3L8.4 18.9z',Y)+S('M4 20l1.1-4.4 3.3 3.3z','#f3d3a0')+S('M16.6 4.1c1-1 2.3-.9 3.2.1l.1.1c1 .9 1 2.3 0 3.3L17.6 5.9z',PK)+T('M4.7 18.3l1 1','#5a3414',1.2)+HL('M7 15.6L15.8 6.8'),
+ mic:Rc(8.3,2.6,7.4,12,3.7,GR)+T('M9.6 6h4.8M9.6 8.6h4.8M9.6 11.2h4.8','#8a9bb0',1.1)+L('M6 11.2c0 3.7 2.6 6.2 6 6.2s6-2.5 6-6.2','#8a9bb0',1.6)+L('M12 17.6v3M8.6 20.6h6.8','#8a9bb0',1.8),
+ party:S('M3.6 20.6L7.4 9.4l7.2 7.2z',Y)+T('M5.3 15.8l5.4 3M7 11.3l5.6 3.3',O,1.6)+S('M3.6 20.6L7.4 9.4',Y,0)+C(15.4,6.4,1.1,R,0)+C(19.6,10.6,1.1,B,0)+C(11.6,4.4,1.1,G,0)+C(20,5.4,.9,PU,0)+T('M13 8.6l1.8-2.2M17 12.6l2.4-1.6M9.2 7.2l.6-2.4',PK,1.4)+star(17,16.4,2.3,PK,1),
+ flame:S('M12 21.4c-5.4 0-7.4-4.4-5.6-8.4 1-2 2.5-3 3-5.6 2 1 2.8 2.5 2.8 4 1-.7 1.5-2 1.3-3.5 3.2 2.3 5.6 6 4.2 10-.9 2.3-3 3.5-5.7 3.5z',O)+S('M12 21.4c-2.5 0-3.6-2.2-2.4-4 1-1.5 2.3-2.2 2.4-4 2 1.2 3 3 2.3 5.2-.3 1.5-1 2.8-2.3 2.8z',Y,1.2),
+ timer:C(12,13.6,7.6,'#fff8e0')+C(12,13.6,5.6,'none',0).replace('fill="none"','fill="none" stroke="'+O+'" stroke-width="1.6"')+Rc(9.8,2.4,4.4,2.6,1,O)+T('M12 13.6V9.6M12 13.6l3 1.8','#5a3414',1.8)+T('M18.6 7.2l1.5-1.5','#5a3414',2),
+ clock:C(12,12,9,'#fff8e0')+T('M12 7v5.4l3.6 2.2','#5a3414',2)+C(12,12,1,'#5a3414',0),
+ checkc:C(12,12,9.2,G)+L('M7.4 12.6l3.3 3.3 6-7.2',W,2.4).replace(/stroke="var\(--io\)" stroke-width="4.8"/,'stroke="#2c7a14" stroke-width="4.8"'),
+ check:L('M5 12.8l4.8 4.8L19.4 6.2',G,3.2),
+ coin:C(12,12,9.2,Y)+C(12,12,6.4,'none',0).replace('fill="none"','fill="none" stroke="#e0a000" stroke-width="1.5"')+star(12,12,3.6,'#ffec9a',1)+HL('M6.6 9.2q1.2-2.4 3.4-3'),
+ calendar:Rc(3.4,5,17.2,15.6,2.6,'#fff8e0')+S('M3.4 7.6Q3.4 5 6 5h12q2.6 0 2.6 2.6V10H3.4z',R)+Rc(7.4,2.8,2.2,4.2,1.1,GR)+Rc(14.4,2.8,2.2,4.2,1.1,GR)+C(8,13.4,1,'#c98c4a',0)+C(12,13.4,1,'#c98c4a',0)+C(16,13.4,1,'#c98c4a',0)+C(8,17,1,'#c98c4a',0)+C(12,17,1,'#c98c4a',0),
+ x:L('M6.4 6.4l11.2 11.2M17.6 6.4L6.4 17.6',R,3),
+ note:S('M5 3.6h11l3.6 3.6V20.4H5z','#fff8e0')+S('M16 3.6v3.6h3.6','#ffe9a8',1.2)+T('M8 11h8.6M8 14.4h8.6M8 17.8h5','#c98c4a',1.5),
+ sparkle:S('M10 2.6l2 6.6 6.6 2-6.6 2-2 6.6-2-6.6-6.6-2 6.6-2z',Y)+S('M19 3.4l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9z',W,1.1)+S('M18.4 15.4l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z',PK,1),
+ star:star(12,12.4,9.4,Y,1.6)+HL('M8.4 9.6L12 5.6'),
+ target:C(12,12,9.4,W)+C(12,12,6.6,R)+C(12,12,3.6,W)+C(12,12,1.5,R,0),
+ ball:C(12,12,9.2,'#d9f04a')+T('M4.4 7.4c3.8 1.6 5.2 5 4.8 9.8M19.6 16.6c-3.8-1.6-5.2-5-4.8-9.8',W,1.8),
+ play:S('M7 4.6v14.8l12-7.4z',G,1.8)+HL('M9 8.2v6'),
+ stop:Rc(5.4,5.4,13.2,13.2,2.6,R,1.8)+HL('M8 8.2h4'),
+ down:L('M12 3.8v11M7.2 10.4l4.8 4.8 4.8-4.8',B,3)+L('M5.4 20h13.2',B,2.6),
+ up:L('M12 15.4v-11M7.2 8.8L12 4l4.8 4.8',B,3)+L('M5.4 20h13.2',B,2.6),
+ trophy:S('M7 3.8h10v5.6c0 3.4-2.4 5.4-5 5.6-2.6-.2-5-2.2-5-5.6z',Y)+L('M7 6.2H4.4c-.4 3 .8 5 3.2 5.4M17 6.2h2.6c.4 3-.8 5-3.2 5.4',Y,1.6)+Rc(10.4,15,3.2,3.2,1,'#e0a000')+Rc(7.4,18,9.2,3,1.4,BR)+HL('M9 6.4v3.4'),
+ medal:S('M7.4 2.6l3.6 6.4 1.4-1 1.4 1 3.6-6.4z','#4aa3f2',1.3)+C(12,15,6.2,'var(--c1,#ffd24a)')+star(12,15,3.6,'#fff',1)+HL('M7.6 13.4q1-2.6 3.2-3.2'),
+ pushpin:S('M9 3.4h6l-.8 6 2.8 3.2H7l2.8-3.2z',R)+L('M12 12.6v8',GR,1.4),
+ pin:S('M12 21.4C6.6 15 5.4 12.6 5.4 9.6a6.6 6.6 0 0 1 13.2 0c0 3-1.2 5.4-6.6 11.8z',R)+C(12,9.6,2.4,W,0)+HL('M8.2 7.6q1-2 3-2.4'),
+ books:Rc(3.4,13.4,17.2,6.4,1.4,B)+Rc(4.8,7.8,14.4,6,1.4,G)+Rc(6.6,3,10.8,5.2,1.4,Y)+T('M7 16.6h10M8 10.8h8M9.4 5.6h5.4','#fff',1.2),
+ page:S('M5.4 3h9.6l3.6 3.6V21H5.4z','#fff8e0')+S('M15 3v3.6h3.6','#ffe9a8',1.2)+T('M8 10.6h8.4M8 13.8h8.4M8 17h5.6','#8a9bb0',1.4),
+ folder:S('M3 6.4q0-1.6 1.6-1.6H9l2 2.4h8.4q1.6 0 1.6 1.6V18q0 1.6-1.6 1.6H4.6Q3 19.6 3 18z',O)+S('M3 10.4h18v7.6q0 1.6-1.6 1.6H4.6Q3 19.6 3 18z',Y),
+ box:S('M3.4 8l8.6-4.6L20.6 8v9L12 21.6 3.4 17z',BR)+T('M3.4 8L12 12.6 20.6 8M12 12.6v9','#5a3414',1.4)+S('M7.6 5.8l8.6 4.6v2.6l-2.6-1.4V9.6L7.6 6.4z',CR,1),
+ save:S('M4.4 3.4h12.8l3.4 3.4V19.4q0 1.2-1.2 1.2H4.4q-1.2 0-1.2-1.2V4.6q0-1.2 1.2-1.2z',B)+Rc(7,3.4,9.4,5.4,.8,W,1.3)+Rc(7,13.4,10,7.2,1,'#fff8e0',1.3)+Rc(12.6,4.6,2.2,3,.5,GR,0),
+ trash:S('M6.2 7.4h11.6l-.9 12.4q-.1 1.4-1.5 1.4H8.6q-1.4 0-1.5-1.4z',GR)+L('M4.6 6.2h14.8M9.8 4.2h4.4',GR,1.6)+T('M10 10.4v7M14 10.4v7','#8a9bb0',1.4),
+ cap:S('M12 4.2L1.8 9 12 13.8 22.2 9z',DK,1.4)+S('M6 11.4v4.6q0 2.4 6 2.4t6-2.4v-4.6l-6 2.8z','#4a3b6e',1.4)+T('M20 9.6v5.4','#ffd24a',1.6)+C(20,16,1.5,Y,1),
+ wind:L('M3.8 9h10.4a2.8 2.8 0 1 0-2.8-2.8',B,2)+L('M3.8 13.2h14.4a2.8 2.8 0 1 1-2.8 2.8',B,2)+L('M3.8 17.2h7',B,2),
+ people:C(8.4,8,3.2,'#f3c98a')+S('M2.6 19.4q0-5.2 5.8-5.2t5.8 5.2z',G)+C(16.4,9,2.8,'#f3c98a')+S('M12.2 19.4q.3-4.4 4.8-4.4 4.6 0 4.8 4.4z',B),
+ chat:S('M4.4 4.4h15.2q1.6 0 1.6 1.6v8.6q0 1.6-1.6 1.6h-7.4l-4.6 4v-4H4.4q-1.6 0-1.6-1.6V6q0-1.6 1.6-1.6z',W)+C(8.2,10.4,1.2,'#5a3414',0)+C(12,10.4,1.2,'#5a3414',0)+C(15.8,10.4,1.2,'#5a3414',0),
+ think:S('M7.6 4.6c1.2-2 4.4-2.2 5.8-.4 2-1.4 5 0 5 2.4 2.4.4 3 3.8.8 5-.8 2-3.6 2.6-5 1.2-1.6 1.4-4.4 1-5.2-.8-2.6.6-4.4-2.4-2.4-4 .2-1.2.6-2.4 1-3.4z',W)+C(7.6,17.4,1.8,W)+C(5,20.6,1.1,W,1.2),
+ tree:Rc(10.4,13.6,3.2,7.4,1.2,BR)+C(12,9.4,6.8,'#3fb050')+C(8.6,11.4,3.8,'#5fd070',0)+C(15,8,3.4,'#5fd070',0)+HL('M8 7.4q1.2-1.8 3.2-2'),
+ gift:Rc(4,10.4,16,10.4,1.6,R)+Rc(3,7.2,18,4.4,1.4,'#ff8a8a')+Rc(10.6,7.2,2.8,13.6,0,Y,1.3)+S('M12 7.2C9.4 7.2 7.2 6.4 7.2 4.8c0-1.8 3-1.8 4.8 2.4C13.8 3 16.8 3 16.8 4.8c0 1.6-2.2 2.4-4.8 2.4z',Y,1.3),
+ bone:S('M7.6 5.4a2.7 2.7 0 1 0-4 3.2 2.7 2.7 0 0 0 3.2 3.9l6.8 6.8a2.7 2.7 0 1 0 3.2 3.9 2.7 2.7 0 0 0 3.9-3.2 2.7 2.7 0 1 0-3.2-3.9L11.5 9.3a2.7 2.7 0 0 0-3.9-3.9z',CR)+HL('M5 6.8q.6-.8 1.4-.8'),
+ window:Rc(3.4,3.4,17.2,17.2,2,'#bfe6ff')+L('M12 3.8v16.4M3.8 12h16.4','#8a5a2b',1.6)+HL('M6 7.6h3.4'),
+ fsad:face('#ffd24a',C(8.6,10.6,2.2,W,1)+C(15.4,10.6,2.2,W,1)+C(8.8,11,1,DK,0)+C(15.2,11,1,DK,0)+T('M8.6 17q3.4-3 6.8 0')),
+ fsleep:face('#ffd24a',T('M7.4 10.6q1.6 1.4 3.2 0M13.4 10.6q1.6 1.4 3.2 0')+E(12,16.2,1.6,1.2,'#a85a2a',0))+T('M16.6 4.6h3.4l-3.4 3.6h3.4','#4a7ad0',1.4),
+ fstress:face('#ffd24a',T('M7.2 9.4l3 1.4M16.8 9.4l-3 1.4')+C(8.8,12.2,.9,DK,0)+C(15.2,12.2,.9,DK,0)+T('M8.4 17.2l1.4-1.4 1.4 1.4 1.4-1.4 1.4 1.4 1.4-1.4')),
+ fnone:face('#ffd24a',C(8.8,11,1.1,DK,0)+C(15.2,11,1.1,DK,0)+T('M9 16.4h6')),
+ fsmile:face('#ffd24a',C(8.8,10.6,1.1,DK,0)+C(15.2,10.6,1.1,DK,0)+T('M7.8 14.4q4.2 4.6 8.4 0')),
+ warn:S('M12 3.4L22 20.6H2z',Y)+T('M12 9.6v5.4','#5a3414',2.2)+C(12,17.8,1.2,'#5a3414',0),
+ mail:Rc(2.8,5.4,18.4,13.4,2.2,W)+T('M3.6 7l8.4 6.4L20.4 7','#8a5a2b',1.6),
+ game:S('M7.6 7.4h8.8c3.2 0 5.2 3.6 5 8-.1 2.2-2.4 3-3.8 1.4l-1.6-2H8l-1.6 2c-1.4 1.6-3.7.8-3.8-1.4-.2-4.4 1.8-8 5-8z','#8a9bb0')+T('M7.6 11v3.4M5.9 12.7h3.4','#fff',1.6)+C(15.6,11.8,1.1,R,0)+C(18,13.8,1.1,G,0),
+ flower:C(12,5.6,3.2,W)+C(12,18.4,3.2,W)+C(5.6,12,3.2,W)+C(18.4,12,3.2,W)+C(7.5,7.5,3,W)+C(16.5,7.5,3,W)+C(7.5,16.5,3,W)+C(16.5,16.5,3,W)+C(12,12,3.3,Y),
+ home:S('M12 3L2.8 11h2.6v8.6q0 .8.8.8h4.4v-5.2h2.8v5.2h4.4q.8 0 .8-.8V11h2.6z',R)+S('M6 11v8.6h12V11l-6-5.2z','#fff3d0',1.2)+Rc(10.4,14.6,3.2,5.4,.6,BR,1.2),
+ lock:S('M7.4 10.6V8a4.6 4.6 0 0 1 9.2 0v2.6',GR)+Rc(4.8,10.4,14.4,10.6,2.4,Y)+C(12,15,1.6,'#5a3414',0)+T('M12 15.4v2.6','#5a3414',1.6),
+ nogo:C(12,12,9.2,R)+L('M5.6 18.4L18.4 5.6',W,2.6).replace(/stroke="var\(--io\)" stroke-width="5"/,'stroke="#a02020" stroke-width="5"'),
+ gear:S('M10.4 2.8h3.2l.6 2.4 1.8.8 2.2-1.2 2.2 2.2-1.2 2.2.8 1.8 2.4.6v3.2l-2.4.6-.8 1.8 1.2 2.2-2.2 2.2-2.2-1.2-1.8.8-.6 2.4h-3.2l-.6-2.4-1.8-.8-2.2 1.2-2.2-2.2 1.2-2.2-.8-1.8-2.4-.6v-3.2l2.4-.6.8-1.8-1.2-2.2 2.2-2.2 2.2 1.2 1.8-.8z',GR)+C(12,12,3.2,'#8a9bb0'),
+ bell:S('M12 3.4c3.6 0 5.8 2.8 5.8 6.4 0 3.4 1.4 4.6 2.6 6H3.6c1.2-1.4 2.6-2.6 2.6-6C6.2 6.2 8.4 3.4 12 3.4z',Y)+E(12,19.2,2.4,1.8,O,1.3)+HL('M8.6 8q.8-2 2.6-2.4'),
+ eyes:E(7.4,12,4.4,5.6,W)+E(16.6,12,4.4,5.6,W)+C(8.2,12.8,2,DK,0)+C(15.8,12.8,2,DK,0)+C(8.8,12,.7,W,0)+C(16.4,12,.7,W,0),
+ zzz:L('M5 6h6l-6 7h6',B,1.8)+L('M13.4 12h5l-5 6h5',B,1.6),
+ coffee:Rc(4.2,9,11.8,11,3,W)+Rc(4.2,9,11.8,3,1.4,'#8a5a2b',1.4)+L('M16 11.6q3.8 0 3.8 3t-3.8 3',W,1.8)+L('M8 3.4q-1 1.4 0 2.8M12 3.4q-1 1.4 0 2.8',GR,1.3),
+ wave:S('M9 20.6c-3-1-4.6-4-4-7.2l.8-4c.2-1 1.6-1.2 2-.2l.9 2.6V5.4c0-1.1 1.7-1.3 2-.2l.6 3V4.2c0-1.1 1.7-1.3 2 0l.5 3.6 1-2.8c.4-1 2-.7 2 .4l-.5 5.2c-.3 3.4-2.5 6-5 6.2z','#f3c98a')+T('M18.6 3.6q2 .8 2.6 3M3.6 4.6q-.4 1.6.6 3','#4aa3f2',1.4),
+ phone:Rc(6.6,2.4,10.8,19.2,2.4,'#8a9bb0')+Rc(8,5,8,12,.8,'#bfe6ff',1)+C(12,19.4,1,W,0),
+ cupcake:S('M6.4 11.4h11.2l-1.4 8.6q-.2 1-1.2 1H9q-1-.1-1.2-1z',PK)+T('M10 13.4l.5 6M14 13.4l-.5 6','#fff',1.2)+S('M5.6 11.4q-.6-3.4 2.4-4.4 .6-3 4-3t4 3q3 1 2.4 4.4z',CR)+C(12,5.2,1.4,R,1),
+ teacher:C(12,7.6,3.6,'#f3c98a')+S('M4.4 20.6q0-6.6 7.6-6.6t7.6 6.6z',B)+Rc(14.4,3.8,7,5.4,.8,'#2f8f4a',1.2)+T('M16 6.5h4','#fff',1),
+ ring:C(12,12,9.2,W)+C(12,12,4,'#bfe6ff',1.4)+T('M5.4 5.4l4.2 4.2M18.6 5.4l-4.2 4.2M5.4 18.6l4.2-4.2M18.6 18.6l-4.2-4.2',R,3),
+ mute:S('M3.6 9.4h3.8l4.8-4v13.2l-4.8-4H3.6z',GR)+L('M15.4 9.6l5 5M20.4 9.6l-5 5',R,2),
+ brain:S('M12 4.4c-1.6-1.6-4.4-1.2-5.2.8-2 .2-3.2 2.4-2.4 4.2-1.2 1.4-.6 3.4.8 4.2-.2 2.2 1.8 3.6 3.6 3 .8 1.6 2.4 1.8 3.2 1z',PK)+S('M12 4.4c1.6-1.6 4.4-1.2 5.2.8 2 .2 3.2 2.4 2.4 4.2 1.2 1.4.6 3.4-.8 4.2.2 2.2-1.8 3.6-3.6 3-.8 1.6-2.4 1.8-3.2 1z','#ffa8d0')+T('M12 5v13M8 9.4q1.6.2 2 1.6M16 9.4q-1.6.2-2 1.6M8 14q1.4.2 2.2 1M16 14q-1.4.2-2.2 1','#c2578a',1.1),
+ globe:C(12,12,9.2,B)+S('M6 7q3-2.2 5 .6l-1 3.6-3.2 1-2-2.6zM13.6 12.6q3.6-.8 4.8 2.4l-1.4 3-3-.8z',G,1.2),
+ camera:S('M3.6 7.6h3.6l1.4-2.4h6.8l1.4 2.4h3.6q1.4 0 1.4 1.4v8.4q0 1.4-1.4 1.4H3.6q-1.4 0-1.4-1.4V9q0-1.4 1.4-1.4z',GR)+C(12,13,3.8,'#4aa3f2')+C(12,13,1.6,'#bfe6ff',0),
+ music:L('M9 17.4V5.6l10-2v11.8',PU,1.8)+C(7,17.6,2.6,PU)+C(17,15.6,2.6,PU),
+ bag:S('M5 8h14l1.2 12.4q.1 1-1 1H4.8q-1.1 0-1-1z',PK)+L('M8.6 10.2V6.8a3.4 3.4 0 0 1 6.8 0v3.4',PK,1.6),
+ monitor:Rc(2.8,4,18.4,12.4,2,GR)+Rc(4.6,5.8,14.8,8.8,.8,'#bfe6ff',1)+L('M9 20.4h6M12 16.4v4',GR,1.8),
+ sun:C(12,12,5,Y)+T('M12 2.6v3M12 18.4v3M2.6 12h3M18.4 12h3M5.4 5.4l2.1 2.1M16.5 16.5l2.1 2.1M18.6 5.4l-2.1 2.1M7.5 16.5l-2.1 2.1',O,2),
+ moon:S('M19 14.6A8 8 0 0 1 9.4 5a8 8 0 1 0 9.6 9.6z',Y),
+ refresh:L('M19.4 12a7.4 7.4 0 0 1-13 4.8M4.6 12a7.4 7.4 0 0 1 13-4.8',G,2.4)+S('M19 3.8v5h-5z',G,1.3)+S('M5 20.2v-5h5z',G,1.3),
+ square:Rc(4.4,4.4,15.2,15.2,3,W,1.8),
+ drop:S('M12 3.4C8 8.6 6 11.4 6 14.6a6 6 0 0 0 12 0c0-3.2-2-6-6-11.2z',B)+HL('M9 15q.2 2.2 2.2 2.8'),
+ bolt:S('M13.4 2.8L5.4 13.4h5.2L9.6 21.4l9-11.2h-5.4z',Y),
+ arrowr:L('M4.4 12h13.6M12.8 6.4L18.4 12l-5.6 5.6',O,3),
+ bookmark:S('M6.6 3.4h10.8v17.6L12 16.6l-5.4 4.4z',R)+HL('M9 6v5'),
+ circle:C(12,12,8.4,W,1.8)+HL('M7.6 9.4q1-2.4 3.4-3'),
+ expand:L('M14 4.4h5.6V10M10 19.6H4.4V14M19.6 4.4l-6 6M4.4 19.6l6-6',B,2.4),
+ arrowl:L('M19.6 12H6M11.2 6.4L5.6 12l5.6 5.6',O,3)
+ }})();
+
+const EMO={'🐾':['paw'],'🐶':['dog'],'🐕':['dog'],'🐱':['cat'],'💛':['heart','y'],'💙':['heart','b'],'💗':['heart','p'],'❤':['heart'],'✏':['pencil'],'✎':['pencil'],'✍':['pencil'],'🎙':['mic'],'🎉':['party'],'🔥':['flame'],'⏱':['timer'],'🍅':['timer'],'🕒':['clock'],'⏰':['clock'],'✅':['checkc'],'✓':['check'],'🪙':['coin'],'📅':['calendar'],'✕':['x'],'❌':['x'],'📝':['note'],'🗒':['note'],'✨':['sparkle'],'🌟':['star'],'⭐':['star'],'🎯':['target'],'🎾':['ball'],'▶':['play'],'■':['stop'],'⬇':['down'],'⬆':['up'],'📤':['up'],'🏆':['trophy'],'🥇':['medal','y'],'🥈':['medal','s'],'🥉':['medal','z'],'📌':['pushpin'],'📍':['pin'],'📚':['books'],'📄':['page'],'📂':['folder'],'📦':['box'],'💾':['save'],'🗑':['trash'],'🎓':['cap'],'🌬':['wind'],'👥':['people'],'💬':['chat'],'💭':['think'],'🌳':['tree'],'🎁':['gift'],'🦴':['bone'],'🪟':['window'],'🥺':['fsad'],'😴':['fsleep'],'😫':['fstress'],'😶':['fnone'],'🙂':['fsmile'],'⚠':['warn'],'📨':['mail'],'🎮':['game'],'🌼':['flower'],'🏠':['home'],'🔒':['lock'],'🚫':['nogo'],'⚙':['gear'],'🔔':['bell'],'👀':['eyes'],'💤':['zzz'],'☕':['coffee'],'👋':['wave'],'🖐':['wave'],'📲':['phone'],'📱':['phone'],'🧁':['cupcake'],'👩‍🏫':['teacher'],'🛟':['ring'],'🔇':['mute'],'🧠':['brain'],'🌐':['globe'],'📸':['camera'],'🎵':['music'],'🛍':['bag'],'🖥':['monitor'],'☀':['sun'],'🌙':['moon'],'🔄':['refresh'],'⬜':['square'],'💧':['drop'],'💪':['bolt'],'⚡':['bolt'],'👉':['arrowr'],'🔖':['bookmark'],'◯':['circle'],'⤢':['expand'],'←':['arrowl']};
+const _EK=Object.keys(EMO).sort((a,b)=>b.length-a.length),EMO_RE=new RegExp('('+_EK.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')\uFE0F?','g'),_NS='http://www.w3.org/2000/svg',_SKIP=new Set(['TEXTAREA','INPUT','OPTION','SCRIPT','STYLE','TITLE','NOSCRIPT','TEXT','TSPAN','text','tspan']);
+function iconSprite(){const sp=document.createElementNS(_NS,'svg');sp.setAttribute('id','icons');sp.setAttribute('width','0');sp.setAttribute('height','0');sp.setAttribute('aria-hidden','true');sp.style.cssText='position:absolute;width:0;height:0;overflow:hidden';
+ sp.innerHTML=Object.entries(ICONS).map(([k,v])=>`<symbol id="i-${k}" viewBox="0 0 24 24">${v}</symbol>`).join('');return sp}
+function iconEl(m){const [id,cls]=EMO[m]||[];const sv=document.createElementNS(_NS,'svg');sv.setAttribute('class','ic'+(cls?' ic-'+cls:''));sv.setAttribute('viewBox','0 0 24 24');sv.setAttribute('aria-hidden','true');const u=document.createElementNS(_NS,'use');u.setAttribute('href','#i-'+id);sv.appendChild(u);return sv}
+function iconize(root){if(!root||!root.nodeType)return;const doc=root.nodeType===9?root:root.ownerDocument;if(!doc)return;const list=[];
+ const tw=doc.createTreeWalker(root,4,{acceptNode(n){const p=n.parentNode;if(!p||_SKIP.has(p.nodeName)||(p.closest&&p.closest('#icons')))return 2;EMO_RE.lastIndex=0;return EMO_RE.test(n.nodeValue)?1:3}});
+ while(tw.nextNode())list.push(tw.currentNode);
+ for(const n of list){const parts=n.nodeValue.split(EMO_RE),fr=doc.createDocumentFragment();parts.forEach((t,i)=>{if(i%2){fr.appendChild(iconEl(t))}else if(t)fr.appendChild(doc.createTextNode(t))});n.parentNode.replaceChild(fr,n)}}
+function iconWatch(doc){if(!doc||!doc.body||doc.__iw)return;doc.__iw=1;
+ new MutationObserver(ms=>{const q=new Set();for(const m of ms){if(m.type==='characterData'){if(m.target.parentNode)q.add(m.target.parentNode)}else m.addedNodes.forEach(n=>{if(n.nodeType===1)q.add(n);else if(n.nodeType===3&&n.parentNode)q.add(n.parentNode)})}q.forEach(n=>iconize(n))}).observe(doc.body,{childList:true,subtree:true,characterData:true});iconize(doc.body)}
+function iconInit(){if(!$('#icons'))document.body.prepend(iconSprite());iconWatch(document)}
+
 /* ======= v7: desktop widget mode ======= */
 function setDeskMode(m){if(!DESK)return;deskMode=m;winstonDesktop.setMode(m);const w=m==='widget'||m==='orb';document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',!w);
  if(!w){const i=$('#intro');if(i)i.style.display='none'}drawWidget();if(!w)render()}
@@ -2136,7 +2252,7 @@ S.classes.forEach(ensure);
 if(!inFrame&&/^https?:/.test(location.protocol)){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest';document.head.append(l);if('serviceWorker' in navigator){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!window.__rl){window.__rl=1;location.reload()}});navigator.serviceWorker.register('sw.js').catch(()=>{})}}
 if(DESK){const w=(deskMode==='widget'||deskMode==='orb')&&!!S.user;if(!S.user)deskMode='full';winstonDesktop.setMode(deskMode);document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',deskMode==='full')}
 applyTheme();
-render();drawWidget();tickTimer();if(DESK&&deskMode!=='full'&&S.user)$('#intro').style.display='none';else showIntro();
+render();drawWidget();iconInit();tickTimer();if(DESK&&deskMode!=='full'&&S.user)$('#intro').style.display='none';else showIntro();
 </script>
 </body>
 </html>
