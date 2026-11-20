@@ -465,9 +465,10 @@ nav button b .ic{width:27px;height:27px;vertical-align:middle}.mood b .ic{width:
 #intro .ichips span{display:inline-flex;align-items:center;gap:6px;font:400 15px 'Lilita One','Poppins',sans-serif;color:#fff;background:linear-gradient(#e8a95a,#b8742e);border:3px solid #5a3414;border-radius:12px;padding:5px 12px;box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 3px 0 #3a200a;text-shadow:-1px -1px 0 #5a3414,1px -1px 0 #5a3414,-1px 1px 0 #5a3414,1px 1px 0 #5a3414}
 #intro .ichips span .ic{width:1.3em;height:1.3em}
 html[data-theme=dark] #intro .ichips span{background:linear-gradient(#7a5530,#523519);color:#fff}
-#intro .iburst{position:absolute;left:50%;bottom:-18%;width:150%;aspect-ratio:1;transform:translateX(-50%);z-index:0;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.34) 0 7deg,transparent 7deg 18deg);-webkit-mask:radial-gradient(circle,#000 8%,transparent 62%);mask:radial-gradient(circle,#000 8%,transparent 62%);animation:iturn 50s linear infinite;pointer-events:none}
-@keyframes iturn{to{transform:translateX(-50%) rotate(360deg)}}
-html[data-theme=dark] #intro .iburst{opacity:.35}
+#intro .iburst{position:absolute;left:50%;bottom:-6%;width:130%;aspect-ratio:1.3;transform:translateX(-50%);z-index:0;background:radial-gradient(ellipse at 50% 55%,rgba(255,248,200,.7),rgba(255,248,200,.25) 38%,transparent 66%);animation:iglow 7s ease-in-out infinite;pointer-events:none}
+@keyframes iglow{50%{opacity:.7}}
+html[data-theme=dark] #intro .iburst{opacity:.45}
+@media(prefers-reduced-motion:reduce){#intro .iburst{animation:none}}
 #intro .ibtn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:64px;font-size:28px;white-space:nowrap;animation:ipop2 .7s .9s both,ipulse 1.6s 1.6s ease-in-out infinite}
 @keyframes ipulse{50%{filter:brightness(1.12) drop-shadow(0 0 12px rgba(190,255,120,.9))}}
 #intro .ibtn .ic{width:1.1em;height:1.1em}
@@ -877,7 +878,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.27 (Siamese cat)';
+const APP_VERSION='2026-11-20.28 (friend requests, calmer glow)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -1275,7 +1276,7 @@ Object.assign(ACTIONS,{
 /* ======= friends ======= */
 const myCode=()=>btoa(unescape(encodeURIComponent(JSON.stringify({n:S.user.name,d:DN(),l:lvl(),w:weekMins(),s:streakDays(),t:Date.now(),u:S.live&&S.live.on?S.live.uid:undefined,h:Math.round(S.happy),e:S.eq,b:petBreed(),un:S.user.username,lc:S.user.loc}))));
 function rFriends(){liveKick();
- MAIN().innerHTML=`${peerCard()}${lbCard()}${schoolCard()}<div class="card"><h2>Invite Friends</h2><p class="mute">Studying is better together. Share your streak card or send an invite.</p><div class="row"><button class="p grow" data-a="invite">📨 Invite A Friend</button><button class="s grow" data-a="sharecard">📤 Share My Streak</button></div><div class="row" style="margin-top:8px"><button class="s grow" data-a="shareig">📸 Instagram Story</button><button class="s grow" data-a="sharett">🎵 TikTok</button></div></div>
+ friendSync();MAIN().innerHTML=`${peerCard()}${findCard()}${lbCard()}${schoolCard()}<div class="card"><h2>Invite Friends</h2><p class="mute">Studying is better together. Share your streak card or send an invite.</p><div class="row"><button class="p grow" data-a="invite">📨 Invite A Friend</button><button class="s grow" data-a="sharecard">📤 Share My Streak</button></div><div class="row" style="margin-top:8px"><button class="s grow" data-a="shareig">📸 Instagram Story</button><button class="s grow" data-a="sharett">🎵 TikTok</button></div></div>
  <div class="card"><h2>Your friend code</h2><p class="mute">Send this to a friend. They paste it below to see Winston in his latest outfit.</p><textarea readonly id="mc" style="min-height:70px">${myCode()}</textarea><button class="s" data-a="copy">Copy</button></div>
  <div class="card"><h2>Add a friend</h2><textarea id="fc" placeholder="Paste a friend code"></textarea><button class="p" data-a="addf">Add friend</button>
  <p class="mute">Heads up: codes are a snapshot. Live updating and friend requests need an online account (the Supabase setup used elsewhere in this repo) — a good next step.</p></div>
@@ -1283,7 +1284,7 @@ function rFriends(){liveKick();
 Object.assign(ACTIONS,{
  copy(){navigator.clipboard&&navigator.clipboard.writeText($('#mc').value).then(()=>toast('Copied!'),()=>toast('Select the text and copy it'))},
  addf(){try{const f=JSON.parse(decodeURIComponent(escape(atob($('#fc').value.trim()))));if(!f.n)throw 0;S.friends=S.friends.filter(x=>x.n!==f.n);S.friends.push(f);save();render();toast(`${f.n} added!`)}catch(e){toast('That code doesn\'t look right')}},
- delf(d){S.friends.splice(+d.k,1);save();render()}
+ delf(d){const f=S.friends[+d.k];if(f&&f.cu&&f.un)cloudRpc('winston_friend_remove',{p_username:f.un});S.friends.splice(+d.k,1);save();render()}
 });
 
 /* ======= shop ======= */
@@ -2243,13 +2244,13 @@ async function cloudSignUp(email,password,meta){const f=await sb('/rest/v1/rpc/w
  const r=await sb('/auth/v1/signup',{method:'POST',body:{email,password,data:meta}});if(r.net)return {err:'offline'};if(!r.ok)return {err:'x',msg:errMsg(r)};const j=r.json||{};return {session:j.access_token?j:null}}
 async function cloudSignIn(email,password){const r=await sb('/auth/v1/token?grant_type=password',{method:'POST',body:{email,password}});if(r.net)return {err:'offline',msg:"I can't reach the account server right now."};if(!r.ok)return {err:'x',msg:errMsg(r)};return {session:r.json}}
 async function cloudToken(){const c=S.cloud;if(!c)return null;if(Date.now()<c.exp-60000)return c.at;const r=await sb('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:c.rt}});if(!r.ok||!r.json)return null;Object.assign(c,cloudObj(r.json),{synced:c.synced,pending:c.pending,hash:c.hash});try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}return c.at}
-function slimState(){const c=JSON.parse(JSON.stringify(S));delete c.cloud;if(c.user)delete c.user.pw;if(c.pref)delete c.pref.apiKey;(c.classes||[]).forEach(k=>(k.docs||[]).forEach(d=>{d.text=String(d.text||'').slice(0,1500)}));if(JSON.stringify(c).length>900000)(c.classes||[]).forEach(k=>{(k.docs||[]).forEach(d=>{d.text=''});(k.sessions||[]).forEach(x=>{x.lines=(x.lines||[]).slice(-60)})});return c}
+function slimState(){const c=JSON.parse(JSON.stringify(S));delete c.cloud;c.friends=(c.friends||[]).filter(f=>!f.cu);if(c.user)delete c.user.pw;if(c.pref)delete c.pref.apiKey;(c.classes||[]).forEach(k=>(k.docs||[]).forEach(d=>{d.text=String(d.text||'').slice(0,1500)}));if(JSON.stringify(c).length>900000)(c.classes||[]).forEach(k=>{(k.docs||[]).forEach(d=>{d.text=''});(k.sessions||[]).forEach(x=>{x.lines=(x.lines||[]).slice(-60)})});return c}
 var _cq=null,_cbusy=false;
 const _hs=t=>{let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return h};
 const cloudHash=()=>{const c=slimState();delete c.tick;delete c.nextCheck;c.happy=Math.round(c.happy||0);if(c.days)for(const k of Object.keys(c.days))if(!Object.keys(c.days[k]||{}).length)delete c.days[k];return _hs(JSON.stringify(c))};
 function cloudQueue(){if(!S.cloud||!S.user)return;S.cloud.pending=1;clearTimeout(_cq);_cq=setTimeout(()=>cloudPush(),5000)}
 async function cloudPush(force){if(!S.cloud||!S.user||_cbusy)return false;_cbusy=true;try{const h=cloudHash();if(!force&&h===S.cloud.hash){S.cloud.pending=0;S.cloud.status='synced';return true}const tk=await cloudToken();if(!tk){S.cloud.status='signin';return false}
-  const r=await sb('/rest/v1/winston_profiles?on_conflict=id',{method:'POST',token:tk,headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:{id:S.cloud.uid,username:S.user.username||null,data:slimState(),updated_at:new Date().toISOString()}});
+  const r=await sb('/rest/v1/winston_profiles?on_conflict=id',{method:'POST',token:tk,headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:{id:S.cloud.uid,username:S.user.username||null,data:slimState(),stats:{w:weekMins(),s:streakDays(),l:lvl(),h:Math.round(S.happy),e:S.eq,b:petBreed(),lc:S.user.loc||{}},updated_at:new Date().toISOString()}});
   if(r.ok){S.cloud.hash=h;S.cloud.pending=0;S.cloud.synced=Date.now();S.cloud.status='synced'}else S.cloud.status=r.net?'offline':'error';try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}return r.ok}finally{_cbusy=false}}
 async function cloudGetProfile(tk,uid){const r=await sb('/rest/v1/winston_profiles?id=eq.'+encodeURIComponent(uid)+'&select=username,data,updated_at',{token:tk});return r.ok&&Array.isArray(r.json)&&r.json[0]?r.json[0]:null}
 async function cloudPull(){if(!S.cloud||!S.user)return;const tk=await cloudToken();if(!tk)return;const row=await cloudGetProfile(tk,S.cloud.uid);if(!row||!row.data||!row.data.user)return cloudPush(true);
@@ -2283,6 +2284,27 @@ Object.assign(ACTIONS,{
  async cloudupgo(){const em=(($('#cue')||{}).value||'').trim(),pw=($('#cup')||{}).value||'',pw2=($('#cup2')||{}).value||'';if(!/^\S+@\S+\.\S+$/.test(em))return toast("That email doesn't look right");if(pw.length<8)return toast('Use at least 8 characters');if(pw!==pw2)return toast("Those passwords don't match");
   const r=await cloudSignUp(em,pw,{name:S.user.name,username:S.user.username||slugName(S.user.name)});if(r.err==='offline')return toast("I can't reach the account server right now.");if(r.err)return toast(r.msg);if(!r.session){closeModal();return toast('Check your email to confirm, then sign in from the Settings page 💌')}
   S.cloud=cloudObj(r.session);S.user.email=em;save();closeModal();await cloudPush();render();toast('Cloud account created ☁')}});
+
+/* ======= friend requests by username (server) ======= */
+let friendReq=[],fres=null,fsetup=false;
+async function cloudRpc(fn,body){const tk=await cloudToken();if(!tk)return null;const r=await sb('/rest/v1/rpc/'+fn,{method:'POST',token:tk,body:body||{}});if(r.status===404){fsetup=true;return null}return r.ok?(r.json===null?true:r.json):null}
+async function friendSync(force){if(!S.cloud)return;if(!force&&Date.now()-(friendSync.t||0)<30000)return;friendSync.t=Date.now();
+ const [lst,inb]=await Promise.all([cloudRpc('winston_friend_list'),cloudRpc('winston_friend_inbox')]);let changed=false;
+ if(Array.isArray(lst)){const mapped=lst.map(f=>{const st=f.stats||{};return {n:f.name||f.username,un:f.username,d:f.dog||'Pup',l:st.l||1,w:st.w||0,s:st.s||0,h:st.h||70,e:st.e||{},b:st.b,lc:st.lc||{},t:Date.now(),cu:1,live:1}});
+  const before=JSON.stringify(S.friends.filter(f=>f.cu).map(f=>[f.un,f.w,f.s,f.l]));S.friends=[...S.friends.filter(f=>!f.cu),...mapped];if(JSON.stringify(mapped.map(f=>[f.un,f.w,f.s,f.l]))!==before){changed=true;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}}
+ if(Array.isArray(inb)){const nin=inb.filter(x=>x.direction==='in').length,old=friendReq.filter(x=>x.direction==='in').length;if(JSON.stringify(inb)!==JSON.stringify(friendReq))changed=true;friendReq=inb;if(nin>old&&friendSync.seen)toast(`${inb.find(x=>x.direction==='in').name||'Someone'} sent you a friend request!`);friendSync.seen=1}
+ if(changed&&tab==='social'&&(view.ssub||'friends')==='friends')render()}
+function findCard(){if(!S.cloud)return `<div class="card"><h3>Find Friends</h3><p class="mute" style="margin:0 0 8px">Create a cloud account to search for friends by username and send friend requests.</p><button class="p" data-a="cloudup" style="width:100%">☁ Create Cloud Account</button></div>`;
+ const inc=friendReq.filter(x=>x.direction==='in'),out=friendReq.filter(x=>x.direction==='out');
+ return `<div class="card"><h3>Find Friends</h3><div class="row"><input class="grow" id="fq" placeholder="Search by username" value="${esc(view.fq||'')}" autocomplete="off" autocapitalize="off" style="margin:0"><button class="p" data-a="fsearch">Search</button></div>
+ ${fsetup?'<p class="mute" style="margin:8px 0 0">Friend requests need a one-time server setup: run winston/supabase-friends.sql in Supabase.</p>':''}
+ ${fres===null?'':fres.length?fres.map(u=>`<div class="item"><div class="grow"><b>${esc(u.name||u.username)}</b> <span class="mute">@${esc(u.username)}</span><div class="mute" style="font-size:13px">${esc(u.dog||'')}</div></div><button class="p" data-a="freq" data-k="${esc(u.username)}">Add Friend</button></div>`).join(''):'<p class="mute" style="margin:8px 0 0">No one found with that username. Check the spelling (at least 3 letters).</p>'}
+ ${inc.length?`<h3 class="petsec">Friend Requests</h3>${inc.map(x=>`<div class="item"><div class="grow"><b>${esc(x.name||x.username)}</b> <span class="mute">@${esc(x.username)}</span></div><button class="p" data-a="fresp" data-k="${x.id}" data-y="1">Accept</button><button class="s" data-a="fresp" data-k="${x.id}" data-y="0">Decline</button></div>`).join('')}`:''}
+ ${out.length?`<h3 class="petsec">Sent</h3>${out.map(x=>`<div class="item"><div class="grow"><b>${esc(x.name||x.username)}</b> <span class="mute">@${esc(x.username)} · waiting</span></div></div>`).join('')}`:''}</div>`}
+Object.assign(ACTIONS,{
+ async fsearch(){const q=(($('#fq')||{}).value||'').trim().replace(/^@/,'');view.fq=q;if(q.length<3)return toast('Type at least 3 letters of their username');const r=await cloudRpc('winston_find_user',{p_q:q});fres=Array.isArray(r)?r:[];if(r===null&&!fsetup)toast("I can't reach the server right now");render()},
+ async freq(d){const r=await cloudRpc('winston_friend_request',{p_username:d.k});const m={sent:'Friend request sent! 💌',accepted:"You're now friends! 🎉",friends:"You're already friends.",self:"That's you!",notfound:'No one with that username.',declined:'They declined earlier. Try again later.',signin:'Sign in first.'};toast(m[r]||"Couldn't send that request");friendSync(true).then(()=>{fres=null;render()})},
+ async fresp(d){await cloudRpc('winston_friend_respond',{p_id:+d.k,p_accept:d.y==='1'});toast(d.y==='1'?'Friend added! 🎉':'Request declined');await friendSync(true);render()}});
 
 /* ======= v7: desktop widget mode ======= */
 function setDeskMode(m){if(!DESK)return;deskMode=m;if(m==='full'&&needLock())setTimeout(showLock,0);winstonDesktop.setMode(m);const w=m==='widget'||m==='orb';document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',!w);
