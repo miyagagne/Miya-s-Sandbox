@@ -71,3 +71,7 @@ Winston opens your laptop's real microphone: pick the device, watch the live lev
 - **What's Going On?:** a button in every class hub. Winston summarizes **this week**, **overall**, and **what's coming up** (calendar, study time, topics covered most) from your notes, materials and syllabus.
 - **Ask Winston (the dog as an agent):** open it from Home, any class hub, or Class Mode. He knows *all* your classes (notes, materials, calendar, study time) and answers questions like "what's going on in BUAD 112?", "what's due soon?" or "explain the four Ps". Replies offer Open / Practice shortcuts.
 - **Smart AI everywhere:** inside the published Claude page the AI is built in. On the website, phone app and desktop app, paste an Anthropic API key under *My Dog → Settings → Winston AI Key (Optional)*. It's stored only on your device and sent only to api.anthropic.com (use a key with a spending limit). Without a key, Winston still answers by searching your notes, materials and calendar.
+
+## Pick your pet
+
+At the start you choose a **Dog** (Pomeranian, Golden Retriever, Corgi, German Shepherd) or a **Cat** (Persian, Orange Tabby, Maine Coon), then name them. Each breed has its own colors, ears, face and markings, and works with every accessory and mood. Switch any time in My Pet → Settings → *My Pet*.
