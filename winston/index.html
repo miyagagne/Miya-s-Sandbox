@@ -504,7 +504,7 @@ html[data-theme=dark] #intro .iburst{opacity:.45}
 #intro .ititle small{font-size:18px;line-height:1.2}
 #intro .logo{display:flex;flex-direction:column;align-items:center;gap:0;margin-top:2px}
 #intro .logo .trow{display:flex;justify-content:center;align-items:center;gap:1px;line-height:.9}
-#intro .tl{display:inline-block;font:400 clamp(66px,20vw,118px)/.92 'Lilita One','Poppins',sans-serif;letter-spacing:1px;color:#ffd23f;background:linear-gradient(#fff7ae 0,#ffd93f 42%,#ff9d2e 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;-webkit-text-stroke:10px #6b3410;paint-order:stroke fill;transform:rotate(var(--r,0deg));filter:drop-shadow(0 7px 0 #6b3410) drop-shadow(0 12px 12px rgba(20,40,80,.35));animation:tlpop .55s cubic-bezier(.2,1.5,.4,1) both;animation-delay:var(--d,0s)}
+#intro .tl{display:inline-block;font:400 clamp(66px,20vw,118px)/.92 'Lilita One','Poppins',sans-serif;letter-spacing:1px;color:#ffd23f;background:linear-gradient(#fff7ae 0,#ffd93f 42%,#ff9d2e 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;-webkit-text-stroke:5px #7a4418;paint-order:stroke fill;transform:rotate(var(--r,0deg));filter:drop-shadow(0 4px 0 #7a4418) drop-shadow(0 8px 10px rgba(20,40,80,.3));animation:tlpop .55s cubic-bezier(.2,1.5,.4,1) both;animation-delay:var(--d,0s)}
 #intro .logo .trow:nth-child(2) .tl:not(.tpaw){background-image:linear-gradient(#fff0c8 0,#ffc23f 40%,#ff7a3a 100%)}
 #intro .tl.tpaw{font-size:clamp(46px,14vw,80px);-webkit-text-fill-color:initial;background:none;-webkit-text-stroke:0;filter:drop-shadow(0 5px 0 #6b3410);margin-left:6px;--r:12deg}
 #intro .tl.tpaw .ic{width:1em;height:1em}
@@ -896,7 +896,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.31 (STUDY PAWS logo)';
+const APP_VERSION='2026-11-20.32 (lighter logo outline)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
