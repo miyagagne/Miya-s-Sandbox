@@ -511,6 +511,8 @@ html[data-theme=dark] #intro .iburst{opacity:.45}
 @keyframes tlpop{0%{opacity:0;transform:translateY(-30px) scale(.4) rotate(var(--r,0deg))}100%{opacity:1;transform:rotate(var(--r,0deg))}}
 @media(prefers-reduced-motion:reduce){#intro .tl{animation:none}}
 main.onb{max-width:620px!important;margin:0 auto;display:block!important}main.onb .hero{text-align:center}main.onb .hero h1{text-align:center;display:block}main.onb .hero .dogwrap svg{max-width:220px}
+#intro .isub{display:inline-block;max-width:min(88vw,420px);margin:12px auto 0;padding:10px 18px;color:#4a2c10;font-weight:600;font-size:17px;line-height:1.35;text-shadow:none;background:linear-gradient(#fffbea,#ffedbd);border:3px solid #8a5a2b;border-radius:16px;box-shadow:inset 0 0 0 2px #ffdf8e,0 4px 0 #5a3414,0 8px 14px rgba(20,40,80,.25)}
+html[data-theme=dark] #intro .isub{color:#fff3dd;background:linear-gradient(#5a4028,#3e2a18);border-color:#2a1a0c;box-shadow:inset 0 0 0 2px #8a6238,0 4px 0 #160c04,0 8px 14px rgba(0,0,0,.4)}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -898,7 +900,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.35 (popup fills window)';
+const APP_VERSION='2026-11-20.36 (readable intro text)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
