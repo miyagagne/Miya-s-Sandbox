@@ -3,7 +3,12 @@ name: Build Winston Desktop
 # Builds installers for Windows, Mac and Linux.
 # Run it from the Actions tab (Run workflow), or push a tag like winston-v1.0.0 to also publish a Release.
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Also publish a public GitHub Release with the installers'
+        type: boolean
+        default: false
   push:
     tags: ['winston-v*']
 
@@ -40,7 +45,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    if: startsWith(github.ref, 'refs/tags/winston-v')
+    if: startsWith(github.ref, 'refs/tags/winston-v') || inputs.release == true
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -50,4 +55,7 @@ jobs:
           merge-multiple: true
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'winston-latest' }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Winston (latest)' }}
+          target_commitish: ${{ github.sha }}
           files: dist/*
