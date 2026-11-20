@@ -205,7 +205,7 @@ nav button{color:#8d8074;text-shadow:none}nav button.on{background:#ffeaa6;color
 #widget{border:1px solid #cfe6e2;box-shadow:0 8px 28px rgba(40,70,70,.2);background:#fff}
 .sbub{border:1px solid #cfe6e2;box-shadow:0 2px 6px rgba(40,70,70,.1)}
 .stage::after{background:radial-gradient(ellipse,rgba(120,100,70,.16),rgba(120,100,70,0) 70%);height:22px;width:58%;bottom:10px}.stage::before{display:none}
-.dogwrap svg{filter:drop-shadow(0 6px 6px rgba(80,60,20,.16)) drop-shadow(0 0 16px rgba(255,235,150,.6))}
+.dogwrap svg{filter:drop-shadow(0 6px 6px rgba(80,60,20,.14))}
 input,select,textarea{border:2px solid #ffe0a0}
 html[data-theme=dark] nav{background:rgba(38,32,56,.93);border-color:#4d4170}html[data-theme=dark] nav button{color:#b6a8b8}html[data-theme=dark] nav button.on{background:#3a3152;color:#f4ebdd}
 html[data-theme=dark] .sign{background:#2e2745;border-color:#5f4f86;color:var(--ink)}
@@ -213,10 +213,10 @@ html[data-theme=dark] .card{border-color:#5f4f86;box-shadow:0 5px 0 rgba(120,90,
 html[data-theme=dark] #widget{border-color:#4d4170}html[data-theme=dark] .sbub{border-color:#4d4170}
 
 /* ---- polish: glass, motion, desktop ---- */
-.card{background:rgba(255,255,255,.74);-webkit-backdrop-filter:blur(16px) saturate(1.25);backdrop-filter:blur(16px) saturate(1.25);border:1.5px solid rgba(255,255,255,.9);box-shadow:0 10px 38px rgba(50,110,170,.17),inset 0 1px 0 rgba(255,255,255,.95)}
-html[data-theme=dark] .card{background:rgba(40,33,64,.72);border-color:rgba(255,255,255,.14);box-shadow:0 10px 38px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.08)}
+.card{background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.95);box-shadow:0 6px 24px rgba(50,110,170,.12)}
+html[data-theme=dark] .card{background:rgba(40,33,64,.88);border-color:rgba(255,255,255,.1);box-shadow:0 6px 24px rgba(0,0,0,.35)}
 .p{font-size:16px;letter-spacing:.2px;padding:12px 20px}.p:hover{transform:translateY(-1px)}
-.stage{background:radial-gradient(circle at 50% 46%,rgba(255,232,150,.6),rgba(255,232,150,0) 64%)}
+.stage{background:radial-gradient(circle at 50% 46%,rgba(255,232,150,.4),rgba(255,232,150,0) 62%)}
 html[data-theme=dark] .stage{background:radial-gradient(circle at 50% 46%,rgba(150,120,255,.3),rgba(150,120,255,0) 64%)}
 .greet{font-family:var(--display);font-size:15px;color:var(--mute);text-align:center;margin:0 0 2px;letter-spacing:.3px}
 .bar i{animation:grow .9s cubic-bezier(.2,.8,.3,1)}@keyframes grow{from{width:0!important}}
@@ -371,7 +371,7 @@ function dog(eq={},m='happy',vb='0 0 200 200'){
   ?'<path d="M100 121 V127 M88 129 Q94 136 100 127 Q106 136 112 129" stroke="#2a1810" stroke-width="2.6" fill="none" stroke-linecap="round"/>'
   :'<path d="M100 121 V127 M90 136 Q100 125 110 136" stroke="#2a1810" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
  const glad=m==='happy'||m==='cheer'||m==='calm';
- const HP=fluff(100,102,57,48,20,.045,.12,1.15);
+ const HP=fluff(100,102,57,48,20,.022,.1,1.15);
  const furLines=H('<path d="M124 64 q7 4 10 13M146 98 q4 7 3 15" fill="none" stroke="#b86a22" stroke-opacity=".3" stroke-width="1.6" stroke-linecap="round"/><path d="M128 70 q5 3 7 10M140 84 q4 4 5 11" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="1.4" stroke-linecap="round"/>');
  return `<svg viewBox="${vb}" role="img" aria-label="Winston the study therapy dog">
  <circle cx="100" cy="104" r="98" fill="url(#aura)" opacity="${m==='sad'?.25:m==='ok'?.45:.8}"/>
@@ -380,7 +380,7 @@ function dog(eq={},m='happy',vb='0 0 200 200'){
  <g class="breathe">
  <ellipse cx="100" cy="164" rx="48" ry="32" fill="url(#fur)"/>
  ${H('<ellipse cx="146" cy="171" rx="22" ry="20" fill="url(#fur)"/><ellipse cx="156" cy="190" rx="15" ry="7.5" fill="url(#cream)"/><path d="M150 188v4M156 187v5M162 188v4" stroke="#d2a574" stroke-width="1.4" stroke-linecap="round"/>')}
- <path d="${fluff(100,150,36,26,12,.06,.05,1.1)}" fill="url(#cream)"/>
+ <path d="${fluff(100,150,36,26,12,.03,.05,1.1)}" fill="url(#cream)"/>
  <ellipse cx="100" cy="152" rx="34" ry="9" fill="#9a4f12" opacity=".24"/><ellipse cx="100" cy="150" rx="28" ry="7" fill="#b86a22" opacity=".16"/>
  ${H('<path d="M103 156 Q127 152 127 172 L126 187 Q125 195 115 195 Q104 195 103 187Z" fill="url(#cream)"/><path d="M109 189v5M115 188v6M121 189v5" stroke="#d2a574" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="115" cy="193" rx="9" ry="2.4" fill="#ffc9cf" opacity=".6"/>')}
  </g>
@@ -395,7 +395,7 @@ function dog(eq={},m='happy',vb='0 0 200 200'){
  <path d="M72 148 Q100 166 128 148 L128 156 Q100 174 72 156Z" fill="#e8484f" stroke="#a52a30" stroke-width="1.5"/><circle cx="100" cy="168" r="7" fill="url(#gold)" stroke="#b97a00" stroke-width="1.5"/><path transform="translate(100 168) scale(.5)" d="${hd}" fill="#e8484f"/>
  ${g('neck')}${g('face')}${g('hat')}
  ${raise?'<path d="M134 160 Q150 152 155 140" fill="none" stroke="#f5a24a" stroke-width="14" stroke-linecap="round"/><g class="pawup"><ellipse cx="158" cy="126" rx="13" ry="16" fill="url(#cream)" stroke="#d2a574" stroke-opacity=".8"/><path d="M152 116v6M158 114v7M164 116v6" stroke="#d2a574" stroke-width="1.6" stroke-linecap="round"/><ellipse cx="158" cy="132" rx="7" ry="5" fill="#ffc9cf"/></g>':''}
- ${m==='happy'||m==='cheer'?star(30,64,1,0)+star(170,64,1,.6)+heart(32,44,0)+heart(168,44,.8):''}
+ ${m==='happy'||m==='cheer'?star(30,64,1,0)+star(170,64,1,.6):''}
  </svg>`}
 const ICONVB={hat:'40 -16 120 86',face:'52 78 96 44',neck:'56 134 88 62',back:'0 52 200 148'};
 function accIcon(id){return `<svg viewBox="${ICONVB[ACC[id].slot]}">${ACC[id].svg}</svg>`}
@@ -554,7 +554,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.1 (Expo Go app)';
+const APP_VERSION='2026-11-20.2 (cleaner graphics)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -1481,11 +1481,11 @@ function burst(n=14,el){if(matchMedia('(prefers-reduced-motion: reduce)').matche
   e.animate([{transform:'translate(-50%,-50%) scale(.3)',opacity:1},{transform:`translate(calc(-50% + ${Math.cos(a)*d}px),calc(-50% + ${Math.sin(a)*d-50}px)) scale(1.15) rotate(${Math.random()*200-100}deg)`,opacity:0}],{duration:900+Math.random()*700,easing:'cubic-bezier(.2,.7,.3,1)'}).onfinish=()=>e.remove()}}
 (function(){try{const cv=$('#bg'),g=cv.getContext('2d'),RM=matchMedia('(prefers-reduced-motion: reduce)').matches,TAU=Math.PI*2,rnd=Math.random;
  let W,H,D,last=0,stamps=[];
- const clouds=[...Array(3)].map(()=>({x:rnd()*1.2,y:.05+rnd()*.2,s:.7+rnd()*.8,sp:.004+rnd()*.006}));
+ const clouds=[...Array(0)].map(()=>({x:rnd()*1.2,y:.05+rnd()*.2,s:.7+rnd()*.8,sp:.004+rnd()*.006}));
  const bits=[].map(()=>({x:rnd(),y:rnd(),sp:.012+rnd()*.016,k:rnd()<.5?'paw':'bone',sz:13+rnd()*11,rot:(rnd()-.5)*.9}));
  const flowers=[...Array(9)].map((_,i)=>({x:i%2?.02+rnd()*.13:.85+rnd()*.13,r:rnd(),k:rnd()<.55?'daisy':'tulip',c:['#ff7eb3','#ffb347','#ff6b6b','#b79cff'][rnd()*4|0],p:rnd()*TAU,s:.8+rnd()*.6}));
  const FAR={y:.7,a:.025,ph:0,c:'#a8e99a',d:'#8fdc82',nc:'#2f5a4e',nd:'#264a44'},MID={y:.78,a:.03,ph:2,c:'#85db75',d:'#6fcc62',nc:'#265246',nd:'#1f423a'},NEAR={y:.88,a:.02,ph:4,c:'#62cc56',d:'#4cb948',nc:'#1f4a3c',nd:'#183a32'};
- const flies=[0].map(i=>({ph:i*2.1,y:.3+i*.12,sp:.05+i*.02,c:['#ff8fba','#ffd23f','#b79cff'][i],s:1+i*.2}));
+ const flies=[].map(i=>({ph:i*2.1,y:.3+i*.12,sp:.05+i*.02,c:['#ff8fba','#ffd23f','#b79cff'][i],s:1+i*.2}));
  const motes=[...Array(16)].map(()=>({x:rnd(),y:rnd(),r:3+rnd()*7,sp:.006+rnd()*.01,ph:rnd()*TAU}));
  function size(){D=Math.min(devicePixelRatio||1,1.5);W=cv.width=Math.round(innerWidth*D);H=cv.height=Math.round(innerHeight*D);if(RM)draw(0)}
  addEventListener('resize',size);
