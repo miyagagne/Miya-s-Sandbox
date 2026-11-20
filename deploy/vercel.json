@@ -1,0 +1,6 @@
+{
+  "headers": [
+    { "source": "/app/(index.html|sw.js|config.js)", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+    { "source": "/app/", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+  ]
+}
