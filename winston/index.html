@@ -493,8 +493,8 @@ html[data-theme=dark] #intro .iburst{opacity:.45}
 }
 @media(min-width:1300px){main{max-width:1180px}}
 /* ---- pet-only floating window ---- */
-#widget.pipmini{background:linear-gradient(#bfe6ff,#e9fbff 62%,#8fdc70 62%)!important;display:block;overflow:hidden;border:0;box-shadow:none}
-.pipstage{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;padding:8px 8px 10px;position:relative}
+#widget.pipmini{height:100vh!important;min-height:100vh!important;margin:0;background:linear-gradient(#bfe6ff,#e9fbff 62%,#8fdc70 62%)!important;display:block;overflow:hidden;border:0;box-shadow:none}
+.pipstage{min-height:100vh;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;padding:8px 8px 10px;position:relative}
 .pipdog{width:min(82vw,190px);cursor:pointer;margin-top:auto}.pipdog svg{width:100%;height:auto;display:block;animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 6px 5px rgba(40,60,20,.35))}
 .pipname{font:400 16px 'Lilita One',system-ui,sans-serif;color:#fff;text-shadow:-1.5px -1.5px 0 #5a3414,1.5px -1.5px 0 #5a3414,-1.5px 1.5px 0 #5a3414,1.5px 1.5px 0 #5a3414}
 .pipstage .sbub{margin:0 0 4px;max-width:96%;text-align:center}
@@ -898,7 +898,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.33 (laptop-size desktop window)';
+const APP_VERSION='2026-11-20.34 (name pet first, popup fix)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -1033,6 +1033,7 @@ function smartMsg(){const u=S.user,c=live&&S.classes.find(x=>x.id===live.cls);
  return QUOTES[Math.floor(Date.now()/60000)%QUOTES.length].replace('{n}',u.name)}
 const dogMood=()=>W.paw?'pawup':(W.react&&Date.now()<W.react.until&&W.react.mood)?W.react.mood:Date.now()<W.cheerUntil?'cheer':W.view==='breathe'?'calm':mood();
 const wClock=()=>{const t=S.timer;if(!t)return'';const el=(Date.now()-t.start)/1000;return fmtClock(t.target?Math.max(0,t.target-el):el)};
+function pipBg(mini){try{if(!pipWin)return;const d=pipWin.document;d.documentElement.style.background=mini?'#8fdc70':'#fffaf0';d.body.style.background=mini?'linear-gradient(#bfe6ff,#e9fbff 62%,#8fdc70 62%)':'#fffaf0';d.body.style.minHeight='100vh';d.body.style.padding='0';d.body.style.margin='0'}catch(e){}}
 function drawWidget(){
  if(!S.user){WEL.className='';WEL.innerHTML='';document.body.classList.remove('live');return}
  if(typeof CM!=='undefined'&&CM.on&&!W.popped){WEL.className='';WEL.innerHTML='';renderCM();return}
@@ -1045,7 +1046,8 @@ function drawWidget(){
   WEL.className='mini show';setTimeout(applyWPos,0);WEL.innerHTML=`<button class="wbtn" data-a="wopen" aria-label="Open ${esc(DN())}">${dog(S.eq,dogMood(),'10 6 180 196')}</button>${cap}`;return}
 if(W.popped&&!W.pmenu){const reply=W.react&&Date.now()<W.react.until?W.react:null,live2=typeof live!=='undefined'&&live,last=live2&&live.notes&&live.notes.length?live.notes[live.notes.length-1]:null;
   const bub=W.paw?`<div class="sbub pawbub"><b>Still with me, ${esc(S.user.name)}?</b><button class="p pawbtn" data-a="highpaw">High Paw!</button><div class="pawbar"><i></i></div></div>`:reply?`<div class="sbub">${esc(reply.text)}</div>`:W.msg&&Date.now()-(W.msgAt||0)<15000?`<div class="sbub">${esc(W.msg).slice(0,90)}</div>`:last?`<div class="sbub sm">Noted: ${esc((last.term||last.line).slice(0,50))}</div>`:'';
-  WEL.className='show pip pipmini';WEL.innerHTML=`<div class="pipstage">${bub}<div class="pipdog" data-a="pipmenu" title="Tap ${esc(DN())} for the menu">${dog(S.eq,dogMood(),'10 6 180 196',petBreed())}</div><div class="pipname">${esc(DN())}</div>${S.timer?`<div class="pipname tmv wclock" style="font-size:20px">${wClock()}</div>`:''}</div>`;return}
+  pipBg(true);WEL.className='show pip pipmini';WEL.innerHTML=`<div class="pipstage">${bub}<div class="pipdog" data-a="pipmenu" title="Tap ${esc(DN())} for the menu">${dog(S.eq,dogMood(),'10 6 180 196',petBreed())}</div><div class="pipname">${esc(DN())}</div>${S.timer?`<div class="pipname tmv wclock" style="font-size:20px">${wClock()}</div>`:''}</div>`;return}
+ if(W.popped)pipBg(false);
  WEL.className='show'+(W.popped?' pip':'')+(desk?' desk':'');
  const keepScroll=W._lv===W.view?WEL.scrollTop:0;W._lv=W.view;
  const dwb=desk?'<button class="wx" data-a="dwpin" title="Always on top" aria-label="Always on top">📌</button><button class="wx" data-a="dwcollapse" title="Shrink to a circle" aria-label="Shrink to a circle">◯</button><button class="wx" data-a="dwexpand" title="Open the full app" aria-label="Open the full app">⤢</button><button class="wx" data-a="dwhide" title="Hide to tray" aria-label="Hide">–</button>':(W.popped?'<button class="wx" data-a="pipmenu" aria-label="Just the pet">← Just Pet</button>':'<button class="wx" data-a="wclose" aria-label="Minimize">–</button>');
@@ -1932,7 +1934,7 @@ function tourShow(i){tourI=Math.max(0,Math.min(TOUR.length-1,i));const st=TOUR[t
   host.className=spot?'':'nospot';
   host.innerHTML=`${spot}<div class="tcard ${pos}">${st.dog?`<div class="tdog">${dog(S.eq,'happy','10 6 180 196')}</div>`:''}<div class="tdots">${TOUR.map((_,k)=>`<i class="${k<=tourI?'on':''}"></i>`).join('')}</div><h3>${esc(st.t)}</h3><p>${esc(st.b)}</p><div class="trow"><button class="s" data-a="tourskip">Skip</button><span class="grow"></span>${tourI?'<button class="s" data-a="tourback">Back</button>':''}<button class="p" data-a="tournext">${tourI===TOUR.length-1?"Let's Go! 🐾":'Next'}</button></div></div>`})}
 function tourEnd(){const h=$('#tour');if(h)h.remove();S.pref.tourDone=true;save();tab='home';view.cls=null;view.sub='live';render();drawWidget()}
-function maybeTour(force){if(!S.user||(!force&&(S.pref.tourDone||DESK||CM.on||$('#tour'))))return;if(!force&&$('#intro')&&getComputedStyle($('#intro')).display!=='none')return;tourShow(0)}
+function maybeTour(force){if(!S.user||(!force&&(S.pref.tourDone||DESK||CM.on||$('#tour'))))return;if(!force&&needName())return;if(!force&&$('#intro')&&getComputedStyle($('#intro')).display!=='none')return;tourShow(0)}
 Object.assign(ACTIONS,{tour(){closeModal();maybeTour(true)},tournext(){tourI>=TOUR.length-1?tourEnd():tourShow(tourI+1)},tourback(){tourShow(tourI-1)},tourskip(){tourEnd()}});
 
 
@@ -2329,11 +2331,12 @@ Object.assign(ACTIONS,{
  async freq(d){const r=await cloudRpc('winston_friend_request',{p_username:d.k});const m={sent:'Friend request sent! 💌',accepted:"You're now friends! 🎉",friends:"You're already friends.",self:"That's you!",notfound:'No one with that username.',declined:'They declined earlier. Try again later.',signin:'Sign in first.'};toast(m[r]||"Couldn't send that request");friendSync(true).then(()=>{fres=null;render()})},
  async fresp(d){await cloudRpc('winston_friend_respond',{p_id:+d.k,p_accept:d.y==='1'});toast(d.y==='1'?'Friend added! 🎉':'Request declined');await friendSync(true);render()}});
 
-function maybeName(){if(!S.user||S.pref.petNamed||(S.user.dogName||'Winston')!=='Winston'||$('#tour')||$('#lock')||$('#modal.on')||(typeof CM!=='undefined'&&CM.on))return;
+const needName=()=>!!(S.user&&!S.pref.petNamed&&(S.user.dogName||'Winston')==='Winston');
+function maybeName(){if(!needName()||$('#tour')||$('#lock')||$('#modal.on')||(typeof CM!=='undefined'&&CM.on))return;const it=$('#intro');if(it&&getComputedStyle(it).display!=='none'&&!it.classList.contains('out'))return;
  openModal(`<h2>Name Your ${petNoun()==='cat'?'Cat':'Pup'}!</h2><div class="dogwrap stage">${dog(S.eq,'happy','0 0 200 200',petBreed())}</div><p class="mute" style="margin:0 0 6px;text-align:center">Your study buddy deserves a name that is all yours.</p><input id="pn2" placeholder="Type a name" maxlength="20" autocomplete="off"><div>${['Biscuit','Mochi','Pepper','Waffles','Cosmo','Luna','Peanut','Honey'].map(n=>`<span class="chip" data-a="pnpick" data-k="${n}">${n}</span>`).join('')}</div><button class="p" data-a="pnsave" style="width:100%;margin-top:10px">Save Name</button><button class="s" data-a="pnkeep" style="width:100%;margin-top:10px">Keep Winston</button>`)}
 Object.assign(ACTIONS,{pnpick(d){const i=$('#pn2');if(i)i.value=d.k},
- pnsave(){const v=(($('#pn2')||{}).value||'').trim().slice(0,20);if(!v)return toast('Type a name first 🐾');S.user.dogName=v;S.pref.petNamed=true;save();closeModal();render();drawWidget();toast(`Meet ${v}!`)},
- pnkeep(){S.pref.petNamed=true;save();closeModal()}});
+ pnsave(){const v=(($('#pn2')||{}).value||'').trim().slice(0,20);if(!v)return toast('Type a name first 🐾');S.user.dogName=v;S.pref.petNamed=true;save();closeModal();render();drawWidget();toast(`Meet ${v}!`);setTimeout(()=>maybeTour(),700)},
+ pnkeep(){S.pref.petNamed=true;save();closeModal();setTimeout(()=>maybeTour(),700)}});
 
 /* ---- draggable corner pet ---- */
 function applyWPos(){const w=S.pref.wpos,el=WEL;if(!el||!w||W.popped||(typeof DESK!=='undefined'&&DESK))return;const r=el.getBoundingClientRect(),x=Math.min(Math.max(0,w.x*innerWidth),innerWidth-(r.width||90)),y=Math.min(Math.max(0,w.y*innerHeight),innerHeight-(r.height||90));el.style.left=x+'px';el.style.top=y+'px';el.style.right='auto';el.style.bottom='auto'}
@@ -2428,7 +2431,7 @@ function showIntro(){const el=$('#intro'),u=S.user;let title,sub;
 ACTIONS.install=async()=>{if(deferredInstall){deferredInstall.prompt();try{await deferredInstall.userChoice}catch(e){}deferredInstall=null}else toast('Use your browser menu: Share → Add To Home Screen (iPhone) or ⋮ → Install App (Android/Chrome)')};
 ACTIONS.setbreed=d=>{if(!BREEDS[d.k])return;S.pet={species:BREEDS[d.k].sp,breed:d.k};save();render();drawWidget();toast(`Now you have a ${BREEDS[d.k].name}! ${BREEDS[d.k].sp==='cat'?'🐱':'🐶'}`)};
 ACTIONS.theme=d=>{S.pref.theme=d.k;save();applyTheme()};
-ACTIONS.intro=()=>{setTimeout(()=>maybeTour(),1100);const el=$('#intro');el.classList.add('out');setTimeout(()=>{el.style.display='none'},650);if(S.user&&!DESK&&!(S.pref&&S.pref.autoFloat===false))popOut(true)};
+ACTIONS.intro=()=>{setTimeout(()=>{if(needName())maybeName();else maybeTour()},1000);const el=$('#intro');el.classList.add('out');setTimeout(()=>{el.style.display='none'},650);if(S.user&&!DESK&&!(S.pref&&S.pref.autoFloat===false))popOut(true)};
 
 function burst(n=14,el){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
  const r=(el||document.querySelector('.dogwrap svg')||document.body).getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+Math.min(r.height*.4,60);
