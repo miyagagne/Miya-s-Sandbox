@@ -1,9 +1,9 @@
 {
   "name": "winston-desktop",
-  "version": "1.1.0",
-  "description": "Winston, your study therapy dog, as an always-on-top desktop widget.",
+  "version": "1.2.0",
+  "description": "Study Paws, your study buddy pet, as an always-on-top desktop widget.",
   "main": "main.js",
-  "author": "Winston",
+  "author": "Study Paws",
   "license": "MIT",
   "scripts": {
     "prestart": "node scripts/copy-app.js",
@@ -16,7 +16,7 @@
   },
   "build": {
     "appId": "com.winston.studybuddy",
-    "productName": "Winston",
+    "productName": "Study Paws",
     "files": [
       "main.js",
       "preload.js",
@@ -28,13 +28,14 @@
       "output": "dist"
     },
     "mac": {
+      "artifactName": "StudyPaws.${ext}",
       "category": "public.app-category.education",
       "target": [
         "dmg",
         "zip"
       ],
       "extendInfo": {
-        "NSMicrophoneUsageDescription": "Winston listens to your class to write your notes."
+        "NSMicrophoneUsageDescription": "Study Paws listens to your class to write your notes."
       }
     },
     "win": {
@@ -50,8 +51,10 @@
       "category": "Education"
     },
     "nsis": {
-      "oneClick": true,
-      "perMachine": false
+      "artifactName": "StudyPaws-Setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "StudyPaws-Portable.${ext}"
     }
   }
 }

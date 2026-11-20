@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Winston",
+    "name": "Study Paws",
     "slug": "winston-study-buddy",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,7 +11,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.winston.studybuddy",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Winston listens during class to take notes for you."
+        "NSMicrophoneUsageDescription": "Study Paws listens during class to take notes for you."
       }
     },
     "android": {
@@ -20,7 +20,7 @@
       "permissions": ["RECORD_AUDIO", "MODIFY_AUDIO_SETTINGS"]
     },
     "plugins": [
-      ["expo-audio", { "microphonePermission": "Winston listens during class to take notes for you." }]
+      ["expo-audio", { "microphonePermission": "Study Paws listens during class to take notes for you." }]
     ]
   }
 }

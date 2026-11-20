@@ -1,4 +1,4 @@
-// Winston desktop widget: a small always-on-top window that floats over whatever you're doing.
+// Study Paws desktop widget: a small always-on-top window that floats over whatever you're doing.
 const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, screen, nativeImage, shell, session, systemPreferences } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -43,7 +43,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: w, height: h, x: pos.x, y: pos.y,
     frame: false, transparent: true, hasShadow: false, resizable: false, maximizable: false, fullscreenable: false,
-    show: false, title: 'Winston', backgroundColor: '#00000000',
+    show: false, title: 'Study Paws', backgroundColor: '#00000000',
     icon: path.join(__dirname, 'build', 'icon.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, backgroundThrottling: false }
   });
@@ -83,14 +83,14 @@ function toggleShow() { if (!win) return; if (win.isVisible()) win.hide(); else 
 
 function buildTray() {
   const menu = Menu.buildFromTemplate([
-    { label: win && win.isVisible() ? 'Hide Winston' : 'Show Winston', click: toggleShow },
+    { label: win && win.isVisible() ? 'Hide Study Paws' : 'Show Study Paws', click: toggleShow },
     ...[['orb', 'Floating Circle'], ['widget', 'Widget With Bubbles'], ['full', 'Full App']].map(([k, l]) => ({ label: l, type: 'radio', checked: cfg.mode === k, click: () => { win.webContents.executeJavaScript(`setDeskMode('${k}')`); } })),
     { type: 'separator' },
     { label: 'Update From Website On Launch', type: 'checkbox', checked: cfg.liveUpdate !== false, click: (i) => { cfg.liveUpdate = i.checked; saveCfg(); } },
     { label: 'Always On Top', type: 'checkbox', checked: !!cfg.onTop, click: (i) => { cfg.onTop = i.checked; saveCfg(); applyTop(); } },
     { label: 'Start With My Computer', type: 'checkbox', checked: !!cfg.openAtLogin, click: (i) => { cfg.openAtLogin = i.checked; saveCfg(); app.setLoginItemSettings({ openAtLogin: i.checked }); } },
     { type: 'separator' },
-    { label: 'Quit Winston', click: () => { quitting = true; app.quit(); } }
+    { label: 'Quit Study Paws', click: () => { quitting = true; app.quit(); } }
   ]);
   tray.setContextMenu(menu);
 }
@@ -99,7 +99,7 @@ function createTray() {
   let img = nativeImage.createFromPath(path.join(__dirname, 'build', 'tray.png'));
   img = img.resize({ width: 18, height: 18 });
   tray = new Tray(img);
-  tray.setToolTip('Winston — your study buddy dog');
+  tray.setToolTip('Study Paws — your study buddy pet');
   tray.on('click', toggleShow);
   buildTray();
 }

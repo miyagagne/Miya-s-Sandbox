@@ -1,4 +1,4 @@
-# Winston Desktop Widget
+# Study Paws Desktop
 
 Winston, your study therapy dog, as a small always-on-top window that floats over whatever you're doing (Brightspace, Google Docs, a video, anything). It lives in your system tray, can start with your computer, and sends real notifications.
 

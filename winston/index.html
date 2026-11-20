@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#7fd0fb">
-<meta name="apple-mobile-web-app-title" content="Winston"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Study Paws"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Fredoka:wght@500;600&family=Poppins:wght@600;700&family=Instrument+Sans:wght@400;500;600&display=swap">
-<title>Winston Study Buddy</title>
+<title>Study Paws</title>
 <style>
 :root{color-scheme:light;--bg:#bfeaff;--ink:#4a3426;--mute:#8a7260;--card:rgba(255,252,240,.95);--line:#ffb3d1;--brand:#ff9a3d;--brand2:#ff6fa8;--ok:#3fb84c;--bad:#e0504d;--soft:#fff0c2;--display:'Fredoka',system-ui,sans-serif}
 *{box-sizing:border-box}
@@ -120,7 +120,7 @@ a{color:#c4691a;font-weight:600}
 #widget.show{display:block}
 #widget.mini{width:auto;max-height:none;overflow:visible;padding:0;border:0;background:none;box-shadow:none}
 body.live{padding-bottom:340px}
-.wbtn{width:92px;height:92px;border:0;background:none;filter:drop-shadow(0 6px 5px rgba(60,40,10,.3));padding:0;overflow:visible;cursor:pointer;display:block}
+.wbtn{touch-action:none;cursor:grab;width:92px;height:92px;border:0;background:none;filter:drop-shadow(0 6px 5px rgba(60,40,10,.3));padding:0;overflow:visible;cursor:pointer;display:block}
 .wbtn svg{width:100%;height:100%;display:block}
 .wcap{position:absolute;right:84px;bottom:6px;width:max-content;max-width:190px;background:#fff;border:2px solid #49c6bd;border-radius:14px;padding:5px 9px;font-size:12px;box-shadow:0 3px 0 #2a9d97;color:var(--ink)}
 #widget.pip{position:relative;width:100%;max-height:none;height:100vh;min-height:0;box-sizing:border-box;border-radius:0;border:0;box-shadow:none;display:block;overflow:auto}
@@ -885,7 +885,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.29 (pet-only popup, name your pet)';
+const APP_VERSION='2026-11-20.30 (Study Paws)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -1029,7 +1029,7 @@ function drawWidget(){
  document.body.classList.toggle('live',!!(open&&!W.popped&&innerWidth>=700));
  if(W.msg!==W._lm){W._lm=W.msg;W.msgAt=Date.now()}
  if(!open){const cap=W.paw?'<div class="wcap">Still with me? 🐾 tap!</div>':live?`<div class="wcap">${esc(W.msg||((S.classes.find(x=>x.id===live.cls)||{}).noRec?'⌨️ Typing notes…':'🎙 Listening…')).slice(0,90)}</div>`:'';
-  WEL.className='mini show';WEL.innerHTML=`<button class="wbtn" data-a="wopen" aria-label="Open ${esc(DN())}">${dog(S.eq,dogMood(),'10 6 180 196')}</button>${cap}`;return}
+  WEL.className='mini show';setTimeout(applyWPos,0);WEL.innerHTML=`<button class="wbtn" data-a="wopen" aria-label="Open ${esc(DN())}">${dog(S.eq,dogMood(),'10 6 180 196')}</button>${cap}`;return}
 if(W.popped&&!W.pmenu){const reply=W.react&&Date.now()<W.react.until?W.react:null,live2=typeof live!=='undefined'&&live,last=live2&&live.notes&&live.notes.length?live.notes[live.notes.length-1]:null;
   const bub=W.paw?`<div class="sbub pawbub"><b>Still with me, ${esc(S.user.name)}?</b><button class="p pawbtn" data-a="highpaw">High Paw!</button><div class="pawbar"><i></i></div></div>`:reply?`<div class="sbub">${esc(reply.text)}</div>`:W.msg&&Date.now()-(W.msgAt||0)<15000?`<div class="sbub">${esc(W.msg).slice(0,90)}</div>`:last?`<div class="sbub sm">Noted: ${esc((last.term||last.line).slice(0,50))}</div>`:'';
   WEL.className='show pip pipmini';WEL.innerHTML=`<div class="pipstage">${bub}<div class="pipdog" data-a="pipmenu" title="Tap ${esc(DN())} for the menu">${dog(S.eq,dogMood(),'10 6 180 196',petBreed())}</div><div class="pipname">${esc(DN())}</div>${S.timer?`<div class="pipname tmv wclock" style="font-size:20px">${wClock()}</div>`:''}</div>`;return}
@@ -1087,7 +1087,7 @@ async function talkSend(){const el=wq('#wt'),t=el&&el.value.trim();if(!t)return;
  if(AI.sm){try{const r=await AI.sm(`${persona()}\n\nThe student is feeling stressed or low about school. Reply as a calm, caring study therapy dog: validate their feeling in one sentence, then give ONE tiny, concrete next step (under 2 minutes), then one warm closing line. Max 70 words, no lists, no medical advice.\nStudent (${S.user.name}, ${S.user.majors||'student'}) says: ${t}`,{cache:false,onText:({text})=>{W.talk=text;talkOut()}});W.talk=r.text}catch(e){W.talk=canned()}}else W.talk=canned();
  W.talkBusy=false;drawWidget()}
 Object.assign(ACTIONS,{
- wopen(){W.open=true;W.autoOpen=false;drawWidget()},
+ wopen(){if(Date.now()-(W.dragged||0)<400)return;W.open=true;W.autoOpen=false;drawWidget()},
  wclose(){W.open=false;W.autoOpen=false;if(W.breath)W.breath.stop=true;W.view='home';drawWidget()},
  wview(d){if(W.breath)W.breath.stop=true;W.view=d.k;W.msg='';
   if(d.k==='card'){W.qcard=shuffle(allItems())[0]||null;W.reveal=false}
@@ -1314,7 +1314,7 @@ function rSettings(){const u=S.user;
  ${passwordCard()}
  <label style="display:block;margin-top:6px">Class Connections</label><div class="instcard"><div class="row"><button class="s grow" data-a="gc">🎓 Google Classroom</button><button class="s grow" data-a="bsconnect">📚 Brightspace</button></div><div style="margin-top:8px"><span class="chip ${S.pref.gdrive?'on':''}" data-a="gcdrive">${S.pref.gdrive?'✓ ':''}Include Google Drive Files</span></div></div>
  ${installCard()}
- ${S.pref.apiKey?'':''}<label style="display:block;margin-top:6px">Winston AI Key (Optional)</label><div class="instcard"><input id="akey" type="password" placeholder="Paste an Anthropic API key" value="${esc(S.pref.apiKey||'')}" autocomplete="off"><button class="s" data-a="savekey" style="width:100%">${S.pref.apiKey?'Update Key':'Save Key'}</button><p class="mute" style="margin:8px 0 0;font-size:12px">Turns on smart AI answers everywhere (phone, laptop, desktop app). Stored only on this device and sent only to api.anthropic.com. Use a key with a spending limit.${AI.sm?' <b>✨ AI is on.</b>':''}</p></div><button class="s" data-a="tour" style="width:100%;margin:2px 0 10px">🎓 Replay The Tutorial</button>
+ ${S.pref.apiKey?'':''}<label style="display:block;margin-top:6px">Study Paws AI Key (Optional)</label><div class="instcard"><input id="akey" type="password" placeholder="Paste an Anthropic API key" value="${esc(S.pref.apiKey||'')}" autocomplete="off"><button class="s" data-a="savekey" style="width:100%">${S.pref.apiKey?'Update Key':'Save Key'}</button><p class="mute" style="margin:8px 0 0;font-size:12px">Turns on smart AI answers everywhere (phone, laptop, desktop app). Stored only on this device and sent only to api.anthropic.com. Use a key with a spending limit.${AI.sm?' <b>✨ AI is on.</b>':''}</p></div><button class="s" data-a="tour" style="width:100%;margin:2px 0 10px">🎓 Replay The Tutorial</button>
  <label style="display:block;margin-top:6px">My Pet</label>${['dog','cat'].map(sp=>`<div class="mute" style="margin:6px 0 2px;font-weight:600">${sp==='dog'?'🐶 Dogs':'🐱 Cats'}</div><div>${Object.entries(BREEDS).filter(([k,b])=>b.sp===sp).map(([k,b])=>`<span class="chip ${S.pet.breed===k?'on':''}" data-a="setbreed" data-k="${k}">${b.name}</span>`).join('')}</div>`).join('')}
  <label style="display:block;margin-top:6px">High-Paw Check-Ins</label><div>${[['off','Off'],['gentle','Gentle'],['normal','Frequent']].map(([k,l])=>`<span class="chip ${(S.pref.paw||'gentle')===k?'on':''}" data-a="pawmode" data-k="${k}">${l}</span>`).join('')}</div><p class="mute" style="margin:0 0 4px;font-size:12px">Gentle checks in every 8–15 minutes and never costs ${esc(DN())} any happiness.</p>
  <label style="display:block;margin-top:6px">Friend Nudges</label><div><span class="chip ${S.pref.nudge?'on':''}" data-a="nudgetoggle">${S.pref.nudge?'✓ ':''}Tell Me When Friends Are Ahead</span></div><p class="mute" style="margin:0 0 4px;font-size:12px">Friendly peer pressure with notifications while the app is open. Works best with Share My Stats Live on.</p>
@@ -1899,7 +1899,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.i
 
 /* ---- first-run tutorial ---- */
 const TOUR=[
- {t:'Meet Winston! 🐶',b:"I'm your study buddy. I cheer you on, take notes in class and help you understand your classes. Want a 1-minute tour?",tab:'home',dog:1},
+ {t:'Welcome To Study Paws! 🐾',b:"I'm your study buddy. I cheer you on, take notes in class and help you understand your classes. Want a 1-minute tour?",tab:'home',dog:1},
  {t:'Add Your Classes',b:'Open the Classes tab and add each class. Upload a syllabus if you have one and I\'ll find the dates. Every class gets its own hub.',tab:'class',sel:'nav [data-k=class]'},
  {t:'Inside A Class Hub',b:'🎙 Live: I listen and take notes · 📝 Review: recaps you can edit · 📄 Materials: uploads by week · 📅 Plan: calendar and study timer. Tap "What\'s Going On?" for this week and the big picture, and "Import From Brightspace" to bring in dates and lectures. If your professor doesn\'t allow recording, use Typing Mode.',tab:'hub',sel:'[data-a=whatsup]'},
  {t:'Practice For Coins',b:'Answer quick questions built from your own notes. Right answers earn coins for my shop. 🪙',tab:'practice',sel:'nav [data-k=practice]'},
@@ -2019,10 +2019,10 @@ Object.assign(ACTIONS,{
 /* ---- install prompt (free: home-screen app on iPhone / Android) ---- */
 const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 function installBanner(){if(DESK||inFrame||!/^https?:/.test(location.protocol)||isStandalone()||!S.pref.tourDone)return '';if(S.pref.instHide&&Date.now()-S.pref.instHide<14*864e5)return '';
- if(isIOS())return `<div class="card instban"><h3>📲 Put ${esc(DN())} On Your Home Screen</h3><p class="mute" style="margin:0 0 8px">Free, no app store. Open ${esc(DN())} like a real app, full screen, and it updates itself.</p>
+ if(isIOS())return `<div class="card instban"><h3>📲 Put Study Paws On Your Home Screen</h3><p class="mute" style="margin:0 0 8px">Free, no app store. Open Study Paws like a real app, full screen, and it updates itself.</p>
   <ol class="iossteps"><li>Tap the <b>Share</b> button <span class="shareic">⬆️</span> at the bottom of Safari</li><li>Scroll down and tap <b>Add to Home Screen</b></li><li>Tap <b>Add</b> — then open ${esc(DN())} from your home screen</li></ol>
   <p class="mute" style="font-size:12px;margin:6px 0 8px">Not seeing the Share button? Open this page in <b>Safari</b> first.</p><button class="s" data-a="insthide" style="width:100%">Got It</button></div>`;
- if(deferredInstall)return `<div class="card instban"><h3>📲 Install ${esc(DN())}</h3><p class="mute" style="margin:0 0 8px">Add ${esc(DN())} to your home screen — free, full screen, and it updates itself.</p><div class="row"><button class="p grow" data-a="install">⬇ Install</button><button class="s grow" data-a="insthide">Not Now</button></div></div>`;
+ if(deferredInstall)return `<div class="card instban"><h3>📲 Install Study Paws</h3><p class="mute" style="margin:0 0 8px">Add Study Paws to your home screen — free, full screen, and it updates itself.</p><div class="row"><button class="p grow" data-a="install">⬇ Install</button><button class="s grow" data-a="insthide">Not Now</button></div></div>`;
  return ''}
 ACTIONS.insthide=()=>{S.pref.instHide=Date.now();save();render()};
 
@@ -2322,6 +2322,14 @@ Object.assign(ACTIONS,{pnpick(d){const i=$('#pn2');if(i)i.value=d.k},
  pnsave(){const v=(($('#pn2')||{}).value||'').trim().slice(0,20);if(!v)return toast('Type a name first 🐾');S.user.dogName=v;S.pref.petNamed=true;save();closeModal();render();drawWidget();toast(`Meet ${v}!`)},
  pnkeep(){S.pref.petNamed=true;save();closeModal()}});
 
+/* ---- draggable corner pet ---- */
+function applyWPos(){const w=S.pref.wpos,el=WEL;if(!el||!w||W.popped||(typeof DESK!=='undefined'&&DESK))return;const r=el.getBoundingClientRect(),x=Math.min(Math.max(0,w.x*innerWidth),innerWidth-(r.width||90)),y=Math.min(Math.max(0,w.y*innerHeight),innerHeight-(r.height||90));el.style.left=x+'px';el.style.top=y+'px';el.style.right='auto';el.style.bottom='auto'}
+(function(){let d=null;
+ document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('#widget.mini .wbtn');if(!b||e.button>0)return;const r=WEL.getBoundingClientRect();d={ox:e.clientX-r.left,oy:e.clientY-r.top,sx:e.clientX,sy:e.clientY,moved:false}},true);
+ document.addEventListener('pointermove',e=>{if(!d)return;if(!d.moved&&Math.abs(e.clientX-d.sx)+Math.abs(e.clientY-d.sy)<6)return;d.moved=true;e.preventDefault();const r=WEL.getBoundingClientRect(),x=Math.min(Math.max(0,e.clientX-d.ox),innerWidth-r.width),y=Math.min(Math.max(0,e.clientY-d.oy),innerHeight-r.height);WEL.style.left=x+'px';WEL.style.top=y+'px';WEL.style.right='auto';WEL.style.bottom='auto'},{capture:true,passive:false});
+ document.addEventListener('pointerup',()=>{if(!d)return;if(d.moved){const r=WEL.getBoundingClientRect();S.pref.wpos={x:r.left/innerWidth,y:r.top/innerHeight};save();W.dragged=Date.now()}d=null},true);
+ addEventListener('resize',applyWPos)})();
+
 /* ======= v7: desktop widget mode ======= */
 function setDeskMode(m){if(!DESK)return;deskMode=m;if(m==='full'&&needLock())setTimeout(showLock,0);winstonDesktop.setMode(m);const w=m==='widget'||m==='orb';document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',!w);
  if(!w){const i=$('#intro');if(i)i.style.display='none'}drawWidget();if(!w)render()}
@@ -2397,7 +2405,7 @@ function introPets(hero){const ks=Object.keys(BREEDS).filter(k=>k!==hero).slice(
  return ks.map((k,i)=>`<div class="ipet" style="--x:${slots[i][0]};--b:${slots[i][1]};--w:${slots[i][2]};--dl:${(.18+i*.1).toFixed(2)}s">${dog(eqs[i]||{},i%2?'happy':'cheer','0 0 200 200',k)}</div>`).join('')}
 function showIntro(){const el=$('#intro'),u=S.user;let title,sub;
  if(u){const wk=S.classes.reduce((a,c)=>a+weekSecs(c),0),up=upcoming(1,14)[0];title=`<small>Welcome Back</small>${esc(u.name)}!`;sub=`${esc(DN())} missed you! ${wk>60?`You've studied ${fmtDur(wk)} this week. `:''}${up?`Next up: ${esc(up.title)} (${esc(up.cls)}) ${when(up)}.`:'Ready to learn something fun today?'}`}
- else{title='<small>Meet</small>Winston';sub='Your study buddy for class. Pick a pet, join the pack and make studying fun.'}
+ else{title='<small>Meet</small>Study Paws';sub='Your study buddy for class. Pick a pet, join the pack and make studying fun.'}
  const hero=petBreed();
  el.innerHTML=`${introScene()}<div class="iburst"></div><h1 class="ititle">${title}</h1><p class="isub">${sub}</p><div class="ichips"><span>📝 Live Notes</span><span>🎯 Daily Quests</span><span>👥 Friends</span><span>🌳 Dog Park</span><span>✏️ Practice</span></div>
  <div class="istage">${introPets(hero)}<div class="ipet ihero" style="--x:50%;--b:-1%;--w:min(44vw,200px);--dl:.05s">${dog(u?S.eq:{},'cheer','0 0 200 200',hero)}</div></div>

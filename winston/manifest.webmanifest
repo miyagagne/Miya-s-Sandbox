@@ -1,7 +1,7 @@
 {
-  "name": "Winston — Your Study Buddy Dog",
-  "short_name": "Winston",
-  "description": "A study therapy dog that keeps you motivated, takes live class notes, and keeps your streak alive.",
+  "name": "Study Paws — Your Study Buddy",
+  "short_name": "Study Paws",
+  "description": "A study buddy pet that keeps you motivated, takes live class notes, and keeps your streak alive.",
   "id": "./index.html",
   "start_url": "./index.html",
   "scope": "./",
