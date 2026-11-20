@@ -3,7 +3,7 @@
 # Source: https://github.com/miyagagne/Miya-s-Sandbox
 set -e
 URL='https://github.com/miyagagne/Miya-s-Sandbox/releases/download/winston-latest/StudyPaws.dmg'
-if [ "$(uname -m)" != "arm64" ]; then echo "This download is for Macs with Apple silicon (2020 and newer). Use the web app on this Mac: https://studypaws.netlify.app/app/"; exit 1; fi
+if [ "$(uname -m)" != "arm64" ]; then echo "This download is for Macs with Apple silicon (2020 and newer). Use the web app on this Mac: https://studypaws.vercel.app/app/"; exit 1; fi
 OUT="$HOME/Downloads/StudyPaws.dmg"
 echo "Downloading Study Paws (about 100 MB)..."
 curl -fL --progress-bar -o "$OUT" "$URL"
