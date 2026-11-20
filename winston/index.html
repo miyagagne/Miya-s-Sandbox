@@ -312,6 +312,22 @@ html[data-theme=dark] .s,html[data-theme=dark] .tabs button{color:#5de0e6}
 nav button{width:100%;min-width:0;justify-self:stretch;height:58px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;white-space:nowrap}
 nav button b{line-height:1}
 @media(max-width:360px){nav button{font-size:9px;letter-spacing:.2px}}
+/* ---- tutorial + agent ---- */
+#tour{position:fixed;inset:0;z-index:140}
+#tour .tspot{position:fixed;border-radius:18px;box-shadow:0 0 0 9999px rgba(20,12,40,.62),0 0 0 3px #fff,0 0 22px 6px rgba(255,255,255,.6);pointer-events:none;transition:all .35s cubic-bezier(.2,.8,.3,1)}
+#tour.nospot{background:rgba(20,12,40,.62)}
+#tour .tcard{position:fixed;left:50%;transform:translateX(-50%);width:min(92vw,420px);background:#fff;color:var(--ink);border-radius:22px;padding:16px 18px;box-shadow:0 16px 48px rgba(0,0,0,.4)}
+#tour .tcard.top{top:calc(14px + env(safe-area-inset-top))}#tour .tcard.bot{bottom:calc(14px + env(safe-area-inset-bottom))}#tour .tcard.mid{top:50%;transform:translate(-50%,-50%)}
+#tour .tcard h3{margin:2px 0 6px;font-size:19px}#tour .tcard p{margin:0 0 12px;font-size:15px;line-height:1.45}
+#tour .tdots{display:flex;gap:5px;margin-bottom:8px}#tour .tdots i{width:18px;height:5px;border-radius:5px;background:#e6e0f2}#tour .tdots i.on{background:#6c4df0}
+#tour .tdog{width:84px;margin:-6px auto 4px;display:block}#tour .tdog svg{width:100%;display:block}
+#tour .trow{display:flex;gap:8px;align-items:center}
+html[data-theme=dark] #tour .tcard{background:#181240}html[data-theme=dark] #tour .tdots i{background:#352c66}html[data-theme=dark] #tour .tdots i.on{background:#7c5cff}
+.synh{font-family:var(--display);font-weight:600;margin:12px 0 4px;font-size:16px}
+.syn ul{margin:4px 0;padding-left:20px}.syn li{margin:3px 0}
+.synstat{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}.synstat span{background:var(--soft);border:1px solid var(--line);border-radius:99px;padding:4px 11px;font-size:13px;font-weight:600}
+.agacts{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 8px 4px}
+#agchat{max-height:42vh;overflow:auto;margin:6px 0}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -521,7 +537,7 @@ Object.assign(ACTIONS,{
  ob1(){const n=$('#nm').value.trim()||obData.name;if(!n)return toast('Tell me your name!');obData.name=n;obData.email=$('#em').value.trim();ob=2;render()},
  ob2(){obData.majors=$('#mj').value.trim();obData.minors=$('#mn').value.trim();ob=4;render()},
  pick(d){$('#dn').value=d.k},
- ob4(){const dn=($('#dn').value.trim()||'Winston').slice(0,20);S.user={name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,dogName:dn,goals:($('#gl')?$('#gl').value.trim():'')};save();tab='home';render();drawWidget();toast(`Welcome, ${S.user.name}! Say hi to ${dn}! 🐶`);if(DESK)setDeskMode('orb');else if(!(S.pref&&S.pref.autoFloat===false))popOut(true)},
+ ob4(){const dn=($('#dn').value.trim()||'Winston').slice(0,20);S.user={name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,dogName:dn,goals:($('#gl')?$('#gl').value.trim():'')};save();tab='home';render();drawWidget();toast(`Welcome, ${S.user.name}! Say hi to ${dn}! 🐶`);setTimeout(()=>maybeTour(),1400);if(DESK)setDeskMode('orb');else if(!(S.pref&&S.pref.autoFloat===false))popOut(true)},
  tab(d){go(d.k)}
 });
 
@@ -538,7 +554,7 @@ function rHome(){
  <div class="bar" style="margin:10px 0 4px"><i style="width:${pct}%"></i></div><div class="mute">${hi-S.earned} XP to level ${L+1}</div>
  <p class="bubble">${esc(mood()==='sad'?'I miss you! Studying together makes me happy 🥺':smartMsg())}</p></div>
  <div class="row" style="margin-bottom:14px">${t?'':'<button class="s grow" data-a="openfocus">⏱ Focus</button>'}<button class="p ${t?'':'purple '}grow" data-a="tab" data-k="class">🎙 Start class</button></div>
- <button class="s" data-a="cm" style="width:100%;margin:-4px 0 14px">📱 Class Mode — Keep ${esc(DN())} Beside You</button>
+ <div class="row" style="margin:-4px 0 14px"><button class="s grow" data-a="agent">💬 Ask ${esc(DN())}</button><button class="s grow" data-a="cm">📱 Class Mode</button></div>
  ${questsCard()}
  <div class="card"><h3>How are you feeling?</h3><div class="moods">${MOODS.map(m=>`<button class="mood" data-a="feel" data-k="${m[1]}"><b>${m[0]}</b><span>${m[1]}</span></button>`).join('')}</div><div id="feelout"></div></div>`}
 function openFocus(){if(!S.classes.length){toast('Add a class first');tab='class';render();return}
@@ -556,6 +572,7 @@ function rClass(){
  <details class="card" ${classes().length?'':'open'}><summary><b>＋ Add a class</b></summary><label>Class name</label><input id="cn" placeholder="BUAD 112"><label>Syllabus (optional) — PDF, Word, PowerPoint or text</label><input id="cf" type="file" multiple accept=".pdf,.docx,.pptx,.txt,.md,.csv"><button class="p" data-a="addc">Add class</button></details>`;return}
  const sub=view.sub;
  $('#main').innerHTML=`<button class="s" data-a="openc" data-k="">← All classes</button><div class="row" style="margin-top:10px"><h2 class="grow" style="margin:0">${esc(c.name)}</h2><button class="s" data-a="editc" data-k="${c.id}">✏️ Edit</button></div>${c.instructor||c.room?`<p class="mute" style="margin:4px 0 8px">${[c.instructor&&'👩‍🏫 '+esc(c.instructor),c.room&&'📍 '+esc(c.room)].filter(Boolean).join(' · ')}</p>`:''}
+ <div class="row" style="margin:6px 0 10px"><button class="p grow" data-a="whatsup" style="flex:1.7 1 0">🐶 What's Going On?</button><button class="s grow" data-a="agent" data-k="${c.id}">💬 Ask ${esc(DN())}</button></div>
  <div class="tabs">${[['live','🎙 Live'],['review','📝 Review'],['mat','📄 Materials'],['plan','📅 Plan']].map(([k,l])=>`<button data-a="sub" data-k="${k}" class="${k===sub?'on':''}">${l}</button>`).join('')}</div><div id="sub"></div>`;
  ({live:rLive,review:rReview,mat:rMat,plan:rPlan})[sub](c);
 }
@@ -639,7 +656,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.8 (equal tabs)';
+const APP_VERSION='2026-11-20.9 (tutorial, class synopsis, Ask Winston agent)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -1059,6 +1076,7 @@ function rDog(){const sub=view.dsub||'shop';
 function rSettings(){const u=S.user;
  MAIN().innerHTML=`<div class="card"><h2>Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea>
  ${installCard()}
+ ${S.pref.apiKey?'':''}<label style="display:block;margin-top:6px">Winston AI Key (Optional)</label><div class="instcard"><input id="akey" type="password" placeholder="Paste an Anthropic API key" value="${esc(S.pref.apiKey||'')}" autocomplete="off"><button class="s" data-a="savekey" style="width:100%">${S.pref.apiKey?'Update Key':'Save Key'}</button><p class="mute" style="margin:8px 0 0;font-size:12px">Turns on smart AI answers everywhere (phone, laptop, desktop app). Stored only on this device and sent only to api.anthropic.com. Use a key with a spending limit.${AI.sm?' <b>✨ AI is on.</b>':''}</p></div><button class="s" data-a="tour" style="width:100%;margin:2px 0 10px">🎓 Replay The Tutorial</button>
  <label style="display:block;margin-top:6px">Look</label><div class="themeopts">${[['auto','🖥 Auto'],['light','☀️ Light'],['dark','🌙 Dark']].map(([k,l])=>`<span class="chip thm ${(S.pref.theme||'auto')===k?'on':''}" data-a="theme" data-k="${k}">${l}</span>`).join('')}</div>
  <label style="display:block;margin-top:6px">Floating widget</label><div><span class="chip ${S.pref.autoFloat===false?'':'on'}" id="autof" data-a="toggleauto">${S.pref.autoFloat===false?'':'✓ '}Float ${esc(DN())} on my screen when I open the app</span></div><p class="mute" style="margin-top:0">Works in desktop Chrome or Edge. He stays on top of Brightspace, Google and other tabs.</p>
  <button class="p" data-a="savesettings" style="width:100%">Save</button></div>
@@ -1519,7 +1537,7 @@ function renderCM(){const el=$('#cm');if(!el||!S.user)return;const t=S.timer,c=t
  const bub=W.paw?`<div class="cmb paw"><b>Still with me, ${esc(S.user.name)}? 🐶</b><button class="p" data-a="highpaw">🐾 High Paw!</button></div>`:`<div class="cmb">${esc(cmText())}</div>`;
  el.innerHTML=`<div class="cmtop"><span id="cmclock">${cmClock()}</span><button class="cmx" data-a="cmexit" aria-label="Exit Class Mode">✕</button></div>
  <div class="cmmid">${bub}<button class="cmdog" data-a="cmpet" aria-label="Pet ${esc(DN())}">${dog(S.eq,dogMood(),'10 6 180 196')}</button><div class="cmname">${esc(DN())} · Lv ${lvl()}</div>${t?`<div class="cmtimer"><small>${t.target?'Focus':'Studying'}${c?' · '+esc(c.name):''}</small><b id="cmtm">${wClock()}</b></div>`:''}</div>
- <div class="cmbar"><button data-a="cmboost">💛<span>Boost</span></button><button data-a="cmfocus">${t?'⏹':'⏱'}<span>${t?'Stop':'Focus'}</span></button><button data-a="cmbreathe">🌬️<span>Breathe</span></button><button data-a="cmnotes">🎙<span>Notes</span></button></div>`}
+ <div class="cmbar"><button data-a="cmboost">💛<span>Boost</span></button><button data-a="cmfocus">${t?'⏹':'⏱'}<span>${t?'Stop':'Focus'}</span></button><button data-a="cmbreathe">🌬️<span>Breathe</span></button><button data-a="cmask">💬<span>Ask</span></button><button data-a="cmnotes">🎙<span>Notes</span></button></div>`}
 function cmSay(text,mood){CM.react={text,until:Date.now()+3000};W.cheerUntil=Date.now()+(mood?3000:0);renderCM();setTimeout(()=>{if(CM.on)renderCM()},3100)}
 Object.assign(ACTIONS,{
  cm(){if(!S.user)return;CM.on=true;document.body.classList.add('cm');renderCM();cmLock();clearInterval(CM.iv);let n=0;CM.iv=setInterval(()=>{if(!CM.on)return;n++;const a=$('#cmclock');if(a)a.textContent=cmClock();const b=$('#cmtm');if(b)b.textContent=wClock();if(n%60===0)renderCM()},1000);
@@ -1530,6 +1548,111 @@ Object.assign(ACTIONS,{
  cmfocus(){if(S.timer)ACTIONS.stoptimer();else openFocus()},
  cmbreathe(){openBreath()},
  cmnotes(){ACTIONS.cmexit();go('class')}});
+
+
+/* ======= v8: tutorial, class synopsis, Ask Winston agent, optional AI key ======= */
+function installAIShim(){const key=(S.pref&&S.pref.apiKey)||'';
+ if(AI.sm&&!AI.sm.__byo)return;if(!key){if(AI.sm&&AI.sm.__byo)AI.sm=null;return}
+ const call=async msgs=>{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-5-5',max_tokens:1400,messages:msgs})});
+  if(r.status===401||r.status===403){const e=new Error('key rejected');e.code='not_granted';throw e}
+  if(r.status===429){const e=new Error('rate limited');e.code='rate_limited';throw e}
+  if(!r.ok)throw new Error('http '+r.status);const j=await r.json();return (j.content||[]).map(b=>b.text||'').join('')};
+ const f=async(m,o)=>{const msgs=typeof m==='string'?[{role:'user',content:m}]:m;const text=await call(msgs);if(o&&o.onText)try{o.onText({text})}catch(e){}return {text}};
+ f.json=async p=>{const t=await call([{role:'user',content:p+'\n\nReply with ONLY valid JSON, no markdown fences.'}]);const m=t.match(/\{[\s\S]*\}/);if(!m)throw new Error('no json');return JSON.parse(m[0])};
+ f.__byo=true;AI.sm=f}
+
+/* ---- what's going on: this week + overall ---- */
+const sesTime=x=>{const t=Date.parse(x.date);return isNaN(t)?null:t};
+function synopsis(c){const ws=weekStart().getTime(),all=c.sessions.filter(x=>x.lines&&x.lines.length),wk=all.filter(x=>{const t=sesTime(x);return t!==null&&t>=ws});
+ const teach=ss=>ss.flatMap(x=>x.lines.filter(l=>!/^\[My note\]/.test(l))),pts=ss=>keyPoints(teach(ss)),mine=ss=>ss.flatMap(x=>x.lines.filter(l=>/^\[My note\]/.test(l)).map(cleanLine));
+ const topics={};all.forEach(x=>(x.hits||[]).forEach(h=>{const it=c.items.find(i=>i.id===h.id);if(it)topics[it.term]=(topics[it.term]||0)+1}));
+ return {wkN:wk.length,allN:all.length,week:pts(wk).slice(0,6),overall:pts(all).slice(0,8),mine:mine(wk).slice(0,4),top:Object.entries(topics).sort((a,b)=>b[1]-a[1]).slice(0,6).map(x=>x[0]),
+  up:upcoming(60,45).filter(e=>e.cid===c.id).slice(0,5),weekSec:weekSecs(c),totalSec:secsFor(c.id),goalSec:c.goalMin*60}}
+function synHtml(c,syn,ai){const li=a=>a&&a.length?`<ul>${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'';
+ const intro=ai&&ai.intro?ai.intro:`Here's the scoop, ${S.user.name}! ${syn.wkN?`You've been to ${syn.wkN} class${syn.wkN>1?'es':''} this week`:'No class recorded yet this week'} and ${syn.allN} overall.`;
+ const wk=ai&&ai.week&&ai.week.length?ai.week:syn.week,ov=ai&&ai.overall&&ai.overall.length?ai.overall:syn.overall,nx=ai&&ai.next&&ai.next.length?ai.next:syn.up.map(e=>`${e.title} — ${when(e)}`);
+ return `<div class="bubble">🐶 ${esc(intro)}</div>
+ <div class="synstat"><span>📅 ${syn.wkN} this week</span><span>🎓 ${syn.allN} overall</span><span>⏱ ${fmtDur(syn.weekSec)} of ${fmtDur(syn.goalSec)} this week</span><span>🕒 ${fmtDur(syn.totalSec)} all time</span></div>
+ <div class="synh">This Week</div>${wk.length?li(wk):'<p class="mute" style="margin:4px 0">Nothing recorded yet this week. Tap Start Class when you\'re there and I\'ll take notes! 🎙</p>'}${syn.mine.length?`<div class="mute" style="margin-top:6px">Your own notes</div>${li(syn.mine)}`:''}
+ <div class="synh">Overall</div>${ov.length?li(ov):'<p class="mute" style="margin:4px 0">I\'ll build the big picture as we record more classes together.</p>'}${syn.top.length?`<div style="margin-top:6px">${syn.top.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>`:''}
+ <div class="synh">Coming Up</div>${nx.length?li(nx):'<p class="mute" style="margin:4px 0">Nothing on the calendar yet. Add your syllabus in Materials and I\'ll find the dates.</p>'}
+ <div class="row" style="margin-top:12px"><button class="p grow" data-a="pc" data-k="${c.id}">✏️ Practice This Class</button><button class="s grow" data-a="agent" data-k="${c.id}">💬 Ask ${esc(DN())}</button></div>
+ <p class="mute" style="margin:8px 0 0;font-size:12px">${ai?'✨ Written by '+esc(DN())+' AI from your notes and materials.':AI.sm?'':'Built from your notes. Add an AI key in Settings for a smarter summary.'}</p>`}
+async function aiSyn(c,syn){try{
+ const facts=`THIS WEEK: ${syn.wkN} class(es) recorded. Key points: ${syn.week.join(' | ')||'none'}. Student's own notes: ${syn.mine.join(' | ')||'none'}.\nOVERALL: ${syn.allN} class(es) recorded. Key points: ${syn.overall.join(' | ')||'none'}. Topics covered most: ${syn.top.join(', ')||'none'}.\nCOMING UP: ${syn.up.map(e=>e.title+' ('+e.date+')').join('; ')||'nothing scheduled'}.\nSTUDY TIME: ${fmtDur(syn.weekSec)} this week of ${fmtDur(syn.goalSec)} goal; ${fmtDur(syn.totalSec)} all time.`;
+ const r=await aiJson(`${persona()}\n\nTASK: Give the student a calm, friendly synopsis of what is going on in this class. Use ONLY the information below; do not invent facts. Return JSON {"intro":"one warm sentence","week":["up to 5 short bullets about this week"],"overall":["up to 6 short bullets about the whole class so far"],"next":["up to 4 short bullets: what to do or watch for next"]}.\n\n${ctxOf(c)}\n\n${facts}`);
+ const el=$('#syn');if(el&&view.synCls===c.id&&r)el.innerHTML=synHtml(c,syn,r)}catch(e){if(e&&e.code==='not_granted'){AI.sm=null;toast('Your AI key was rejected — check it in Settings')}}}
+
+/* ---- Ask Winston agent: knows every class ---- */
+const AG={h:[],focus:null};
+function mentioned(q){const n=norm(q);return S.classes.filter(c=>{const cn=norm(c.name);return cn&&(n.includes(cn)||cn.split(' ').filter(w=>w.length>2).every(w=>n.includes(w)))})}
+function agentCtx(focus){const u=S.user,out=[`STUDENT: ${u.name}, major ${u.majors||'unknown'}. Goal: ${u.goals||'not set'}. Today is ${todayIso()}. Streak: ${streakDays()} days.`];
+ for(const c of S.classes){const syn=synopsis(c);out.push(`\n## ${c.name}${c.instructor?' (instructor '+c.instructor+')':''}${c.room?' in '+c.room:''}`,
+  `Study time this week ${fmtDur(syn.weekSec)} of ${fmtDur(syn.goalSec)}; classes recorded: ${syn.allN} (${syn.wkN} this week).`,
+  `Coming up: ${syn.up.map(e=>`${e.title} (${e.type}, ${e.date})`).join('; ')||'nothing scheduled'}.`,
+  `This week the teacher covered: ${syn.week.slice(0,5).join(' | ')||'(nothing recorded)'}.`,
+  `Overall key points: ${syn.overall.slice(0,6).join(' | ')||'(none yet)'}.`,
+  `Course terms: ${c.items.slice(0,focus===c.id?40:14).map(i=>i.term+': '+i.text.slice(0,110)).join(' | ')||'(none)'}.`);
+  if(focus===c.id){const d=docsCtx(c);if(d)out.push('Syllabus/document excerpts: '+d.slice(0,3500))}}
+ return out.join('\n').slice(0,14000)}
+function localAnswerAll(q,cs){const n=norm(q),qw=n.split(' ').filter(w=>w.length>2&&!STOP.has(w));
+ const pool=cs.flatMap(c=>[...c.items.map(i=>({t:i.term,s:i.text,c:c.name})),...c.sessions.flatMap(x=>x.lines.map(l=>({t:'Teacher said',s:l,c:c.name})))]);
+ const sc=pool.map(p=>({p,n:qw.filter(w=>norm(p.t+' '+p.s).includes(w.slice(0,5))).length})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n).slice(0,3);
+ return sc.length?`Here's what I found, step by step:\n`+sc.map((x,i)=>`${i+1}. **${x.p.t}** (${x.p.c}): ${x.p.s}`).join('\n'):`Hmm, I couldn't find that in your classes yet. Add it to Materials or record a class and I'll learn it too! 🐾`}
+function agentLocal(q){const n=norm(q),ms=mentioned(q),cs=ms.length?ms:S.classes;
+ if(!cs.length)return {text:`Add a class first and I'll learn it with you! 🐾`,acts:[]};
+ const acts=ms.slice(0,2).flatMap(c=>[{l:'Open '+c.name,a:'agopen',k:c.id},{l:'Practice '+c.name,a:'agprac',k:c.id}]);
+ if(/going on|happening|this week|catch me up|synopsis|recap|summary|summarize|what did|whats new|what is new/.test(n))
+  return {text:cs.map(c=>{const sy=synopsis(c);return `**${c.name}**\n`+(sy.week.length?'This week:\n'+sy.week.slice(0,4).map((x,i)=>`${i+1}. ${x}`).join('\n'):'Nothing recorded this week yet.')+(sy.up.length?`\nComing up: ${sy.up.slice(0,3).map(e=>e.title+' ('+when(e)+')').join(', ')}`:'')}).join('\n\n'),acts};
+ if(/due|deadline|exam|quiz|assignment|homework|coming up|schedule|when is|test|soon/.test(n)){const up=upcoming(60,45).filter(e=>cs.some(c=>c.id===e.cid)).slice(0,6);
+  return {text:up.length?`Here's what's coming up:\n`+up.map((e,i)=>`${i+1}. **${e.title}** — ${e.cls}, ${when(e)}`).join('\n'):`I don't see anything on the calendar yet. Upload a syllabus in Materials and I'll find the dates! 🐾`,acts}}
+ if(/how (much|long)|study time|studied|hours/.test(n))return {text:cs.map(c=>`**${c.name}**: ${fmtDur(weekSecs(c))} this week (goal ${fmtDur(c.goalMin*60)}), ${fmtDur(secsFor(c.id))} all time.`).join('\n'),acts};
+ if(/needs me|behind|priority|most important|where should i start/.test(n)){const r=[...S.classes].sort((a,b)=>weekSecs(a)/(a.goalMin*60)-weekSecs(b)/(b.goalMin*60))[0];return {text:`${r.name} is furthest from its weekly goal (${fmtDur(weekSecs(r))} of ${fmtDur(r.goalMin*60)}). Want to start a focus session there? 🐾`,acts:[{l:'Open '+r.name,a:'agopen',k:r.id}]}}
+ return {text:localAnswerAll(q,cs),acts}}
+function agHtml(){return AG.h.map(m=>m.role==='user'?`<div class="bubble" style="margin-left:28px;background:rgba(141,124,255,.18)">${esc(m.content)}</div>`:`<div class="bubble">🐶 ${m.pending&&!m.content?'<span class="mute">thinking…</span>':md(m.content)}</div>${(m.acts||[]).length?`<div class="agacts">${m.acts.map(a=>`<span class="chip on" data-a="${a.a}" data-k="${a.k}">${esc(a.l)}</span>`).join('')}</div>`:''}`).join('')}
+function agPaint(){const el=$('#agchat');if(el){el.innerHTML=agHtml();el.scrollTop=el.scrollHeight}}
+function agChips(){const c=S.classes.find(x=>x.id===AG.focus);return c?[`What's going on in ${c.name}?`,`What's due in ${c.name}?`,`Explain the big idea of ${c.name}`]:[`What's going on this week?`,`What's due soon?`,`Which class needs me most?`,`How much have I studied?`]}
+Object.assign(ACTIONS,{
+ whatsup(){const c=cur();if(!c)return;view.synCls=c.id;const syn=synopsis(c);openModal(`<h2>🐶 What's Going On In ${esc(c.name)}?</h2><div id="syn" class="syn">${synHtml(c,syn,null)}</div>`);if(AI.sm&&(syn.allN||c.items.length||(c.docs||[]).length))aiSyn(c,syn)},
+ agent(d){AG.focus=(d&&d.k)||null;closeModal();openModal(`<h2>🐶 Ask ${esc(DN())}</h2><p class="mute" style="margin:0 0 6px">I go to class with you — ask me about any of your classes.</p><div id="agchat">${agHtml()}</div><div class="row" id="agchips" style="margin:6px 0">${agChips().map(q=>`<span class="chip" data-a="agask" data-q="${esc(q)}">${esc(q)}</span>`).join('')}</div><div class="row"><input class="grow" id="agq" placeholder="Ask about any class…" autocomplete="off"><button class="p" data-a="agask">Ask</button></div><p class="mute" style="margin:8px 0 0;font-size:12px">${AI.sm?'✨ Smart answers are on.':'I\'m searching your notes and calendar. Add an AI key in Settings for smarter answers.'}</p>`);setTimeout(()=>{agPaint();const i=$('#agq');if(i&&innerWidth>700)i.focus()},50)},
+ async agask(d){const inp=$('#agq'),q=(d.q||(inp&&inp.value)||'').trim();if(!q)return;if(inp)inp.value='';
+  AG.h.push({role:'user',content:q});const acts=mentioned(q).slice(0,2).flatMap(c=>[{l:'Open '+c.name,a:'agopen',k:c.id},{l:'Practice '+c.name,a:'agprac',k:c.id}]);
+  if(!AI.sm){const r=agentLocal(q);AG.h.push({role:'assistant',content:r.text,acts:r.acts});return agPaint()}
+  const turns=AG.h.filter(m=>!m.pending).slice(-9).map(t=>({role:t.role,content:t.content}));while(turns.length&&turns[0].role!=='user')turns.shift();
+  const pre=`${persona()}\n\nYou are ${DN()}, the student's study companion who goes to class with them. You know all of their classes below. Answer questions about any class; say which class you mean. Use ONLY this information and general study knowledge; if something isn't in their data, say so kindly. Keep answers short (under 120 words) unless asked for more.\n\n${agentCtx(AG.focus)}`;
+  const msgs=turns.map((t,i)=>i===0?{role:'user',content:`${pre}\n\nStudent question: ${t.content}`}:t);
+  const reply={role:'assistant',content:'',pending:true,acts};AG.h.push(reply);agPaint();
+  try{const r=await AI.sm(msgs,{cache:false,onText:({text})=>{reply.content=text;agPaint()}});reply.content=(r&&r.text)||reply.content||'Hmm, I blanked for a second — try again? 🐾'}
+  catch(e){if(e&&e.code==='not_granted'){AI.sm=null;const l=agentLocal(q);reply.content='Your AI key was rejected, so I searched your notes instead:\n'+l.text}else if(e&&e.code==='rate_limited')reply.content='I need a quick breather — ask me again in a moment! 🐾';else{const l=agentLocal(q);reply.content=l.text}}
+  reply.pending=false;agPaint()},
+ agopen(d){closeModal();tab='class';view.cls=d.k;view.sub='review';render()},
+ agprac(d){closeModal();tab='practice';startPractice(d.k)},
+ savekey(){const v=($('#akey')||{}).value||'';S.pref.apiKey=v.trim()||undefined;if(!S.pref.apiKey)delete S.pref.apiKey;save();if(AI.sm&&AI.sm.__byo)AI.sm=null;installAIShim();render();toast(S.pref.apiKey?'AI key saved ✨':'AI key removed')},
+ cmask(){ACTIONS.agent({})}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='agq'){e.preventDefault();ACTIONS.agask({})}});
+
+/* ---- first-run tutorial ---- */
+const TOUR=[
+ {t:'Meet Winston! 🐶',b:"I'm your study therapy dog. I cheer you on, take notes in class and help you understand your classes. Want a 1-minute tour?",tab:'home',dog:1},
+ {t:'Add Your Classes',b:'Open the Classes tab and add each class. Upload a syllabus if you have one and I\'ll find the dates. Every class gets its own hub.',tab:'class',sel:'nav [data-k=class]'},
+ {t:'Inside A Class Hub',b:'🎙 Live: I listen and take notes · 📝 Review: recaps you can edit · 📄 Materials: uploads by week · 📅 Plan: calendar and study timer. Tap "What\'s Going On?" any time for this week and the big picture.',tab:'hub',sel:'[data-a=whatsup]'},
+ {t:'Practice For Coins',b:'Answer quick questions built from your own notes. Right answers earn coins for my shop. 🪙',tab:'practice',sel:'nav [data-k=practice]'},
+ {t:'Boost Your Mood',b:'Bored, stressed or unmotivated? Tell me how you feel and I\'ll help with breathing, a game or a pep talk.',tab:'boost',sel:'nav [data-k=boost]'},
+ {t:'Make Me Yours',b:'Spend coins on hats and glasses, add friends, switch Light or Dark mode and name me in Settings.',tab:'dog',sel:'nav [data-k=dog]'},
+ {t:'Ask Me Anything',b:'I go to class with you, so ask me about any class: what\'s going on, what\'s due, or to explain a topic. Add an AI key in Settings for smarter answers.',tab:'home',sel:'[data-a=agent]'},
+ {t:'Class Mode',b:'Keep me open in class: full screen, the screen stays awake and I check in with a high paw. Install me from Settings → Get The App to keep me on your phone or computer.',tab:'home',sel:'[data-a=cm]'}];
+let tourI=0;
+function tourShow(i){tourI=Math.max(0,Math.min(TOUR.length-1,i));const st=TOUR[tourI];
+ if(st.tab==='hub'){tab='class';const c0=S.classes[0];view.cls=c0?c0.id:null;view.sub='live'}else{tab=st.tab||'home';view.cls=null}
+ P=null;render();drawWidget();
+ let host=$('#tour');if(!host){host=document.createElement('div');host.id='tour';document.body.append(host)}
+ requestAnimationFrame(()=>{const el=st.sel&&document.querySelector(st.sel);let spot='',pos='mid';
+  if(el){try{el.scrollIntoView({block:'center'})}catch(e){}const r=el.getBoundingClientRect();if(r.width>0){spot=`<div class="tspot" style="left:${r.left-6}px;top:${r.top-6}px;width:${r.width+12}px;height:${r.height+12}px"></div>`;pos=(r.top+r.height/2)>innerHeight*.5?'top':'bot'}}
+  host.className=spot?'':'nospot';
+  host.innerHTML=`${spot}<div class="tcard ${pos}">${st.dog?`<div class="tdog">${dog(S.eq,'happy','10 6 180 196')}</div>`:''}<div class="tdots">${TOUR.map((_,k)=>`<i class="${k<=tourI?'on':''}"></i>`).join('')}</div><h3>${esc(st.t)}</h3><p>${esc(st.b)}</p><div class="trow"><button class="s" data-a="tourskip">Skip</button><span class="grow"></span>${tourI?'<button class="s" data-a="tourback">Back</button>':''}<button class="p" data-a="tournext">${tourI===TOUR.length-1?"Let's Go! 🐾":'Next'}</button></div></div>`})}
+function tourEnd(){const h=$('#tour');if(h)h.remove();S.pref.tourDone=true;save();tab='home';view.cls=null;view.sub='live';render();drawWidget()}
+function maybeTour(force){if(!S.user||(!force&&(S.pref.tourDone||DESK||CM.on||$('#tour'))))return;if(!force&&$('#intro')&&getComputedStyle($('#intro')).display!=='none')return;tourShow(0)}
+Object.assign(ACTIONS,{tour(){closeModal();maybeTour(true)},tournext(){tourI>=TOUR.length-1?tourEnd():tourShow(tourI+1)},tourback(){tourShow(tourI-1)},tourskip(){tourEnd()}});
 
 /* ======= v7: desktop widget mode ======= */
 function setDeskMode(m){if(!DESK)return;deskMode=m;winstonDesktop.setMode(m);const w=m==='widget'||m==='orb';document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',!w);
@@ -1580,7 +1703,7 @@ function showIntro(){const el=$('#intro'),u=S.user;let title,sub;
  el.className='';el.style.display='flex';setTimeout(()=>burst(14,el.querySelector('svg')),500)}
 ACTIONS.install=async()=>{if(deferredInstall){deferredInstall.prompt();try{await deferredInstall.userChoice}catch(e){}deferredInstall=null}else toast('Use your browser menu: Share → Add To Home Screen (iPhone) or ⋮ → Install App (Android/Chrome)')};
 ACTIONS.theme=d=>{S.pref.theme=d.k;save();applyTheme()};
-ACTIONS.intro=()=>{const el=$('#intro');el.classList.add('out');setTimeout(()=>{el.style.display='none'},650);if(S.user&&!DESK&&!(S.pref&&S.pref.autoFloat===false))popOut(true)};
+ACTIONS.intro=()=>{setTimeout(()=>maybeTour(),1100);const el=$('#intro');el.classList.add('out');setTimeout(()=>{el.style.display='none'},650);if(S.user&&!DESK&&!(S.pref&&S.pref.autoFloat===false))popOut(true)};
 
 function burst(n=14,el){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
  const r=(el||document.querySelector('.dogwrap svg')||document.body).getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+Math.min(r.height*.4,60);
@@ -1677,7 +1800,7 @@ function burst(n=14,el){if(matchMedia('(prefers-reduced-motion: reduce)').matche
 }catch(e){console.warn('background off',e)}})();
 S.classes.forEach(c=>c.sessions.forEach(x=>{if(x.aiState==='loading')x.aiState=''}));
 S.classes.forEach(ensure);
-(async()=>{try{AI.sm=window.claude&&claude.use?await claude.use('sample'):null}catch(e){AI.sm=null}try{AI.mcp=window.claude&&claude.use?await claude.use('mcp'):null}catch(e){AI.mcp=null}if((AI.sm||AI.mcp)&&S.user)render()})();
+(async()=>{try{AI.sm=window.claude&&claude.use?await claude.use('sample'):null}catch(e){AI.sm=null}try{AI.mcp=window.claude&&claude.use?await claude.use('mcp'):null}catch(e){AI.mcp=null}if(!AI.sm)installAIShim();if((AI.sm||AI.mcp)&&S.user)render()})();
 if(!inFrame&&/^https?:/.test(location.protocol)){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest';document.head.append(l);if('serviceWorker' in navigator){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!window.__rl){window.__rl=1;location.reload()}});navigator.serviceWorker.register('sw.js').catch(()=>{})}}
 if(DESK){const w=(deskMode==='widget'||deskMode==='orb')&&!!S.user;if(!S.user)deskMode='full';winstonDesktop.setMode(deskMode);document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',deskMode==='full')}
 applyTheme();

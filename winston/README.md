@@ -63,3 +63,11 @@ Winston opens your laptop's real microphone: pick the device, watch the live lev
 - After class, the recap is a short **bullet-point summary** of what the teacher said (key points, topics from your materials, dates and to-dos, your own notes, a quick self-check), whether or not you uploaded study cards. Filler words and repeats are removed.
 - The **Notes** use the same structure and are readable (headings and bullets). Tap **Edit** to change them as simple text (`#` title, `##` headings, `-` bullets); edited notes can be saved to Google Docs again.
 - The floating widget shows Winston on the left with speech bubbles beside him. The **high paw** pops up as a bubble with a countdown while he waves his paw; catch it for 4 coins, miss it and he gets a little sad.
+
+
+## Tutorial, class synopsis and Ask Winston
+
+- **First-run tutorial:** an 8-step spotlight tour (classes, class hubs, practice, boost, customizing, Ask Winston, Class Mode). Replay it from My Dog → Settings → *Replay The Tutorial*.
+- **What's Going On?:** a button in every class hub. Winston summarizes **this week**, **overall**, and **what's coming up** (calendar, study time, topics covered most) from your notes, materials and syllabus.
+- **Ask Winston (the dog as an agent):** open it from Home, any class hub, or Class Mode. He knows *all* your classes (notes, materials, calendar, study time) and answers questions like "what's going on in BUAD 112?", "what's due soon?" or "explain the four Ps". Replies offer Open / Practice shortcuts.
+- **Smart AI everywhere:** inside the published Claude page the AI is built in. On the website, phone app and desktop app, paste an Anthropic API key under *My Dog → Settings → Winston AI Key (Optional)*. It's stored only on your device and sent only to api.anthropic.com (use a key with a spending limit). Without a key, Winston still answers by searching your notes, materials and calendar.
