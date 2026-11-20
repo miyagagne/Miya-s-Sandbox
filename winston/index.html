@@ -493,9 +493,9 @@ html[data-theme=dark] #intro .iburst{opacity:.45}
 }
 @media(min-width:1300px){main{max-width:1180px}}
 /* ---- pet-only floating window ---- */
-#widget.pipmini{height:100vh!important;min-height:100vh!important;margin:0;background:linear-gradient(#bfe6ff,#e9fbff 62%,#8fdc70 62%)!important;display:block;overflow:hidden;border:0;box-shadow:none}
-.pipstage{min-height:100vh;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;padding:8px 8px 10px;position:relative}
-.pipdog{width:min(82vw,190px);cursor:pointer;margin-top:auto}.pipdog svg{width:100%;height:auto;display:block;animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 6px 5px rgba(40,60,20,.35))}
+#widget.pipmini{position:fixed!important;inset:0;width:auto!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0;padding:0;background:linear-gradient(#bfe6ff,#e9fbff 58%,#8fdc70 58%)!important;display:block;overflow:hidden;border:0;border-radius:0;box-shadow:none}
+.pipstage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px}
+.pipdog{width:min(80vw,58vh);max-width:260px;cursor:pointer;margin-top:0}.pipdog svg{width:100%;height:auto;display:block;animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 6px 5px rgba(40,60,20,.35))}
 .pipname{font:400 16px 'Lilita One',system-ui,sans-serif;color:#fff;text-shadow:-1.5px -1.5px 0 #5a3414,1.5px -1.5px 0 #5a3414,-1.5px 1.5px 0 #5a3414,1.5px 1.5px 0 #5a3414}
 .pipstage .sbub{margin:0 0 4px;max-width:96%;text-align:center}
 #widget .dogcol .ic,#widget small .ic{width:1.2em!important;height:1.2em!important;max-width:none!important;animation:none!important;filter:none!important}
@@ -898,7 +898,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.34 (name pet first, popup fix)';
+const APP_VERSION='2026-11-20.35 (popup fills window)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -1033,7 +1033,7 @@ function smartMsg(){const u=S.user,c=live&&S.classes.find(x=>x.id===live.cls);
  return QUOTES[Math.floor(Date.now()/60000)%QUOTES.length].replace('{n}',u.name)}
 const dogMood=()=>W.paw?'pawup':(W.react&&Date.now()<W.react.until&&W.react.mood)?W.react.mood:Date.now()<W.cheerUntil?'cheer':W.view==='breathe'?'calm':mood();
 const wClock=()=>{const t=S.timer;if(!t)return'';const el=(Date.now()-t.start)/1000;return fmtClock(t.target?Math.max(0,t.target-el):el)};
-function pipBg(mini){try{if(!pipWin)return;const d=pipWin.document;d.documentElement.style.background=mini?'#8fdc70':'#fffaf0';d.body.style.background=mini?'linear-gradient(#bfe6ff,#e9fbff 62%,#8fdc70 62%)':'#fffaf0';d.body.style.minHeight='100vh';d.body.style.padding='0';d.body.style.margin='0'}catch(e){}}
+function pipBg(mini){try{if(!pipWin)return;const d=pipWin.document;d.documentElement.style.background=mini?'#8fdc70':'#fffaf0';d.body.style.background=mini?'linear-gradient(#bfe6ff,#e9fbff 62%,#8fdc70 62%)':'#fffaf0';d.body.style.minHeight='0';d.body.style.padding='0';d.body.style.margin='0';d.documentElement.style.overflow='hidden';d.body.style.overflow='hidden'}catch(e){}}
 function drawWidget(){
  if(!S.user){WEL.className='';WEL.innerHTML='';document.body.classList.remove('live');return}
  if(typeof CM!=='undefined'&&CM.on&&!W.popped){WEL.className='';WEL.innerHTML='';renderCM();return}
