@@ -23,7 +23,7 @@ function saveCfg() { try { fs.writeFileSync(cfgFile(), JSON.stringify(cfg)); } c
 
 // The installed app loads the live site, so every update pushed from Claude shows up on the next launch.
 // If you're offline it falls back to the copy bundled inside the installer.
-const SITE_DIR = 'https://miyagagne.github.io/Miya-s-Sandbox/winston/';
+const SITE_DIR = 'https://studypaws.netlify.app/app/';
 const ourPage = (u) => typeof u === 'string' && (u.startsWith(SITE_DIR) || u.startsWith('file:'));
 function appIndex() {
   const bundled = path.join(__dirname, 'app', 'index.html');
