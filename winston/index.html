@@ -273,6 +273,27 @@ html[data-theme=dark] #intro{background:linear-gradient(#1a1040,#5a2a8a)}
 html[data-theme=dark] .stage{background:none}
 #widget.mini,#widget.orb,html[data-theme=dark] #widget.mini,html[data-theme=dark] #widget.orb{background:none;border:0;box-shadow:none}
 .wbtn{background:none!important;border:0!important;box-shadow:none!important}
+
+/* ---- Class Mode: full-screen Winston to keep open in class ---- */
+#cm{display:none}
+body.cm #cm{display:flex;position:fixed;inset:0;z-index:90;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));color:#fff;overflow:hidden}
+body.cm main,body.cm nav,body.cm #timerchip,body.cm #widget{display:none!important}
+body.cm #modal{z-index:130}
+.cmtop{display:flex;justify-content:space-between;align-items:center}
+#cmclock{font:600 34px/1 var(--display);color:#fff;text-shadow:0 2px 12px rgba(80,30,60,.4);letter-spacing:.5px}
+.cmx{border:0;background:rgba(255,255,255,.3);color:#fff;width:42px;height:42px;border-radius:50%;font-size:18px}
+.cmmid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:0}
+.cmb{background:#fff;color:var(--ink);border-radius:20px;padding:12px 18px;max-width:min(86vw,400px);text-align:center;font-size:16px;line-height:1.4;box-shadow:0 8px 24px rgba(40,20,70,.25);position:relative;animation:bpop .25s ease-out}
+.cmb::after{content:"";position:absolute;left:50%;bottom:-8px;width:16px;height:16px;background:inherit;transform:translateX(-50%) rotate(45deg);border-radius:3px}
+.cmb.paw{display:flex;flex-direction:column;gap:8px;align-items:center}
+.cmdog{border:0;background:none;padding:0;width:min(60vmin,300px);cursor:pointer;filter:drop-shadow(0 12px 14px rgba(60,20,50,.35));-webkit-tap-highlight-color:transparent}.cmdog svg{width:100%;height:auto;display:block;animation:bob 3.2s ease-in-out infinite}.cmdog:active svg{transform:scale(.97)}
+.cmname{font-family:var(--display);font-weight:600;color:#fff;text-shadow:0 2px 10px rgba(80,30,60,.45)}
+.cmtimer{background:rgba(255,255,255,.94);color:var(--ink);border-radius:16px;padding:6px 20px;text-align:center}.cmtimer small{display:block;color:var(--mute);font-size:12px}.cmtimer b{font:600 28px/1.1 var(--display)}
+.cmbar{display:flex;gap:10px;justify-content:center}
+.cmbar button{flex:1;max-width:100px;border:0;background:#fff;color:var(--ink);border-radius:18px;padding:10px 4px;font-size:22px;display:flex;flex-direction:column;align-items:center;gap:3px;box-shadow:0 6px 18px rgba(40,20,70,.22)}.cmbar button span{font:700 10px/1 'Poppins',system-ui;text-transform:uppercase;letter-spacing:.8px;color:var(--mute)}
+html[data-theme=dark] .cmb,html[data-theme=dark] .cmtimer,html[data-theme=dark] .cmbar button{background:#181240;color:var(--ink)}
+html[data-theme=dark] .cmx{background:rgba(255,255,255,.16)}
+@media(max-height:520px){.cmdog{width:36vh}.cmmid{flex-direction:row;gap:24px}}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -321,6 +342,7 @@ body.fullbar #deskbar{display:flex}body.fullbar{padding-top:32px}body.fullbar #b
 <div id="widget"></div>
 <div id="toast"></div>
 <div id="deskbar"><span>🐶 Winston</span><span><button data-a="dwpin" title="Always on top">📌</button><button data-a="dwcollapse" title="Shrink to a floating circle">◯ Circle</button><button data-a="dwhide" title="Hide to tray">–</button></span></div>
+<div id="cm"></div>
 <div id="modal"></div>
 <div id="intro"></div>
 <div id="timerchip" data-a="tab" data-k="home"></div>
@@ -498,6 +520,7 @@ function rHome(){
  <div class="bar" style="margin:10px 0 4px"><i style="width:${pct}%"></i></div><div class="mute">${hi-S.earned} XP to level ${L+1}</div>
  <p class="bubble">${esc(mood()==='sad'?'I miss you! Studying together makes me happy 🥺':smartMsg())}</p></div>
  <div class="row" style="margin-bottom:14px">${t?'':'<button class="s grow" data-a="openfocus">⏱ Focus</button>'}<button class="p ${t?'':'purple '}grow" data-a="tab" data-k="class">🎙 Start class</button></div>
+ <button class="s" data-a="cm" style="width:100%;margin:-4px 0 14px">📱 Class Mode — Keep ${esc(DN())} Beside You</button>
  ${questsCard()}
  <div class="card"><h3>How are you feeling?</h3><div class="moods">${MOODS.map(m=>`<button class="mood" data-a="feel" data-k="${m[1]}"><b>${m[0]}</b><span>${m[1]}</span></button>`).join('')}</div><div id="feelout"></div></div>`}
 function openFocus(){if(!S.classes.length){toast('Add a class first');tab='class';render();return}
@@ -598,7 +621,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.4 (colorful & clean)';
+const APP_VERSION='2026-11-20.5 (Class Mode)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -734,6 +757,7 @@ const dogMood=()=>W.paw?'pawup':(W.react&&Date.now()<W.react.until&&W.react.mood
 const wClock=()=>{const t=S.timer;if(!t)return'';const el=(Date.now()-t.start)/1000;return fmtClock(t.target?Math.max(0,t.target-el):el)};
 function drawWidget(){
  if(!S.user){WEL.className='';WEL.innerHTML='';document.body.classList.remove('live');return}
+ if(typeof CM!=='undefined'&&CM.on&&!W.popped){WEL.className='';WEL.innerHTML='';renderCM();return}
 
  if(DESK&&deskMode==='orb'){WEL.className='orb show';WEL.innerHTML=`<div class="orbring"><div class="orbbtn${W.paw?' alert':''}" title="Open ${esc(DN())}" aria-label="Open ${esc(DN())}">${dog(S.eq,dogMood(),'10 6 180 196')}</div></div>`;return}
  const desk=DESK&&deskMode==='widget',open=W.popped||W.open||desk;W.drawn=Date.now();
@@ -831,7 +855,7 @@ function applyTheme(){const d=themeIsDark(),v=d?'dark':'light';document.document
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)}catch(e){}
 let pipWin=null;
 async function popOut(auto){if(pipWin)return;
- if(!window.documentPictureInPicture){if(!auto)toast('Floating windows work in desktop Chrome or Edge. Elsewhere, tap the 🐶 bubble — '+DN()+' stays on screen inside the app!');return}
+ if(!window.documentPictureInPicture){if(!auto)ACTIONS.cm();return}
  try{const w=await documentPictureInPicture.requestWindow({width:340,height:400});pipWin=w;
   document.querySelectorAll('link[rel=stylesheet]').forEach(l=>{const n=w.document.createElement('link');n.rel='stylesheet';n.href=l.href;w.document.head.append(n)});
   [...document.styleSheets].forEach(ss=>{try{const st=w.document.createElement('style');st.textContent=[...ss.cssRules].map(r=>r.cssText).join('');w.document.head.append(st)}catch(e){}});
@@ -1465,6 +1489,29 @@ Object.assign(ACTIONS,{
   if(!S.live.uid){S.live.uid=crypto.randomUUID();S.live.secret=crypto.randomUUID()+crypto.randomUUID()}S.live.on=true;save();liveStatus='';render();await liveSync();render();
   toast(liveStatus==='live'?'Live leaderboard on! 🏆 Send friends a fresh code.':liveStatus==='setup'?'Live sync needs the one-time database setup (see supabase-leaderboard.sql).':"Couldn't reach the live leaderboard from here — snapshots still work.")},
  async livedelete(){if(!S.live.uid)return;const r=await liveCall('winston_delete',{p_uid:S.live.uid,p_secret:S.live.secret});S.live={on:false,uid:'',secret:''};save();render();toast(r===null?"Live sharing off. (Couldn't reach the server to delete — your data there stays until you can.)":'Your live data was deleted 🗑️')}});
+
+
+/* ---- Class Mode ---- */
+const CM={on:false,react:null,lock:null,iv:null};
+async function cmLock(){try{if('wakeLock' in navigator&&CM.on&&document.visibilityState==='visible'){CM.lock=await navigator.wakeLock.request('screen')}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(CM.on&&document.visibilityState==='visible')cmLock()});
+const cmClock=()=>{const d=new Date();return (d.getHours()%12||12)+':'+String(d.getMinutes()).padStart(2,'0')};
+function cmText(){if(W.react&&Date.now()<W.react.until)return W.react.text;if(CM.react&&Date.now()<CM.react.until)return CM.react.text;return smartMsg()}
+function renderCM(){const el=$('#cm');if(!el||!S.user)return;const t=S.timer,c=t&&S.classes.find(x=>x.id===t.cls);
+ const bub=W.paw?`<div class="cmb paw"><b>Still with me, ${esc(S.user.name)}? 🐶</b><button class="p" data-a="highpaw">🐾 High Paw!</button></div>`:`<div class="cmb">${esc(cmText())}</div>`;
+ el.innerHTML=`<div class="cmtop"><span id="cmclock">${cmClock()}</span><button class="cmx" data-a="cmexit" aria-label="Exit Class Mode">✕</button></div>
+ <div class="cmmid">${bub}<button class="cmdog" data-a="cmpet" aria-label="Pet ${esc(DN())}">${dog(S.eq,dogMood(),'10 6 180 196')}</button><div class="cmname">${esc(DN())} · Lv ${lvl()}</div>${t?`<div class="cmtimer"><small>${t.target?'Focus':'Studying'}${c?' · '+esc(c.name):''}</small><b id="cmtm">${wClock()}</b></div>`:''}</div>
+ <div class="cmbar"><button data-a="cmboost">💛<span>Boost</span></button><button data-a="cmfocus">${t?'⏹':'⏱'}<span>${t?'Stop':'Focus'}</span></button><button data-a="cmbreathe">🌬️<span>Breathe</span></button><button data-a="cmnotes">🎙<span>Notes</span></button></div>`}
+function cmSay(text,mood){CM.react={text,until:Date.now()+3000};W.cheerUntil=Date.now()+(mood?3000:0);renderCM();setTimeout(()=>{if(CM.on)renderCM()},3100)}
+Object.assign(ACTIONS,{
+ cm(){if(!S.user)return;CM.on=true;document.body.classList.add('cm');renderCM();cmLock();clearInterval(CM.iv);let n=0;CM.iv=setInterval(()=>{if(!CM.on)return;n++;const a=$('#cmclock');if(a)a.textContent=cmClock();const b=$('#cmtm');if(b)b.textContent=wClock();if(n%60===0)renderCM()},1000);
+  try{if(!document.fullscreenElement&&!DESK&&innerWidth<900&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}},
+ cmexit(){CM.on=false;clearInterval(CM.iv);document.body.classList.remove('cm');try{if(CM.lock)CM.lock.release();CM.lock=null}catch(e){}try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}$('#cm').innerHTML='';render();drawWidget()},
+ cmpet(){S.happy=Math.min(100,S.happy+1);save();cmSay(['Hehe, thank you! 🐾','You\'re the best, '+S.user.name+'! 💛','Tail wag activated! 🐶','Okay okay — back to studying! 📚'][Math.floor(Math.random()*4)],'cheer');burst(10,$('.cmdog'))},
+ cmboost(){const q=QUOTES[Math.floor(Math.random()*QUOTES.length)].replace('{n}',S.user.name);cmSay(q)},
+ cmfocus(){if(S.timer)ACTIONS.stoptimer();else openFocus()},
+ cmbreathe(){openBreath()},
+ cmnotes(){ACTIONS.cmexit();go('class')}});
 
 /* ======= v7: desktop widget mode ======= */
 function setDeskMode(m){if(!DESK)return;deskMode=m;winstonDesktop.setMode(m);const w=m==='widget'||m==='orb';document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',!w);
