@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script src="config.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#7fd0fb">
@@ -98,7 +99,7 @@ nav button.on{background:#fff3cf;color:#a85a10;font-weight:700;text-shadow:none;
 .gear{position:absolute;top:8px;right:10px;border:0;background:none;font-size:22px;padding:6px;line-height:1;z-index:2;cursor:pointer}
 #intro{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;background:radial-gradient(ellipse at 50% 40%,#fffbea,#ffe9ae);transition:opacity .6s}
 #intro.out{opacity:0;pointer-events:none}
-#intro svg{width:min(62vw,280px);animation:introhop 1.1s ease-out}
+#intro .ic{width:1.25em;height:1.25em;animation:none}
 @keyframes introhop{0%{transform:translateY(60px) scale(.6);opacity:0}60%{transform:translateY(-18px) scale(1.05);opacity:1}100%{transform:none}}
 .gamegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .gcard{aspect-ratio:1/1.05;border-radius:16px;border:3px solid #f5b25a;background:linear-gradient(#ffd27a,#ffb347);display:grid;place-items:center;font-size:30px;padding:4px;cursor:pointer;font-weight:600;color:#fff;overflow:hidden;text-align:center;line-height:1.15}
@@ -456,6 +457,21 @@ nav button b .ic{width:27px;height:27px;vertical-align:middle}.mood b .ic{width:
 .lockbox{width:min(92vw,380px);position:relative;z-index:1;text-align:center;margin:0}.lockpet svg{width:110px;display:block;margin:-60px auto 0;max-width:none}
 .lockbox.shake{animation:shake .4s}@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 .sheet h2:first-of-type{padding-right:36px}
+/* ---- opening screen: game title look ---- */
+#intro .ititle{font:400 clamp(54px,16vw,84px)/1 'Lilita One','Poppins',sans-serif;color:#ffd84a;letter-spacing:1px;margin:2px 0 0;-webkit-text-stroke:0;text-shadow:-4px -4px 0 #7a3a10,4px -4px 0 #7a3a10,-4px 4px 0 #7a3a10,4px 4px 0 #7a3a10,0 8px 0 #7a3a10,0 14px 18px rgba(20,40,80,.45)}
+#intro .ititle small{display:block;width:max-content;margin-left:auto;margin-right:auto;font:400 18px/1 'Lilita One','Poppins',sans-serif;letter-spacing:2px;color:#fff;background:linear-gradient(#e8a95a,#b8742e);border:3px solid #5a3414;border-radius:12px;padding:6px 18px;margin-bottom:10px;text-shadow:-1.5px -1.5px 0 #5a3414,1.5px -1.5px 0 #5a3414,-1.5px 1.5px 0 #5a3414,1.5px 1.5px 0 #5a3414;box-shadow:0 3px 0 #3a200a;text-transform:uppercase}
+#intro .isub{font-weight:600;font-size:16px;text-shadow:0 2px 0 rgba(20,60,110,.6)}
+#intro .ichips{gap:8px;max-width:420px}
+#intro .ichips span{display:inline-flex;align-items:center;gap:6px;font:400 15px 'Lilita One','Poppins',sans-serif;color:#fff;background:linear-gradient(#e8a95a,#b8742e);border:3px solid #5a3414;border-radius:12px;padding:5px 12px;box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 3px 0 #3a200a;text-shadow:-1px -1px 0 #5a3414,1px -1px 0 #5a3414,-1px 1px 0 #5a3414,1px 1px 0 #5a3414}
+#intro .ichips span .ic{width:1.3em;height:1.3em}
+html[data-theme=dark] #intro .ichips span{background:linear-gradient(#7a5530,#523519);color:#fff}
+#intro .iburst{position:absolute;left:50%;bottom:-18%;width:150%;aspect-ratio:1;transform:translateX(-50%);z-index:0;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.34) 0 7deg,transparent 7deg 18deg);-webkit-mask:radial-gradient(circle,#000 8%,transparent 62%);mask:radial-gradient(circle,#000 8%,transparent 62%);animation:iturn 50s linear infinite;pointer-events:none}
+@keyframes iturn{to{transform:translateX(-50%) rotate(360deg)}}
+html[data-theme=dark] #intro .iburst{opacity:.35}
+#intro .ibtn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:64px;font-size:28px;white-space:nowrap;animation:ipop2 .7s .9s both,ipulse 1.6s 1.6s ease-in-out infinite}
+@keyframes ipulse{50%{filter:brightness(1.12) drop-shadow(0 0 12px rgba(190,255,120,.9))}}
+#intro .ibtn .ic{width:1.1em;height:1.1em}
+#intro .ipet.ihero{--w:min(52vw,230px)!important}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -514,7 +530,7 @@ body.fullbar #deskbar{display:flex}body.fullbar{padding-top:32px}body.fullbar #b
    Google sign-in: create an OAuth Web client ID at console.cloud.google.com
    (APIs & Services > Credentials), add your site URL as an authorized JS origin,
    and paste the client ID below. Leave empty to use the name-only fallback. */
-const GOOGLE_CLIENT_ID='';
+const GOOGLE_CLIENT_ID=String((window.WINSTON_CONFIG||{}).googleClientId||'').trim();
 
 /* ======= helpers ======= */
 const $=s=>document.querySelector(s);
@@ -538,7 +554,7 @@ ensure(DEMO);let S=load();let joy=0;
 function ensure(c){c.weeks=c.weeks||[];c.docs=c.docs||[];c.events=c.events||[];c.meet=c.meet||{days:[],start:'',end:''};c.goalMin=c.goalMin||180;c.scratch=c.scratch||[];c.items.forEach(i=>{if(!i.wk)i.wk='course'})}
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===1){s.classes.forEach(ensure);return s}}catch(e){}
  return {v:1,user:null,coins:0,earned:0,happy:70,tick:Date.now(),owned:[],eq:{},classes:[DEMO],friends:[],checks:0}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Storage is full — remove some uploaded files')}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Storage is full — remove some uploaded files')}if(typeof cloudQueue==='function')cloudQueue()}
 // Winston gets a little lonelier while you are away (gentle: never below 15).
 (function decay(){const h=(Date.now()-S.tick)/36e5;S.happy=Math.max(15,Math.min(S.happy,100)-h*1.5);S.tick=Date.now();save()})();
 
@@ -682,15 +698,15 @@ function renderOnboard(){
  const M=$('#main');
  if(ob===1){M.innerHTML=`<div class="hero dogwrap"><div class="dogwrap">${dog({},'happy')}</div><h1>Let's Make Your Account! 🐾</h1><p>Set up your profile, pick a pet and give them a name. It only takes a minute.</p></div>
  <div class="card"><h2>Create Your Account</h2>
- ${GOOGLE_CLIENT_ID?'<div id="gbtn"></div><p class="mute" style="text-align:center">or create one yourself:</p>':''}
+ ${cloudGoogleBtn()}
  <label>Your name</label><input id="nm" placeholder="e.g. Miya" maxlength="30" autocomplete="name">
  <label>Choose a username</label><input id="un" placeholder="e.g. miya_studies" maxlength="20" autocomplete="username" autocapitalize="off" spellcheck="false"><div class="mute" style="font-size:12px;margin:-6px 0 10px">Your friends see this. Use 3–20 letters, numbers or _.</div>
- <label>Email (optional)</label><input id="em" type="email" placeholder="for reminders and account recovery" autocomplete="email">
+ <label>Email (so your account works on any device)</label><input id="em" type="email" placeholder="you@example.com" autocomplete="email">
  <label>Create a password</label><input id="pw" type="password" placeholder="At least 8 characters" autocomplete="new-password"><label>Confirm password</label><input id="pw2" type="password" placeholder="Type it again" autocomplete="new-password"><div class="mute" style="font-size:12px;margin:-6px 0 10px">Locks Winston on this device. There is no email reset, so pick one you'll remember.</div>
  <button class="p" data-a="ob1" style="width:100%">Create My Account</button>
- <p class="mute" style="text-align:center;margin:12px 0 6px">Already have an account?</p><button class="s" data-a="restore" style="width:100%">📂 Restore From Backup</button><input id="rf" type="file" accept=".json,application/json" style="display:none">
- <p class="mute" style="font-size:12px;margin:10px 0 0">Your account is stored privately on this device. Back it up any time in Settings to move it to another device.</p></div>`;
-  if(GOOGLE_CLIENT_ID)loadGoogle()}
+ <p class="mute" style="text-align:center;margin:12px 0 6px">Already have an account?</p><button class="s" data-a="signinscreen" style="width:100%;margin-bottom:10px">Sign In</button><button class="s" data-a="restore" style="width:100%">📂 Restore From Backup</button><input id="rf" type="file" accept=".json,application/json" style="display:none">
+ <p class="mute" style="font-size:12px;margin:10px 0 0">Add an email and your account (and password) is kept on our secure server so it works on any device. Leave it blank to keep everything on this device only.</p></div>`}
+ if(ob==='signin'){M.innerHTML=`<div class="hero dogwrap"><div class="dogwrap">${dog({},'happy')}</div><h1>Welcome Back! 🐾</h1><p>Sign in to get your pet, classes and notes.</p></div><div class="card"><h2>Sign In</h2>${cloudGoogleBtn(true)}<label>Email</label><input id="sie" type="email" placeholder="you@example.com" value="${esc(obData.signinEmail||'')}" autocomplete="email"><label>Password</label><input id="sip" type="password" placeholder="Your password" autocomplete="current-password"><button class="p" data-a="signin" style="width:100%">Sign In</button><button class="s" data-a="cforgot" style="width:100%;margin-top:10px">Forgot Password?</button><button class="s" data-a="restore" style="width:100%;margin-top:10px">📂 Restore From Backup</button><input id="rf" type="file" accept=".json,application/json" style="display:none"><button class="s" data-a="signupscreen" style="width:100%;margin-top:10px">← Create A New Account</button></div>`}
  if(ob===2){M.innerHTML=`<div class="card"><h2>What are you studying?</h2><label>Major(s)</label><input id="mj" value="${esc(obData.majors)}" placeholder="e.g. Business Administration"><label>Minor(s) (optional)</label><input id="mn" value="${esc(obData.minors)}">
  <button class="p" data-a="ob2">Next</button></div>`}
  if(ob===3){const grp=(sp,ttl)=>`<h3 class="petsec">${ttl}</h3><div class="breedgrid">${Object.entries(BREEDS).filter(([k,b])=>b.sp===sp).map(([k,b])=>`<button class="breed ${obData.pet.breed===k?'on':''}" data-a="petbreed" data-k="${k}">${dog({},'happy','0 0 200 200',k)}<b>${b.name}</b></button>`).join('')}</div>`;
@@ -699,16 +715,24 @@ function renderOnboard(){
 }
 function loadGoogle(){const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=()=>{google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:r=>{try{const p=JSON.parse(atob(r.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));obData.name=p.name;obData.email=p.email;ob=2;render()}catch(e){toast('Google sign-in failed')}}});google.accounts.id.renderButton($('#gbtn'),{theme:'outline',size:'large'})};document.head.append(s)}
 Object.assign(ACTIONS,{
- ob1(){const n=($('#nm').value.trim()||obData.name||'').trim();if(!n)return toast('Tell me your name!');
+ async ob1(){const n=($('#nm').value.trim()||obData.name||'').trim();if(!n)return toast('Tell me your name!');
   const un=(($('#un')||{}).value||'').trim().toLowerCase().replace(/^@/,'');if(!/^[a-z0-9_]{3,20}$/.test(un))return toast('Pick a username: 3–20 letters, numbers or _');
   const em=($('#em').value||'').trim();if(em&&!/^\S+@\S+\.\S+$/.test(em))return toast("That email doesn't look right");
   const pw=($('#pw')||{}).value||'',pw2=($('#pw2')||{}).value||'';if(pw.length<8)return toast('Use a password with at least 8 characters');if(pw!==pw2)return toast("Those passwords don't match");
+  obData.cloud=null;obData.pending={n,un,em,pw};
+  if(em){const b=$('[data-a=ob1]');if(b){b.disabled=true;b.dataset.t=b.textContent;b.textContent='Creating…'}const r=await cloudSignUp(em,pw,{name:n,username:un});if(b){b.disabled=false;b.textContent=b.dataset.t}
+   if(r.err==='offline')return openModal(`<h2>Can't Reach The Account Server</h2><p>I couldn't connect to create your online account. You can keep your account on this device for now and add cloud sync later in Settings.</p><button class="p" data-a="ob1local" style="width:100%">Continue On This Device</button><button class="s" data-a="closemodal" style="width:100%;margin-top:10px">Try Again Later</button>`);
+   if(r.err)return toast(r.msg);
+   if(!r.session){obData.signinEmail=em;ob='signin';render();return toast('Check your email to confirm your account, then sign in 💌')}
+   obData.cloud=r.session}
   obData.name=n;obData.username=un;obData.email=em;obData.pw=pw;ob=2;render()},
+ ob1local(){const q=obData.pending||{};closeModal();obData.cloud=null;obData.name=q.n;obData.username=q.un;obData.email=q.em;obData.pw=q.pw;ob=2;render()},
+ signinscreen(){ob='signin';render()},signupscreen(){ob=1;render()},
  ob2(){obData.majors=$('#mj').value.trim();obData.minors=$('#mn').value.trim();ob=3;render()},
  petbreed(d){if(!BREEDS[d.k])return;obData.pet={species:BREEDS[d.k].sp,breed:d.k};render()},
  ob3(){ob=4;render()},
  pick(d){$('#dn').value=d.k},
- async ob4(){const dn=($('#dn').value.trim()).slice(0,20);if(!dn)return toast('Give your pet a name first! 🐾');S.pet=Object.assign({},obData.pet);const un=obData.username||((obData.name||'student').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,14)||'student')+Math.floor(100+Math.random()*900);S.user={id:uid(),created:Date.now(),username:un,name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,dogName:dn,goals:($('#gl')?$('#gl').value.trim():'')};if(obData.pw){await setPassword(obData.pw);obData.pw=''}try{sessionStorage.setItem('winston.ok','1')}catch(e){}save();tab='home';render();drawWidget();toast(`Welcome, ${S.user.name}! Say hi to ${dn}! ${petNoun()==='cat'?'🐱':'🐶'}`);setTimeout(()=>maybeTour(),1400);if(DESK)setDeskMode('orb');else if(!(S.pref&&S.pref.autoFloat===false))popOut(true)},
+ async ob4(){const dn=($('#dn').value.trim()).slice(0,20);if(!dn)return toast('Give your pet a name first! 🐾');S.pet=Object.assign({},obData.pet);const un=obData.username||((obData.name||'student').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,14)||'student')+Math.floor(100+Math.random()*900);S.user={id:uid(),created:Date.now(),username:un,name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,dogName:dn,goals:($('#gl')?$('#gl').value.trim():'')};if(obData.pw){await setPassword(obData.pw);obData.pw=''}try{sessionStorage.setItem('winston.ok','1')}catch(e){}if(obData.cloud){S.cloud=cloudObj(obData.cloud);obData.cloud=null}save();if(S.cloud)cloudPush();tab='home';render();drawWidget();toast(`Welcome, ${S.user.name}! Say hi to ${dn}! ${petNoun()==='cat'?'🐱':'🐶'}`);setTimeout(()=>maybeTour(),1400);if(DESK)setDeskMode('orb');else if(!(S.pref&&S.pref.autoFloat===false))popOut(true)},
  tab(d){go(d.k)}
 });
 
@@ -832,7 +856,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.23 (password, Classroom, Brightspace)';
+const APP_VERSION='2026-11-20.25 (cloud accounts, one-click connections)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -1255,6 +1279,7 @@ function rSettings(){const u=S.user;
  MAIN().innerHTML=`<div class="card"><h2>Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Username</label><input id="su" value="${esc(u.username||slugName(u.name))}" maxlength="20" autocapitalize="off"><label>Email (optional)</label><input id="se" type="email" value="${esc(u.email||'')}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea>
  ${accountCard()}
  ${passwordCard()}
+ <label style="display:block;margin-top:6px">Class Connections</label><div class="instcard"><div class="row"><button class="s grow" data-a="gc">🎓 Google Classroom</button><button class="s grow" data-a="bsconnect">📚 Brightspace</button></div><div style="margin-top:8px"><span class="chip ${S.pref.gdrive?'on':''}" data-a="gcdrive">${S.pref.gdrive?'✓ ':''}Include Google Drive Files</span></div></div>
  ${installCard()}
  ${S.pref.apiKey?'':''}<label style="display:block;margin-top:6px">Winston AI Key (Optional)</label><div class="instcard"><input id="akey" type="password" placeholder="Paste an Anthropic API key" value="${esc(S.pref.apiKey||'')}" autocomplete="off"><button class="s" data-a="savekey" style="width:100%">${S.pref.apiKey?'Update Key':'Save Key'}</button><p class="mute" style="margin:8px 0 0;font-size:12px">Turns on smart AI answers everywhere (phone, laptop, desktop app). Stored only on this device and sent only to api.anthropic.com. Use a key with a spending limit.${AI.sm?' <b>✨ AI is on.</b>':''}</p></div><button class="s" data-a="tour" style="width:100%;margin:2px 0 10px">🎓 Replay The Tutorial</button>
  <label style="display:block;margin-top:6px">My Pet</label>${['dog','cat'].map(sp=>`<div class="mute" style="margin:6px 0 2px;font-weight:600">${sp==='dog'?'🐶 Dogs':'🐱 Cats'}</div><div>${Object.entries(BREEDS).filter(([k,b])=>b.sp===sp).map(([k,b])=>`<span class="chip ${S.pet.breed===k?'on':''}" data-a="setbreed" data-k="${k}">${b.name}</span>`).join('')}</div>`).join('')}
@@ -1931,7 +1956,7 @@ document.addEventListener('change',e=>{const t=e.target;if(!t||t.id!=='rf'||!t.f
  r.onload=()=>{try{const o=JSON.parse(r.result);if(!o||o.v!==1||!Array.isArray(o.classes)||!o.user||!o.user.name)throw 0;localStorage.setItem(KEY,JSON.stringify(o));toast('Account restored! Loading…');setTimeout(()=>location.reload(),600)}catch(err){toast("That doesn't look like a Winston backup file")}};r.readAsText(f)});
 function accountCard(){const u=S.user;return `<label style="display:block;margin-top:6px">My Account</label><div class="instcard"><div style="font:400 18px var(--display)">@${esc(u.username||slugName(u.name)||'student')}</div><div class="mute" style="font-size:13px">${esc(u.name)}${u.email?' · '+esc(u.email):''}${u.created?' · Member since '+new Date(u.created).toLocaleDateString(undefined,{month:'short',year:'numeric'}):''}</div>
  <div class="row" style="margin-top:8px"><button class="s grow" data-a="exportacct">💾 Export Backup</button><button class="s grow" data-a="restore">📂 Restore</button></div><input id="rf" type="file" accept=".json,application/json" style="display:none">
- <p class="mute" style="margin:8px 0 0;font-size:12px">Your account lives on this device. Export a backup to move it to another phone or computer, then choose Restore there. Backups never include your AI key.</p></div>`}
+${cloudBlock()}<p class="mute" style="margin:8px 0 0;font-size:12px">Export a backup to move it to another phone or computer, then choose Restore there. Backups never include your AI key.</p></div>`}
 Object.assign(ACTIONS,{
  restore(){const f=$('#rf');if(f){f.value='';f.click()}},
  async exportacct(){const b=JSON.parse(JSON.stringify(S));if(b.pref)delete b.pref.apiKey;const nm=`winston-account-${(S.user.username||'me')}.json`;await saveBlob(nm,new Blob([JSON.stringify(b)],{type:'application/json'}));toast('Backup saved 💾 Keep it somewhere safe')}});
@@ -2106,16 +2131,17 @@ async function gcAll(path,key,params){let out=[],pt='';for(let i=0;i<6;i++){cons
 const gcDueLocal=(d,t)=>{if(!d||!d.year)return {};if(t&&(t.hours!==undefined||t.minutes!==undefined)){const x=new Date(Date.UTC(d.year,d.month-1,d.day,t.hours||0,t.minutes||0));return {date:isoD(x),time:pad2(x.getHours())+':'+pad2(x.getMinutes())}}return {date:`${d.year}-${pad2(d.month)}-${pad2(d.day)}`}};
 const gcLinks=a=>(a||[]).map(m=>m.link?`${m.link.title||'Link'}: ${m.link.url}`:m.youTubeVideo?`Video: ${m.youTubeVideo.title||''} ${m.youTubeVideo.alternateLink||''}`:m.form?`Form: ${m.form.title||''} ${m.form.formUrl||''}`:m.driveFile&&m.driveFile.driveFile?`File: ${m.driveFile.driveFile.title||''}`:'').filter(Boolean).join('\n');
 function gcSetup(){openModal(`<h2>🎓 Connect Google Classroom</h2><p class="mute" style="margin:0 0 8px">Google needs a free <b>Client ID</b> so only you can sign in. One-time setup, about 5 minutes:</p><ol style="padding-left:20px;margin:0 0 10px"><li>Open <b>console.cloud.google.com</b> and create a project.</li><li><b>APIs &amp; Services → Library</b>: enable <b>Google Classroom API</b> (and <b>Google Drive API</b> if you want files).</li><li><b>OAuth consent screen</b>: choose External and add your own email as a <b>Test user</b>.</li><li><b>Credentials → Create credentials → OAuth client ID → Web application</b>. Under <b>Authorized JavaScript origins</b> add <b>https://miyagagne.github.io</b>.</li><li>Paste the Client ID below.</li></ol><input id="gcid" placeholder="123456-abc.apps.googleusercontent.com" value="${esc(gcClient())}" autocomplete="off"><button class="p" data-a="gcsave" style="width:100%">Save And Continue</button><p class="mute" style="margin:8px 0 0;font-size:12px">Winston only reads your classes, assignments, announcements and materials. Nothing is posted to Classroom, and the sign-in token stays in this tab.</p>`)}
-function gcPanel(){openModal(`<h2>🎓 Google Classroom</h2><p class="mute" style="margin:0 0 8px">Sign in with Google and pick the classes to bring in. Winston copies class names, due dates, announcements and materials.</p><div style="margin:6px 0"><span class="chip ${S.pref.gdrive?'on':''}" data-a="gcdrive">${S.pref.gdrive?'✓ ':''}Also Import Google Drive Files</span></div><button class="p" data-a="gcconnect" style="width:100%">Sign In With Google</button><div id="gcout" class="mute" style="margin-top:8px"></div><div id="gclist"></div><p class="mute" style="margin:8px 0 0;font-size:12px"><span data-a="gcsetup" style="text-decoration:underline;cursor:pointer">Change Client ID</span></p>`)}
+function gcPanel(){openModal(`<h2>🎓 Google Classroom</h2><p class="mute" style="margin:0 0 8px">Sign in with Google and pick the classes to bring in. Winston copies class names, due dates, announcements and materials.</p><div style="margin:6px 0"><span class="chip ${S.pref.gdrive?'on':''}" data-a="gcdrive">${S.pref.gdrive?'✓ ':''}Also Import Google Drive Files</span></div><button class="p" data-a="gcquick" style="width:100%">Connect And Import</button><div id="gcout" class="mute" style="margin-top:8px"></div><div id="gclist"></div><p class="mute" style="margin:8px 0 0;font-size:12px"><span data-a="gcsetup" style="text-decoration:underline;cursor:pointer">Change Client ID</span></p>`)}
 function gcListHtml(){return `<h3 class="petsec">Choose Classes</h3>${gcCourses.map((c,i)=>`<div style="margin:4px 0"><span class="chip ${c._on?'on':''}" data-a="gcpick" data-k="${i}">${c._on?'✓ ':''}${esc(c.name)}${c.section?' · '+esc(c.section):''}</span></div>`).join('')||'<p class="mute">No active classes found.</p>'}${gcCourses.length?`<button class="p" data-a="gcimport" style="width:100%;margin-top:10px">Import ${gcCourses.filter(c=>c._on).length} Class${gcCourses.filter(c=>c._on).length===1?'':'es'}</button>`:''}`}
 async function gcImportDrive(c,att,say){const out=[];for(const m of att||[]){const f=m.driveFile&&m.driveFile.driveFile;if(!f||!f.id)continue;try{const meta=await (await gcGet('https://www.googleapis.com/drive/v3/files/'+f.id,{fields:'id,name,mimeType'})).json();const mt=meta.mimeType||'';
   if(/vnd\.google-apps\.(document|presentation)/.test(mt)){const t=await (await gcGet(`https://www.googleapis.com/drive/v3/files/${f.id}/export`,{mimeType:'text/plain'})).text();const d=addDocOnce(c,'gd:'+f.id,'Drive: '+meta.name,t);if(d)out.push(d)}
   else if(/pdf|officedocument\.(wordprocessingml|presentationml)|text\/plain/.test(mt)){const blob=await (await gcGet(`https://www.googleapis.com/drive/v3/files/${f.id}`,{alt:'media'})).blob();const file=new File([blob],meta.name||'file',{type:mt});say&&say(`Reading ${file.name}…`);const text=(await readDoc(file))||'';const d=addDocOnce(c,'gd:'+f.id,'Drive: '+meta.name,text);if(d)out.push(d)}}catch(e){}}return out}
 Object.assign(ACTIONS,{
- gc(){gcClient()?gcPanel():gcSetup()},gcsetup(){gcSetup()},
+ gc(){gcClient()?ACTIONS.gcquick():gcSetup()},gcsetup(){gcSetup()},
+ gcquick(){gcPanel();ACTIONS.gcconnect().then(()=>{if(gcCourses.length)return ACTIONS.gcimport()})},
  gcsave(){const v=(($('#gcid')||{}).value||'').trim();if(!/\.apps\.googleusercontent\.com$/.test(v))return toast("That doesn't look like a Client ID (it ends in .apps.googleusercontent.com)");S.pref.gclient=v;save();gcPanel()},
- gcdrive(){S.pref.gdrive=!S.pref.gdrive;save();const m=$('#gcout');gcPanel()},
- async gcconnect(){const out=$('#gcout'),say=t=>{if($('#gcout'))$('#gcout').textContent=t};
+ gcdrive(){S.pref.gdrive=!S.pref.gdrive;save();if($('#gcout'))gcPanel();else render()},
+ async gcconnect(){gcCourses=[];const out=$('#gcout'),say=t=>{if($('#gcout'))$('#gcout').textContent=t};
   try{say('Opening Google sign-in…');await gcLoad();const scope=GC_SCOPES.concat(S.pref.gdrive?['https://www.googleapis.com/auth/drive.readonly']:[]).join(' ');
    gcTok=await new Promise((res,rej)=>{const tc=google.accounts.oauth2.initTokenClient({client_id:gcClient(),scope,callback:r=>r&&r.access_token?res(r.access_token):rej(new Error((r&&r.error)||'Sign-in was cancelled')),error_callback:e=>rej(new Error((e&&e.type)||'Sign-in was cancelled'))});tc.requestAccessToken({prompt:''})});
    say('Finding your classes…');gcCourses=(await gcAll('courses','courses',{courseStates:'ACTIVE',studentId:'me'})).map(c=>({...c,_on:true}));say(gcCourses.length?`Found ${gcCourses.length} class${gcCourses.length===1?'':'es'}.`:'');$('#gclist').innerHTML=gcListHtml()}
@@ -2132,24 +2158,87 @@ Object.assign(ACTIONS,{
   save();render();say(`✅ Imported ${nc} class${nc===1?'':'es'}, ${ne} due date${ne===1?'':'s'}, ${nd} material${nd===1?'':'s'} and ${nk} study card${nk===1?'':'s'}.`)}});
 
 /* ---- Brightspace connection (runs in your own logged-in Brightspace tab) ---- */
-const BS_BM="javascript:(async()=>{try{const o=location.origin,g=async u=>{const r=await fetch(o+u,{credentials:'include'});if(!r.ok)throw 0;const t=await r.text();try{return JSON.parse(t)}catch(e){return t}};let v={};try{(await g('/d2l/api/versions/')).forEach(p=>v[p.ProductCode]=p.LatestVersion)}catch(e){}const lp=v.lp||'1.43',le=v.le||'1.43';let en=[],bm='';for(let i=0;i<3;i++){const r=await g('/d2l/api/lp/'+lp+'/enrollments/myenrollments/?orgUnitTypeId=3&isActive=true'+(bm?'&bookmark='+bm:''));en=en.concat(r.Items||[]);if(!r.PagingInfo||!r.PagingInfo.HasMoreItems)break;bm=r.PagingInfo.Bookmark}const st=h=>String(h||'').replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\\s+/g,' ').trim(),out=[];for(const e of en.slice(0,14)){const id=e.OrgUnit.Id,c={id:id,name:e.OrgUnit.Name,code:e.OrgUnit.Code,toc:[],work:[],news:[],text:[]},b='/d2l/api/le/'+le+'/'+id;try{const t=await g(b+'/content/toc'),w=(ms,p)=>(ms||[]).forEach(m=>{const n=(p?p+' > ':'')+m.Title;c.toc.push({m:n,t:(m.Topics||[]).map(x=>({t:x.Title,u:x.Url,i:x.TopicId,y:x.TypeIdentifier}))});w(m.Modules,n)});w(t.Modules,'')}catch(e){}try{(await g(b+'/dropbox/folders/')).forEach(f=>c.work.push({t:f.Name,d:f.DueDate,x:st(f.CustomInstructions&&f.CustomInstructions.Html).slice(0,1500)}))}catch(e){}try{const n=await g(b+'/news/');(Array.isArray(n)?n:n.Items||[]).slice(0,25).forEach(a=>c.news.push({t:a.Title,d:a.StartDate,b:st(a.Body&&(a.Body.Html||a.Body.Text)).slice(0,2500)}))}catch(e){}let k=0;for(const m of c.toc)for(const x of m.t){if(k>=10)break;if(x.i&&/\\.(html?|txt)$/i.test(x.u||'')){try{c.text.push({t:x.t,b:st(await g(b+'/content/topics/'+x.i+'/file')).slice(0,6000)});k++}catch(e){}}}out.push(c)}await navigator.clipboard.writeText(JSON.stringify({w:'winston-bs',v:1,o:o,c:out}));alert('Winston copied '+out.length+' classes! Go back to Winston and paste.')}catch(e){alert('Winston could not read this page. Open Brightspace (signed in) and try again.')}})()";
-function bsConnectHtml(){return `<h2>📚 Connect Brightspace</h2><p class="mute" style="margin:0 0 8px">Brightspace doesn't let outside apps log in for you, so ${esc(DN())} works from your own signed-in tab. Your password never leaves Brightspace.</p>
- <ol style="padding-left:20px;margin:0 0 10px"><li>Copy this bookmark code and save it as a bookmark called <b>Send To Winston</b>.<textarea readonly id="bsbm2" style="min-height:70px;font-size:11px">${esc(BS_BM)}</textarea><button class="s" data-a="bscopy2" style="width:100%">Copy Bookmark Code</button></li><li>Open Brightspace, sign in, and click that bookmark on any Brightspace page. It gathers your courses, assignments, announcements and lecture text and copies them.</li><li>Come back here, paste, and import.</li></ol>
- <textarea id="bsjson" placeholder="Paste what the bookmark copied" style="min-height:80px"></textarea><button class="p" data-a="bsimport" style="width:100%">Import Classes &amp; Materials</button><div id="bsout2" class="mute" style="margin-top:8px"></div>
- <p class="mute" style="margin:8px 0 0;font-size:12px">Only needs the calendar? Use <b>Import From Brightspace</b> inside a class to add a calendar file instead.</p>`}
+const BS_SRC="javascript:(async()=>{try{const o=location.origin,g=async u=>{const r=await fetch(o+u,{credentials:'include'});if(!r.ok)throw 0;const t=await r.text();try{return JSON.parse(t)}catch(e){return t}};let v={};try{(await g('/d2l/api/versions/')).forEach(p=>v[p.ProductCode]=p.LatestVersion)}catch(e){}const lp=v.lp||'1.43',le=v.le||'1.43';let en=[],bm='';for(let i=0;i<3;i++){const r=await g('/d2l/api/lp/'+lp+'/enrollments/myenrollments/?orgUnitTypeId=3&isActive=true'+(bm?'&bookmark='+bm:''));en=en.concat(r.Items||[]);if(!r.PagingInfo||!r.PagingInfo.HasMoreItems)break;bm=r.PagingInfo.Bookmark}const st=h=>String(h||'').replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\\s+/g,' ').trim(),out=[];for(const e of en.slice(0,14)){const id=e.OrgUnit.Id,c={id:id,name:e.OrgUnit.Name,code:e.OrgUnit.Code,toc:[],work:[],news:[],text:[]},b='/d2l/api/le/'+le+'/'+id;try{const t=await g(b+'/content/toc'),w=(ms,p)=>(ms||[]).forEach(m=>{const n=(p?p+' > ':'')+m.Title;c.toc.push({m:n,t:(m.Topics||[]).map(x=>({t:x.Title,u:x.Url,i:x.TopicId,y:x.TypeIdentifier}))});w(m.Modules,n)});w(t.Modules,'')}catch(e){}try{(await g(b+'/dropbox/folders/')).forEach(f=>c.work.push({t:f.Name,d:f.DueDate,x:st(f.CustomInstructions&&f.CustomInstructions.Html).slice(0,1500)}))}catch(e){}try{const n=await g(b+'/news/');(Array.isArray(n)?n:n.Items||[]).slice(0,25).forEach(a=>c.news.push({t:a.Title,d:a.StartDate,b:st(a.Body&&(a.Body.Html||a.Body.Text)).slice(0,2500)}))}catch(e){}let k=0;for(const m of c.toc)for(const x of m.t){if(k>=10)break;if(x.i&&/\\.(html?|txt)$/i.test(x.u||'')){try{c.text.push({t:x.t,b:st(await g(b+'/content/topics/'+x.i+'/file')).slice(0,6000)});k++}catch(e){}}}out.push(c)}const d={w:'winston-bs',v:1,o:o,c:out};if(window.opener){window.opener.postMessage(d,'__ORIGIN__');alert('Sent '+out.length+' classes to Winston!')}else{await navigator.clipboard.writeText(JSON.stringify(d));alert('Winston copied '+out.length+' classes! Go back to Winston and paste.')}}catch(e){alert('Winston could not read this page. Open Brightspace (signed in) and try again.')}})()";
+const bsBookmark=()=>BS_SRC.split('__ORIGIN__').join((/^https?:/.test(location.protocol)&&!inFrame)?location.origin:'*');
+let bsWin=null;
 const isoLocal=iso=>{const d=new Date(iso);return isNaN(d)?null:{date:isoD(d),time:pad2(d.getHours())+':'+pad2(d.getMinutes())}};
+function bsConnectHtml(){return `<h2>📚 Connect Brightspace</h2><p class="mute" style="margin:0 0 8px">Brightspace doesn't let outside apps log in for you, so ${esc(DN())} works from your own signed-in tab. Your password never leaves Brightspace.</p>
+ <label>Your school's Brightspace link</label><input id="bsurl" placeholder="e.g. brightspace.yourschool.edu" value="${esc(S.pref.bsurl||'')}" autocomplete="off" autocapitalize="off">
+ <details ${S.pref.bsDone?'':'open'} style="margin:6px 0"><summary><b>One-time setup: save the bookmark</b></summary><p class="mute" style="margin:6px 0">Copy this code and save it as a bookmark named <b>Send To Winston</b>.</p><textarea readonly id="bsbm2" style="min-height:70px;font-size:11px">${esc(bsBookmark())}</textarea><button class="s" data-a="bscopy2" style="width:100%">Copy Bookmark Code</button><div style="margin-top:8px"><span class="chip ${S.pref.bsDone?'on':''}" data-a="bsdone">${S.pref.bsDone?'✓ ':''}I Saved The Bookmark</span></div></details>
+ <button class="p" data-a="bsopen" style="width:100%;margin-top:6px">Open Brightspace</button><p class="mute" style="margin:8px 0">Sign in if asked, then click your <b>Send To Winston</b> bookmark. Your classes come straight back here.</p><div id="bsout2" class="mute"></div>
+ <details style="margin-top:8px"><summary><b>Or paste instead</b></summary><textarea id="bsjson" placeholder="Paste what the bookmark copied" style="min-height:80px"></textarea><button class="s" data-a="bsimport" style="width:100%">Import Pasted Data</button></details>`}
+async function importBS(o,say){let nc=0,ne=0,nd=0,nk=0;for(const bc of o.c){try{const nm=String(bc.name||bc.code||'Class').replace(/\s+/g,' ').trim();say(`Importing ${nm}…`);const c=ensureClass(nm);nc++;const docs=[];
+  for(const w of bc.work||[]){const l=w.d?isoLocal(w.d):null;if(l&&addEventOnce(c,w.t,l.date,evKind(w.t),l.time))ne++;const dd=addDocOnce(c,'bs:w:'+bc.id+':'+w.t,'Assignment: '+w.t,`${w.t}\n${w.x||''}`);if(dd)docs.push(dd)}
+  for(const a of bc.news||[]){const dd=addDocOnce(c,'bs:n:'+bc.id+':'+a.t,'Announcement: '+a.t,`${a.t}\n${a.b||''}`);if(dd)docs.push(dd)}
+  for(const t of bc.text||[]){const dd=addDocOnce(c,'bs:t:'+bc.id+':'+t.t,'Lecture: '+t.t,t.b);if(dd)docs.push(dd)}
+  const outline=(bc.toc||[]).map(m=>`${m.m}\n${(m.t||[]).map(x=>'- '+x.t).join('\n')}`).join('\n\n');const od=addDocOnce(c,'bs:o:'+bc.id,'Course outline',outline);if(od)docs.push(od);
+  nd+=docs.length;save();nk+=await cardsFor(c,docs,say)}catch(e){say('Could not import one class: '+(e.message||'error'))}}
+ save();render();const m=`✅ Imported ${nc} class${nc===1?'':'es'}, ${ne} due date${ne===1?'':'s'}, ${nd} material${nd===1?'':'s'} and ${nk} study card${nk===1?'':'s'}.`;say(m);toast(m)}
+window.addEventListener('message',e=>{const d=e.data;if(!d||d.w!=='winston-bs'||!Array.isArray(d.c)||!d.c.length)return;if(!bsWin||e.source!==bsWin)return;const w=bsWin;importBS(d,t=>{const el=$('#bsout2');if(el)el.textContent=t}).then(()=>{try{w.close()}catch(x){}bsWin=null})});
 Object.assign(ACTIONS,{
  bsconnect(){openModal(bsConnectHtml())},
- bscopy2(){(navigator.clipboard?navigator.clipboard.writeText(BS_BM):Promise.reject()).then(()=>toast('Copied! Save it as a bookmark 🔖'),()=>{const t=$('#bsbm2');if(t){t.select();toast('Select the text and copy it')}})},
+ bsdone(){S.pref.bsDone=!S.pref.bsDone;save();const c=$('[data-a=bsdone]');if(c){c.classList.toggle('on',!!S.pref.bsDone);c.textContent=(S.pref.bsDone?'✓ ':'')+'I Saved The Bookmark'}},
+ bsopen(){const raw=(($('#bsurl')||{}).value||'').trim();let u;try{u=new URL(/^https?:/i.test(raw)?raw:'https://'+raw);if(!/\./.test(u.hostname))throw 0}catch(e){return toast("Type your school's Brightspace link first (like brightspace.yourschool.edu)")}
+  if(!S.pref.bsDone)return toast('Save the bookmark first, then tap "I Saved The Bookmark"');S.pref.bsurl=u.origin;save();bsWin=window.open(u.origin,'winston-bs','popup=yes,width=1000,height=780');if(!bsWin)return toast('Your browser blocked the window. Allow pop-ups for Winston and try again.');
+  const el=$('#bsout2');if(el)el.textContent='Brightspace is open. Sign in, then click your "Send To Winston" bookmark…'},
+ bscopy2(){(navigator.clipboard?navigator.clipboard.writeText(bsBookmark()):Promise.reject()).then(()=>toast('Copied! Save it as a bookmark 🔖'),()=>{const t=$('#bsbm2');if(t){t.select();toast('Select the text and copy it')}})},
  async bsimport(){const say=t=>{if($('#bsout2'))$('#bsout2').textContent=t};let o;try{o=JSON.parse((($('#bsjson')||{}).value||'').trim())}catch(e){return say("That doesn't look like what the bookmark copied. Run the bookmark again and paste it here.")}
-  if(!o||o.w!=='winston-bs'||!Array.isArray(o.c)||!o.c.length)return say('No Brightspace classes found in that. Run the bookmark on a Brightspace page and paste again.');
-  let nc=0,ne=0,nd=0,nk=0;for(const bc of o.c){try{const nm=String(bc.name||bc.code||'Class').replace(/\s+/g,' ').trim();say(`Importing ${nm}…`);const c=ensureClass(nm);nc++;const docs=[];
-   for(const w of bc.work||[]){const l=w.d?isoLocal(w.d):null;if(l&&addEventOnce(c,w.t,l.date,evKind(w.t),l.time))ne++;const dd=addDocOnce(c,'bs:w:'+bc.id+':'+w.t,'Assignment: '+w.t,`${w.t}\n${w.x||''}`);if(dd)docs.push(dd)}
-   for(const a of bc.news||[]){const dd=addDocOnce(c,'bs:n:'+bc.id+':'+a.t,'Announcement: '+a.t,`${a.t}\n${a.b||''}`);if(dd)docs.push(dd)}
-   for(const t of bc.text||[]){const dd=addDocOnce(c,'bs:t:'+bc.id+':'+t.t,'Lecture: '+t.t,t.b);if(dd)docs.push(dd)}
-   const outline=(bc.toc||[]).map(m=>`${m.m}\n${(m.t||[]).map(x=>'- '+x.t).join('\n')}`).join('\n\n');const od=addDocOnce(c,'bs:o:'+bc.id,'Course outline',outline);if(od)docs.push(od);
-   nd+=docs.length;save();nk+=await cardsFor(c,docs,say)}catch(e){say('Could not import one class: '+(e.message||'error'))}}
-  save();render();say(`✅ Imported ${nc} class${nc===1?'':'es'}, ${ne} due date${ne===1?'':'s'}, ${nd} material${nd===1?'':'s'} and ${nk} study card${nk===1?'':'s'}.`)}});
+  if(!o||o.w!=='winston-bs'||!Array.isArray(o.c)||!o.c.length)return say('No Brightspace classes found in that. Run the bookmark on a Brightspace page and paste again.');await importBS(o,say)}});
+
+/* ======= cloud accounts (Supabase Auth): email + Google, forgot password, sync ======= */
+const CFG=Object.assign({supabaseUrl:LIVE.url,supabaseKey:LIVE.key},Object.fromEntries(Object.entries(window.WINSTON_CONFIG||{}).filter(([k,v])=>v)));
+const sbUrl=()=>String(CFG.supabaseUrl).replace(/\/$/,'');
+async function sb(path,o={}){const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),9000);
+ try{const h={apikey:CFG.supabaseKey,'Content-Type':'application/json',...(o.token?{Authorization:'Bearer '+o.token}:{}),...(o.headers||{})};
+  const r=await fetch(sbUrl()+path,{method:o.method||'GET',headers:h,body:o.body===undefined?undefined:JSON.stringify(o.body),signal:ctl.signal});let j=null;try{const tx=await r.text();j=tx?JSON.parse(tx):null}catch(e){}return {ok:r.ok,status:r.status,json:j}}
+ catch(e){return {ok:false,net:true,status:0,json:null}}finally{clearTimeout(t)}}
+let _cset=null;async function cloudSettings(){if(_cset)return _cset;const r=await sb('/auth/v1/settings');if(r.ok)_cset=r.json;return r.ok?r.json:null}
+const cloudObj=j=>({at:j.access_token||j.at,rt:j.refresh_token||j.rt,exp:j.exp||Date.now()+(j.expires_in||3600)*1000,uid:(j.user&&j.user.id)||j.uid||'',email:(j.user&&j.user.email)||j.email||'',prov:(j.user&&j.user.app_metadata&&j.user.app_metadata.provider)||j.prov||'email',synced:0,pending:1});
+const errMsg=r=>{const t=JSON.stringify(r.json||'');return /already|registered|exists/i.test(t)?'That email already has an account. Tap Sign In instead.':/weak|password/i.test(t)&&r.status<500?'That password is too weak. Try a longer one.':/invalid login|credentials/i.test(t)?'That email and password don\'t match.':/not confirmed|confirm/i.test(t)?'Confirm your email first (check your inbox), then sign in.':/rate|too many/i.test(t)?'Too many tries. Wait a minute and try again.':(r.json&&(r.json.msg||r.json.error_description||r.json.message))||'Something went wrong. Try again.'};
+async function cloudSignUp(email,password,meta){const f=await sb('/rest/v1/rpc/winston_username_free',{method:'POST',body:{p_username:meta.username}});if(f.net)return {err:'offline'};if(f.ok&&f.json===false)return {err:'taken',msg:'That username is taken. Try another one.'};
+ const r=await sb('/auth/v1/signup',{method:'POST',body:{email,password,data:meta}});if(r.net)return {err:'offline'};if(!r.ok)return {err:'x',msg:errMsg(r)};const j=r.json||{};return {session:j.access_token?j:null}}
+async function cloudSignIn(email,password){const r=await sb('/auth/v1/token?grant_type=password',{method:'POST',body:{email,password}});if(r.net)return {err:'offline',msg:"I can't reach the account server right now."};if(!r.ok)return {err:'x',msg:errMsg(r)};return {session:r.json}}
+async function cloudToken(){const c=S.cloud;if(!c)return null;if(Date.now()<c.exp-60000)return c.at;const r=await sb('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:c.rt}});if(!r.ok||!r.json)return null;Object.assign(c,cloudObj(r.json),{synced:c.synced,pending:c.pending,hash:c.hash});try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}return c.at}
+function slimState(){const c=JSON.parse(JSON.stringify(S));delete c.cloud;if(c.user)delete c.user.pw;if(c.pref)delete c.pref.apiKey;(c.classes||[]).forEach(k=>(k.docs||[]).forEach(d=>{d.text=String(d.text||'').slice(0,1500)}));if(JSON.stringify(c).length>900000)(c.classes||[]).forEach(k=>{(k.docs||[]).forEach(d=>{d.text=''});(k.sessions||[]).forEach(x=>{x.lines=(x.lines||[]).slice(-60)})});return c}
+var _cq=null,_cbusy=false;
+const _hs=t=>{let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return h};
+const cloudHash=()=>{const c=slimState();delete c.tick;delete c.nextCheck;c.happy=Math.round(c.happy||0);if(c.days)for(const k of Object.keys(c.days))if(!Object.keys(c.days[k]||{}).length)delete c.days[k];return _hs(JSON.stringify(c))};
+function cloudQueue(){if(!S.cloud||!S.user)return;S.cloud.pending=1;clearTimeout(_cq);_cq=setTimeout(()=>cloudPush(),5000)}
+async function cloudPush(force){if(!S.cloud||!S.user||_cbusy)return false;_cbusy=true;try{const h=cloudHash();if(!force&&h===S.cloud.hash){S.cloud.pending=0;S.cloud.status='synced';return true}const tk=await cloudToken();if(!tk){S.cloud.status='signin';return false}
+  const r=await sb('/rest/v1/winston_profiles?on_conflict=id',{method:'POST',token:tk,headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:{id:S.cloud.uid,username:S.user.username||null,data:slimState(),updated_at:new Date().toISOString()}});
+  if(r.ok){S.cloud.hash=h;S.cloud.pending=0;S.cloud.synced=Date.now();S.cloud.status='synced'}else S.cloud.status=r.net?'offline':'error';try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}return r.ok}finally{_cbusy=false}}
+async function cloudGetProfile(tk,uid){const r=await sb('/rest/v1/winston_profiles?id=eq.'+encodeURIComponent(uid)+'&select=username,data,updated_at',{token:tk});return r.ok&&Array.isArray(r.json)&&r.json[0]?r.json[0]:null}
+async function cloudPull(){if(!S.cloud||!S.user)return;const tk=await cloudToken();if(!tk)return;const row=await cloudGetProfile(tk,S.cloud.uid);if(!row||!row.data||!row.data.user)return cloudPush(true);
+ const t=Date.parse(row.updated_at)||0,local=cloudHash();if(S.cloud.hash==='restore'){S.cloud.hash=local}
+ if(local!==S.cloud.hash)return cloudPush();if(t<=(S.cloud.synced||0)+1500)return;
+ const keep={cloud:S.cloud,pw:S.user.pw,apiKey:S.pref.apiKey,lock:S.pref.lock};S=row.data;S.v=1;S.cloud=Object.assign(keep.cloud,{synced:Date.now(),pending:0,status:'synced'});S.user.pw=keep.pw;if(!S.pref)S.pref={};S.pref.apiKey=keep.apiKey;if(keep.lock!==undefined)S.pref.lock=keep.lock;S.pref.tourDone=true;S.classes.forEach(ensure);S.cloud.hash=cloudHash();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}render();drawWidget()}
+function cloudRestoreToDevice(sess,row){const data=Object.assign({},row.data);data.cloud=cloudObj(sess);data.cloud.synced=Date.now();data.cloud.pending=0;data.cloud.hash='restore';data.pref=Object.assign({},data.pref,{tourDone:true,lock:false});data.v=1;try{localStorage.setItem(KEY,JSON.stringify(data));sessionStorage.setItem('winston.ok','1')}catch(e){}toast('Welcome back! Loading your account…');setTimeout(()=>location.reload(),500)}
+function cloudGoogleBtn(signin){return `<button class="s" data-a="cgoogle" style="width:100%;margin-bottom:8px">🌐 Continue With Google</button><p class="mute" style="text-align:center;margin:0 0 8px">or ${signin?'sign in':'create an account'} with your email:</p>`}
+const cloudWeb=()=>/^https?:/.test(location.protocol)&&!inFrame&&!DESK;
+function cloudBlock(){const c=S.cloud,u=S.user;return c?`<div style="margin-top:8px"><span class="chip on" style="margin:0">☁ Cloud account</span> <span class="mute" style="font-size:13px">${esc(c.email||'')}${c.prov==='google'?' · Google':''}</span></div><div class="mute" style="font-size:13px;margin:4px 0">${c.status==='synced'||(c.synced&&!c.pending)?'Synced '+new Date(c.synced).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):c.status==='offline'?'Offline. Will sync when you are back online.':c.pending?'Changes waiting to sync':'Not synced yet'}</div><div class="row"><button class="s grow" data-a="cloudsync">☁ Sync Now</button><button class="s grow" data-a="cloudout">Sign Out</button></div><button class="${view.cdel?'p bad':'s'}" data-a="clouddel" style="width:100%;margin-top:8px">${view.cdel?'Really Delete My Cloud Account?':'Delete Cloud Account'}</button>`:`<div class="mute" style="font-size:13px;margin:6px 0">This account is kept on this device only.</div><button class="s" data-a="cloudup" style="width:100%">☁ Create Cloud Account (Sync Everywhere)</button>`}
+async function cloudAfterReturn(ret){const say=m=>toast(m);try{const it=$('#intro');if(it){it.style.display='none';it.className='out'}
+ const ur=await sb('/auth/v1/user',{token:ret.at});if(!ur.ok||!ur.json)return say('Sign-in did not finish. Please try again.');const us=ur.json,md=us.user_metadata||{};
+ const sess={access_token:ret.at,refresh_token:ret.rt,expires_in:Math.round((ret.exp-Date.now())/1000),user:us};
+ if(ret.type==='recovery')return openModal(`<h2>Choose A New Password</h2><input id="np1" type="password" placeholder="New password (8+ characters)" autocomplete="new-password"><input id="np2" type="password" placeholder="Confirm password" autocomplete="new-password"><button class="p" data-a="cnewpw" data-k="${esc(ret.at)}" style="width:100%">Save Password</button>`);
+ if(S.user){S.cloud=cloudObj(sess);S.cloud.prov=(us.app_metadata&&us.app_metadata.provider)||'google';save();render();return say('Cloud account connected ☁')}
+ const row=await cloudGetProfile(ret.at,us.id);if(row&&row.data&&row.data.user)return cloudRestoreToDevice(sess,row);
+ const nm=String(md.name||md.full_name||(us.email||'').split('@')[0]||'').slice(0,30);obData.cloud=sess;obData.email=us.email||'';obData.name=nm;obData.username=slugName(md.username||nm||(us.email||'').split('@')[0]).slice(0,20)||'student'+Math.floor(100+Math.random()*900);ob=2;render();say(`Signed in${nm?' as '+nm:''}! Let's set up your pet.`)}catch(e){say('Sign-in did not finish. Please try again.')}}
+function cloudReturn(){const h=location.hash||'';if(!/access_token=/.test(h))return null;const q=new URLSearchParams(h.slice(1));try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}return {at:q.get('access_token'),rt:q.get('refresh_token'),exp:Date.now()+(+q.get('expires_in')||3600)*1000,type:q.get('type')||''}}
+Object.assign(ACTIONS,{
+ async signin(){const em=(($('#sie')||{}).value||'').trim(),pw=($('#sip')||{}).value||'';if(!/^\S+@\S+\.\S+$/.test(em)||!pw)return toast('Enter your email and password');const b=$('[data-a=signin]');if(b){b.disabled=true}
+  const r=await cloudSignIn(em,pw);if(b)b.disabled=false;if(r.err)return toast(r.msg);const sess=r.session,row=await cloudGetProfile(sess.access_token,sess.user.id);
+  if(row&&row.data&&row.data.user)return cloudRestoreToDevice(sess,row);const md=(sess.user&&sess.user.user_metadata)||{};obData.cloud=sess;obData.email=em;obData.name=md.name||em.split('@')[0];obData.username=slugName(md.username||obData.name)||'student'+Math.floor(100+Math.random()*900);obData.pw='';ob=2;render();toast("You're signed in! Let's set up your pet.")},
+ async cgoogle(){if(!cloudWeb())return toast('Open Winston on its website (miyagagne.github.io) to use Google sign-in.');const st=await cloudSettings();if(!st)return toast("I can't reach the account server right now.");if(!(st.external&&st.external.google))return toast("Google sign-in isn't switched on for this app yet. Use your email for now.");
+  location.href=sbUrl()+'/auth/v1/authorize?provider=google&redirect_to='+encodeURIComponent(location.origin+location.pathname)},
+ async cforgot(){const em=(($('#sie')||{}).value||'').trim();if(!/^\S+@\S+\.\S+$/.test(em))return toast('Type your email above first');const r=await sb('/auth/v1/recover?redirect_to='+encodeURIComponent(cloudWeb()?location.origin+location.pathname:''),{method:'POST',body:{email:em}});toast(r.net?"I can't reach the account server right now.":'If that email has an account, a reset link is on its way 💌')},
+ async cnewpw(d){const a=($('#np1')||{}).value||'',b2=($('#np2')||{}).value||'';if(a.length<8)return toast('Use at least 8 characters');if(a!==b2)return toast("Those passwords don't match");const r=await sb('/auth/v1/user',{method:'PUT',token:d.k,body:{password:a}});if(!r.ok)return toast(errMsg(r));closeModal();toast('Password updated. Sign in with your new password 🔒');ob='signin';render()},
+ async cloudsync(){toast('Syncing…');const ok=await cloudPush(true);render();toast(ok?'Synced ☁':'Could not sync right now')},
+ cloudout(){S.cloud=null;save();render();toast('Signed out of the cloud. Your data stays on this device.')},
+ clouddel(){if(!view.cdel){view.cdel=true;render();setTimeout(()=>{if(view.cdel){view.cdel=false;if(tab==='dog')render()}},3500);return}view.cdel=false;(async()=>{const tk=await cloudToken();if(tk)await sb('/rest/v1/rpc/winston_delete_account',{method:'POST',token:tk,body:{}});S.cloud=null;save();render();toast('Cloud account deleted. Your data stays on this device.')})()},
+ cloudup(){openModal(`<h2>☁ Create Cloud Account</h2><p class="mute" style="margin:0 0 8px">Keep your pet, classes and notes safe online and use ${esc(DN())} on any device.</p><input id="cue" type="email" placeholder="Email" value="${esc(S.user.email||'')}" autocomplete="email"><input id="cup" type="password" placeholder="Password (8+ characters)" autocomplete="new-password"><input id="cup2" type="password" placeholder="Confirm password" autocomplete="new-password"><button class="p" data-a="cloudupgo" style="width:100%">Create Account</button>${cloudWeb()?'<button class="s" data-a="cgoogle" style="width:100%;margin-top:10px">🌐 Use Google Instead</button>':''}`)},
+ async cloudupgo(){const em=(($('#cue')||{}).value||'').trim(),pw=($('#cup')||{}).value||'',pw2=($('#cup2')||{}).value||'';if(!/^\S+@\S+\.\S+$/.test(em))return toast("That email doesn't look right");if(pw.length<8)return toast('Use at least 8 characters');if(pw!==pw2)return toast("Those passwords don't match");
+  const r=await cloudSignUp(em,pw,{name:S.user.name,username:S.user.username||slugName(S.user.name)});if(r.err==='offline')return toast("I can't reach the account server right now.");if(r.err)return toast(r.msg);if(!r.session){closeModal();return toast('Check your email to confirm, then sign in from the Settings page 💌')}
+  S.cloud=cloudObj(r.session);S.user.email=em;save();closeModal();await cloudPush();render();toast('Cloud account created ☁')}});
 
 /* ======= v7: desktop widget mode ======= */
 function setDeskMode(m){if(!DESK)return;deskMode=m;if(m==='full'&&needLock())setTimeout(showLock,0);winstonDesktop.setMode(m);const w=m==='widget'||m==='orb';document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',!w);
@@ -2220,14 +2309,14 @@ function introScene(){let sd=9;const rn=()=>(sd=(sd*16807)%2147483647)/214748364
  ${hill(690,10,1.3,'var(--ihill4)')}
  ${flowers}<g style="opacity:var(--istar)" fill="#d8ff9a">${ff}</g></g></svg>`}
 function introPets(hero){const ks=Object.keys(BREEDS).filter(k=>k!==hero),hats=Object.keys(ACC).filter(k=>ACC[k].slot==='hat'),faces=Object.keys(ACC).filter(k=>ACC[k].slot==='face');
- const slots=[['9%','3%','min(22vw,98px)'],['25%','15%','min(17vw,78px)'],['39%','1%','min(19vw,86px)'],['61%','1%','min(19vw,86px)'],['75%','15%','min(17vw,78px)'],['91%','3%','min(22vw,98px)']];
+ const slots=[['8%','2%','min(21vw,92px)'],['22%','13%','min(16vw,72px)'],['36%','27%','min(14vw,62px)'],['64%','27%','min(14vw,62px)'],['78%','13%','min(16vw,72px)'],['92%','2%','min(21vw,92px)']];
  const eqs=[{hat:hats[2%hats.length]},{face:faces[0]},{},{},{hat:hats[0]},{face:faces[1%faces.length]}];
  return ks.map((k,i)=>`<div class="ipet" style="--x:${slots[i][0]};--b:${slots[i][1]};--w:${slots[i][2]};--dl:${(.18+i*.1).toFixed(2)}s">${dog(eqs[i]||{},i%2?'happy':'cheer','0 0 200 200',k)}</div>`).join('')}
 function showIntro(){const el=$('#intro'),u=S.user;let title,sub;
  if(u){const wk=S.classes.reduce((a,c)=>a+weekSecs(c),0),up=upcoming(1,14)[0];title=`<small>Welcome Back</small>${esc(u.name)}!`;sub=`${esc(DN())} missed you! ${wk>60?`You've studied ${fmtDur(wk)} this week. `:''}${up?`Next up: ${esc(up.title)} (${esc(up.cls)}) ${when(up)}.`:'Ready to learn something fun today?'}`}
  else{title='<small>Meet</small>Winston';sub='Your study buddy for class. Pick a pet, join the pack and make studying fun.'}
  const hero=petBreed();
- el.innerHTML=`${introScene()}<h1 class="ititle">${title}</h1><p class="isub">${sub}</p><div class="ichips"><span>📝 Live Notes</span><span>🎯 Daily Quests</span><span>👥 Friends</span><span>🌳 Dog Park</span><span>✏️ Practice</span></div>
+ el.innerHTML=`${introScene()}<div class="iburst"></div><h1 class="ititle">${title}</h1><p class="isub">${sub}</p><div class="ichips"><span>📝 Live Notes</span><span>🎯 Daily Quests</span><span>👥 Friends</span><span>🌳 Dog Park</span><span>✏️ Practice</span></div>
  <div class="istage">${introPets(hero)}<div class="ipet ihero" style="--x:50%;--b:-1%;--w:min(44vw,200px);--dl:.05s">${dog(u?S.eq:{},'cheer','0 0 200 200',hero)}</div></div>
  <button class="p ibtn" data-a="intro">Let's Go! 🐾</button>`;
  el.className='';el.style.display='flex';setTimeout(()=>burst(16,el.querySelector('.ihero svg')),700)}
@@ -2354,8 +2443,9 @@ S.classes.forEach(ensure);
 (async()=>{try{AI.sm=window.claude&&claude.use?await claude.use('sample'):null}catch(e){AI.sm=null}try{AI.mcp=window.claude&&claude.use?await claude.use('mcp'):null}catch(e){AI.mcp=null}if(!AI.sm)installAIShim();if((AI.sm||AI.mcp)&&S.user)render()})();
 if(!inFrame&&/^https?:/.test(location.protocol)){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest';document.head.append(l);if('serviceWorker' in navigator){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!window.__rl){window.__rl=1;location.reload()}});navigator.serviceWorker.register('sw.js').catch(()=>{})}}
 if(DESK){const w=(deskMode==='widget'||deskMode==='orb')&&!!S.user;if(!S.user)deskMode='full';winstonDesktop.setMode(deskMode);document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',deskMode==='full')}
+window.__ret=cloudReturn();
 applyTheme();
-render();drawWidget();iconInit();if(needLock())showLock();tickTimer();if(DESK&&deskMode!=='full'&&S.user)$('#intro').style.display='none';else showIntro();
+render();drawWidget();iconInit();if(needLock())showLock();if(window.__ret)setTimeout(()=>cloudAfterReturn(window.__ret),300);else if(S.cloud)setTimeout(cloudPull,1200);tickTimer();if(DESK&&deskMode!=='full'&&S.user)$('#intro').style.display='none';else showIntro();
 </script>
 </body>
 </html>
