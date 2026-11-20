@@ -96,6 +96,7 @@ function buildTray() {
     ...[['orb', 'Floating Circle'], ['widget', 'Widget With Bubbles'], ['full', 'Full App']].map(([k, l]) => ({ label: l, type: 'radio', checked: cfg.mode === k, click: () => { win.webContents.executeJavaScript(`setDeskMode('${k}')`); } })),
     { type: 'separator' },
     { label: 'Update From Website On Launch', type: 'checkbox', checked: cfg.liveUpdate !== false, click: (i) => { cfg.liveUpdate = i.checked; saveCfg(); } },
+    { label: 'Open Web Version', click: () => shell.openExternal(SITE_DIR + 'index.html') },
     { label: 'Always On Top', type: 'checkbox', checked: !!cfg.onTop, click: (i) => { cfg.onTop = i.checked; saveCfg(); applyTop(); } },
     { label: 'Start With My Computer', type: 'checkbox', checked: !!cfg.openAtLogin, click: (i) => { cfg.openAtLogin = i.checked; saveCfg(); app.setLoginItemSettings({ openAtLogin: i.checked }); } },
     { type: 'separator' },
