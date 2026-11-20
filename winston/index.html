@@ -450,6 +450,12 @@ html[data-theme=dark] .sign{color:#fff}
 .ic-y{--c1:#ffd24a}.ic-b{--c1:#4aa3f2}.ic-p{--c1:#ff8ac0}.ic-s{--c1:#cfd8e3}.ic-z{--c1:#d9894a}
 nav button b .ic{width:27px;height:27px;vertical-align:middle}.mood b .ic{width:32px;height:32px}.tool .ic{width:32px;height:32px}.gear .ic{width:26px;height:26px}
 .stat .ic{width:1.3em;height:1.3em}.wgrid .ic,.wm .ic{width:1.3em;height:1.3em}
+/* ---- lock screen ---- */
+#lock{position:fixed;inset:0;z-index:150;display:none;align-items:center;justify-content:center;padding:20px;background:linear-gradient(var(--is1),var(--is2))}
+#lock .iscene{position:absolute;inset:0;width:100%;height:100%;max-width:none;z-index:0}
+.lockbox{width:min(92vw,380px);position:relative;z-index:1;text-align:center;margin:0}.lockpet svg{width:110px;display:block;margin:-60px auto 0;max-width:none}
+.lockbox.shake{animation:shake .4s}@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.sheet h2:first-of-type{padding-right:36px}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -680,6 +686,7 @@ function renderOnboard(){
  <label>Your name</label><input id="nm" placeholder="e.g. Miya" maxlength="30" autocomplete="name">
  <label>Choose a username</label><input id="un" placeholder="e.g. miya_studies" maxlength="20" autocomplete="username" autocapitalize="off" spellcheck="false"><div class="mute" style="font-size:12px;margin:-6px 0 10px">Your friends see this. Use 3–20 letters, numbers or _.</div>
  <label>Email (optional)</label><input id="em" type="email" placeholder="for reminders and account recovery" autocomplete="email">
+ <label>Create a password</label><input id="pw" type="password" placeholder="At least 8 characters" autocomplete="new-password"><label>Confirm password</label><input id="pw2" type="password" placeholder="Type it again" autocomplete="new-password"><div class="mute" style="font-size:12px;margin:-6px 0 10px">Locks Winston on this device. There is no email reset, so pick one you'll remember.</div>
  <button class="p" data-a="ob1" style="width:100%">Create My Account</button>
  <p class="mute" style="text-align:center;margin:12px 0 6px">Already have an account?</p><button class="s" data-a="restore" style="width:100%">📂 Restore From Backup</button><input id="rf" type="file" accept=".json,application/json" style="display:none">
  <p class="mute" style="font-size:12px;margin:10px 0 0">Your account is stored privately on this device. Back it up any time in Settings to move it to another device.</p></div>`;
@@ -695,12 +702,13 @@ Object.assign(ACTIONS,{
  ob1(){const n=($('#nm').value.trim()||obData.name||'').trim();if(!n)return toast('Tell me your name!');
   const un=(($('#un')||{}).value||'').trim().toLowerCase().replace(/^@/,'');if(!/^[a-z0-9_]{3,20}$/.test(un))return toast('Pick a username: 3–20 letters, numbers or _');
   const em=($('#em').value||'').trim();if(em&&!/^\S+@\S+\.\S+$/.test(em))return toast("That email doesn't look right");
-  obData.name=n;obData.username=un;obData.email=em;ob=2;render()},
+  const pw=($('#pw')||{}).value||'',pw2=($('#pw2')||{}).value||'';if(pw.length<8)return toast('Use a password with at least 8 characters');if(pw!==pw2)return toast("Those passwords don't match");
+  obData.name=n;obData.username=un;obData.email=em;obData.pw=pw;ob=2;render()},
  ob2(){obData.majors=$('#mj').value.trim();obData.minors=$('#mn').value.trim();ob=3;render()},
  petbreed(d){if(!BREEDS[d.k])return;obData.pet={species:BREEDS[d.k].sp,breed:d.k};render()},
  ob3(){ob=4;render()},
  pick(d){$('#dn').value=d.k},
- ob4(){const dn=($('#dn').value.trim()).slice(0,20);if(!dn)return toast('Give your pet a name first! 🐾');S.pet=Object.assign({},obData.pet);const un=obData.username||((obData.name||'student').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,14)||'student')+Math.floor(100+Math.random()*900);S.user={id:uid(),created:Date.now(),username:un,name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,dogName:dn,goals:($('#gl')?$('#gl').value.trim():'')};save();tab='home';render();drawWidget();toast(`Welcome, ${S.user.name}! Say hi to ${dn}! ${petNoun()==='cat'?'🐱':'🐶'}`);setTimeout(()=>maybeTour(),1400);if(DESK)setDeskMode('orb');else if(!(S.pref&&S.pref.autoFloat===false))popOut(true)},
+ async ob4(){const dn=($('#dn').value.trim()).slice(0,20);if(!dn)return toast('Give your pet a name first! 🐾');S.pet=Object.assign({},obData.pet);const un=obData.username||((obData.name||'student').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,14)||'student')+Math.floor(100+Math.random()*900);S.user={id:uid(),created:Date.now(),username:un,name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,dogName:dn,goals:($('#gl')?$('#gl').value.trim():'')};if(obData.pw){await setPassword(obData.pw);obData.pw=''}try{sessionStorage.setItem('winston.ok','1')}catch(e){}save();tab='home';render();drawWidget();toast(`Welcome, ${S.user.name}! Say hi to ${dn}! ${petNoun()==='cat'?'🐱':'🐶'}`);setTimeout(()=>maybeTour(),1400);if(DESK)setDeskMode('orb');else if(!(S.pref&&S.pref.autoFloat===false))popOut(true)},
  tab(d){go(d.k)}
 });
 
@@ -719,7 +727,7 @@ function rHome(){
  <p class="bubble">${esc(mood()==='sad'?'I miss you! Studying together makes me happy 🥺':smartMsg())}</p></div>
  <div class="row" style="margin-bottom:14px">${t?'':'<button class="s grow" data-a="openfocus">⏱ Focus</button>'}<button class="p ${t?'':'purple '}grow" data-a="tab" data-k="class">🎙 Start class</button></div>
  <div class="row" style="margin:-4px 0 14px"><button class="s grow" data-a="agent">💬 Ask ${esc(DN())}</button><button class="s grow" data-a="cm">📱 Class Mode</button></div>
- ${installBanner()}
+ ${secureBanner()}${installBanner()}
  ${peerCard()}
  ${questsCard()}
  <div class="card"><h3>How are you feeling?</h3><div class="moods">${MOODS.map(m=>`<button class="mood" data-a="feel" data-k="${m[1]}"><b>${m[0]}</b><span>${m[1]}</span></button>`).join('')}</div><div id="feelout"></div></div>
@@ -734,7 +742,7 @@ Object.assign(ACTIONS,{openfocus(){openFocus()},
 /* ======= classes ======= */
 function rClass(){
  const c=classes().find(x=>x.id===view.cls);
- if(!c){$('#main').innerHTML=`<h2 style="margin:0 0 10px">Your classes</h2>${classes().map(x=>{const nx=upcoming(30,60).find(e=>e.cid===x.id),sec=weekSecs(x),goal=x.goalMin*60;
+ if(!c){$('#main').innerHTML=`<h2 style="margin:0 0 10px">Your classes</h2>${connectCard()}${classes().map(x=>{const nx=upcoming(30,60).find(e=>e.cid===x.id),sec=weekSecs(x),goal=x.goalMin*60;
   return `<div class="card classcard" data-a="openc" data-k="${x.id}"><div class="row"><div class="grow"><b style="font-size:18px">${esc(x.name)}</b>${x.instructor?`<div class="mute">${esc(x.instructor)}</div>`:''}</div><button class="s" data-a="editc" data-k="${x.id}" aria-label="Edit class">✎</button></div>${nx?`<div class="mute" style="margin-top:6px"><i class="dot" style="background:${EVT[nx.type][1]}"></i> ${esc(nx.title)} · ${when(nx)}</div>`:''}<div class="bar" style="margin-top:8px"><i style="width:${Math.min(100,Math.round(sec/goal*100))}%"></i></div><div class="mute" style="font-size:12px">${fmtDur(sec)} of ${fmtDur(goal)} this week</div></div>`}).join('')||'<div class="card"><p class="mute">Add your first class to get started.</p></div>'}
  <details class="card" ${classes().length?'':'open'}><summary><b>＋ Add a class</b></summary><label>Class name</label><input id="cn" placeholder="BUAD 112"><label>Syllabus (optional) — PDF, Word, PowerPoint or text</label><input id="cf" type="file" multiple accept=".pdf,.docx,.pptx,.txt,.md,.csv"><button class="p" data-a="addc">Add class</button></details>`;return}
  const sub=view.sub;
@@ -824,7 +832,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.22 (custom icons)';
+const APP_VERSION='2026-11-20.23 (password, Classroom, Brightspace)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -1246,6 +1254,7 @@ function rDog(){const sub=view.dsub||'shop';
 function rSettings(){const u=S.user;
  MAIN().innerHTML=`<div class="card"><h2>Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Username</label><input id="su" value="${esc(u.username||slugName(u.name))}" maxlength="20" autocapitalize="off"><label>Email (optional)</label><input id="se" type="email" value="${esc(u.email||'')}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea>
  ${accountCard()}
+ ${passwordCard()}
  ${installCard()}
  ${S.pref.apiKey?'':''}<label style="display:block;margin-top:6px">Winston AI Key (Optional)</label><div class="instcard"><input id="akey" type="password" placeholder="Paste an Anthropic API key" value="${esc(S.pref.apiKey||'')}" autocomplete="off"><button class="s" data-a="savekey" style="width:100%">${S.pref.apiKey?'Update Key':'Save Key'}</button><p class="mute" style="margin:8px 0 0;font-size:12px">Turns on smart AI answers everywhere (phone, laptop, desktop app). Stored only on this device and sent only to api.anthropic.com. Use a key with a spending limit.${AI.sm?' <b>✨ AI is on.</b>':''}</p></div><button class="s" data-a="tour" style="width:100%;margin:2px 0 10px">🎓 Replay The Tutorial</button>
  <label style="display:block;margin-top:6px">My Pet</label>${['dog','cat'].map(sp=>`<div class="mute" style="margin:6px 0 2px;font-weight:600">${sp==='dog'?'🐶 Dogs':'🐱 Cats'}</div><div>${Object.entries(BREEDS).filter(([k,b])=>b.sp===sp).map(([k,b])=>`<span class="chip ${S.pet.breed===k?'on':''}" data-a="setbreed" data-k="${k}">${b.name}</span>`).join('')}</div>`).join('')}
@@ -2048,8 +2057,102 @@ function iconWatch(doc){if(!doc||!doc.body||doc.__iw)return;doc.__iw=1;
  new MutationObserver(ms=>{const q=new Set();for(const m of ms){if(m.type==='characterData'){if(m.target.parentNode)q.add(m.target.parentNode)}else m.addedNodes.forEach(n=>{if(n.nodeType===1)q.add(n);else if(n.nodeType===3&&n.parentNode)q.add(n.parentNode)})}q.forEach(n=>iconize(n))}).observe(doc.body,{childList:true,subtree:true,characterData:true});iconize(doc.body)}
 function iconInit(){if(!$('#icons'))document.body.prepend(iconSprite());iconWatch(document)}
 
+
+/* ======= password lock + connections (Google Classroom, Brightspace) ======= */
+const _b64=u=>btoa(String.fromCharCode(...u)),_unb64=t=>Uint8Array.from(atob(t),c=>c.charCodeAt(0));
+function _sha256(m){const P=[];for(let n=2;P.length<64;n++)if(P.every(p=>n%p))P.push(n);const K=P.map(p=>Math.floor((Math.cbrt(p)%1)*4294967296)>>>0);let H=P.slice(0,8).map(p=>Math.floor((Math.sqrt(p)%1)*4294967296)>>>0);
+ const l=m.length,pad=new Uint8Array(((l+9+63)>>6)<<6);pad.set(m);pad[l]=128;const dv=new DataView(pad.buffer);dv.setUint32(pad.length-4,l*8>>>0);dv.setUint32(pad.length-8,Math.floor(l*8/4294967296));
+ const rot=(x,n)=>(x>>>n)|(x<<(32-n));for(let o=0;o<pad.length;o+=64){const w=new Array(64);for(let i=0;i<16;i++)w[i]=dv.getUint32(o+i*4);for(let i=16;i<64;i++){const a=rot(w[i-15],7)^rot(w[i-15],18)^(w[i-15]>>>3),b=rot(w[i-2],17)^rot(w[i-2],19)^(w[i-2]>>>10);w[i]=(w[i-16]+a+w[i-7]+b)>>>0}
+  let [a,b,c,d,e,f,g,h]=H;for(let i=0;i<64;i++){const S1=rot(e,6)^rot(e,11)^rot(e,25),ch=(e&f)^(~e&g),t1=(h+S1+ch+K[i]+w[i])>>>0,S0=rot(a,2)^rot(a,13)^rot(a,22),mj=(a&b)^(a&c)^(b&c),t2=(S0+mj)>>>0;h=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=b;b=a;a=(t1+t2)>>>0}
+  H=[H[0]+a,H[1]+b,H[2]+c,H[3]+d,H[4]+e,H[5]+f,H[6]+g,H[7]+h].map(x=>x>>>0)}
+ const out=new Uint8Array(32),ov=new DataView(out.buffer);H.forEach((x,i)=>ov.setUint32(i*4,x));return out}
+async function pwHash(pw,salt,it,alg){const enc=new TextEncoder().encode(pw);
+ if(alg!=='sha'&&window.crypto&&crypto.subtle){const k=await crypto.subtle.importKey('raw',enc,'PBKDF2',false,['deriveBits']);return new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',salt,iterations:it,hash:'SHA-256'},k,256))}
+ let h=_sha256(Uint8Array.from([...salt,...enc]));for(let i=0;i<Math.min(it,20000);i++)h=_sha256(Uint8Array.from([...h,...salt]));return h}
+async function setPassword(pw){const salt=crypto.getRandomValues(new Uint8Array(16)),it=150000,alg=(window.crypto&&crypto.subtle)?'pbkdf2':'sha';S.user.pw={s:_b64(salt),h:_b64(await pwHash(pw,salt,it,alg)),i:it,a:alg};save()}
+async function checkPassword(pw){const q=S.user&&S.user.pw;if(!q)return true;return _b64(await pwHash(pw,_unb64(q.s),q.i,q.a))===q.h}
+const lockOK=()=>{try{return sessionStorage.getItem('winston.ok')==='1'}catch(e){return false}};
+const needLock=()=>!!(S.user&&S.user.pw&&S.pref.lock!==false&&!lockOK()&&!(DESK&&deskMode!=='full'));
+function showLock(){let el=$('#lock');if(!el){el=document.createElement('div');el.id='lock';document.body.append(el)}const u=S.user;
+ el.innerHTML=`${introScene()}<div class="lockbox card"><div class="lockpet">${dog(S.eq,'happy','0 0 200 200',petBreed())}</div><h2>Welcome Back, ${esc(u.name)}!</h2><p class="mute" style="margin:0 0 10px">Enter your password to open ${esc(DN())}.</p><input id="lpw" type="password" placeholder="Password" autocomplete="current-password"><button class="p" data-a="unlock" style="width:100%">Unlock</button><button class="s" data-a="forgot" style="width:100%;margin-top:12px">Forgot Password?</button></div>`;
+ el.style.display='flex';setTimeout(()=>{const i=$('#lpw');if(i&&!/iphone|android/i.test(navigator.userAgent))i.focus()},60)}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='lpw'){e.preventDefault();ACTIONS.unlock()}});
+function passwordCard(){const has=!!(S.user&&S.user.pw);return `<label style="display:block;margin-top:6px">Password</label><div class="instcard">${has?'<input id="pwc" type="password" placeholder="Current password" autocomplete="current-password">':''}<input id="pwn" type="password" placeholder="${has?'New password (8+ characters)':'Create a password (8+ characters)'}" autocomplete="new-password"><input id="pwn2" type="password" placeholder="Confirm password" autocomplete="new-password"><button class="s" data-a="pwsave" style="width:100%">${has?'Change Password':'Set Password'}</button>
+ ${has?`<div style="margin-top:8px"><span class="chip ${S.pref.lock!==false?'on':''}" data-a="lockpref">${S.pref.lock!==false?'✓ ':''}Ask For My Password When I Open Winston</span></div>`:''}<p class="mute" style="margin:8px 0 0;font-size:12px">Your password is stored only on this device, scrambled with a salt. Nobody can recover it for you. If you forget it, restore a backup or start over.</p></div>`}
+function secureBanner(){if(!S.user||S.user.pw)return '';if(S.pref.secHide&&Date.now()-S.pref.secHide<7*864e5)return '';return `<div class="card"><h3>🔒 Secure Your Account</h3><p class="mute" style="margin:0 0 8px">Create a password so only you can open ${esc(DN())} and your notes.</p><div class="row"><button class="p grow" data-a="settings">Create Password</button><button class="s grow" data-a="sechide">Later</button></div></div>`}
+Object.assign(ACTIONS,{
+ async unlock(){const v=($('#lpw')||{}).value||'';if(!v)return toast('Type your password');if(await checkPassword(v)){try{sessionStorage.setItem('winston.ok','1')}catch(e){}const el=$('#lock');if(el)el.remove();toast(`Welcome back, ${S.user.name}!`)}else{const b=$('.lockbox');if(b){b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake')}toast("That password isn't right");const i=$('#lpw');if(i){i.value='';i.focus()}}},
+ forgot(){const b=$('.lockbox');if(!b)return;b.innerHTML=`<h2>Forgot Your Password?</h2><p class="mute" style="margin:0 0 10px">Your account lives only on this device, so nobody (including me) can reset it. You can restore a backup that has your account, or erase this device and start fresh.</p><button class="s" data-a="restore" style="width:100%">📂 Restore From Backup</button><input id="rf" type="file" accept=".json,application/json" style="display:none"><button class="${view.lockErase?'p bad':'s'}" data-a="lockerase" style="width:100%;margin-top:12px">${view.lockErase?'Really Erase Everything?':'Erase And Start Over'}</button><button class="s" data-a="lockback" style="width:100%;margin-top:12px">← Back</button>`},
+ lockerase(){if(!view.lockErase){view.lockErase=true;ACTIONS.forgot();setTimeout(()=>{if(view.lockErase){view.lockErase=false;if($('#lock .lockbox'))ACTIONS.forgot()}},3500);return}try{localStorage.removeItem(KEY);sessionStorage.removeItem('winston.ok')}catch(e){}location.reload()},
+ lockback(){view.lockErase=false;showLock()},
+ async pwsave(){const has=!!(S.user&&S.user.pw),n=($('#pwn')||{}).value||'',n2=($('#pwn2')||{}).value||'';if(has&&!(await checkPassword(($('#pwc')||{}).value||'')))return toast("Your current password isn't right");if(n.length<8)return toast('Use at least 8 characters');if(n!==n2)return toast("Those passwords don't match");await setPassword(n);try{sessionStorage.setItem('winston.ok','1')}catch(e){}render();toast(has?'Password changed 🔒':'Password set 🔒')},
+ lockpref(){S.pref.lock=S.pref.lock===false;save();render()},
+ sechide(){S.pref.secHide=Date.now();save();render()}});
+
+/* ---- connections card (Classes tab) ---- */
+const connectCard=()=>`<div class="card"><h3>Connect Your Classes</h3><p class="mute" style="margin:0 0 8px">Bring in your classes, due dates and materials automatically.</p><div class="row"><button class="s grow" data-a="gc">🎓 Google Classroom</button><button class="s grow" data-a="bsconnect">📚 Brightspace</button></div></div>`;
+const evKind=t=>/exam|midterm|final|quiz|test/i.test(t)?'exam':/read|chapter/i.test(t)?'reading':'assignment';
+function ensureClass(name,extra){const k=norm(name);let c=S.classes.find(x=>norm(x.name)===k);if(!c){S.classes=S.classes.filter(x=>x.id!=='demo'||x.sessions.length);c={id:uid(),name:String(name).slice(0,60),sessions:[],items:[]};ensure(c);S.classes.push(c)}Object.assign(c,Object.fromEntries(Object.entries(extra||{}).filter(([k2,v])=>v&&!c[k2])));return c}
+function addDocOnce(c,src,name,text){text=String(text||'').trim();if(text.length<30||c.docs.some(d=>d.src===src))return null;const d={id:uid(),src,name:String(name).slice(0,60),wk:'course',kind:'material',text:text.slice(0,40000),chars:text.length,cards:0};c.docs.push(d);return d}
+function addEventOnce(c,title,date,type,time){if(!title||!date)return false;const k=title.toLowerCase()+date;if(c.events.some(e=>e.title.toLowerCase()+e.date===k))return false;c.events.push({id:uid(),title:String(title).slice(0,80),date,type:type||evKind(title),time:time||''});return true}
+async function cardsFor(c,docs,say){let n=0;for(const d of docs.slice(0,30)){say&&say(`Making study cards from ${d.name}…`);try{n+=await makeCards(c,d)}catch(e){}}return n}
+
+/* ---- Google Classroom (official API, sign in with Google) ---- */
+const GC_SCOPES=['https://www.googleapis.com/auth/classroom.courses.readonly','https://www.googleapis.com/auth/classroom.coursework.me.readonly','https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly','https://www.googleapis.com/auth/classroom.announcements.readonly'];
+const gcClient=()=>String(S.pref.gclient||GOOGLE_CLIENT_ID||'').trim();let gcTok=null,gcCourses=[];
+const gcLoad=()=>new Promise((res,rej)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return res();const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.onload=()=>res();sc.onerror=()=>rej(new Error('Could not reach Google sign-in'));document.head.append(sc)});
+async function gcGet(url,params){const u=new URL(url);for(const [k,v] of Object.entries(params||{}))u.searchParams.set(k,v);const r=await fetch(u,{headers:{Authorization:'Bearer '+gcTok}});if(!r.ok){const e=new Error('http '+r.status);e.code=r.status;throw e}return r}
+async function gcAll(path,key,params){let out=[],pt='';for(let i=0;i<6;i++){const j=await (await gcGet('https://classroom.googleapis.com/v1/'+path,{pageSize:100,...(params||{}),...(pt?{pageToken:pt}:{})})).json();out=out.concat(j[key]||[]);pt=j.nextPageToken;if(!pt)break}return out}
+const gcDueLocal=(d,t)=>{if(!d||!d.year)return {};if(t&&(t.hours!==undefined||t.minutes!==undefined)){const x=new Date(Date.UTC(d.year,d.month-1,d.day,t.hours||0,t.minutes||0));return {date:isoD(x),time:pad2(x.getHours())+':'+pad2(x.getMinutes())}}return {date:`${d.year}-${pad2(d.month)}-${pad2(d.day)}`}};
+const gcLinks=a=>(a||[]).map(m=>m.link?`${m.link.title||'Link'}: ${m.link.url}`:m.youTubeVideo?`Video: ${m.youTubeVideo.title||''} ${m.youTubeVideo.alternateLink||''}`:m.form?`Form: ${m.form.title||''} ${m.form.formUrl||''}`:m.driveFile&&m.driveFile.driveFile?`File: ${m.driveFile.driveFile.title||''}`:'').filter(Boolean).join('\n');
+function gcSetup(){openModal(`<h2>🎓 Connect Google Classroom</h2><p class="mute" style="margin:0 0 8px">Google needs a free <b>Client ID</b> so only you can sign in. One-time setup, about 5 minutes:</p><ol style="padding-left:20px;margin:0 0 10px"><li>Open <b>console.cloud.google.com</b> and create a project.</li><li><b>APIs &amp; Services → Library</b>: enable <b>Google Classroom API</b> (and <b>Google Drive API</b> if you want files).</li><li><b>OAuth consent screen</b>: choose External and add your own email as a <b>Test user</b>.</li><li><b>Credentials → Create credentials → OAuth client ID → Web application</b>. Under <b>Authorized JavaScript origins</b> add <b>https://miyagagne.github.io</b>.</li><li>Paste the Client ID below.</li></ol><input id="gcid" placeholder="123456-abc.apps.googleusercontent.com" value="${esc(gcClient())}" autocomplete="off"><button class="p" data-a="gcsave" style="width:100%">Save And Continue</button><p class="mute" style="margin:8px 0 0;font-size:12px">Winston only reads your classes, assignments, announcements and materials. Nothing is posted to Classroom, and the sign-in token stays in this tab.</p>`)}
+function gcPanel(){openModal(`<h2>🎓 Google Classroom</h2><p class="mute" style="margin:0 0 8px">Sign in with Google and pick the classes to bring in. Winston copies class names, due dates, announcements and materials.</p><div style="margin:6px 0"><span class="chip ${S.pref.gdrive?'on':''}" data-a="gcdrive">${S.pref.gdrive?'✓ ':''}Also Import Google Drive Files</span></div><button class="p" data-a="gcconnect" style="width:100%">Sign In With Google</button><div id="gcout" class="mute" style="margin-top:8px"></div><div id="gclist"></div><p class="mute" style="margin:8px 0 0;font-size:12px"><span data-a="gcsetup" style="text-decoration:underline;cursor:pointer">Change Client ID</span></p>`)}
+function gcListHtml(){return `<h3 class="petsec">Choose Classes</h3>${gcCourses.map((c,i)=>`<div style="margin:4px 0"><span class="chip ${c._on?'on':''}" data-a="gcpick" data-k="${i}">${c._on?'✓ ':''}${esc(c.name)}${c.section?' · '+esc(c.section):''}</span></div>`).join('')||'<p class="mute">No active classes found.</p>'}${gcCourses.length?`<button class="p" data-a="gcimport" style="width:100%;margin-top:10px">Import ${gcCourses.filter(c=>c._on).length} Class${gcCourses.filter(c=>c._on).length===1?'':'es'}</button>`:''}`}
+async function gcImportDrive(c,att,say){const out=[];for(const m of att||[]){const f=m.driveFile&&m.driveFile.driveFile;if(!f||!f.id)continue;try{const meta=await (await gcGet('https://www.googleapis.com/drive/v3/files/'+f.id,{fields:'id,name,mimeType'})).json();const mt=meta.mimeType||'';
+  if(/vnd\.google-apps\.(document|presentation)/.test(mt)){const t=await (await gcGet(`https://www.googleapis.com/drive/v3/files/${f.id}/export`,{mimeType:'text/plain'})).text();const d=addDocOnce(c,'gd:'+f.id,'Drive: '+meta.name,t);if(d)out.push(d)}
+  else if(/pdf|officedocument\.(wordprocessingml|presentationml)|text\/plain/.test(mt)){const blob=await (await gcGet(`https://www.googleapis.com/drive/v3/files/${f.id}`,{alt:'media'})).blob();const file=new File([blob],meta.name||'file',{type:mt});say&&say(`Reading ${file.name}…`);const text=(await readDoc(file))||'';const d=addDocOnce(c,'gd:'+f.id,'Drive: '+meta.name,text);if(d)out.push(d)}}catch(e){}}return out}
+Object.assign(ACTIONS,{
+ gc(){gcClient()?gcPanel():gcSetup()},gcsetup(){gcSetup()},
+ gcsave(){const v=(($('#gcid')||{}).value||'').trim();if(!/\.apps\.googleusercontent\.com$/.test(v))return toast("That doesn't look like a Client ID (it ends in .apps.googleusercontent.com)");S.pref.gclient=v;save();gcPanel()},
+ gcdrive(){S.pref.gdrive=!S.pref.gdrive;save();const m=$('#gcout');gcPanel()},
+ async gcconnect(){const out=$('#gcout'),say=t=>{if($('#gcout'))$('#gcout').textContent=t};
+  try{say('Opening Google sign-in…');await gcLoad();const scope=GC_SCOPES.concat(S.pref.gdrive?['https://www.googleapis.com/auth/drive.readonly']:[]).join(' ');
+   gcTok=await new Promise((res,rej)=>{const tc=google.accounts.oauth2.initTokenClient({client_id:gcClient(),scope,callback:r=>r&&r.access_token?res(r.access_token):rej(new Error((r&&r.error)||'Sign-in was cancelled')),error_callback:e=>rej(new Error((e&&e.type)||'Sign-in was cancelled'))});tc.requestAccessToken({prompt:''})});
+   say('Finding your classes…');gcCourses=(await gcAll('courses','courses',{courseStates:'ACTIVE',studentId:'me'})).map(c=>({...c,_on:true}));say(gcCourses.length?`Found ${gcCourses.length} class${gcCourses.length===1?'':'es'}.`:'');$('#gclist').innerHTML=gcListHtml()}
+  catch(e){say(/popup|cancel|closed|access_denied/i.test(e.message)?'Sign-in was cancelled.':e.code===403?'Google blocked access. Make sure the Classroom API is enabled and your email is a Test user.':e.code===401?'Google rejected the sign-in. Try again.':'Could not connect: '+(e.message||'unknown error'))}},
+ gcpick(d){const c=gcCourses[+d.k];if(c){c._on=!c._on;$('#gclist').innerHTML=gcListHtml()}},
+ async gcimport(){const say=t=>{if($('#gcout'))$('#gcout').textContent=t},chosen=gcCourses.filter(c=>c._on);if(!chosen.length)return toast('Pick at least one class');let nc=0,ne=0,nd=0,nk=0;
+  for(const co of chosen){try{say(`Importing ${co.name}…`);const c=ensureClass(co.name,{room:co.room});nc++;
+   const [cw,an,mt]=await Promise.all([gcAll(`courses/${co.id}/courseWork`,'courseWork').catch(()=>[]),gcAll(`courses/${co.id}/announcements`,'announcements').catch(()=>[]),gcAll(`courses/${co.id}/courseWorkMaterials`,'courseWorkMaterial').catch(()=>[])]);
+   const docs=[];
+   for(const w of cw){const du=gcDueLocal(w.dueDate,w.dueTime);if(du.date&&addEventOnce(c,w.title,du.date,evKind(w.title),du.time))ne++;const dd=addDocOnce(c,'gc:w:'+w.id,'Classroom: '+w.title,`${w.title}\n${w.description||''}\n${gcLinks(w.materials)}`);if(dd)docs.push(dd);if(S.pref.gdrive)docs.push(...await gcImportDrive(c,w.materials,say))}
+   for(const a of an){const dd=addDocOnce(c,'gc:a:'+a.id,'Announcement: '+String(a.text||'').slice(0,30),`${a.text||''}\n${gcLinks(a.materials)}`);if(dd)docs.push(dd)}
+   for(const m of mt){const dd=addDocOnce(c,'gc:m:'+m.id,'Material: '+(m.title||''),`${m.title||''}\n${m.description||''}\n${gcLinks(m.materials)}`);if(dd)docs.push(dd);if(S.pref.gdrive)docs.push(...await gcImportDrive(c,m.materials,say))}
+   nd+=docs.length;save();nk+=await cardsFor(c,docs,say)}catch(e){say(`Could not import ${co.name}: ${e.message||'error'}`)}}
+  save();render();say(`✅ Imported ${nc} class${nc===1?'':'es'}, ${ne} due date${ne===1?'':'s'}, ${nd} material${nd===1?'':'s'} and ${nk} study card${nk===1?'':'s'}.`)}});
+
+/* ---- Brightspace connection (runs in your own logged-in Brightspace tab) ---- */
+const BS_BM="javascript:(async()=>{try{const o=location.origin,g=async u=>{const r=await fetch(o+u,{credentials:'include'});if(!r.ok)throw 0;const t=await r.text();try{return JSON.parse(t)}catch(e){return t}};let v={};try{(await g('/d2l/api/versions/')).forEach(p=>v[p.ProductCode]=p.LatestVersion)}catch(e){}const lp=v.lp||'1.43',le=v.le||'1.43';let en=[],bm='';for(let i=0;i<3;i++){const r=await g('/d2l/api/lp/'+lp+'/enrollments/myenrollments/?orgUnitTypeId=3&isActive=true'+(bm?'&bookmark='+bm:''));en=en.concat(r.Items||[]);if(!r.PagingInfo||!r.PagingInfo.HasMoreItems)break;bm=r.PagingInfo.Bookmark}const st=h=>String(h||'').replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/\\s+/g,' ').trim(),out=[];for(const e of en.slice(0,14)){const id=e.OrgUnit.Id,c={id:id,name:e.OrgUnit.Name,code:e.OrgUnit.Code,toc:[],work:[],news:[],text:[]},b='/d2l/api/le/'+le+'/'+id;try{const t=await g(b+'/content/toc'),w=(ms,p)=>(ms||[]).forEach(m=>{const n=(p?p+' > ':'')+m.Title;c.toc.push({m:n,t:(m.Topics||[]).map(x=>({t:x.Title,u:x.Url,i:x.TopicId,y:x.TypeIdentifier}))});w(m.Modules,n)});w(t.Modules,'')}catch(e){}try{(await g(b+'/dropbox/folders/')).forEach(f=>c.work.push({t:f.Name,d:f.DueDate,x:st(f.CustomInstructions&&f.CustomInstructions.Html).slice(0,1500)}))}catch(e){}try{const n=await g(b+'/news/');(Array.isArray(n)?n:n.Items||[]).slice(0,25).forEach(a=>c.news.push({t:a.Title,d:a.StartDate,b:st(a.Body&&(a.Body.Html||a.Body.Text)).slice(0,2500)}))}catch(e){}let k=0;for(const m of c.toc)for(const x of m.t){if(k>=10)break;if(x.i&&/\\.(html?|txt)$/i.test(x.u||'')){try{c.text.push({t:x.t,b:st(await g(b+'/content/topics/'+x.i+'/file')).slice(0,6000)});k++}catch(e){}}}out.push(c)}await navigator.clipboard.writeText(JSON.stringify({w:'winston-bs',v:1,o:o,c:out}));alert('Winston copied '+out.length+' classes! Go back to Winston and paste.')}catch(e){alert('Winston could not read this page. Open Brightspace (signed in) and try again.')}})()";
+function bsConnectHtml(){return `<h2>📚 Connect Brightspace</h2><p class="mute" style="margin:0 0 8px">Brightspace doesn't let outside apps log in for you, so ${esc(DN())} works from your own signed-in tab. Your password never leaves Brightspace.</p>
+ <ol style="padding-left:20px;margin:0 0 10px"><li>Copy this bookmark code and save it as a bookmark called <b>Send To Winston</b>.<textarea readonly id="bsbm2" style="min-height:70px;font-size:11px">${esc(BS_BM)}</textarea><button class="s" data-a="bscopy2" style="width:100%">Copy Bookmark Code</button></li><li>Open Brightspace, sign in, and click that bookmark on any Brightspace page. It gathers your courses, assignments, announcements and lecture text and copies them.</li><li>Come back here, paste, and import.</li></ol>
+ <textarea id="bsjson" placeholder="Paste what the bookmark copied" style="min-height:80px"></textarea><button class="p" data-a="bsimport" style="width:100%">Import Classes &amp; Materials</button><div id="bsout2" class="mute" style="margin-top:8px"></div>
+ <p class="mute" style="margin:8px 0 0;font-size:12px">Only needs the calendar? Use <b>Import From Brightspace</b> inside a class to add a calendar file instead.</p>`}
+const isoLocal=iso=>{const d=new Date(iso);return isNaN(d)?null:{date:isoD(d),time:pad2(d.getHours())+':'+pad2(d.getMinutes())}};
+Object.assign(ACTIONS,{
+ bsconnect(){openModal(bsConnectHtml())},
+ bscopy2(){(navigator.clipboard?navigator.clipboard.writeText(BS_BM):Promise.reject()).then(()=>toast('Copied! Save it as a bookmark 🔖'),()=>{const t=$('#bsbm2');if(t){t.select();toast('Select the text and copy it')}})},
+ async bsimport(){const say=t=>{if($('#bsout2'))$('#bsout2').textContent=t};let o;try{o=JSON.parse((($('#bsjson')||{}).value||'').trim())}catch(e){return say("That doesn't look like what the bookmark copied. Run the bookmark again and paste it here.")}
+  if(!o||o.w!=='winston-bs'||!Array.isArray(o.c)||!o.c.length)return say('No Brightspace classes found in that. Run the bookmark on a Brightspace page and paste again.');
+  let nc=0,ne=0,nd=0,nk=0;for(const bc of o.c){try{const nm=String(bc.name||bc.code||'Class').replace(/\s+/g,' ').trim();say(`Importing ${nm}…`);const c=ensureClass(nm);nc++;const docs=[];
+   for(const w of bc.work||[]){const l=w.d?isoLocal(w.d):null;if(l&&addEventOnce(c,w.t,l.date,evKind(w.t),l.time))ne++;const dd=addDocOnce(c,'bs:w:'+bc.id+':'+w.t,'Assignment: '+w.t,`${w.t}\n${w.x||''}`);if(dd)docs.push(dd)}
+   for(const a of bc.news||[]){const dd=addDocOnce(c,'bs:n:'+bc.id+':'+a.t,'Announcement: '+a.t,`${a.t}\n${a.b||''}`);if(dd)docs.push(dd)}
+   for(const t of bc.text||[]){const dd=addDocOnce(c,'bs:t:'+bc.id+':'+t.t,'Lecture: '+t.t,t.b);if(dd)docs.push(dd)}
+   const outline=(bc.toc||[]).map(m=>`${m.m}\n${(m.t||[]).map(x=>'- '+x.t).join('\n')}`).join('\n\n');const od=addDocOnce(c,'bs:o:'+bc.id,'Course outline',outline);if(od)docs.push(od);
+   nd+=docs.length;save();nk+=await cardsFor(c,docs,say)}catch(e){say('Could not import one class: '+(e.message||'error'))}}
+  save();render();say(`✅ Imported ${nc} class${nc===1?'':'es'}, ${ne} due date${ne===1?'':'s'}, ${nd} material${nd===1?'':'s'} and ${nk} study card${nk===1?'':'s'}.`)}});
+
 /* ======= v7: desktop widget mode ======= */
-function setDeskMode(m){if(!DESK)return;deskMode=m;winstonDesktop.setMode(m);const w=m==='widget'||m==='orb';document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',!w);
+function setDeskMode(m){if(!DESK)return;deskMode=m;if(m==='full'&&needLock())setTimeout(showLock,0);winstonDesktop.setMode(m);const w=m==='widget'||m==='orb';document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',!w);
  if(!w){const i=$('#intro');if(i)i.style.display='none'}drawWidget();if(!w)render()}
 (function(){let d=null;
  document.addEventListener('pointerdown',e=>{const o=e.target.closest&&e.target.closest('.orbring');if(!o||!DESK)return;d={x:e.screenX,y:e.screenY,moved:false};try{o.setPointerCapture(e.pointerId)}catch(_){}},true);
@@ -2252,7 +2355,7 @@ S.classes.forEach(ensure);
 if(!inFrame&&/^https?:/.test(location.protocol)){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest';document.head.append(l);if('serviceWorker' in navigator){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!window.__rl){window.__rl=1;location.reload()}});navigator.serviceWorker.register('sw.js').catch(()=>{})}}
 if(DESK){const w=(deskMode==='widget'||deskMode==='orb')&&!!S.user;if(!S.user)deskMode='full';winstonDesktop.setMode(deskMode);document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',deskMode==='full')}
 applyTheme();
-render();drawWidget();iconInit();tickTimer();if(DESK&&deskMode!=='full'&&S.user)$('#intro').style.display='none';else showIntro();
+render();drawWidget();iconInit();if(needLock())showLock();tickTimer();if(DESK&&deskMode!=='full'&&S.user)$('#intro').style.display='none';else showIntro();
 </script>
 </body>
 </html>
