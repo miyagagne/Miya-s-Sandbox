@@ -458,13 +458,13 @@ function fluff(cx,cy,rx,ry,n,tuft,cheek,tension){
  for(let i=0;i<N;i++){const a=P[(i-1+N)%N],b=P[i],c=P[(i+1)%N],e=P[(i+2)%N];d+=`C${(b[0]+(c[0]-a[0])*t).toFixed(1)} ${(b[1]+(c[1]-a[1])*t).toFixed(1)} ${(c[0]-(e[0]-b[0])*t).toFixed(1)} ${(c[1]-(e[1]-b[1])*t).toFixed(1)} ${c[0].toFixed(1)} ${c[1].toFixed(1)}`}
  return d+'Z'}
 const BREEDS={
- pom:{sp:'dog',name:'Pomeranian',fur:'#f6a54e',fs:'#b9661c',cream:'#fff1d9',cs:'#e3bf8e',ear:'up',earS:.82,earIn:'#ff9db6',tuft:.1,cheek:.2,blaze:1,chest:.08},
+ pom:{sp:'dog',name:'Pomeranian',fur:'#f6a54e',fs:'#b9661c',cream:'#fff1d9',cs:'#e3bf8e',ear:'up',earS:.82,earIn:'#ff9db6',n:12,tuft:.035,cheek:.26,tension:1.7,blaze:1,chest:.02,cn:8},
  golden:{sp:'dog',name:'Golden Retriever',fur:'#e9b14f',fs:'#a8741f',cream:'#f8e3ad',cs:'#dcbd7e',ear:'floppy',ear2:'#d99d3c',earIn:'#d9a043',tuft:.012,cheek:.06,muz:1},
  corgi:{sp:'dog',name:'Corgi',fur:'#f0a048',fs:'#b4631b',cream:'#fff6e6',cs:'#e8cba0',ear:'up',earS:1.22,earIn:'#ffa5b8',tuft:.008,cheek:.02,blaze:1},
  gsd:{sp:'dog',name:'German Shepherd',fur:'#c98a45',fs:'#6e4219',cream:'#e6c79a',cs:'#b99363',dark:'#4a3626',ear:'up',earS:1.1,earTall:1,earIn:'#d9a0a0',tuft:.006,cheek:0,mask:1},
- persian:{sp:'cat',name:'Persian',fur:'#f3efe9',fs:'#b8ad9e',cream:'#fffaf3',cs:'#e4dccf',ear:'cat',earS:.8,earIn:'#ffc4d1',tuft:.075,cheek:.16,flat:1,chest:.07},
+ persian:{sp:'cat',name:'Persian',fur:'#f3efe9',fs:'#b8ad9e',cream:'#fffaf3',cs:'#e4dccf',ear:'cat',earS:.8,earIn:'#ffc4d1',n:14,tuft:.04,cheek:.2,tension:1.6,flat:1,chest:.03,cn:8},
  tabby:{sp:'cat',name:'Orange Tabby',fur:'#f09a40',fs:'#b5601a',cream:'#ffe8c8',cs:'#ecc895',ear:'cat',earS:1,earIn:'#ffb0bd',tuft:.012,cheek:.04,stripe:'#c8651b'},
- maine:{sp:'cat',name:'Maine Coon',fur:'#8f7458',fs:'#4e3a28',cream:'#eadfca',cs:'#c9b698',ear:'cat',earS:1.22,earIn:'#d9a3a8',tuft:.055,cheek:.1,stripe:'#4a3827',tip:1,chest:.07,bigtail:1}};
+ maine:{sp:'cat',name:'Maine Coon',fur:'#8f7458',fs:'#4e3a28',cream:'#eadfca',cs:'#c9b698',ear:'cat',earS:1.22,earIn:'#d9a3a8',n:14,tuft:.035,cheek:.14,tension:1.55,stripe:'#4a3827',tip:1,chest:.035,cn:8,bigtail:1}};
 const petBreed=()=>(typeof S!=='undefined'&&S&&S.pet&&BREEDS[S.pet.breed])?S.pet.breed:'pom';
 const petNoun=()=>BREEDS[petBreed()].sp==='cat'?'cat':'dog';
 function dog(eq={},m='happy',vb='0 0 200 200',br){
@@ -497,7 +497,7 @@ function dog(eq={},m='happy',vb='0 0 200 200',br){
   :m==='ok'?'<path d="M100 121 V127 M88 129 Q94 136 100 127 Q106 136 112 129" stroke="#2a1810" stroke-width="2.6" fill="none" stroke-linecap="round"/>'
   :'<path d="M100 121 V127 M90 136 Q100 125 110 136" stroke="#2a1810" stroke-width="2.6" fill="none" stroke-linecap="round"/>');
  const glad=m==='happy'||m==='cheer'||m==='calm';
- const HP=fluff(100,102,57,48,20,B.tuft,B.cheek,1.15);
+ const HP=fluff(100,102,57,48,B.n||20,B.tuft,B.cheek,B.tension||1.15);
  const earUp=()=>{const sx=B.earS||1,sy=B.earTall?1.3:sx;return `<g transform="translate(137 80) scale(${sx} ${sy}) translate(-137 -80)"><path d="M114 64 C122 48 134 34 146 26 C158 46 164 64 160 84 C146 76 128 70 114 64Z" ${fo}/><path d="M127 64 C133 54 140 44 146 40 C153 54 156 64 154 76 C144 72 134 68 127 64Z" fill="${B.earIn}"/>${B.blaze?`<ellipse cx="138" cy="70" rx="9" ry="5" ${co} opacity=".9" transform="rotate(-35 138 70)"/>`:''}${B.mask?`<path d="M146 26 C158 46 164 64 160 84 C152 74 148 52 146 26Z" fill="${B.dark}" opacity=".85"/>`:''}<path d="M118 62 C124 46 134 34 144 28" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="2" stroke-linecap="round"/></g>`};
  const earCat=()=>{const sc=B.earS||1;return `<g transform="translate(135 68) scale(${sc}) translate(-135 -68)"><path d="M116 68 L128 22 L158 62 C148 72 128 74 116 68Z" ${fo}/><path d="M125 62 L130 38 L148 58Z" fill="${B.earIn}"/>${B.tip?`<path d="M128 22 L126 8 M128 22 L136 10" stroke="${FS}" stroke-width="2.4" stroke-linecap="round" fill="none"/>`:''}</g>`};
  const earBack=B.ear==='up'?H(earUp()):B.ear==='cat'?H(earCat()):'';
@@ -518,7 +518,7 @@ function dog(eq={},m='happy',vb='0 0 200 200',br){
  <g class="breathe">
  <ellipse cx="100" cy="164" rx="48" ry="32" ${fo}/>
  ${H(`<ellipse cx="146" cy="171" rx="22" ry="20" ${fo}/><ellipse cx="156" cy="190" rx="15" ry="7.5" ${co}/><path d="M150 188v4M156 187v5M162 188v4" stroke="${CS}" stroke-width="1.4" stroke-linecap="round"/>`)}
- <path d="${fluff(100,150,B.chest?42:36,B.chest?29:26,12,B.chest||.03,.05,1.1)}" ${co}/>
+ <path d="${fluff(100,150,B.chest?42:36,B.chest?29:26,B.cn||12,B.chest||.03,.05,B.tension||1.1)}" ${co}/>
  ${H(`<path d="M103 156 Q127 152 127 172 L126 187 Q125 195 115 195 Q104 195 103 187Z" ${co}/><path d="M109 189v5M115 188v6M121 189v5" stroke="${CS}" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="115" cy="193" rx="9" ry="2.4" fill="#ffc9cf" opacity=".6"/>`)}
  </g>
  ${earBack}
@@ -696,7 +696,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.11 (pick your pet: 4 dogs, 3 cats)';
+const APP_VERSION='2026-11-20.12 (softer Pomeranian)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
