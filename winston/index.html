@@ -338,6 +338,19 @@ html[data-theme=dark] .p{border-color:#a99bff}html[data-theme=dark] .p.purple{bo
 .breed svg{width:100%;max-width:130px;height:auto;display:block}
 .breed.on{border-color:#6c4df0;background:#f1edff;box-shadow:0 0 0 3px rgba(108,77,240,.18)}
 html[data-theme=dark] .breed{background:#241d4a;border-color:#3a3070}html[data-theme=dark] .breed.on{background:#2c2068;border-color:#8068ff}
+/* ---- park, nudges, sections ---- */
+.petsec{font-family:var(--display);font-weight:600;font-size:16px;margin:12px 0 4px}
+.nudge .nrow{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:6px 0;font-size:14px}.nudge .nrow.behind{border-color:#ffb3a6;background:#fff1ee}.nudge .nrow.lead{border-color:#b6e3c4;background:#effaf2}.nudge .nrow.live{border-color:#c9bdff;background:#f3f0ff}
+html[data-theme=dark] .nudge .nrow{background:#241d4a;border-color:#3a3070}html[data-theme=dark] .nudge .nrow.behind{background:#3a1f35;border-color:#8a3a6a}html[data-theme=dark] .nudge .nrow.lead{background:#173a2e;border-color:#2f7a5a}
+.park{position:relative;height:300px;border-radius:16px;overflow:hidden;background:linear-gradient(#bfe6ff,#e6f6ff 40%,#a9e39b 40%);border:1px solid var(--line)}
+.park .parkdeco{position:absolute;inset:0;width:100%;height:100%}
+.parkpets{position:absolute;left:0;right:0;bottom:6px;display:flex;gap:6px;overflow-x:auto;padding:0 10px;align-items:flex-end;scrollbar-width:none}.parkpets::-webkit-scrollbar{display:none}
+.ppet{flex:none;width:104px;text-align:center;position:relative;margin-bottom:calc(var(--o)*14px)}
+.ppet svg{width:100%;height:auto;display:block;animation:bob 3s ease-in-out infinite;animation-delay:var(--d);filter:drop-shadow(0 4px 4px rgba(40,70,30,.3))}
+.ppet .pbub{background:#fff;color:var(--ink);border-radius:10px;font-size:10px;font-weight:600;padding:3px 7px;margin:0 auto 2px;width:max-content;max-width:104px;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.ppet .ptag{font:600 12px var(--display);color:#1f3b24;text-shadow:0 1px 0 rgba(255,255,255,.6)}.ppet .psub{font-size:10px;color:#2f5a35}.ppet.me .ptag{color:#4b30c8}
+.ppet .pwave{min-height:28px;padding:0 10px;font-size:12px;margin-top:2px;border-radius:10px}
+html[data-theme=dark] .park{background:linear-gradient(#1a1040,#4a2a7a 40%,#1d4a45 40%);border-color:#3a3070}html[data-theme=dark] .ppet .ptag{color:#fff;text-shadow:none}html[data-theme=dark] .ppet .psub{color:#cfc8ff}html[data-theme=dark] .ppet .pbub{background:#181240;color:#ece9ff}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -566,15 +579,15 @@ function renderOnboard(){
   if(GOOGLE_CLIENT_ID)loadGoogle()}
  if(ob===2){M.innerHTML=`<div class="card"><h2>What are you studying?</h2><label>Major(s)</label><input id="mj" value="${esc(obData.majors)}" placeholder="e.g. Business Administration"><label>Minor(s) (optional)</label><input id="mn" value="${esc(obData.minors)}">
  <button class="p" data-a="ob2">Next</button></div>`}
- if(ob===3){const sp=obData.pet.species;M.innerHTML=`<div class="card"><h2>Pick Your Study Buddy</h2><p class="mute" style="margin:0 0 8px">Who's going to class with you?</p><div class="row" style="margin:6px 0"><button class="${sp==='dog'?'p':'s'} grow" data-a="petsp" data-k="dog">🐶 Dog</button><button class="${sp==='cat'?'p':'s'} grow" data-a="petsp" data-k="cat">🐱 Cat</button></div><div class="breedgrid">${Object.entries(BREEDS).filter(([k,b])=>b.sp===sp).map(([k,b])=>`<button class="breed ${obData.pet.breed===k?'on':''}" data-a="petbreed" data-k="${k}">${dog({},'happy','0 0 200 200',k)}<b>${b.name}</b></button>`).join('')}</div><button class="p" data-a="ob3" style="width:100%;margin-top:8px">Continue</button></div>`}
+ if(ob===3){const grp=(sp,ttl)=>`<h3 class="petsec">${ttl}</h3><div class="breedgrid">${Object.entries(BREEDS).filter(([k,b])=>b.sp===sp).map(([k,b])=>`<button class="breed ${obData.pet.breed===k?'on':''}" data-a="petbreed" data-k="${k}">${dog({},'happy','0 0 200 200',k)}<b>${b.name}</b></button>`).join('')}</div>`;
+  M.innerHTML=`<div class="card"><h2>Pick Your Study Buddy</h2><p class="mute" style="margin:0 0 4px">Who's going to class with you?</p>${grp('dog','🐶 Dogs')}${grp('cat','🐱 Cats')}<button class="p" data-a="ob3" style="width:100%;margin-top:10px">Continue</button></div>`}
  if(ob===4){M.innerHTML=`<div class="card dogwrap"><h2>Name Your ${obData.pet.species==='cat'?'Cat! 🐱':'Pup! 🐶'}</h2><div class="dogwrap stage">${dog({},'happy','0 0 200 200',obData.pet.breed)}</div><label>Your pet's name</label><input id="dn" value="Winston" maxlength="20"><div>${['Winston','Biscuit','Mochi','Pepper','Waffles','Cosmo','Luna','Peanut'].map(n=>`<span class="chip" data-a="pick" data-k="${n}">${n}</span>`).join('')}</div><label style="display:block;margin-top:8px">One big goal you're studying for (optional)</label><textarea id="gl" placeholder="e.g. Graduate with honors and land my dream marketing job"></textarea><button class="p" data-a="ob4">Let's go! 🐾</button></div>`}
 }
 function loadGoogle(){const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=()=>{google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:r=>{try{const p=JSON.parse(atob(r.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));obData.name=p.name;obData.email=p.email;ob=2;render()}catch(e){toast('Google sign-in failed')}}});google.accounts.id.renderButton($('#gbtn'),{theme:'outline',size:'large'})};document.head.append(s)}
 Object.assign(ACTIONS,{
  ob1(){const n=$('#nm').value.trim()||obData.name;if(!n)return toast('Tell me your name!');obData.name=n;obData.email=$('#em').value.trim();ob=2;render()},
  ob2(){obData.majors=$('#mj').value.trim();obData.minors=$('#mn').value.trim();ob=3;render()},
- petsp(d){obData.pet={species:d.k,breed:d.k==='dog'?'pom':'persian'};render()},
- petbreed(d){obData.pet.breed=d.k;render()},
+ petbreed(d){if(!BREEDS[d.k])return;obData.pet={species:BREEDS[d.k].sp,breed:d.k};render()},
  ob3(){ob=4;render()},
  pick(d){$('#dn').value=d.k},
  ob4(){const dn=($('#dn').value.trim()||'Winston').slice(0,20);S.pet=Object.assign({},obData.pet);S.user={name:obData.name,email:obData.email||'',majors:obData.majors,minors:obData.minors,dogName:dn,goals:($('#gl')?$('#gl').value.trim():'')};save();tab='home';render();drawWidget();toast(`Welcome, ${S.user.name}! Say hi to ${dn}! ${petNoun()==='cat'?'🐱':'🐶'}`);setTimeout(()=>maybeTour(),1400);if(DESK)setDeskMode('orb');else if(!(S.pref&&S.pref.autoFloat===false))popOut(true)},
@@ -595,6 +608,7 @@ function rHome(){
  <p class="bubble">${esc(mood()==='sad'?'I miss you! Studying together makes me happy 🥺':smartMsg())}</p></div>
  <div class="row" style="margin-bottom:14px">${t?'':'<button class="s grow" data-a="openfocus">⏱ Focus</button>'}<button class="p ${t?'':'purple '}grow" data-a="tab" data-k="class">🎙 Start class</button></div>
  <div class="row" style="margin:-4px 0 14px"><button class="s grow" data-a="agent">💬 Ask ${esc(DN())}</button><button class="s grow" data-a="cm">📱 Class Mode</button></div>
+ ${peerCard()}
  ${questsCard()}
  <div class="card"><h3>How are you feeling?</h3><div class="moods">${MOODS.map(m=>`<button class="mood" data-a="feel" data-k="${m[1]}"><b>${m[0]}</b><span>${m[1]}</span></button>`).join('')}</div><div id="feelout"></div></div>`}
 function openFocus(){if(!S.classes.length){toast('Add a class first');tab='class';render();return}
@@ -612,7 +626,8 @@ function rClass(){
  <details class="card" ${classes().length?'':'open'}><summary><b>＋ Add a class</b></summary><label>Class name</label><input id="cn" placeholder="BUAD 112"><label>Syllabus (optional) — PDF, Word, PowerPoint or text</label><input id="cf" type="file" multiple accept=".pdf,.docx,.pptx,.txt,.md,.csv"><button class="p" data-a="addc">Add class</button></details>`;return}
  const sub=view.sub;
  $('#main').innerHTML=`<button class="s" data-a="openc" data-k="">← All classes</button><div class="row" style="margin-top:10px"><h2 class="grow" style="margin:0">${esc(c.name)}</h2><button class="s" data-a="editc" data-k="${c.id}">✏️ Edit</button></div>${c.instructor||c.room?`<p class="mute" style="margin:4px 0 8px">${[c.instructor&&'👩‍🏫 '+esc(c.instructor),c.room&&'📍 '+esc(c.room)].filter(Boolean).join(' · ')}</p>`:''}
- <div class="row" style="margin:6px 0 10px"><button class="p grow" data-a="whatsup" style="flex:1.7 1 0">🐶 What's Going On?</button><button class="s grow" data-a="agent" data-k="${c.id}">💬 Ask ${esc(DN())}</button></div>
+ <div class="row" style="margin:6px 0 10px"><button class="p grow" data-a="whatsup" style="flex:1.25 1 0">🐶 What's Going On?</button><button class="s grow" data-a="agent" data-k="${c.id}">💬 Ask ${esc(DN())}</button></div>
+ <div class="row" style="margin:-2px 0 10px"><button class="s grow" data-a="bs">🎓 Import From Brightspace</button></div>
  <div class="tabs">${[['live','🎙 Live'],['review','📝 Review'],['mat','📄 Materials'],['plan','📅 Plan']].map(([k,l])=>`<button data-a="sub" data-k="${k}" class="${k===sub?'on':''}">${l}</button>`).join('')}</div><div id="sub"></div>`;
  ({live:rLive,review:rReview,mat:rMat,plan:rPlan})[sub](c);
 }
@@ -696,7 +711,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.12 (softer Pomeranian)';
+const APP_VERSION='2026-11-20.13 (park, typing mode, nudges, Brightspace)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -705,12 +720,13 @@ function rLive(c){
  if(!live||live.cls!==c.id){const dr=S.liveDraft&&S.liveDraft.cls===c.id&&S.liveDraft.lines.length?S.liveDraft:null;
   SUB().innerHTML=`${dr?`<div class="card"><h3>🛟 Unfinished class found</h3><p class="mute">${esc(DN())} saved ${dr.lines.length} lines from a class that didn't get finished.</p><div class="row"><button class="p" data-a="finishdraft">Finish &amp; make notes</button><button class="s" data-a="dropdraft">Discard</button></div></div>`:''}
  <div class="card"><h2>Ready for class?</h2><p>${esc(DN())} will take notes while your teacher talks, light up your teacher's materials as they're mentioned, and pop up for a surprise <b>high paw</b> now and then. 🐾</p>
- <p class="mute" style="margin-bottom:2px">Which materials is class on today?</p><div style="margin-bottom:10px">${wkChips(c,'vwk',view.wk,true)}</div><button class="p" data-a="startlive">▶ Start class with ${esc(DN())}</button>
- <p class="mute">${esc(DN())} listens with your browser's speech recognition and <b>you can always type or dictate notes too</b> (tap the 🎙 on your phone keyboard). Audio is processed by your browser vendor's service.</p></div>`;return}
- SUB().innerHTML=`<div class="row" style="margin-bottom:8px"><button class="p ok" data-a="endlive">■ End class &amp; get notes</button><button class="s" id="micbtn" data-a="mic">🎙 Listen</button><button class="s" data-a="popout">🪟 Float ${esc(DN())}</button></div>
+ <div class="bubble" style="margin:8px 0">🔒 Some professors don't allow recording. <b>Only record if yours does.</b> If not, turn on Typing Mode and I'll organize the notes you type.</div><div style="margin:4px 0 10px"><span class="chip ${c.noRec?'on':''}" data-a="norec">${c.noRec?'✓ ':''}🚫 Typing Mode (No Recording)</span></div>
+ <p class="mute" style="margin-bottom:2px">Which materials is class on today?</p><div style="margin-bottom:10px">${wkChips(c,'vwk',view.wk,true)}</div><button class="p" data-a="startlive">${c.noRec?'⌨️ Start typing notes':'▶ Start class with '+esc(DN())}</button>
+ <p class="mute">${c.noRec?'Typing Mode is on — the microphone stays off in this class.':esc(DN())+' listens with your browser\'s speech recognition and <b>you can always type or dictate notes too</b> (tap the 🎙 on your phone keyboard). Audio is processed by your browser vendor\'s service.'}</p></div>`;return}
+ SUB().innerHTML=`<div class="row" style="margin-bottom:8px"><button class="p ok" data-a="endlive">■ End class &amp; get notes</button>${c.noRec?'':'<button class="s" id="micbtn" data-a="mic">🎙 Listen</button>'}<button class="s" data-a="popout">🪟 Float ${esc(DN())}</button></div>
  <div id="endwarn"></div>
- <div class="card"><h3>🎙 Capturing notes</h3><div id="micstat" class="mute"></div><div id="interim" class="mute" style="font-style:italic;min-height:20px"></div>
- <select id="micdev" style="margin:4px 0" aria-label="Microphone"><option>Default microphone</option></select><div class="bar" style="height:10px;margin:4px 0 8px" title="Mic level"><i id="miclevel" style="width:0%;transition:width .08s"></i></div><div style="margin:0 0 6px"><span class="chip" id="micengine" data-a="micengine"></span></div>
+ <div class="card"><h3>${c.noRec?'⌨️ Typing Mode':'🎙 Capturing notes'}</h3>${c.noRec?'<p class="mute" style="margin:0 0 6px">The microphone is off. Type or dictate your own notes and I\'ll organize them. 💛</p>':''}<div id="micblock" ${c.noRec?'style="display:none"':''}><div id="micstat" class="mute"></div><div id="interim" class="mute" style="font-style:italic;min-height:20px"></div>
+ <select id="micdev" style="margin:4px 0" aria-label="Microphone"><option>Default microphone</option></select><div class="bar" style="height:10px;margin:4px 0 8px" title="Mic level"><i id="miclevel" style="width:0%;transition:width .08s"></i></div><div style="margin:0 0 6px"><span class="chip" id="micengine" data-a="micengine"></span></div></div>
  <div style="margin:6px 0"><span class="chip ${live.mine?'':'on'}" data-a="nsrc" data-k="teacher" id="nsT">Teacher said</span><span class="chip ${live.mine?'on':''}" data-a="nsrc" data-k="mine" id="nsM">My own note</span></div>
  <textarea id="said" placeholder="Type or dictate here — Enter adds it (Shift+Enter for a new line)"></textarea>
  <div class="row"><button class="p" data-a="say">Add to notes</button><span class="mute" id="capcount"></span></div></div>
@@ -796,7 +812,7 @@ function startWebSpeech(){
  rec.onend=()=>{if(live&&live.listening&&MIC.engine==='cloud')setTimeout(()=>{if(live&&live.listening&&MIC.engine==='cloud')try{rec.start()}catch(e){}},350);else micUI()};
  live.listening=true;try{rec.start()}catch(e){startLocal()}}
 Object.assign(ACTIONS,{
- startlive(){const c=cur();live={cls:c.id,wk:view.wk||'all',notes:[],hits:[],lines:[],focus:null,listening:false,t0:Date.now(),mine:false,ack:false};S.liveDraft=null;schedulePaw();drawWidget();render();startListen()},
+ startlive(){const c=cur();live={cls:c.id,wk:view.wk||'all',notes:[],hits:[],lines:[],focus:null,listening:false,t0:Date.now(),mine:false,ack:false};S.liveDraft=null;schedulePaw();drawWidget();render();if(!c.noRec)startListen()},
  say(){if(!live)return;const el=$('#said'),v=el&&el.value.trim();if(!v)return;el.value='';v.split(/\n+/).forEach(l=>heard(l,{mine:live.mine}))},
  nsrc(d){if(!live)return;live.mine=d.k==='mine';const a=$('#nsT'),b=$('#nsM');if(a)a.classList.toggle('on',!live.mine);if(b)b.classList.toggle('on',live.mine)},
  mic(){if(!live)return;if(live.listening){live.listening=false;live.micMsg='';stopEngines();micClose();micUI()}else{live.micMsg='';startListen()}},
@@ -838,7 +854,7 @@ function drawWidget(){
  const desk=DESK&&deskMode==='widget',open=W.popped||W.open||desk;W.drawn=Date.now();
  document.body.classList.toggle('live',!!(open&&!W.popped&&innerWidth>=700));
  if(W.msg!==W._lm){W._lm=W.msg;W.msgAt=Date.now()}
- if(!open){const cap=W.paw?'<div class="wcap">Still with me? 🐾 tap!</div>':live?`<div class="wcap">${esc(W.msg||'🎙 Listening…').slice(0,90)}</div>`:'';
+ if(!open){const cap=W.paw?'<div class="wcap">Still with me? 🐾 tap!</div>':live?`<div class="wcap">${esc(W.msg||((S.classes.find(x=>x.id===live.cls)||{}).noRec?'⌨️ Typing notes…':'🎙 Listening…')).slice(0,90)}</div>`:'';
   WEL.className='mini show';WEL.innerHTML=`<button class="wbtn" data-a="wopen" aria-label="Open ${esc(DN())}">${dog(S.eq,dogMood(),'10 6 180 196')}</button>${cap}`;return}
  WEL.className='show'+(W.popped?' pip':'')+(desk?' desk':'');
  const keepScroll=W._lv===W.view?WEL.scrollTop:0;W._lv=W.view;
@@ -880,10 +896,10 @@ function wNote(){if(!S.classes.length)return '<div class="bubble wmsg">Add a cla
 function wCard(){const q=W.qcard;if(!q)return '<div class="bubble wmsg">Add some study cards and I\'ll quiz you!</div>';
  return `<div class="bubble wmsg"><b>${esc(q.term)}</b></div>${W.reveal?`<div class="bubble">${esc(q.text)}</div><div class="row"><button class="p ok grow" data-a="wgot">Got it ✅</button><button class="s grow" data-a="wagain">Again</button></div>`:'<button class="p" data-a="wshow" style="width:100%">Show answer</button>'}<div class="mute" style="font-size:12px;margin-top:6px">${esc(q.clsName||'')}</div>`}
 function appendPaw(){if(wq('.paw'))return;const d=wdoc().createElement('div');d.className='paw';d.innerHTML='Still with me? 🐶<br><button data-a="highpaw">🐾 High paw!</button><div style="font-size:12px;margin-top:4px">Tap within 15s</div>';WEL.append(d)}
-function schedulePaw(){clearTimeout(pawT);pawT=setTimeout(()=>{showPaw();schedulePaw()},(90+Math.random()*150)*1000)}
+function schedulePaw(){clearTimeout(pawT);const m=S.pref.paw||'gentle';if(m==='off')return;const [a,b]=m==='normal'?[90,150]:[480,420];pawT=setTimeout(()=>{showPaw();schedulePaw()},(a+Math.random()*b)*1000)}
 function showPaw(){if(!live||W.paw)return;W.paw=true;if(DESK&&deskMode==='orb'){W.view='home';setDeskMode('widget');return}if(!W.popped&&!W.open&&!(DESK&&deskMode==='widget')){W.open=true;W.autoOpen=true}W.view='home';drawWidget();
  try{if(document.hidden&&window.Notification&&Notification.permission==='granted'&&S.rem&&S.rem.notify)new Notification(DN()+' wants a high paw!',{body:'Still with him? Tap the widget 🐾'})}catch(e){}
- clearTimeout(pawCount);pawCount=setTimeout(()=>{if(!W.paw)return;W.paw=false;S.happy=Math.max(10,S.happy-5);save();W.react={text:"I missed my high paw 🥺 It's okay — I'm still here with you!",until:Date.now()+4500,mood:'sad'};drawWidget();toast(DN()+' missed his high paw 🥺')},15000)}
+ clearTimeout(pawCount);pawCount=setTimeout(()=>{if(!W.paw)return;W.paw=false;const strict=(S.pref.paw||'gentle')==='normal';if(strict)S.happy=Math.max(10,S.happy-5);save();W.react={text:strict?"I missed my high paw 🥺 It's okay — I'm still here with you!":"No worries — keep studying, I'll check in later! 🐾",until:Date.now()+4500,mood:strict?'sad':'ok'};drawWidget();if(strict)toast(DN()+' missed '+(petNoun()==='cat'?'her':'his')+' high paw 🥺')},15000)}
 function wHearts(){const d=wdoc();for(let i=0;i<5;i++){const h=d.createElement('span');h.className='fheart';h.textContent=['💛','🐾','✨','💗'][i%4];h.style.left=(20+Math.random()*60)+'%';h.style.top=(15+Math.random()*25)+'%';h.style.animationDelay=(i*.12)+'s';WEL.style.position=W.popped?'relative':'fixed';WEL.append(h);setTimeout(()=>h.remove(),1700)}}
 const rnd=a=>a[Math.floor(Math.random()*a.length)];
 function canned(){return "That sounds really heavy, and it makes sense that you feel that way. Let's try 5-4-3-2-1: name 5 things you can see, 4 you can touch, 3 you can hear, 2 you can smell, and 1 you can taste. Then take one slow breath with me. 💛"}
@@ -941,6 +957,7 @@ async function popOut(auto){if(pipWin)return;
   if(auto)toast(`${DN()} is floating on your screen — he stays on top while you browse other tabs. Close the little window anytime.`)}
  catch(e){pipWin=null;if(!auto){const nm=e&&e.name;toast(nm==='NotAllowedError'||nm==='SecurityError'?`Chrome blocked the floating window here. Open this page in its own browser tab (not inside a chat) and tap Float again.`:`Could not float ${DN()} — tap the button again.`)}}}
 function tickWidget(){if(!S.user)return;if(Date.now()-(window.__remT||0)>30000){window.__remT=Date.now();remCheck()}
+ if(Date.now()-(window.__ndT||0)>600000){window.__ndT=Date.now();nudgeCheck()}
  if(W.react&&Date.now()>W.react.until){W.react=null;if(W.autoOpen&&!W.paw){W.open=false;W.autoOpen=false}drawWidget();return}
  if(W.msg&&W.view==='home'&&!W.paw&&Date.now()-(W.msgAt||0)>14000){W.msg='';drawWidget();return}
  if(W.popped&&!live&&!S.timer&&W.view==='home'&&S.nextCheck&&Date.now()>S.nextCheck){S.nextCheck=Date.now()+50*60000;W.view='mood';W.msg='Hey, how are you doing? Just checking in on you. 💛';drawWidget();return}
@@ -1090,13 +1107,13 @@ Object.assign(ACTIONS,{
 });
 
 /* ======= friends ======= */
-const myCode=()=>btoa(unescape(encodeURIComponent(JSON.stringify({n:S.user.name,d:DN(),l:lvl(),w:weekMins(),s:streakDays(),t:Date.now(),u:S.live&&S.live.on?S.live.uid:undefined,h:Math.round(S.happy),e:S.eq}))));
+const myCode=()=>btoa(unescape(encodeURIComponent(JSON.stringify({n:S.user.name,d:DN(),l:lvl(),w:weekMins(),s:streakDays(),t:Date.now(),u:S.live&&S.live.on?S.live.uid:undefined,h:Math.round(S.happy),e:S.eq,b:petBreed()}))));
 function rFriends(){liveKick();
  MAIN().innerHTML=`${lbCard()}<div class="card"><h2>Invite Friends</h2><p class="mute">Studying is better together. Share your streak card or send an invite.</p><div class="row"><button class="p grow" data-a="invite">📨 Invite A Friend</button><button class="s grow" data-a="sharecard">📤 Share My Streak</button></div><div class="row" style="margin-top:8px"><button class="s grow" data-a="shareig">📸 Instagram Story</button><button class="s grow" data-a="sharett">🎵 TikTok</button></div></div>
  <div class="card"><h2>Your friend code</h2><p class="mute">Send this to a friend. They paste it below to see Winston in his latest outfit.</p><textarea readonly id="mc" style="min-height:70px">${myCode()}</textarea><button class="s" data-a="copy">Copy</button></div>
  <div class="card"><h2>Add a friend</h2><textarea id="fc" placeholder="Paste a friend code"></textarea><button class="p" data-a="addf">Add friend</button>
  <p class="mute">Heads up: codes are a snapshot. Live updating and friend requests need an online account (the Supabase setup used elsewhere in this repo) — a good next step.</p></div>
- <div class="shopgrid">${S.friends.map((f,i)=>`<div class="card"><div class="dogwrap">${dog(f.e,f.h>=65?'happy':f.h>=35?'ok':'sad')}</div><b>${esc(f.d||'Winston')}​</b><div class="mute">${esc(f.n)}'s pup</div><div class="mute">Level ${f.l} · ❤️ ${f.h}%</div><button class="s" data-a="delf" data-k="${i}">Remove</button></div>`).join('')}</div>`}
+ <div class="shopgrid">${S.friends.map((f,i)=>`<div class="card"><div class="dogwrap">${dog(f.e||{},f.h>=65?'happy':f.h>=35?'ok':'sad','0 0 200 200',f.b)}</div><b>${esc(f.d||'Winston')}​</b><div class="mute">${esc(f.n)}'s pup</div><div class="mute">Level ${f.l} · ❤️ ${f.h}%</div><button class="s" data-a="delf" data-k="${i}">Remove</button></div>`).join('')}</div>`}
 Object.assign(ACTIONS,{
  copy(){navigator.clipboard&&navigator.clipboard.writeText($('#mc').value).then(()=>toast('Copied!'),()=>toast('Select the text and copy it'))},
  addf(){try{const f=JSON.parse(decodeURIComponent(escape(atob($('#fc').value.trim()))));if(!f.n)throw 0;S.friends=S.friends.filter(x=>x.n!==f.n);S.friends.push(f);save();render();toast(`${f.n} added!`)}catch(e){toast('That code doesn\'t look right')}},
@@ -1110,14 +1127,16 @@ const isStandalone=()=>{try{return !!window.__NATIVE_APP||!!window.ReactNativeWe
 function installCard(){if(DESK||isStandalone())return '';const site='https://miyagagne.github.io/Miya-s-Sandbox/winston/';
  return `<label style="display:block;margin-top:6px">Get The App</label><div class="instcard">${inFrame?`<p class="mute" style="margin:0">To put ${esc(DN())} on your phone or computer, open the Winston website and install it from there:<br><b>${site}</b></p>`:`<button class="p" id="instbtn" data-a="install" style="width:100%">⬇ Install ${esc(DN())}</button><p class="mute" style="margin:8px 0 0"><b>iPhone:</b> Safari → Share → Add To Home Screen<br><b>Android:</b> Chrome ⋮ → Install App<br><b>Computer:</b> Chrome or Edge → install icon in the address bar</p>`}</div>`}
 function rDog(){const sub=view.dsub||'shop';
- $('#main').innerHTML=`<div class="tabs">${[['shop','🛍️ Shop'],['friends','👥 Friends'],['me','⚙️ Settings']].map(([k,l])=>`<button data-a="dsub" data-k="${k}" class="${k===sub?'on':''}">${l}</button>`).join('')}</div><div id="dsub"></div>`;
- mainT=$('#dsub');try{({shop:rShop,friends:rFriends,me:rSettings})[sub]()}finally{mainT=null}
+ $('#main').innerHTML=`<div class="tabs">${[['shop','🛍️ Shop'],['friends','👥 Friends'],['park','🌳 Park'],['me','⚙️ Settings']].map(([k,l])=>`<button data-a="dsub" data-k="${k}" class="${k===sub?'on':''}">${l}</button>`).join('')}</div><div id="dsub"></div>`;
+ mainT=$('#dsub');try{({shop:rShop,friends:rFriends,park:rPark,me:rSettings})[sub]()}finally{mainT=null}
  if(sub==='me'&&DESK)deskUI()}
 function rSettings(){const u=S.user;
  MAIN().innerHTML=`<div class="card"><h2>Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea>
  ${installCard()}
  ${S.pref.apiKey?'':''}<label style="display:block;margin-top:6px">Winston AI Key (Optional)</label><div class="instcard"><input id="akey" type="password" placeholder="Paste an Anthropic API key" value="${esc(S.pref.apiKey||'')}" autocomplete="off"><button class="s" data-a="savekey" style="width:100%">${S.pref.apiKey?'Update Key':'Save Key'}</button><p class="mute" style="margin:8px 0 0;font-size:12px">Turns on smart AI answers everywhere (phone, laptop, desktop app). Stored only on this device and sent only to api.anthropic.com. Use a key with a spending limit.${AI.sm?' <b>✨ AI is on.</b>':''}</p></div><button class="s" data-a="tour" style="width:100%;margin:2px 0 10px">🎓 Replay The Tutorial</button>
- <label style="display:block;margin-top:6px">My Pet</label><div>${Object.entries(BREEDS).map(([k,b])=>`<span class="chip ${S.pet.breed===k?'on':''}" data-a="setbreed" data-k="${k}">${b.sp==='dog'?'🐶':'🐱'} ${b.name}</span>`).join('')}</div>
+ <label style="display:block;margin-top:6px">My Pet</label>${['dog','cat'].map(sp=>`<div class="mute" style="margin:6px 0 2px;font-weight:600">${sp==='dog'?'🐶 Dogs':'🐱 Cats'}</div><div>${Object.entries(BREEDS).filter(([k,b])=>b.sp===sp).map(([k,b])=>`<span class="chip ${S.pet.breed===k?'on':''}" data-a="setbreed" data-k="${k}">${b.name}</span>`).join('')}</div>`).join('')}
+ <label style="display:block;margin-top:6px">High-Paw Check-Ins</label><div>${[['off','Off'],['gentle','Gentle'],['normal','Frequent']].map(([k,l])=>`<span class="chip ${(S.pref.paw||'gentle')===k?'on':''}" data-a="pawmode" data-k="${k}">${l}</span>`).join('')}</div><p class="mute" style="margin:0 0 4px;font-size:12px">Gentle checks in every 8–15 minutes and never costs ${esc(DN())} any happiness.</p>
+ <label style="display:block;margin-top:6px">Friend Nudges</label><div><span class="chip ${S.pref.nudge?'on':''}" data-a="nudgetoggle">${S.pref.nudge?'✓ ':''}Tell Me When Friends Are Ahead</span></div><p class="mute" style="margin:0 0 4px;font-size:12px">Friendly peer pressure with notifications while the app is open. Works best with Share My Stats Live on.</p>
  <label style="display:block;margin-top:6px">Look</label><div class="themeopts">${[['auto','🖥 Auto'],['light','☀️ Light'],['dark','🌙 Dark']].map(([k,l])=>`<span class="chip thm ${(S.pref.theme||'auto')===k?'on':''}" data-a="theme" data-k="${k}">${l}</span>`).join('')}</div>
  <label style="display:block;margin-top:6px">Floating widget</label><div><span class="chip ${S.pref.autoFloat===false?'':'on'}" id="autof" data-a="toggleauto">${S.pref.autoFloat===false?'':'✓ '}Float ${esc(DN())} on my screen when I open the app</span></div><p class="mute" style="margin-top:0">Works in desktop Chrome or Edge. He stays on top of Brightspace, Google and other tabs.</p>
  <button class="p" data-a="savesettings" style="width:100%">Save</button></div>
@@ -1676,14 +1695,16 @@ document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.i
 const TOUR=[
  {t:'Meet Winston! 🐶',b:"I'm your study buddy. I cheer you on, take notes in class and help you understand your classes. Want a 1-minute tour?",tab:'home',dog:1},
  {t:'Add Your Classes',b:'Open the Classes tab and add each class. Upload a syllabus if you have one and I\'ll find the dates. Every class gets its own hub.',tab:'class',sel:'nav [data-k=class]'},
- {t:'Inside A Class Hub',b:'🎙 Live: I listen and take notes · 📝 Review: recaps you can edit · 📄 Materials: uploads by week · 📅 Plan: calendar and study timer. Tap "What\'s Going On?" any time for this week and the big picture.',tab:'hub',sel:'[data-a=whatsup]'},
+ {t:'Inside A Class Hub',b:'🎙 Live: I listen and take notes · 📝 Review: recaps you can edit · 📄 Materials: uploads by week · 📅 Plan: calendar and study timer. Tap "What\'s Going On?" for this week and the big picture, and "Import From Brightspace" to bring in dates and lectures. If your professor doesn\'t allow recording, use Typing Mode.',tab:'hub',sel:'[data-a=whatsup]'},
  {t:'Practice For Coins',b:'Answer quick questions built from your own notes. Right answers earn coins for my shop. 🪙',tab:'practice',sel:'nav [data-k=practice]'},
  {t:'Boost Your Mood',b:'Bored, stressed or unmotivated? Tell me how you feel and I\'ll help with breathing, a game or a pep talk.',tab:'boost',sel:'nav [data-k=boost]'},
  {t:'Make Me Yours',b:'Spend coins on hats and glasses, add friends, switch Light or Dark mode and name me in Settings.',tab:'dog',sel:'nav [data-k=dog]'},
+ {t:'Visit The Park 🌳',b:'The Park is where you and your friends hang out between sessions. Take a break, wave hello and see who is studying.',tab:'dog',dsub:'park',sel:'[data-a=dsub][data-k=park]'},
  {t:'Ask Me Anything',b:'I go to class with you, so ask me about any class: what\'s going on, what\'s due, or to explain a topic. Add an AI key in Settings for smarter answers.',tab:'home',sel:'[data-a=agent]'},
  {t:'Class Mode',b:'Keep me open in class: full screen, the screen stays awake and I check in with a high paw. Install me from Settings → Get The App to keep me on your phone or computer.',tab:'home',sel:'[data-a=cm]'}];
 let tourI=0;
 function tourShow(i){tourI=Math.max(0,Math.min(TOUR.length-1,i));const st=TOUR[tourI];
+ if(st.dsub)view.dsub=st.dsub;else if(st.tab==='dog')view.dsub='shop';
  if(st.tab==='hub'){tab='class';const c0=S.classes[0];view.cls=c0?c0.id:null;view.sub='live'}else{tab=st.tab||'home';view.cls=null}
  P=null;render();drawWidget();
  let host=$('#tour');if(!host){host=document.createElement('div');host.id='tour';document.body.append(host)}
@@ -1694,6 +1715,80 @@ function tourShow(i){tourI=Math.max(0,Math.min(TOUR.length-1,i));const st=TOUR[t
 function tourEnd(){const h=$('#tour');if(h)h.remove();S.pref.tourDone=true;save();tab='home';view.cls=null;view.sub='live';render();drawWidget()}
 function maybeTour(force){if(!S.user||(!force&&(S.pref.tourDone||DESK||CM.on||$('#tour'))))return;if(!force&&$('#intro')&&getComputedStyle($('#intro')).display!=='none')return;tourShow(0)}
 Object.assign(ACTIONS,{tour(){closeModal();maybeTour(true)},tournext(){tourI>=TOUR.length-1?tourEnd():tourShow(tourI+1)},tourback(){tourShow(tourI-1)},tourskip(){tourEnd()}});
+
+
+/* ======= v9: peer nudges, Dog Park, Brightspace import ======= */
+S.park=S.park||{};
+function peerStats(){const me=weekMins(),fr=S.friends.filter(f=>!(f.t&&Date.now()-f.t>7*864e5)),ahead=fr.filter(f=>(f.w||0)>me).sort((a,b)=>b.w-a.w),now=fr.filter(f=>f.live&&f.t&&Date.now()-f.t<15*60000);return {me,fr,ahead,now}}
+function peerMsgs(){const {me,fr,ahead,now}=peerStats(),out=[];if(!fr.length)return out;
+ now.slice(0,2).forEach(f=>out.push({t:`👀 ${f.n} is studying right now`,k:'live'}));
+ if(ahead.length){const f=ahead[0];out.push({t:`${f.n} has studied ${f.w} min this week — you're at ${me}. ${f.w-me} min to catch up!`,k:'behind'})}else out.push({t:`You're leading your friends this week with ${me} min! 🏆`,k:'lead'});
+ const sf=fr.filter(f=>(f.s||0)>streakDays()).sort((a,b)=>b.s-a.s)[0];if(sf)out.push({t:`${sf.n} is on a ${sf.s}-day streak — keep yours going! 🔥`,k:'streak'});return out}
+function peerCard(){const m=peerMsgs();if(!m.length)return '';return `<div class="card nudge"><h3>👀 Your Friends Are Studying</h3>${m.slice(0,3).map(x=>`<div class="nrow ${x.k}">${esc(x.t)}</div>`).join('')}<button class="s" data-a="dsubgo" data-k="friends" style="width:100%;margin-top:8px">See The Leaderboard</button></div>`}
+function nudgeCheck(){if(!S.user||!S.pref.nudge)return;const m=peerMsgs().find(x=>x.k==='behind');if(!m)return;const r=dayRec();if(r.nudged)return;r.nudged=1;save();
+ if(window.Notification&&Notification.permission==='granted')try{new Notification(`${DN()}: your friends are ahead!`,{body:m.t})}catch(e){}
+ W.msg=m.t;W.cheerUntil=0;drawWidget();toast(m.t)}
+
+/* ---- Dog Park ---- */
+const PARK_NPC=[{n:'Park Regular',d:'Biscuit',b:'corgi',st:'Chasing the ball 🎾'},{n:'Park Regular',d:'Pepper',b:'tabby',st:'Napping in the sun 💤'},{n:'Park Regular',d:'Mochi',b:'persian',st:'Sniffing flowers 🌼'}];
+function parkCrowd(){const brk=(S.park.breakUntil||0)>Date.now(),me={me:1,n:S.user.name,d:DN(),b:petBreed(),e:S.eq,h:S.happy,st:S.timer?'Studying now 📚':brk?'On a break ☕':'Hanging out 🐾',w:weekMins(),s:streakDays()};
+ const fr=S.friends.map(f=>({n:f.n,d:f.d||'Pup',b:f.b||'pom',e:f.e||{},h:f.h||70,st:(f.live&&f.t&&Date.now()-f.t<15*60000)?'Studying now 📚':(f.t&&Date.now()-f.t<864e5?'Hanging out 🐾':'Napping 💤'),w:f.w||0,s:f.s||0}));
+ const npc=fr.length<3?PARK_NPC.slice(0,3-fr.length).map(x=>({...x,e:{},h:90,npc:1,w:0})):[];return [me,...fr,...npc]}
+const parkDeco=()=>`<svg class="parkdeco" viewBox="0 0 400 200" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><path d="M0 92 Q80 70 160 88 T320 84 T400 92 V200 H0Z" fill="#a9e39b"/><path d="M0 110 Q100 92 200 108 T400 104 V200 H0Z" fill="#8bd77d"/>
+ <g><rect x="34" y="52" width="9" height="40" rx="3" fill="#8a5a3a"/><circle cx="38" cy="42" r="26" fill="#58b85c"/><circle cx="26" cy="54" r="17" fill="#6dcb6f"/><circle cx="52" cy="52" r="16" fill="#4aa850"/></g>
+ <g><rect x="352" y="60" width="8" height="34" rx="3" fill="#8a5a3a"/><circle cx="356" cy="50" r="22" fill="#58b85c"/><circle cx="346" cy="60" r="14" fill="#6dcb6f"/></g>
+ <g stroke="#e9d5b0" stroke-width="3" stroke-linecap="round"><path d="M80 96 H320"/><path d="M80 106 H320"/></g><g fill="#d9bd8a"><rect x="82" y="90" width="5" height="24" rx="2"/><rect x="150" y="90" width="5" height="24" rx="2"/><rect x="218" y="90" width="5" height="24" rx="2"/><rect x="286" y="90" width="5" height="24" rx="2"/></g>
+ <ellipse cx="300" cy="150" rx="40" ry="11" fill="#7ec8f2"/><ellipse cx="292" cy="147" rx="16" ry="3" fill="#bfe6ff"/>
+ <g><rect x="92" y="136" width="46" height="6" rx="2" fill="#b07a4a"/><rect x="96" y="142" width="5" height="12" fill="#8a5a3a"/><rect x="130" y="142" width="5" height="12" fill="#8a5a3a"/><rect x="92" y="126" width="46" height="5" rx="2" fill="#b07a4a"/></g>
+ <g fill="#ff7eb3"><circle cx="190" cy="160" r="3"/><circle cx="200" cy="165" r="3"/><circle cx="360" cy="158" r="3"/></g><g fill="#ffd23f"><circle cx="195" cy="168" r="2.5"/><circle cx="352" cy="165" r="2.5"/></g></svg>`;
+let parkIv=null;
+function rPark(){liveKick();const crowd=parkCrowd(),real=crowd.filter(x=>!x.npc),tot=real.reduce((a,x)=>a+(x.w||0),0),left=Math.ceil(((S.park.breakUntil||0)-Date.now())/1000),brk=left>0;
+ MAIN().innerHTML=`<div class="card parkcard"><h2>🌳 The Dog Park</h2><p class="mute" style="margin:0 0 8px">Where you and your friends hang out between study sessions. Take a break, say hi and cheer each other on.</p>
+ <div class="park">${parkDeco()}<div class="parkpets">${crowd.map((x,i)=>`<div class="ppet ${x.me?'me':''}" style="--d:${(i%4)*.3}s;--o:${i%3}"><div class="pbub">${esc(x.st)}</div>${dog(x.e||{},x.h>=65?'happy':x.h>=35?'ok':'sad','0 0 200 200',x.b)}<div class="ptag">${esc(x.d||'')}${x.me?' · You':''}</div><div class="psub">${x.npc?'Park regular':esc(x.n)}</div>${(x.me||x.npc)?'':`<button class="s pwave" data-a="parkwave" data-k="${esc(x.n)}">👋 Wave</button>`}</div>`).join('')}</div></div>
+ <div class="synstat" style="margin-top:8px"><span>👥 ${real.length} in the park</span><span>⏱ ${tot} min studied together this week</span></div></div>
+ <div class="card"><h3>☕ Take A Break</h3><p class="mute" style="margin:0 0 8px">${brk?`On a break — back in <b id="brk">${fmtClock(left)}</b>. Stretch, drink some water and say hi to the pups. 💛`:"Studying hard? A short break keeps you going. I'll tell you when it's time to head back."}</p>
+ <div class="row"><button class="p grow" data-a="parkbreak">${brk?'End Break':'Start A 5-Minute Break'}</button><button class="s grow" data-a="parkfetch">🎾 Play Fetch</button></div><div id="fetchout" class="mute" style="margin-top:6px"></div></div>
+ <div class="card"><h3>Bring Friends To The Park</h3><p class="mute">The park is better with friends. See who's studying, race up the leaderboard and wave hello.</p><div class="row"><button class="p grow" data-a="invite">📨 Invite A Friend</button><button class="s grow" data-a="dsubgo" data-k="friends">👥 Leaderboard</button></div></div>`;
+ clearInterval(parkIv);if(brk)parkIv=setInterval(()=>{const b=$('#brk');if(!b||tab!=='dog'||view.dsub!=='park'){clearInterval(parkIv);return}const l=Math.ceil(((S.park.breakUntil||0)-Date.now())/1000);if(l<=0){S.park.breakUntil=0;save();clearInterval(parkIv);toast("Break's over — ready to study? 📚");render();return}b.textContent=fmtClock(l)},1000)}
+Object.assign(ACTIONS,{
+ dsubgo(d){tab='dog';view.dsub=d.k;render()},
+ parkbreak(){S.park.breakUntil=(S.park.breakUntil||0)>Date.now()?0:Date.now()+5*60000;save();render()},
+ parkfetch(){const t=Date.now();if(t-(S.park.lastFetch||0)<8000){const o=$('#fetchout');if(o)o.textContent='Give the pups a second to catch their breath! 🐾';return}S.park.lastFetch=t;const r=dayRec();r.fetch=(r.fetch||0)+1;S.happy=Math.min(100,S.happy+2);
+  const o=$('#fetchout');if(r.fetch<=5){earn(1,'fetch! 🎾');}else{save();if(o)o.textContent='🎾 Fetch! Everyone is happily tired now — back to studying soon?'}burst(14,$('.ppet.me svg'))},
+ async parkwave(d){const txt=`🐾 High paw from ${S.user.name}! Come study with ${DN()} 👉 https://miyagagne.github.io/Miya-s-Sandbox/winston/`;try{if(navigator.share){await navigator.share({text:txt});return}}catch(e){if(e&&e.name==='AbortError')return}try{await navigator.clipboard.writeText(txt)}catch(e){}toast(`Wave copied — send it to ${d.k}! 👋`)},
+ pawmode(d){S.pref.paw=d.k;save();if(live){clearTimeout(pawT);schedulePaw()}render();toast(d.k==='off'?'High-paw check-ins are off':d.k==='gentle'?'Gentle check-ins: about every 8–15 minutes':'Frequent check-ins on')},
+ nudgetoggle(){if(S.pref.nudge){S.pref.nudge=false;save();render();return}
+  const on=()=>{S.pref.nudge=true;save();render();toast('Friend nudges on 🔔');setTimeout(nudgeCheck,500)};
+  if(window.Notification&&Notification.permission==='default')Notification.requestPermission().finally(on);else on()},
+ norec(){const c=cur();if(!c)return;c.noRec=!c.noRec;save();render();toast(c.noRec?'Typing Mode on — the mic stays off 🚫🎙':'Typing Mode off')}});
+
+/* ---- Brightspace import (no login needed: calendar file, copied lecture text, downloaded files) ---- */
+function parseICS(t){const L=String(t).replace(/\r/g,'').replace(/\n[ \t]/g,'').split('\n'),ev=[];let c=null;
+ for(const l of L){if(l==='BEGIN:VEVENT')c={};else if(l==='END:VEVENT'){if(c&&c.d&&c.t)ev.push(c);c=null}else if(c){const i=l.indexOf(':');if(i<0)continue;const k=l.slice(0,i).split(';')[0].toUpperCase(),v=l.slice(i+1);
+  if(k==='SUMMARY')c.t=v.replace(/\\,/g,',').replace(/\\n/g,' ').replace(/\;/g,';').trim().slice(0,80);
+  else if(k==='DTSTART'){const m=v.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2}))?(Z)?/);if(m){if(m[4]&&m[6]){const d=new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5]));c.d=isoD(d);c.tm=pad2(d.getHours())+':'+pad2(d.getMinutes())}else{c.d=`${m[1]}-${m[2]}-${m[3]}`;if(m[4])c.tm=`${m[4]}:${m[5]}`}}}}}
+ return ev}
+const evType=t=>/exam|midterm|final|quiz|test/i.test(t)?'exam':/assign|homework|due|essay|paper|project|submit|discussion/i.test(t)?'assignment':/read|chapter/i.test(t)?'reading':/lecture|class|seminar|lab/i.test(t)?'class':'other';
+const BOOKMARKLET="javascript:(()=>{const t=document.title+'\\n\\n'+((document.querySelector('main')||document.body).innerText||'');navigator.clipboard.writeText(t).then(()=>alert('Copied for Winston! Paste it into Import From Brightspace.'),()=>prompt('Copy this for Winston:',t.slice(0,4000)))})()";
+function bsHtml(c){return `<h2>🎓 Import From Brightspace</h2><p class="mute" style="margin:0 0 8px">Brightspace doesn't let outside apps log in for you, so ${esc(DN())} works with what you can export or copy — no password needed. Everything stays on your device.</p>
+ <h3 class="petsec">📅 1. Dates & Deadlines</h3><p class="mute" style="margin:0 0 6px">In Brightspace open <b>Calendar → Subscribe / Export</b>, download the <b>.ics</b> file, then add it here (or paste the link / calendar text).</p>
+ <input id="bsf" type="file" accept=".ics,text/calendar"><textarea id="bst" placeholder="…or paste the calendar link or text here" style="min-height:60px"></textarea><button class="p" data-a="bsics" style="width:100%">Import Dates Into ${esc(c.name)}</button><div id="bsout" class="mute" style="margin:6px 0"></div>
+ <h3 class="petsec">📄 2. Lecture Content</h3><p class="mute" style="margin:0 0 6px">Open a lecture page, announcement or slide text in Brightspace, select all, copy, and paste it here. I'll make study cards from it.</p>
+ <textarea id="bsc" placeholder="Paste the lecture content here" style="min-height:90px"></textarea><div class="row"><select id="bswk" class="grow">${[['course','Course-wide'],...c.weeks.map(w=>[w.id,'Week '+w.n])].map(([k,l])=>`<option value="${k}" ${k===view.mwk?'selected':''}>${l}</option>`).join('')}</select><button class="p" data-a="bscontent">Add To Materials</button></div>
+ <h3 class="petsec">📦 3. Files & Slides</h3><p class="mute" style="margin:0 0 6px">In Brightspace use <b>Content → Table of Contents → Download</b> (or download slides one by one), then upload the PDFs and PowerPoints in Materials.</p><button class="s" data-a="bsfiles" style="width:100%">Go To Materials Upload</button>
+ <h3 class="petsec">⚡ Faster: "Send To Winston" Bookmark</h3><p class="mute" style="margin:0 0 6px">Save this as a bookmark. On any Brightspace page, click it to copy the page text, then paste it in step 2.</p><textarea readonly id="bsbm" style="min-height:70px;font-size:12px">${esc(BOOKMARKLET)}</textarea><button class="s" data-a="bscopy">Copy Bookmark Code</button>`}
+Object.assign(ACTIONS,{
+ bs(){const c=cur();if(!c)return;openModal(bsHtml(c))},
+ async bsics(){const c=cur(),out=$('#bsout');let txt='';const f=($('#bsf')||{}).files&&$('#bsf').files[0];
+  try{if(f)txt=await f.text();else{const v=(($('#bst')||{}).value||'').trim();if(/^https?:\/\//i.test(v)){out.textContent='Fetching…';const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),8000);try{const r=await fetch(v.replace(/^webcal:/i,'https:'),{signal:ctl.signal});txt=await r.text()}catch(e){out.textContent='Brightspace blocks apps from reading that link. Download the .ics file instead and add it above. 💛';return}finally{clearTimeout(tm)}}else txt=v}}catch(e){out.textContent='Could not read that file.';return}
+  const ev=parseICS(txt);if(!ev.length){out.textContent="I couldn't find any dates in that. Make sure it's an .ics calendar file.";return}
+  const lo=Date.now()-30*864e5,hi=Date.now()+400*864e5,have=new Set(c.events.map(e=>e.title.toLowerCase()+e.date));let n=0;
+  for(const e of ev){const t=Date.parse(e.d);if(!(t>=lo&&t<=hi))continue;const k=e.t.toLowerCase()+e.d;if(have.has(k))continue;have.add(k);c.events.push({id:uid(),title:e.t,date:e.d,type:evType(e.t),time:e.tm||''});n++}
+  save();out.textContent=n?`✅ Added ${n} date${n>1?'s':''} to ${c.name}.`:'Those dates were already in your calendar (or are too far away).';if(n){toast(`Added ${n} date${n>1?'s':''} 📅`);render()}},
+ bscontent(){const c=cur(),t=(($('#bsc')||{}).value||'').trim();if(t.length<20)return toast('Paste a bit more text first');const wk=($('#bswk')||{}).value||'course',first=t.split('\n').find(x=>x.trim())||'lecture';
+  const doc={id:uid(),name:('Brightspace: '+first.trim()).slice(0,48),wk,text:t.slice(0,40000),chars:t.length,cards:0};c.docs.push(doc);save();closeModal();view.cls=c.id;view.sub='mat';view.mwk=wk;render();stat('Making study cards…');makeCards(c,doc).then(n=>{render();stat(`✅ ${n} study cards added from Brightspace`)})},
+ bsfiles(){closeModal();view.sub='mat';render()},
+ bscopy(){const v=BOOKMARKLET;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast('Copied! Save it as a bookmark 🔖'),()=>toast('Select the text and copy it'))}});
 
 /* ======= v7: desktop widget mode ======= */
 function setDeskMode(m){if(!DESK)return;deskMode=m;winstonDesktop.setMode(m);const w=m==='widget'||m==='orb';document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',!w);
