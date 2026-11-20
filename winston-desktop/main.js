@@ -13,6 +13,10 @@ const cfgFile = () => path.join(app.getPath('userData'), 'winston-settings.json'
 function loadCfg() { try { cfg = { ...cfg, ...JSON.parse(fs.readFileSync(cfgFile(), 'utf8')) }; } catch (e) { /* first run */ } }
 function saveCfg() { try { fs.writeFileSync(cfgFile(), JSON.stringify(cfg)); } catch (e) { /* ignore */ } }
 
+// The installed app loads the live site, so every update pushed from Claude shows up on the next launch.
+// If you're offline it falls back to the copy bundled inside the installer.
+const SITE_DIR = 'https://miyagagne.github.io/Miya-s-Sandbox/winston/';
+const ourPage = (u) => typeof u === 'string' && (u.startsWith(SITE_DIR) || u.startsWith('file:'));
 function appIndex() {
   const bundled = path.join(__dirname, 'app', 'index.html');
   if (fs.existsSync(bundled)) return bundled;
@@ -45,13 +49,19 @@ function createWindow() {
   });
   win.setOpacity(cfg.opacity);
   applyTop();
-  win.loadFile(appIndex(), { query: { desktop: '1', mode: cfg.mode } });
+  const q = { desktop: '1', mode: cfg.mode };
+  const local = () => win.loadFile(appIndex(), { query: q });
+  if (cfg.liveUpdate === false) local();
+  else {
+    win.loadURL(SITE_DIR + 'index.html?desktop=1&mode=' + cfg.mode);
+    win.webContents.on('did-fail-load', (e, code, desc, url, isMain) => { if (isMain && code !== -3 && String(url).startsWith(SITE_DIR)) local(); });
+  }
   win.once('ready-to-show', () => win.show());
   win.on('close', (e) => { if (!quitting) { e.preventDefault(); win.hide(); } });
   let t = null;
   win.on('moved', () => { clearTimeout(t); t = setTimeout(() => { const b = win.getBounds(); cfg.bounds[cfg.mode] = { x: b.x, y: b.y }; saveCfg(); }, 400); });
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: 'deny' }; });
-  win.webContents.on('will-navigate', (e, url) => { if (/^https?:/.test(url)) { e.preventDefault(); shell.openExternal(url); } });
+  win.webContents.on('will-navigate', (e, url) => { if (/^https?:/.test(url) && !url.startsWith(SITE_DIR)) { e.preventDefault(); shell.openExternal(url); } });
 }
 
 function setMode(m) {
@@ -76,6 +86,7 @@ function buildTray() {
     { label: win && win.isVisible() ? 'Hide Winston' : 'Show Winston', click: toggleShow },
     ...[['orb', 'Floating Circle'], ['widget', 'Widget With Bubbles'], ['full', 'Full App']].map(([k, l]) => ({ label: l, type: 'radio', checked: cfg.mode === k, click: () => { win.webContents.executeJavaScript(`setDeskMode('${k}')`); } })),
     { type: 'separator' },
+    { label: 'Update From Website On Launch', type: 'checkbox', checked: cfg.liveUpdate !== false, click: (i) => { cfg.liveUpdate = i.checked; saveCfg(); } },
     { label: 'Always On Top', type: 'checkbox', checked: !!cfg.onTop, click: (i) => { cfg.onTop = i.checked; saveCfg(); applyTop(); } },
     { label: 'Start With My Computer', type: 'checkbox', checked: !!cfg.openAtLogin, click: (i) => { cfg.openAtLogin = i.checked; saveCfg(); app.setLoginItemSettings({ openAtLogin: i.checked }); } },
     { type: 'separator' },
@@ -115,7 +126,7 @@ else {
     loadCfg();
     // let the widget use your microphone (live class notes) and show notifications
     const allowed = ['media', 'notifications', 'clipboard-sanitized-write'];
-    session.defaultSession.setPermissionRequestHandler((wc, perm, cb) => cb(allowed.includes(perm)));
+    session.defaultSession.setPermissionRequestHandler((wc, perm, cb) => cb(allowed.includes(perm) && ourPage(wc.getURL())));
     session.defaultSession.setPermissionCheckHandler((wc, perm) => allowed.includes(perm));
     if (process.platform === 'darwin' && systemPreferences.askForMediaAccess) systemPreferences.askForMediaAccess('microphone').catch(() => {});
     createWindow();

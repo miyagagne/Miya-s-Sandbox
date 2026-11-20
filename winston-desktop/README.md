@@ -28,3 +28,7 @@ npm start
 - Your data is stored in the desktop app separately from the web version. Use Export / Import to move it across.
 - **Live class listening works on your laptop's microphone.** The first time, Winston downloads a small speech model (about 40 MB) and then transcribes on your device; it needs internet only for that first download. Windows/Mac/Linux will ask for microphone permission the first time.
 - Claude-powered answers, AI recaps and saving notes straight to Google Docs only work in the web version inside Claude. Everything else works offline, and the live leaderboard needs internet.
+
+## Updates (no reinstall)
+
+The installed app loads the live Winston site (`https://miyagagne.github.io/Miya-s-Sandbox/winston/`) every time it opens, so any change pushed to the repo appears on the next launch. If you're offline it uses the copy bundled in the installer. Only changes to the desktop shell itself (`main.js`, tray, window behavior) need a new release: push a tag like `winston-v1.1.0` and GitHub builds new installers. Turn live updates off from the tray menu if you ever want the bundled copy only.
