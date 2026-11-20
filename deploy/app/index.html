@@ -513,6 +513,46 @@ html[data-theme=dark] #intro .iburst{opacity:.45}
 main.onb{max-width:620px!important;margin:0 auto;display:block!important}main.onb .hero{text-align:center}main.onb .hero h1{text-align:center;display:block}main.onb .hero .dogwrap svg{max-width:220px}
 #intro .isub{display:inline-block;max-width:min(88vw,420px);margin:12px auto 0;padding:10px 18px;color:#4a2c10;font-weight:600;font-size:17px;line-height:1.35;text-shadow:none;background:linear-gradient(#fffbea,#ffedbd);border:3px solid #8a5a2b;border-radius:16px;box-shadow:inset 0 0 0 2px #ffdf8e,0 4px 0 #5a3414,0 8px 14px rgba(20,40,80,.25)}
 html[data-theme=dark] #intro .isub{color:#fff3dd;background:linear-gradient(#5a4028,#3e2a18);border-color:#2a1a0c;box-shadow:inset 0 0 0 2px #8a6238,0 4px 0 #160c04,0 8px 14px rgba(0,0,0,.4)}
+/* ---- cool pet-only widget ---- */
+#widget.pipmini{background:linear-gradient(#5cc4ff,#bfeaff 52%,#8fdc70 52%)!important}
+#widget.pipmini:has(.pn){background:linear-gradient(#0d1636,#3a3a7a 52%,#1f4a45 52%)!important}
+.pipsky{position:absolute;inset:0 0 44% 0;overflow:hidden}
+.pipsun{position:absolute;right:12%;top:10%;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle,#fff6b0 28%,#ffd84a 62%,rgba(255,216,74,0) 72%);animation:psun 5s ease-in-out infinite}
+.pn .pipsun{background:radial-gradient(circle,#fffbe8 30%,#e9e2ff 60%,rgba(233,226,255,0) 72%)}
+@keyframes psun{50%{transform:scale(1.12);opacity:.85}}
+.pcl{position:absolute;height:20px;width:58px;border-radius:20px;background:#fff;opacity:.92;filter:drop-shadow(0 3px 0 rgba(120,170,220,.3))}
+.pcl:before,.pcl:after{content:'';position:absolute;background:#fff;border-radius:50%}.pcl:before{width:26px;height:26px;left:8px;top:-12px}.pcl:after{width:20px;height:20px;left:30px;top:-8px}
+.pcl.c1{top:18%;left:-70px;animation:pdrift 22s linear infinite}.pcl.c2{top:42%;left:-70px;transform:scale(.7);animation:pdrift 30s linear -12s infinite}
+.pn .pcl{background:#6c7bd0;opacity:.6}.pn .pcl:before,.pn .pcl:after{background:#6c7bd0}
+@keyframes pdrift{to{left:110%}}
+.prain{position:absolute;left:30%;top:6%;width:40%;height:60%;background:repeating-linear-gradient(105deg,transparent 0 9px,rgba(90,140,220,.6) 9px 11px);animation:prn .5s linear infinite;opacity:.7}
+@keyframes prn{to{background-position:-20px 22px}}
+.pspk{position:absolute;bottom:-10px;width:8px;height:8px;background:#fff6b0;border-radius:50%;box-shadow:0 0 8px 3px rgba(255,240,150,.8);opacity:0;animation:prise 5s ease-in infinite;animation-delay:var(--d);transform:scale(var(--s))}
+@keyframes prise{0%{opacity:0;transform:translateY(0) scale(var(--s))}20%{opacity:1}100%{opacity:0;transform:translateY(-190px) scale(0)}}
+.piphill{position:absolute;left:-10%;right:-10%;bottom:0;height:46%;background:radial-gradient(ellipse at 50% 0,#a6ee82,#6fd150 70%);border-radius:50% 50% 0 0/40% 40% 0 0;box-shadow:inset 0 4px 0 rgba(255,255,255,.35)}
+.pn~.piphill{background:radial-gradient(ellipse at 50% 0,#2c6a5c,#1b4a42 70%)}
+.pipstage>.pipdog,.pipstage>.pipmode,.pipstage>.pipxp,.pipstage>.pipplate,.pipstage>.piphud,.pipstage>.pipclock,.pipstage>.sbub{position:relative;z-index:3}.pipsky,.piphill{z-index:0}
+.pipstage>*{flex:none}.pipstage>.pipdog{flex:0 1 auto;min-height:0;width:min(78vw,40vh);max-width:240px}.pipstage{gap:3px;padding:6px}
+.pipdog{position:relative}.pipdog:hover svg{animation-duration:1.4s}.pipdog:active svg{transform:scale(.95)}
+.pipring{position:absolute;left:50%;bottom:-6%;width:90%;height:22%;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse,rgba(255,244,170,.9),rgba(255,244,170,0) 70%);animation:pglow 3s ease-in-out infinite;z-index:-1}
+@keyframes pglow{50%{opacity:.55;transform:translateX(-50%) scale(1.12)}}
+.pipplate{font:400 17px 'Lilita One',system-ui,sans-serif;color:#fff;background:linear-gradient(#cf9658,#a76a30);border:3px solid #5a3414;border-radius:12px;padding:2px 14px;box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 3px 0 #3a200a;text-shadow:-1px -1px 0 #5a3414,1px -1px 0 #5a3414,-1px 1px 0 #5a3414,1px 1px 0 #5a3414;display:flex;align-items:baseline;gap:8px}
+.pipplate small{font-size:12px;color:#ffe9a8;text-shadow:none;background:#5a3414;border-radius:8px;padding:0 6px}
+.piphud{display:flex;gap:6px;margin-top:2px}
+.piphud span{display:inline-flex;align-items:center;gap:4px;font:400 13px 'Lilita One',system-ui;color:#fff;background:rgba(60,35,12,.82);border:2px solid #3a200a;border-radius:99px;padding:1px 9px 1px 6px;text-shadow:none}
+.piphud .ic{width:15px;height:15px}
+.pipclock{font:400 22px 'Lilita One',system-ui;color:#fff;background:rgba(60,35,12,.85);border-radius:12px;padding:0 12px;border:2px solid #3a200a}
+@media(max-height:240px){.piphud{display:none}}
+.pipmode{display:inline-flex;align-items:center;gap:6px;max-width:94%;font:400 13px 'Lilita One',system-ui;color:#fff;border:2px solid #3a200a;border-radius:99px;padding:1px 10px 1px 7px;background:rgba(60,35,12,.82)}
+.pipmode b{font-weight:400;white-space:nowrap}.pipmode span{color:#ffe9a8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px}
+.pipmode.class{background:linear-gradient(#ff9a6b,#e0502f);border-color:#8a2a10;animation:pglow2 1.6s ease-in-out infinite}.pipmode.pstudy{background:linear-gradient(#58c632,#2f8f1a);border-color:#1f5a0e}
+@keyframes pglow2{50%{filter:brightness(1.15)}}
+.pipmode .ic{width:15px;height:15px}
+.pipxp{position:relative;width:min(80%,210px);height:16px;background:#4a2c12;border:2px solid #3a200a;border-radius:99px;overflow:hidden;box-shadow:inset 0 2px 0 rgba(0,0,0,.35)}
+.pipxp i{display:block;height:100%;background:linear-gradient(#c8ff8a,#58c632 60%,#3fae1f);border-radius:99px;box-shadow:inset 0 2px 0 rgba(255,255,255,.5);transition:width .5s}
+.pipxp em{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:400 10px 'Lilita One',system-ui;font-style:normal;color:#fff;text-shadow:0 1px 0 #3a200a,0 0 3px #3a200a}
+@media(prefers-reduced-motion:reduce){.pspk,.pcl,.pipsun,.pipring,.prain{animation:none}}
+.wbtn{position:relative}.wbtn:before{content:'';position:absolute;inset:-10px;border-radius:50%;background:radial-gradient(circle,rgba(255,244,170,.75),rgba(255,244,170,0) 68%);z-index:-1;animation:pglow 3s ease-in-out infinite}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -900,7 +940,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.36 (readable intro text)';
+const APP_VERSION='2026-11-20.38 (widget shows level, mode, class)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -1035,6 +1075,14 @@ function smartMsg(){const u=S.user,c=live&&S.classes.find(x=>x.id===live.cls);
  return QUOTES[Math.floor(Date.now()/60000)%QUOTES.length].replace('{n}',u.name)}
 const dogMood=()=>W.paw?'pawup':(W.react&&Date.now()<W.react.until&&W.react.mood)?W.react.mood:Date.now()<W.cheerUntil?'cheer':W.view==='breathe'?'calm':mood();
 const wClock=()=>{const t=S.timer;if(!t)return'';const el=(Date.now()-t.start)/1000;return fmtClock(t.target?Math.max(0,t.target-el):el)};
+function pipStatus(){const L=lvl(),lo=15*(L-1)**2,hi=15*L*L,pct=Math.max(0,Math.min(100,Math.round((S.earned-lo)/(hi-lo)*100)));
+ let mode='Relaxing',cn='',ic='zzz',cls='idle';
+ const lc=typeof live!=='undefined'&&live?S.classes.find(x=>x.id===live.cls):null,tc=S.timer?S.classes.find(x=>x.id===S.timer.cls):null;
+ if(lc){mode='In Class';cn=lc.name;ic='mic';cls='class'}else if(S.timer){mode='Studying';cn=tc?tc.name:'';ic='timer';cls='pstudy'}
+ return `<div class="pipmode ${cls}"><svg class="ic"><use href="#i-${ic}"/></svg><b>${mode}</b>${cn?`<span>${esc(cn)}</span>`:''}</div><div class="pipxp" title="${hi-S.earned} XP to level ${L+1}"><i style="width:${pct}%"></i><em>${hi-S.earned} XP to Lv ${L+1}</em></div>`}
+function pipScene(){const sad=mood()==='sad',dk=typeof themeIsDark==='function'&&themeIsDark();
+ const sp=[...Array(9)].map((_,i)=>`<i class="pspk" style="left:${8+i*10.5}%;--d:${(i*.55).toFixed(2)}s;--s:${(.7+(i%3)*.35).toFixed(2)}"></i>`).join('');
+ return `<div class="pipsky ${dk?'pn':''}"><i class="pipsun"></i><i class="pcl c1"></i><i class="pcl c2"></i>${sad?'<i class="prain"></i>':''}${sp}</div><div class="piphill"></div>`}
 function pipBg(mini){try{if(!pipWin)return;const d=pipWin.document;d.documentElement.style.background=mini?'#8fdc70':'#fffaf0';d.body.style.background=mini?'linear-gradient(#bfe6ff,#e9fbff 62%,#8fdc70 62%)':'#fffaf0';d.body.style.minHeight='0';d.body.style.padding='0';d.body.style.margin='0';d.documentElement.style.overflow='hidden';d.body.style.overflow='hidden'}catch(e){}}
 function drawWidget(){
  if(!S.user){WEL.className='';WEL.innerHTML='';document.body.classList.remove('live');return}
@@ -1048,7 +1096,7 @@ function drawWidget(){
   WEL.className='mini show';setTimeout(applyWPos,0);WEL.innerHTML=`<button class="wbtn" data-a="wopen" aria-label="Open ${esc(DN())}">${dog(S.eq,dogMood(),'10 6 180 196')}</button>${cap}`;return}
 if(W.popped&&!W.pmenu){const reply=W.react&&Date.now()<W.react.until?W.react:null,live2=typeof live!=='undefined'&&live,last=live2&&live.notes&&live.notes.length?live.notes[live.notes.length-1]:null;
   const bub=W.paw?`<div class="sbub pawbub"><b>Still with me, ${esc(S.user.name)}?</b><button class="p pawbtn" data-a="highpaw">High Paw!</button><div class="pawbar"><i></i></div></div>`:reply?`<div class="sbub">${esc(reply.text)}</div>`:W.msg&&Date.now()-(W.msgAt||0)<15000?`<div class="sbub">${esc(W.msg).slice(0,90)}</div>`:last?`<div class="sbub sm">Noted: ${esc((last.term||last.line).slice(0,50))}</div>`:'';
-  pipBg(true);WEL.className='show pip pipmini';WEL.innerHTML=`<div class="pipstage">${bub}<div class="pipdog" data-a="pipmenu" title="Tap ${esc(DN())} for the menu">${dog(S.eq,dogMood(),'10 6 180 196',petBreed())}</div><div class="pipname">${esc(DN())}</div>${S.timer?`<div class="pipname tmv wclock" style="font-size:20px">${wClock()}</div>`:''}</div>`;return}
+  pipBg(true);WEL.className='show pip pipmini';WEL.innerHTML=`<div class="pipstage">${bub}${pipScene()}<div class="pipdog" data-a="pipmenu" title="Tap ${esc(DN())} for the menu"><i class="pipring"></i>${dog(S.eq,dogMood(),'10 6 180 196',petBreed())}</div><div class="pipplate">${esc(DN())}<small>Lv ${lvl()}</small></div>${pipStatus()}<div class="piphud"><span><svg class="ic"><use href="#i-coin"/></svg>${S.coins}</span><span><svg class="ic"><use href="#i-flame"/></svg>${streakDays()}</span><span><svg class="ic"><use href="#i-heart"/></svg>${Math.round(S.happy)}%</span></div>${S.timer?`<div class="pipclock tmv wclock">${wClock()}</div>`:''}</div>`;return}
  if(W.popped)pipBg(false);
  WEL.className='show'+(W.popped?' pip':'')+(desk?' desk':'');
  const keepScroll=W._lv===W.view?WEL.scrollTop:0;W._lv=W.view;
@@ -1922,12 +1970,14 @@ const TOUR=[
  {t:'Practice For Coins',b:'Answer quick questions built from your own notes. Right answers earn coins for my shop. 🪙',tab:'practice',sel:'nav [data-k=practice]'},
  {t:'Boost Your Mood',b:'Bored, stressed or unmotivated? Open the Boost Hub on Home and tell me how you feel. I\'ll help with breathing, a game or a pep talk.',tab:'home',sel:'[data-a=tab][data-k=boost]'},
  {t:'Make Me Yours',b:'Spend coins on hats and glasses, switch Light or Dark mode and name me in Settings.',tab:'dog',sel:'nav [data-k=dog]'},
- {t:'Hang Out With Friends 🌳',b:'Social is where your friends, the leaderboard and the Dog Park live. Wave hello, take a break and see who is studying so you can keep up.',tab:'social',sel:'nav [data-k=social]'},
+ {t:'Friends And Leaderboards 🏆',b:'The Social tab is where you add friends by username and race them on the leaderboard. Filter it by friends, your school, your state or your country. When a friend studies, you will get a nudge to keep up.',tab:'social',ssub:'friends',sel:'nav [data-k=social]'},
+ {t:'The Dog Park 🌳',b:'The Park is a little hangout for you and your friends. Every pet shows up with what they are doing, like studying or napping. Studying hard? Tap Start A 5-Minute Break to rest and recharge, play fetch with the pups to earn a coin, or wave hello to a friend. It is your reward space between study sessions, so resting never feels like falling behind.',tab:'social',ssub:'park',sel:'[data-a=ssub][data-k=park]'},
  {t:'Ask Me Anything',b:'I go to class with you, so ask me about any class: what\'s going on, what\'s due, or to explain a topic. Add an AI key in Settings for smarter answers.',tab:'home',sel:'[data-a=agent]'},
  {t:'Class Mode',b:'Keep me open in class: full screen, the screen stays awake and I check in with a high paw. Install me from Settings → Get The App to keep me on your phone or computer.',tab:'home',sel:'[data-a=cm]'}];
 let tourI=0;
 function tourShow(i){tourI=Math.max(0,Math.min(TOUR.length-1,i));const st=TOUR[tourI];
  if(st.dsub)view.dsub=st.dsub;else if(st.tab==='dog')view.dsub='shop';
+ if(st.ssub)view.ssub=st.ssub;
  if(st.tab==='hub'){tab='class';const c0=S.classes[0];view.cls=c0?c0.id:null;view.sub='live'}else{tab=st.tab||'home';view.cls=null}
  P=null;render();drawWidget();
  let host=$('#tour');if(!host){host=document.createElement('div');host.id='tour';document.body.append(host)}
