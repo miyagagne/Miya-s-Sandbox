@@ -555,7 +555,7 @@ function accIcon(id){return `<svg viewBox="${ICONVB[ACC[id].slot]}">${ACC[id].sv
 
 /* ======= navigation ======= */
 let tab='home',view={cls:null,sub:'live',ses:null,wk:'all',mwk:'course',delc:null,rmdoc:null},P=null,ob=1,obData={majors:'',minors:'',pet:{species:'dog',breed:'pom'}};
-const TABS=[['home','🏠','Home'],['class','📚','Classes'],['practice','✏️','Practice'],['boost','💛','Boost'],['dog','🐶','My Pet']];
+const TABS=[['home','🏠','Home'],['class','📚','Classes'],['practice','✏️','Practice'],['social','👥','Social'],['dog','🐶','My Pet']];
 const ACTIONS={};
 function go(t){tab=t;P=null;const m=$('#main');if(m){m.classList.remove('enter');void m.offsetWidth;m.classList.add('enter')}render()}
 function refresh(){render(true);updateWidget()}
@@ -564,7 +564,7 @@ function render(keep){
  if(!S.user){n.style.display='none';return renderOnboard()}
  n.style.display='flex';
  n.innerHTML=TABS.map(([k,i,l])=>`<button data-a="tab" data-k="${k}" class="${k===tab?'on':''}"><b>${k==='dog'&&S.pet&&S.pet.species==='cat'?'🐱':i}</b>${l}</button>`).join('');
- ({home:rHome,class:rClass,practice:rPractice,boost:rBoost,dog:rDog})[tab]();
+ ({home:rHome,class:rClass,practice:rPractice,boost:rBoost,social:rSocial,dog:rDog})[tab]();
  if(Date.now()-joy<900)document.querySelectorAll('.dogwrap svg').forEach(x=>x.classList.add('hop'));
 }
 const classes=()=>S.classes;
@@ -614,7 +614,8 @@ function rHome(){
  <div class="row" style="margin:-4px 0 14px"><button class="s grow" data-a="agent">💬 Ask ${esc(DN())}</button><button class="s grow" data-a="cm">📱 Class Mode</button></div>
  ${peerCard()}
  ${questsCard()}
- <div class="card"><h3>How are you feeling?</h3><div class="moods">${MOODS.map(m=>`<button class="mood" data-a="feel" data-k="${m[1]}"><b>${m[0]}</b><span>${m[1]}</span></button>`).join('')}</div><div id="feelout"></div></div>`}
+ <div class="card"><h3>How are you feeling?</h3><div class="moods">${MOODS.map(m=>`<button class="mood" data-a="feel" data-k="${m[1]}"><b>${m[0]}</b><span>${m[1]}</span></button>`).join('')}</div><div id="feelout"></div></div>
+ <button class="s" data-a="tab" data-k="boost" style="width:100%;margin:0 0 14px">💛 Boost Hub — Breathe, Games &amp; Pep Talks</button>`}
 function openFocus(){if(!S.classes.length){toast('Add a class first');tab='class';render();return}
  openModal(`<h2>⏱ Focus session</h2><p class="mute">Pick a class and a length. ${esc(DN())} will cheer you on.</p><select id="fcls">${S.classes.map(c=>`<option value="${c.id}" ${view.tcls===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select><div>${[15,25,45,0].map(m=>`<span class="chip ${(view.fm===undefined?25:view.fm)===m?'on':''}" data-a="fmpick" data-k="${m}">${m?m+' min':'No limit'}</span>`).join('')}</div><button class="p" data-a="fgo" style="width:100%;margin-top:8px">▶ Start</button>`)}
 Object.assign(ACTIONS,{openfocus(){openFocus()},
@@ -715,7 +716,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.15 (farm scene, detailed pets)';
+const APP_VERSION='2026-11-20.16 (Social tab, motivating friend nudges)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -1113,7 +1114,7 @@ Object.assign(ACTIONS,{
 /* ======= friends ======= */
 const myCode=()=>btoa(unescape(encodeURIComponent(JSON.stringify({n:S.user.name,d:DN(),l:lvl(),w:weekMins(),s:streakDays(),t:Date.now(),u:S.live&&S.live.on?S.live.uid:undefined,h:Math.round(S.happy),e:S.eq,b:petBreed()}))));
 function rFriends(){liveKick();
- MAIN().innerHTML=`${lbCard()}<div class="card"><h2>Invite Friends</h2><p class="mute">Studying is better together. Share your streak card or send an invite.</p><div class="row"><button class="p grow" data-a="invite">📨 Invite A Friend</button><button class="s grow" data-a="sharecard">📤 Share My Streak</button></div><div class="row" style="margin-top:8px"><button class="s grow" data-a="shareig">📸 Instagram Story</button><button class="s grow" data-a="sharett">🎵 TikTok</button></div></div>
+ MAIN().innerHTML=`${peerCard()}${lbCard()}<div class="card"><h2>Invite Friends</h2><p class="mute">Studying is better together. Share your streak card or send an invite.</p><div class="row"><button class="p grow" data-a="invite">📨 Invite A Friend</button><button class="s grow" data-a="sharecard">📤 Share My Streak</button></div><div class="row" style="margin-top:8px"><button class="s grow" data-a="shareig">📸 Instagram Story</button><button class="s grow" data-a="sharett">🎵 TikTok</button></div></div>
  <div class="card"><h2>Your friend code</h2><p class="mute">Send this to a friend. They paste it below to see Winston in his latest outfit.</p><textarea readonly id="mc" style="min-height:70px">${myCode()}</textarea><button class="s" data-a="copy">Copy</button></div>
  <div class="card"><h2>Add a friend</h2><textarea id="fc" placeholder="Paste a friend code"></textarea><button class="p" data-a="addf">Add friend</button>
  <p class="mute">Heads up: codes are a snapshot. Live updating and friend requests need an online account (the Supabase setup used elsewhere in this repo) — a good next step.</p></div>
@@ -1131,8 +1132,8 @@ const isStandalone=()=>{try{return !!window.__NATIVE_APP||!!window.ReactNativeWe
 function installCard(){if(DESK||isStandalone())return '';const site='https://miyagagne.github.io/Miya-s-Sandbox/winston/';
  return `<label style="display:block;margin-top:6px">Get The App</label><div class="instcard">${inFrame?`<p class="mute" style="margin:0">To put ${esc(DN())} on your phone or computer, open the Winston website and install it from there:<br><b>${site}</b></p>`:`<button class="p" id="instbtn" data-a="install" style="width:100%">⬇ Install ${esc(DN())}</button><p class="mute" style="margin:8px 0 0"><b>iPhone:</b> Safari → Share → Add To Home Screen<br><b>Android:</b> Chrome ⋮ → Install App<br><b>Computer:</b> Chrome or Edge → install icon in the address bar</p>`}</div>`}
 function rDog(){const sub=view.dsub||'shop';
- $('#main').innerHTML=`<div class="tabs">${[['shop','🛍️ Shop'],['friends','👥 Friends'],['park','🌳 Park'],['me','⚙️ Settings']].map(([k,l])=>`<button data-a="dsub" data-k="${k}" class="${k===sub?'on':''}">${l}</button>`).join('')}</div><div id="dsub"></div>`;
- mainT=$('#dsub');try{({shop:rShop,friends:rFriends,park:rPark,me:rSettings})[sub]()}finally{mainT=null}
+ $('#main').innerHTML=`<div class="tabs">${[['shop','🛍️ Shop'],['me','⚙️ Settings']].map(([k,l])=>`<button data-a="dsub" data-k="${k}" class="${k===sub?'on':''}">${l}</button>`).join('')}</div><div id="dsub"></div>`;
+ mainT=$('#dsub');try{({shop:rShop,me:rSettings})[sub]()}finally{mainT=null}
  if(sub==='me'&&DESK)deskUI()}
 function rSettings(){const u=S.user;
  MAIN().innerHTML=`<div class="card"><h2>Settings</h2><label>Your name</label><input id="sn" value="${esc(u.name)}"><label>Your dog's name</label><input id="sd" value="${esc(DN())}" maxlength="20"><label>My goals (shown when you need a boost)</label><textarea id="sg">${esc(u.goals||'')}</textarea>
@@ -1150,6 +1151,10 @@ function rSettings(){const u=S.user;
  <div class="card"><h2>Backup</h2><p class="mute">Move your streak, classes and notes between the web app and the desktop widget.</p><div class="row"><button class="s grow" data-a="exportdata">⬇ Export My Data</button><button class="s grow" data-a="importdata">⬆ Import My Data</button></div></div>
  <div class="card"><button class="${view.reset?'p bad':'s'}" data-a="resetall" style="width:100%">${view.reset?'Really erase everything?':'Erase everything & start over'}</button></div>`}
 ACTIONS.dsub=d=>{view.dsub=d.k;render()};
+function rSocial(){const sub=view.ssub||'friends';
+ $('#main').innerHTML=`<div class="tabs">${[['friends','🏆 Friends'],['park','🌳 Park']].map(([k,l])=>`<button data-a="ssub" data-k="${k}" class="${k===sub?'on':''}">${l}</button>`).join('')}</div><div id="ssub"></div>`;
+ mainT=$('#ssub');try{({friends:rFriends,park:rPark})[sub]()}finally{mainT=null}}
+ACTIONS.ssub=d=>{view.ssub=d.k;render()};
 function rShop(){
  MAIN().innerHTML=`<div class="card dogwrap"><div class="dogwrap">${dog(S.eq,mood())}</div><div class="stats"><span class="stat">🪙 ${S.coins}</span><span class="stat">❤️ ${Math.round(S.happy)}%</span></div></div>
  <div class="card"><h2>Treats &amp; toys</h2><div class="shopgrid">${TREATS.map(t=>`<div class="card"><div style="font-size:40px">${t.e}</div><b>${t.name}</b><div class="mute">+${t.h} ❤️</div><button class="p" data-a="treat" data-k="${t.id}">${t.price} 🪙</button></div>`).join('')}</div></div>
@@ -1581,7 +1586,7 @@ async function liveSync(){if(!S.live.on||!S.live.uid||liveBusy)return;liveBusy=t
   liveStatus='live';const ids=S.friends.map(f=>f.u).filter(Boolean);
   if(ids.length){const rows=await liveCall('winston_board',{p_uids:ids});if(Array.isArray(rows)){rows.forEach(r=>{const f=S.friends.find(x=>x.u===r.uid);if(f){f.n=r.name;f.d=r.dog;f.w=r.minutes;f.s=r.streak;f.l=r.level;f.t=Date.parse(r.updated_at)||Date.now();f.live=1}});save()}}}
  finally{liveBusy=false}}
-function liveKick(){if(S.live.on&&Date.now()-liveLast>60000)liveSync().then(()=>{if(tab==='dog'&&view.dsub==='friends')render()})}
+function liveKick(){if(S.live.on&&Date.now()-liveLast>60000)liveSync().then(()=>{if(tab==='social'&&(view.ssub||'friends')==='friends')render()})}
 setInterval(()=>{if(S.user&&S.live.on)liveSync()},300000);
 const liveChip=()=>S.live.on?(liveStatus==='live'?'● Live':liveStatus==='setup'?'Needs One-Time Setup':liveStatus==='offline'?'Offline — Showing Snapshots':'Connecting…'):'Snapshot Mode';
 Object.assign(ACTIONS,{
@@ -1701,9 +1706,9 @@ const TOUR=[
  {t:'Add Your Classes',b:'Open the Classes tab and add each class. Upload a syllabus if you have one and I\'ll find the dates. Every class gets its own hub.',tab:'class',sel:'nav [data-k=class]'},
  {t:'Inside A Class Hub',b:'🎙 Live: I listen and take notes · 📝 Review: recaps you can edit · 📄 Materials: uploads by week · 📅 Plan: calendar and study timer. Tap "What\'s Going On?" for this week and the big picture, and "Import From Brightspace" to bring in dates and lectures. If your professor doesn\'t allow recording, use Typing Mode.',tab:'hub',sel:'[data-a=whatsup]'},
  {t:'Practice For Coins',b:'Answer quick questions built from your own notes. Right answers earn coins for my shop. 🪙',tab:'practice',sel:'nav [data-k=practice]'},
- {t:'Boost Your Mood',b:'Bored, stressed or unmotivated? Tell me how you feel and I\'ll help with breathing, a game or a pep talk.',tab:'boost',sel:'nav [data-k=boost]'},
- {t:'Make Me Yours',b:'Spend coins on hats and glasses, add friends, switch Light or Dark mode and name me in Settings.',tab:'dog',sel:'nav [data-k=dog]'},
- {t:'Visit The Park 🌳',b:'The Park is where you and your friends hang out between sessions. Take a break, wave hello and see who is studying.',tab:'dog',dsub:'park',sel:'[data-a=dsub][data-k=park]'},
+ {t:'Boost Your Mood',b:'Bored, stressed or unmotivated? Open the Boost Hub on Home and tell me how you feel. I\'ll help with breathing, a game or a pep talk.',tab:'home',sel:'[data-a=tab][data-k=boost]'},
+ {t:'Make Me Yours',b:'Spend coins on hats and glasses, switch Light or Dark mode and name me in Settings.',tab:'dog',sel:'nav [data-k=dog]'},
+ {t:'Hang Out With Friends 🌳',b:'Social is where your friends, the leaderboard and the Dog Park live. Wave hello, take a break and see who is studying so you can keep up.',tab:'social',sel:'nav [data-k=social]'},
  {t:'Ask Me Anything',b:'I go to class with you, so ask me about any class: what\'s going on, what\'s due, or to explain a topic. Add an AI key in Settings for smarter answers.',tab:'home',sel:'[data-a=agent]'},
  {t:'Class Mode',b:'Keep me open in class: full screen, the screen stays awake and I check in with a high paw. Install me from Settings → Get The App to keep me on your phone or computer.',tab:'home',sel:'[data-a=cm]'}];
 let tourI=0;
@@ -1724,11 +1729,17 @@ Object.assign(ACTIONS,{tour(){closeModal();maybeTour(true)},tournext(){tourI>=TO
 /* ======= v9: peer nudges, Dog Park, Brightspace import ======= */
 S.park=S.park||{};
 function peerStats(){const me=weekMins(),fr=S.friends.filter(f=>!(f.t&&Date.now()-f.t>7*864e5)),ahead=fr.filter(f=>(f.w||0)>me).sort((a,b)=>b.w-a.w),now=fr.filter(f=>f.live&&f.t&&Date.now()-f.t<15*60000);return {me,fr,ahead,now}}
-function peerMsgs(){const {me,fr,ahead,now}=peerStats(),out=[];if(!fr.length)return out;
- now.slice(0,2).forEach(f=>out.push({t:`👀 ${f.n} is studying right now`,k:'live'}));
- if(ahead.length){const f=ahead[0];out.push({t:`${f.n} has studied ${f.w} min this week — you're at ${me}. ${f.w-me} min to catch up!`,k:'behind'})}else out.push({t:`You're leading your friends this week with ${me} min! 🏆`,k:'lead'});
- const sf=fr.filter(f=>(f.s||0)>streakDays()).sort((a,b)=>b.s-a.s)[0];if(sf)out.push({t:`${sf.n} is on a ${sf.s}-day streak — keep yours going! 🔥`,k:'streak'});return out}
-function peerCard(){const m=peerMsgs();if(!m.length)return '';return `<div class="card nudge"><h3>👀 Your Friends Are Studying</h3>${m.slice(0,3).map(x=>`<div class="nrow ${x.k}">${esc(x.t)}</div>`).join('')}<button class="s" data-a="dsubgo" data-k="friends" style="width:100%;margin-top:8px">See The Leaderboard</button></div>`}
+function peerMsgs(){const {me,fr,ahead,now}=peerStats(),out=[],st=streakDays(),L=lvl();
+ const cls={t:`Stay engaged in class: take notes, ask one question and answer when I check in with a high paw. Show up and stay locked in! 🎓`,k:'class',act:{l:'🎙 Start Class',a:'tab',k:'class'}};
+ if(!fr.length)return [cls,{t:`Studying is better with friends. Invite one and race up the leaderboard together! 🏆`,k:'live',act:{l:'📨 Invite A Friend',a:'invite'}}];
+ now.slice(0,1).forEach(f=>out.push({t:`👀 ${f.n} is studying right now. Join them for a 25-minute focus session!`,k:'live',act:{l:'⏱ Study With '+f.n,a:'openfocus'}}));
+ if(ahead.length){const f=ahead[0],gap=f.w-me;out.push({t:`${f.n} has studied ${f.w} min this week and you're at ${me}. ${gap>25?'One 25-minute focus session helps you catch up':'Just '+gap+' more minutes to catch up'} — start now! 🔥`,k:'behind',act:{l:'⏱ Start Focus',a:'openfocus'}})}
+ else out.push({t:`You're leading your friends this week with ${me} min! One more session keeps you ahead. 🏆`,k:'lead',act:{l:'⏱ Keep Going',a:'openfocus'}});
+ const sf=fr.filter(f=>(f.s||0)>st).sort((a,b)=>b.s-a.s)[0];if(sf)out.push({t:`${sf.n} is on a ${sf.s}-day streak${st?` and yours is ${st}`:" and you haven't started yet"}. Study today to keep yours going! 🔥`,k:'streak',act:{l:"⏱ Start Today's Streak",a:'openfocus'}});
+ const lf=fr.filter(f=>(f.l||1)>L).sort((a,b)=>b.l-a.l)[0];if(lf)out.push({t:`${lf.n} is Level ${lf.l} and you're Level ${L}. Answer 5 practice questions to level up! ✏️`,k:'level',act:{l:'✏️ Practice Now',a:'tab',k:'practice'}});
+ out.push(cls);return out}
+function peerCard(){const m=peerMsgs();if(!m.length)return '';const shown=[...m.filter(x=>x.k!=='class').slice(0,4),...m.filter(x=>x.k==='class')];
+ return `<div class="card nudge"><h3>${S.friends.length?'👀 Your Friends Are Studying':'💪 Stay On Track'}</h3>${shown.map(x=>`<div class="nrow ${x.k}"><div>${esc(x.t)}</div>${x.act?`<button class="p" data-a="${x.act.a}"${x.act.k?` data-k="${x.act.k}"`:''} style="margin-top:8px;width:100%">${esc(x.act.l)}</button>`:''}</div>`).join('')}${S.friends.length?'<button class="s" data-a="dsubgo" data-k="friends" style="width:100%;margin-top:8px">See The Leaderboard</button>':''}</div>`}
 function nudgeCheck(){if(!S.user||!S.pref.nudge)return;const m=peerMsgs().find(x=>x.k==='behind');if(!m)return;const r=dayRec();if(r.nudged)return;r.nudged=1;save();
  if(window.Notification&&Notification.permission==='granted')try{new Notification(`${DN()}: your friends are ahead!`,{body:m.t})}catch(e){}
  W.msg=m.t;W.cheerUntil=0;drawWidget();toast(m.t)}
@@ -1753,9 +1764,9 @@ function rPark(){liveKick();const crowd=parkCrowd(),real=crowd.filter(x=>!x.npc)
  <div class="card"><h3>☕ Take A Break</h3><p class="mute" style="margin:0 0 8px">${brk?`On a break — back in <b id="brk">${fmtClock(left)}</b>. Stretch, drink some water and say hi to the pups. 💛`:"Studying hard? A short break keeps you going. I'll tell you when it's time to head back."}</p>
  <div class="row"><button class="p grow" data-a="parkbreak">${brk?'End Break':'Start A 5-Minute Break'}</button><button class="s grow" data-a="parkfetch">🎾 Play Fetch</button></div><div id="fetchout" class="mute" style="margin-top:6px"></div></div>
  <div class="card"><h3>Bring Friends To The Park</h3><p class="mute">The park is better with friends. See who's studying, race up the leaderboard and wave hello.</p><div class="row"><button class="p grow" data-a="invite">📨 Invite A Friend</button><button class="s grow" data-a="dsubgo" data-k="friends">👥 Leaderboard</button></div></div>`;
- clearInterval(parkIv);if(brk)parkIv=setInterval(()=>{const b=$('#brk');if(!b||tab!=='dog'||view.dsub!=='park'){clearInterval(parkIv);return}const l=Math.ceil(((S.park.breakUntil||0)-Date.now())/1000);if(l<=0){S.park.breakUntil=0;save();clearInterval(parkIv);toast("Break's over — ready to study? 📚");render();return}b.textContent=fmtClock(l)},1000)}
+ clearInterval(parkIv);if(brk)parkIv=setInterval(()=>{const b=$('#brk');if(!b||tab!=='social'||view.ssub!=='park'){clearInterval(parkIv);return}const l=Math.ceil(((S.park.breakUntil||0)-Date.now())/1000);if(l<=0){S.park.breakUntil=0;save();clearInterval(parkIv);toast("Break's over — ready to study? 📚");render();return}b.textContent=fmtClock(l)},1000)}
 Object.assign(ACTIONS,{
- dsubgo(d){tab='dog';view.dsub=d.k;render()},
+ dsubgo(d){tab='social';view.ssub=d.k==='park'?'park':'friends';render()},
  parkbreak(){S.park.breakUntil=(S.park.breakUntil||0)>Date.now()?0:Date.now()+5*60000;save();render()},
  parkfetch(){const t=Date.now();if(t-(S.park.lastFetch||0)<8000){const o=$('#fetchout');if(o)o.textContent='Give the pups a second to catch their breath! 🐾';return}S.park.lastFetch=t;const r=dayRec();r.fetch=(r.fetch||0)+1;S.happy=Math.min(100,S.happy+2);
   const o=$('#fetchout');if(r.fetch<=5){earn(1,'fetch! 🎾');}else{save();if(o)o.textContent='🎾 Fetch! Everyone is happily tired now — back to studying soon?'}burst(14,$('.ppet.me svg'))},
