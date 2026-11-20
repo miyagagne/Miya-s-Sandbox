@@ -617,6 +617,7 @@ const BREEDS={
  gsd:{sp:'dog',name:'German Shepherd',fur:'#c98a45',fs:'#6e4219',cream:'#e6c79a',cs:'#b99363',dark:'#4a3626',ear:'up',earS:1.1,earTall:1,earIn:'#d9a0a0',tuft:.006,cheek:0,mask:1},
  persian:{sp:'cat',name:'Persian',fur:'#f3efe9',fs:'#b8ad9e',cream:'#fffaf3',cs:'#e4dccf',ear:'cat',earS:.8,earIn:'#ffc4d1',n:14,tuft:.04,cheek:.2,tension:1.6,flat:1,chest:.03,cn:8},
  tabby:{sp:'cat',name:'Orange Tabby',fur:'#f09a40',fs:'#b5601a',cream:'#ffe8c8',cs:'#ecc895',ear:'cat',earS:1,earIn:'#ffb0bd',tuft:.012,cheek:.04,stripe:'#c8651b'},
+ siamese:{sp:'cat',name:'Siamese',fur:'#f2e3c8',fs:'#8a6a4a',cream:'#fbf1de',cs:'#d9c3a0',dark:'#6b4a3a',ear:'cat',earS:1.12,earIn:'#a87868',tuft:.012,cheek:.03,mask:1,pts:1,blue:1,chest:0},
  maine:{sp:'cat',name:'Maine Coon',fur:'#8f7458',fs:'#4e3a28',cream:'#eadfca',cs:'#c9b698',ear:'cat',earS:1.22,earIn:'#d9a3a8',n:14,tuft:.035,cheek:.14,tension:1.55,stripe:'#4a3827',tip:1,chest:.035,cn:8,bigtail:1}};
 const petBreed=()=>(typeof S!=='undefined'&&S&&S.pet&&BREEDS[S.pet.breed])?S.pet.breed:'pom';
 const petNoun=()=>BREEDS[petBreed()].sp==='cat'?'cat':'dog';
@@ -631,7 +632,7 @@ function dog(eq={},m='happy',vb='0 0 200 200',br){
  const C=(x,y,r,f,o)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${f}"${o?` opacity="${o}"`:''}/>`;
  const hd='M0 -3 C-6 -10 -14 0 0 10 C14 0 6 -10 0 -3Z';
  const fo=`fill="${F}" stroke="${FS}" stroke-width="2.4" stroke-linejoin="round"`,co=`fill="${CR}" stroke="${CS}" stroke-width="1.6" stroke-linejoin="round"`;
- const eye=ry=>`<ellipse cx="122" cy="100" rx="${ry-1.5}" ry="${ry}" fill="url(#eye)"/><ellipse cx="121" cy="${100+ry*.42}" rx="${ry-4}" ry="${ry*.4}" fill="#6b4630" opacity=".7"/><circle cx="125.5" cy="${96-(ry>12?1:0)}" r="2.7" fill="#fff" opacity=".95"/><path d="M${112-(ry-12)*.3} ${100-ry+1} Q122 ${100-ry-3} 132 ${100-ry+1}" stroke="#2a1810" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M133 ${100-ry+2} l3.5-3" stroke="#2a1810" stroke-width="1.8" stroke-linecap="round"/>`;
+ const eye=ry=>`<ellipse cx="122" cy="100" rx="${ry-1.5}" ry="${ry}" fill="${B.blue?'#3f8fe0':'url(#eye)'}"/><ellipse cx="122" cy="100" rx="${ry*.45}" ry="${ry*.6}" fill="#14202e"/><ellipse cx="121" cy="${100+ry*.42}" rx="${ry-4}" ry="${ry*.4}" fill="${B.blue?'#8fc8ff':'#6b4630'}" opacity=".5"/><circle cx="125.5" cy="${96-(ry>12?1:0)}" r="2.7" fill="#fff" opacity=".95"/><path d="M${112-(ry-12)*.3} ${100-ry+1} Q122 ${100-ry-3} 132 ${100-ry+1}" stroke="#2a1810" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M133 ${100-ry+2} l3.5-3" stroke="#2a1810" stroke-width="1.8" stroke-linecap="round"/>`;
  const eyes=m==='happy'
   ?H('<path d="M112 104 Q122 88 132 104" stroke="#2a1810" stroke-width="4.6" fill="none" stroke-linecap="round"/><path d="M134 100 l4-3M130 94 l3-4" stroke="#2a1810" stroke-width="2.4" stroke-linecap="round"/>')
   :m==='calm'?H('<path d="M112 98 Q122 109 132 98" stroke="#2a1810" stroke-width="4.2" fill="none" stroke-linecap="round"/><path d="M134 100 l4 2M131 105 l3 3" stroke="#2a1810" stroke-width="2.2" stroke-linecap="round"/>')
@@ -654,25 +655,25 @@ function dog(eq={},m='happy',vb='0 0 200 200',br){
  const glad=m==='happy'||m==='cheer'||m==='calm';
  const HP=fluff(100,102,57,48,B.n||20,B.tuft,B.cheek,B.tension||1.15);
  const earUp=()=>{const sx=B.earS||1,sy=B.earTall?1.3:sx;return `<g transform="translate(137 80) scale(${sx} ${sy}) translate(-137 -80)"><path d="M114 64 C122 48 134 34 146 26 C158 46 164 64 160 84 C146 76 128 70 114 64Z" ${fo}/><path d="M127 64 C133 54 140 44 146 40 C153 54 156 64 154 76 C144 72 134 68 127 64Z" fill="${B.earIn}"/><path d="M141 72 q2-9 5-19M147 72 q1-8 2-15" stroke="${CR}" stroke-width="1.8" stroke-linecap="round" fill="none" opacity=".85"/>${B.blaze?`<ellipse cx="138" cy="70" rx="9" ry="5" ${co} opacity=".9" transform="rotate(-35 138 70)"/>`:''}${B.mask?`<path d="M146 26 C158 46 164 64 160 84 C152 74 148 52 146 26Z" fill="${B.dark}" opacity=".85"/>`:''}<path d="M118 62 C124 46 134 34 144 28" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="2" stroke-linecap="round"/></g>`};
- const earCat=()=>{const sc=B.earS||1;return `<g transform="translate(135 68) scale(${sc}) translate(-135 -68)"><path d="M116 68 L128 22 L158 62 C148 72 128 74 116 68Z" ${fo}/><path d="M125 62 L130 38 L148 58Z" fill="${B.earIn}"/>${B.tip?`<path d="M128 22 L126 8 M128 22 L136 10" stroke="${FS}" stroke-width="2.4" stroke-linecap="round" fill="none"/>`:''}</g>`};
+ const earCat=()=>{const sc=B.earS||1;return `<g transform="translate(135 68) scale(${sc}) translate(-135 -68)"><path d="M116 68 L128 22 L158 62 C148 72 128 74 116 68Z" ${B.pts?`fill="${B.dark}" stroke="${FS}" stroke-width="2.4" stroke-linejoin="round"`:fo}/><path d="M125 62 L130 38 L148 58Z" fill="${B.earIn}"/>${B.tip?`<path d="M128 22 L126 8 M128 22 L136 10" stroke="${FS}" stroke-width="2.4" stroke-linecap="round" fill="none"/>`:''}</g>`};
  const earBack=B.ear==='up'?H(earUp()):B.ear==='cat'?H(earCat()):'';
  const earFront=B.ear==='floppy'?H(`<path d="M140 54 C166 52 180 86 170 124 C166 136 150 134 146 118 C142 100 144 76 140 54Z" fill="${B.ear2}" stroke="${FS}" stroke-width="2.4" stroke-linejoin="round"/>`):'';
  const stripes=B.stripe?`<path d="M100 60 V76 M90 63 L94 76 M110 63 L106 76" stroke="${B.stripe}" stroke-width="3.2" stroke-linecap="round" fill="none"/>`+H(`<path d="M148 100 l-12 2 M149 110 l-12 0 M147 120 l-11 -3" stroke="${B.stripe}" stroke-width="2.6" stroke-linecap="round" fill="none"/>`):'';
- const forehead=B.blaze?`<ellipse cx="100" cy="80" rx="7" ry="18" fill="${CR}" opacity=".95"/>`:B.mask?`<path d="M100 58 C88 66 86 82 100 94 C114 82 112 66 100 58Z" fill="${B.dark}" opacity=".6"/>`:'';
+ const forehead=B.pts?`<path d="M100 108 C84 100 80 122 92 134 C96 138 104 138 108 134 C120 122 116 100 100 108Z" fill="${B.dark}" opacity=".55"/>`:B.blaze?`<ellipse cx="100" cy="80" rx="7" ry="18" fill="${CR}" opacity=".95"/>`:B.mask?`<path d="M100 58 C88 66 86 82 100 94 C114 82 112 66 100 58Z" fill="${B.dark}" opacity=".6"/>`:'';
  const mz=B.flat?[100,121,15,11]:cat?[100,124,16,12]:B.muz?[100,124,25,20]:[100,122,24,18];
- const muzFill=B.mask?`fill="${B.dark}" stroke="#33261c" stroke-width="1.6"`:co;
+ const muzFill=B.pts?co:B.mask?`fill="${B.dark}" stroke="#33261c" stroke-width="1.6"`:co;
  const muzzle=`<ellipse cx="${mz[0]}" cy="${mz[1]}" rx="${mz[2]}" ry="${mz[3]}" ${muzFill}/>`+(cat?'':`<ellipse cx="100" cy="138" rx="13" ry="7" ${B.mask?`fill="#6a523c" stroke="#33261c" stroke-width="1.4"`:co}/>`)
   +H((cat?`<ellipse cx="111" cy="${B.flat?124:126}" rx="${B.flat?10:11}" ry="${B.flat?8:9}" ${co}/>`:`<ellipse cx="116" cy="126" rx="14" ry="12" ${B.mask?`fill="#7a6048" stroke="#33261c" stroke-width="1.4"`:co}/>`+C(112,126,1.5,'#b8845a')+C(117,130,1.5,'#b8845a')+C(108,131,1.5,'#b8845a'))+(glad?'<circle cx="142" cy="120" r="10" fill="url(#blush)"/>':''));
  const nose=cat?`<path d="M94 ${112+ny} Q100 ${107+ny} 106 ${112+ny} Q103 ${119+ny} 100 ${120+ny} Q97 ${119+ny} 94 ${112+ny}Z" fill="#ff8fa8" stroke="#d1607a" stroke-width="1.4" stroke-linejoin="round"/>`:`<path d="M90 110 Q100 103 110 110 Q108 120 100 121 Q92 120 90 110Z" fill="url(#nose)"/><ellipse cx="99" cy="107" rx="5.5" ry="2.2" fill="#fff" opacity=".8"/><path d="M95 114 q2 2 4 0M101 114 q2 2 4 0" stroke="#0f0a0c" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".7"/>`;
  const whisk=cat?H(`<path d="M116 ${122+ny} L146 ${116+ny} M116 ${126+ny} L148 ${126+ny} M116 ${130+ny} L146 ${136+ny}" stroke="#5a4a40" stroke-width="1.3" stroke-linecap="round" opacity=".6" fill="none"/>`):'';
- const tail=cat?`<path d="M148 190 C196 192 202 142 176 126" fill="none" stroke="${FS}" stroke-width="${B.bigtail?27:21}" stroke-linecap="round"/><path d="M148 190 C196 192 202 142 176 126" fill="none" stroke="${F}" stroke-width="${B.bigtail?22:16}" stroke-linecap="round"/>`+(B.stripe?`<path d="M186 176 l8 -3 M193 160 l9 -2 M190 144 l9 2" stroke="${B.stripe}" stroke-width="3" stroke-linecap="round" fill="none"/>`:''):'';
+ const tail=cat?`<path d="M148 190 C196 192 202 142 176 126" fill="none" stroke="${FS}" stroke-width="${B.bigtail?27:21}" stroke-linecap="round"/><path d="M148 190 C196 192 202 142 176 126" fill="none" stroke="${B.pts?B.dark:F}" stroke-width="${B.bigtail?22:16}" stroke-linecap="round"/>`+(B.stripe?`<path d="M186 176 l8 -3 M193 160 l9 -2 M190 144 l9 2" stroke="${B.stripe}" stroke-width="3" stroke-linecap="round" fill="none"/>`:''):'';
  return `<svg viewBox="${vb}" role="img" aria-label="Your study buddy, a ${B.name}">
  <ellipse cx="100" cy="197" rx="56" ry="5" fill="#3b2a50" opacity=".14"/>
  ${g('back')}
  ${tail}
  <g class="breathe">
  <ellipse cx="100" cy="164" rx="48" ry="32" ${fo}/><ellipse cx="100" cy="184" rx="40" ry="12" fill="${SH}" opacity=".4"/><ellipse cx="70" cy="154" rx="12" ry="5" fill="${HL}" opacity=".5" transform="rotate(-25 70 154)"/>
- ${H(`<ellipse cx="146" cy="171" rx="22" ry="20" ${fo}/><path d="M134 160 q10-8 22-2" stroke="${HL}" stroke-width="3" fill="none" stroke-linecap="round" opacity=".6"/><path d="M140 186 q8 5 18 0" stroke="${SH}" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".5"/><ellipse cx="156" cy="190" rx="15" ry="7.5" ${co}/><path d="M150 188v4M156 187v5M162 188v4" stroke="${CS}" stroke-width="1.4" stroke-linecap="round"/>`)}
+ ${H(`<ellipse cx="146" cy="171" rx="22" ry="20" ${fo}/><path d="M134 160 q10-8 22-2" stroke="${HL}" stroke-width="3" fill="none" stroke-linecap="round" opacity=".6"/><path d="M140 186 q8 5 18 0" stroke="${SH}" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".5"/><ellipse cx="156" cy="190" rx="15" ry="7.5" ${B.pts?`fill="${B.dark}" stroke="${FS}" stroke-width="1.6"`:co}/><path d="M150 188v4M156 187v5M162 188v4" stroke="${CS}" stroke-width="1.4" stroke-linecap="round"/>`)}
  <path d="${fluff(100,150,B.chest?42:36,B.chest?29:26,B.cn||12,B.chest||.03,.05,B.tension||1.1)}" ${co}/>
  ${H(`<path d="M103 156 Q127 152 127 172 L126 187 Q125 195 115 195 Q104 195 103 187Z" ${co}/><path d="M109 189v5M115 188v6M121 189v5" stroke="${CS}" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="115" cy="193" rx="9" ry="2.4" fill="#ffc9cf" opacity=".6"/>`)}
  </g>
@@ -876,7 +877,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.26 (scoped leaderboards, laptop layout)';
+const APP_VERSION='2026-11-20.27 (Siamese cat)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -2351,7 +2352,7 @@ function introScene(){let sd=9;const rn=()=>(sd=(sd*16807)%2147483647)/214748364
  ${hay(352,598,1)}${hay(322,606,.78)}${hay(640,598,1)}
  ${hill(690,10,1.3,'var(--ihill4)')}
  ${flowers}<g style="opacity:var(--istar)" fill="#d8ff9a">${ff}</g></g></svg>`}
-function introPets(hero){const ks=Object.keys(BREEDS).filter(k=>k!==hero),hats=Object.keys(ACC).filter(k=>ACC[k].slot==='hat'),faces=Object.keys(ACC).filter(k=>ACC[k].slot==='face');
+function introPets(hero){const ks=Object.keys(BREEDS).filter(k=>k!==hero).slice(0,6),hats=Object.keys(ACC).filter(k=>ACC[k].slot==='hat'),faces=Object.keys(ACC).filter(k=>ACC[k].slot==='face');
  const slots=[['8%','2%','min(21vw,92px)'],['22%','13%','min(16vw,72px)'],['36%','27%','min(14vw,62px)'],['64%','27%','min(14vw,62px)'],['78%','13%','min(16vw,72px)'],['92%','2%','min(21vw,92px)']];
  const eqs=[{hat:hats[2%hats.length]},{face:faces[0]},{},{},{hat:hats[0]},{face:faces[1%faces.length]}];
  return ks.map((k,i)=>`<div class="ipet" style="--x:${slots[i][0]};--b:${slots[i][1]};--w:${slots[i][2]};--dl:${(.18+i*.1).toFixed(2)}s">${dog(eqs[i]||{},i%2?'happy':'cheer','0 0 200 200',k)}</div>`).join('')}
