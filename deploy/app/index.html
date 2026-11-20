@@ -553,6 +553,14 @@ html[data-theme=dark] #intro .isub{color:#fff3dd;background:linear-gradient(#5a4
 .pipxp em{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:400 10px 'Lilita One',system-ui;font-style:normal;color:#fff;text-shadow:0 1px 0 #3a200a,0 0 3px #3a200a}
 @media(prefers-reduced-motion:reduce){.pspk,.pcl,.pipsun,.pipring,.prain{animation:none}}
 .wbtn{position:relative}.wbtn:before{content:'';position:absolute;inset:-10px;border-radius:50%;background:radial-gradient(circle,rgba(255,244,170,.75),rgba(255,244,170,0) 68%);z-index:-1;animation:pglow 3s ease-in-out infinite}
+/* ---- Class Mode: two-pane on laptops ---- */
+.cmgrid{flex:1;display:flex;flex-direction:column;min-height:0;gap:10px}
+.cmside{background:#fff;color:var(--ink);border:3px solid #b27a35;border-radius:18px;padding:12px;box-shadow:0 4px 0 #8a5a2b;max-height:34vh;overflow:auto;width:min(94vw,520px);margin:0 auto}
+.cmsidehd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-family:var(--display)}.cmsidehd span{font-size:13px;color:var(--mute)}
+.cmnotes{max-height:14vh;overflow:auto;margin-bottom:6px}.cmline{font-size:14px;padding:3px 0;border-bottom:1px dashed #ead9bd}
+.cmside textarea{min-height:0;margin:0 0 8px;font-size:14px}.cmside select{margin:0}
+html[data-theme=dark] .cmside{background:#4a3322;color:#fff3dd;border-color:#2a1a0c}
+@media(min-width:900px){.cmgrid{flex-direction:row;align-items:stretch;gap:28px;padding:0 4vw}.cmmid{flex:1.2}.cmside{flex:1;max-height:none;width:auto;margin:auto 0;max-width:520px;max-height:62vh}.cmnotes{max-height:30vh}.cmdog{width:min(46vh,340px)}}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -940,7 +948,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.38 (widget shows level, mode, class)';
+const APP_VERSION='2026-11-20.39 (group study rooms, web class mode)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -1864,21 +1872,30 @@ async function cmLock(){try{if('wakeLock' in navigator&&CM.on&&document.visibili
 document.addEventListener('visibilitychange',()=>{if(CM.on&&document.visibilityState==='visible')cmLock()});
 const cmClock=()=>{const d=new Date();return (d.getHours()%12||12)+':'+String(d.getMinutes()).padStart(2,'0')};
 function cmText(){if(W.react&&Date.now()<W.react.until)return W.react.text;if(CM.react&&Date.now()<CM.react.until)return CM.react.text;return smartMsg()}
-function renderCM(){const el=$('#cm');if(!el||!S.user)return;const t=S.timer,c=t&&S.classes.find(x=>x.id===t.cls);
+function cmNotesHtml(){if(!live)return '<div class="mute" style="text-align:center;margin:6px 0">No class running.</div>';const ls=live.lines.slice(-7);return ls.length?ls.map(l=>`<div class="cmline">${esc(cleanLine?cleanLine(l):l)}</div>`).join(''):'<div class="mute" style="text-align:center;margin:6px 0">Listening… type below or let me listen.</div>'}
+function renderCM(){const el=$('#cm');if(!el||!S.user)return;const t=S.timer,c=t&&S.classes.find(x=>x.id===t.cls),lc=live&&S.classes.find(x=>x.id===live.cls),keep=(($('#cmsaid')||{}).value)||'';
  const bub=W.paw?`<div class="cmb paw"><b>Still with me, ${esc(S.user.name)}? 🐶</b><button class="p" data-a="highpaw">🐾 High Paw!</button></div>`:`<div class="cmb">${esc(cmText())}</div>`;
+ const side=live?`<div class="cmside"><div class="cmsidehd"><b>${lc?esc(lc.name):'Class'}</b><span>${live.listening?'🎙 Listening':'⌨ Typing'}</span></div><div id="cmnotes" class="cmnotes">${cmNotesHtml()}</div><textarea id="cmsaid" placeholder="Type a note and press Enter…" rows="2">${esc(keep)}</textarea><div class="row"><button class="s grow" data-a="cmmic">${live.listening?'⏸ Pause Listening':'🎙 Listen'}</button><button class="p bad grow" data-a="cmend">End Class</button></div></div>`
+  :`<div class="cmside"><div class="cmsidehd"><b>Start Class Notes</b></div><p class="mute" style="margin:0 0 8px">${esc(DN())} takes notes while you stay in this view. Works on your laptop, tablet or phone.</p><select id="cmcls">${S.classes.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select><button class="p" data-a="cmstart" style="width:100%;margin-top:8px">🎙 Start Class</button>${S.classes.some(x=>x.noRec)?'<p class="mute" style="font-size:12px;margin:8px 0 0">Classes set to Typing Mode keep the mic off.</p>':''}</div>`;
+ const canPip='documentPictureInPicture' in window;
  el.innerHTML=`<div class="cmtop"><span id="cmclock">${cmClock()}</span><button class="cmx" data-a="cmexit" aria-label="Exit Class Mode">✕</button></div>
- <div class="cmmid">${bub}<button class="cmdog" data-a="cmpet" aria-label="Pet ${esc(DN())}">${dog(S.eq,dogMood(),'10 6 180 196')}</button><div class="cmname">${esc(DN())} · Lv ${lvl()}</div>${t?`<div class="cmtimer"><small>${t.target?'Focus':'Studying'}${c?' · '+esc(c.name):''}</small><b id="cmtm">${wClock()}</b></div>`:''}</div>
- <div class="cmbar"><button data-a="cmboost">💛<span>Boost</span></button><button data-a="cmfocus">${t?'⏹':'⏱'}<span>${t?'Stop':'Focus'}</span></button><button data-a="cmbreathe">🌬️<span>Breathe</span></button><button data-a="cmask">💬<span>Ask</span></button><button data-a="cmnotes">🎙<span>Notes</span></button></div>`}
+ <div class="cmgrid"><div class="cmmid">${bub}<button class="cmdog" data-a="cmpet" aria-label="Pet ${esc(DN())}">${dog(S.eq,dogMood(),'10 6 180 196',petBreed())}</button><div class="cmname">${esc(DN())} · Lv ${lvl()}</div>${t?`<div class="cmtimer"><small>${t.target?'Focus':'Studying'}${c?' · '+esc(c.name):''}</small><b id="cmtm">${wClock()}</b></div>`:''}${S.room?`<div class="cmtimer"><small>${esc(S.room.title)}</small><b id="cmroom">${fmtClock(roomLeft())}</b></div>`:''}</div>${S.classes.length?side:''}</div>
+ <div class="cmbar"><button data-a="cmboost">💛<span>Boost</span></button><button data-a="cmfocus">${t?'⏹':'⏱'}<span>${t?'Stop':'Focus'}</span></button><button data-a="cmbreathe">🌬️<span>Breathe</span></button><button data-a="cmask">💬<span>Ask</span></button>${canPip?'<button data-a="cmpip">🪟<span>Pop Out</span></button>':''}</div>`;
+ const ta=$('#cmsaid');if(ta){ta.value=keep;ta.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();const v=ta.value.trim();if(v){ta.value='';v.split(/\n+/).forEach(l=>heard(l,{mine:true}));const n=$('#cmnotes');if(n)n.innerHTML=cmNotesHtml()}}}}}
 function cmSay(text,mood){CM.react={text,until:Date.now()+3000};W.cheerUntil=Date.now()+(mood?3000:0);renderCM();setTimeout(()=>{if(CM.on)renderCM()},3100)}
 Object.assign(ACTIONS,{
- cm(){if(!S.user)return;CM.on=true;document.body.classList.add('cm');renderCM();cmLock();clearInterval(CM.iv);let n=0;CM.iv=setInterval(()=>{if(!CM.on)return;n++;const a=$('#cmclock');if(a)a.textContent=cmClock();const b=$('#cmtm');if(b)b.textContent=wClock();if(n%60===0)renderCM()},1000);
+ cm(){if(!S.user)return;CM.on=true;document.body.classList.add('cm');renderCM();cmLock();clearInterval(CM.iv);let n=0;CM.iv=setInterval(()=>{if(!CM.on)return;n++;const a=$('#cmclock');if(a)a.textContent=cmClock();const b=$('#cmtm');if(b)b.textContent=wClock();const rr=$('#cmroom');if(rr)rr.textContent=fmtClock(roomLeft());const nn=$('#cmnotes');if(nn&&live)nn.innerHTML=cmNotesHtml();if(n%60===0&&!(($('#cmsaid')||{}).value))renderCM()},1000);
   try{if(!document.fullscreenElement&&!DESK&&innerWidth<900&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}},
  cmexit(){CM.on=false;clearInterval(CM.iv);document.body.classList.remove('cm');try{if(CM.lock)CM.lock.release();CM.lock=null}catch(e){}try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}$('#cm').innerHTML='';render();drawWidget()},
  cmpet(){S.happy=Math.min(100,S.happy+1);save();cmSay(['Hehe, thank you! 🐾','You\'re the best, '+S.user.name+'! 💛','Tail wag activated! 🐶','Okay okay — back to studying! 📚'][Math.floor(Math.random()*4)],'cheer');burst(10,$('.cmdog'))},
  cmboost(){const q=QUOTES[Math.floor(Math.random()*QUOTES.length)].replace('{n}',S.user.name);cmSay(q)},
  cmfocus(){if(S.timer)ACTIONS.stoptimer();else openFocus()},
  cmbreathe(){openBreath()},
- cmnotes(){ACTIONS.cmexit();go('class')}});
+ cmnotes(){ACTIONS.cmexit();go('class')},
+ cmstart(){const id=($('#cmcls')||{}).value||(S.classes[0]&&S.classes[0].id);if(!id)return toast('Add a class first');view.cls=id;ACTIONS.startlive();renderCM()},
+ cmmic(){if(!live)return;if(live.listening){try{ACTIONS.mic()}catch(e){}live.listening=false}else{try{startListen()}catch(e){}}setTimeout(renderCM,400)},
+ cmend(){if(!live)return;view.cls=live.cls;ACTIONS.endlive();if(!live){ACTIONS.cmexit()}else renderCM()},
+ async cmpip(){try{await popOut(false)}catch(e){}toast(W.popped?'Pet popped out! Switch tabs and they stay on top.':'Pop-out needs Chrome or Edge on a computer')}});
 
 
 /* ======= v8: tutorial, class synopsis, Ask Winston agent, optional AI key ======= */
@@ -1971,9 +1988,9 @@ const TOUR=[
  {t:'Boost Your Mood',b:'Bored, stressed or unmotivated? Open the Boost Hub on Home and tell me how you feel. I\'ll help with breathing, a game or a pep talk.',tab:'home',sel:'[data-a=tab][data-k=boost]'},
  {t:'Make Me Yours',b:'Spend coins on hats and glasses, switch Light or Dark mode and name me in Settings.',tab:'dog',sel:'nav [data-k=dog]'},
  {t:'Friends And Leaderboards 🏆',b:'The Social tab is where you add friends by username and race them on the leaderboard. Filter it by friends, your school, your state or your country. When a friend studies, you will get a nudge to keep up.',tab:'social',ssub:'friends',sel:'nav [data-k=social]'},
- {t:'The Dog Park 🌳',b:'The Park is a little hangout for you and your friends. Every pet shows up with what they are doing, like studying or napping. Studying hard? Tap Start A 5-Minute Break to rest and recharge, play fetch with the pups to earn a coin, or wave hello to a friend. It is your reward space between study sessions, so resting never feels like falling behind.',tab:'social',ssub:'park',sel:'[data-a=ssub][data-k=park]'},
+ {t:'The Study Park 🌳',b:'The Park is where group sessions happen. Start a Study Session or a Class Session, set a time, and send the code or link to your friends. Everyone who joins shows up with their pet and shares one countdown timer, so you keep each other focused. Need a rest? Take a 5-minute break or play fetch for a coin.',tab:'social',ssub:'park',sel:'[data-a=ssub][data-k=park]'},
  {t:'Ask Me Anything',b:'I go to class with you, so ask me about any class: what\'s going on, what\'s due, or to explain a topic. Add an AI key in Settings for smarter answers.',tab:'home',sel:'[data-a=agent]'},
- {t:'Class Mode',b:'Keep me open in class: full screen, the screen stays awake and I check in with a high paw. Install me from Settings → Get The App to keep me on your phone or computer.',tab:'home',sel:'[data-a=cm]'}];
+ {t:'Class Mode',b:'Keep me open in class. Start class notes right inside Class Mode, even on the web, and the screen stays awake. On a laptop in Chrome or Edge, tap Pop Out to float your pet over other tabs and apps.',tab:'home',sel:'[data-a=cm]'}];
 let tourI=0;
 function tourShow(i){tourI=Math.max(0,Math.min(TOUR.length-1,i));const st=TOUR[tourI];
  if(st.dsub)view.dsub=st.dsub;else if(st.tab==='dog')view.dsub='shop';
@@ -2021,13 +2038,25 @@ const parkDeco=()=>`<svg class="parkdeco" viewBox="0 0 400 200" preserveAspectRa
  <g><rect x="92" y="136" width="46" height="6" rx="2" fill="#b07a4a"/><rect x="96" y="142" width="5" height="12" fill="#8a5a3a"/><rect x="130" y="142" width="5" height="12" fill="#8a5a3a"/><rect x="92" y="126" width="46" height="5" rx="2" fill="#b07a4a"/></g>
  <g fill="#ff7eb3"><circle cx="190" cy="160" r="3"/><circle cx="200" cy="165" r="3"/><circle cx="360" cy="158" r="3"/></g><g fill="#ffd23f"><circle cx="195" cy="168" r="2.5"/><circle cx="352" cy="165" r="2.5"/></g></svg>`;
 let parkIv=null;
-function rPark(){liveKick();const crowd=parkCrowd(),real=crowd.filter(x=>!x.npc),tot=real.reduce((a,x)=>a+(x.w||0),0),left=Math.ceil(((S.park.breakUntil||0)-Date.now())/1000),brk=left>0;
- MAIN().innerHTML=`<div class="card parkcard"><h2>🌳 The Dog Park</h2><p class="mute" style="margin:0 0 8px">Where you and your friends hang out between study sessions. Take a break, say hi and cheer each other on.</p>
- <div class="park">${parkDeco()}<div class="parkpets">${crowd.map((x,i)=>`<div class="ppet ${x.me?'me':''}" style="--d:${(i%4)*.3}s;--o:${i%3}"><div class="pbub">${esc(x.st)}</div>${dog(x.e||{},x.h>=65?'happy':x.h>=35?'ok':'sad','0 0 200 200',x.b)}<div class="ptag">${esc(x.d||'')}${x.me?' · You':''}</div><div class="psub">${x.npc?'Park regular':esc(x.n)}</div>${(x.me||x.npc)?'':`<button class="s pwave" data-a="parkwave" data-k="${esc(x.n)}">👋 Wave</button>`}</div>`).join('')}</div></div>
- <div class="synstat" style="margin-top:8px"><span>👥 ${real.length} in the park</span><span>⏱ ${tot} min studied together this week</span></div></div>
+function rPark(){liveKick();roomPoll();const crowd=parkCrowd(),real=crowd.filter(x=>!x.npc),left=Math.ceil(((S.park.breakUntil||0)-Date.now())/1000),brk=left>0,R=S.room;
+ const rk=view.rk||'study';
+ const roomCard=R?`<div class="card roomcard"><h3>${R.kind==='class'?'🎓 Class':'📚 Study'} Session</h3><div style="font:400 22px var(--display);color:#6b3a10">${esc(R.title)}</div>
+  <div class="synstat" style="margin:8px 0"><span>⏱ <b id="roomtm">${fmtClock(roomLeft())}</b> left</span><span>👥 <b id="roomn">${roomMem.length||1}</b> here</span><span>Code <b>${esc(R.code)}</b></span></div>
+  <div class="row"><button class="p grow" data-a="roomshare">📨 Invite To Session</button><button class="s grow" data-a="roomcopy">Copy Code</button></div>
+  <div class="row" style="margin-top:8px"><button class="s grow" data-a="cm">📱 Class Mode</button><button class="s grow" data-a="roomleave">Leave Session</button></div></div>`
+  :`<div class="card"><h3>👥 Start A Group Session</h3><p class="mute" style="margin:0 0 8px">Study or sit through class together. Everyone who joins shows up here with their pet and one shared countdown.</p>
+  <div class="tabs" style="margin-bottom:8px">${[['study','📚 Study Session'],['class','🎓 Class Session']].map(([k,l])=>`<button data-a="roomkind" data-k="${k}" class="${k===rk?'on':''}">${l}</button>`).join('')}</div>
+  <input id="rtitle" placeholder="${rk==='class'?'Which class? e.g. BUAD 112 lecture':'What are we studying? e.g. Midterm review'}" maxlength="60">
+  <div class="row"><select id="rmin" class="grow">${[25,45,60,90,120].map(m=>`<option value="${m}" ${m===45?'selected':''}>${m} minutes</option>`).join('')}</select><select id="rcls" class="grow"><option value="">${S.classes.length?'Which class? (optional)':'No classes yet'}</option>${S.classes.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></div>
+  <button class="p" data-a="roomcreate" style="width:100%;margin-top:6px">Start Session</button>
+  <p class="mute" style="margin:12px 0 4px">Got a code from a friend?</p><div class="row"><input class="grow" id="rcode" placeholder="6 letter code" maxlength="6" autocapitalize="characters" style="margin:0;text-transform:uppercase"><button class="s" data-a="roomjoin">Join</button></div>
+  ${S.cloud?'':'<p class="mute" style="margin:8px 0 0;font-size:12px">Group sessions need a cloud account so friends can find each other.</p>'}</div>`;
+ const pets=R?crewHtml():crowd.map((x,i)=>`<div class="ppet ${x.me?'me':''}" style="--d:${(i%4)*.3}s;--o:${i%3}"><div class="pbub">${esc(x.st)}</div>${dog(x.e||{},x.h>=65?'happy':x.h>=35?'ok':'sad','0 0 200 200',x.b)}<div class="ptag">${esc(x.d||'')}${x.me?' · You':''}</div><div class="psub">${x.npc?'Park regular':esc(x.n)}</div>${(x.me||x.npc)?'':`<button class="s pwave" data-a="parkwave" data-k="${esc(x.n)}">👋 Wave</button>`}</div>`).join('');
+ MAIN().innerHTML=`<div class="card parkcard"><h2>🌳 The Study Park</h2><p class="mute" style="margin:0 0 8px">${R?'Your group is here. Keep each other going!':'Start a group study session or a group class session and your friends join you here, with one shared timer.'}</p>
+ <div class="park">${parkDeco()}<div class="parkpets" id="roomcrew">${pets}</div></div></div>
+ ${roomCard}
  <div class="card"><h3>☕ Take A Break</h3><p class="mute" style="margin:0 0 8px">${brk?`On a break — back in <b id="brk">${fmtClock(left)}</b>. Stretch, drink some water and say hi to the pups. 💛`:"Studying hard? A short break keeps you going. I'll tell you when it's time to head back."}</p>
- <div class="row"><button class="p grow" data-a="parkbreak">${brk?'End Break':'Start A 5-Minute Break'}</button><button class="s grow" data-a="parkfetch">🎾 Play Fetch</button></div><div id="fetchout" class="mute" style="margin-top:6px"></div></div>
- <div class="card"><h3>Bring Friends To The Park</h3><p class="mute">The park is better with friends. See who's studying, race up the leaderboard and wave hello.</p><div class="row"><button class="p grow" data-a="invite">📨 Invite A Friend</button><button class="s grow" data-a="dsubgo" data-k="friends">👥 Leaderboard</button></div></div>`;
+ <div class="row"><button class="p grow" data-a="parkbreak">${brk?'End Break':'Start A 5-Minute Break'}</button><button class="s grow" data-a="parkfetch">🎾 Play Fetch</button></div><div id="fetchout" class="mute" style="margin-top:6px"></div></div>`;
  clearInterval(parkIv);if(brk)parkIv=setInterval(()=>{const b=$('#brk');if(!b||tab!=='social'||view.ssub!=='park'){clearInterval(parkIv);return}const l=Math.ceil(((S.park.breakUntil||0)-Date.now())/1000);if(l<=0){S.park.breakUntil=0;save();clearInterval(parkIv);toast("Break's over — ready to study? 📚");render();return}b.textContent=fmtClock(l)},1000)}
 Object.assign(ACTIONS,{
  dsubgo(d){tab='social';view.ssub=d.k==='park'?'park':'friends';render()},
@@ -2321,7 +2350,7 @@ async function cloudSignUp(email,password,meta){const f=await sb('/rest/v1/rpc/w
  const r=await sb('/auth/v1/signup',{method:'POST',body:{email,password,data:meta}});if(r.net)return {err:'offline'};if(!r.ok)return {err:'x',msg:errMsg(r)};const j=r.json||{};return {session:j.access_token?j:null}}
 async function cloudSignIn(email,password){const r=await sb('/auth/v1/token?grant_type=password',{method:'POST',body:{email,password}});if(r.net)return {err:'offline',msg:"I can't reach the account server right now."};if(!r.ok)return {err:'x',msg:errMsg(r)};return {session:r.json}}
 async function cloudToken(){const c=S.cloud;if(!c)return null;if(Date.now()<c.exp-60000)return c.at;const r=await sb('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:c.rt}});if(!r.ok||!r.json)return null;Object.assign(c,cloudObj(r.json),{synced:c.synced,pending:c.pending,hash:c.hash});try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}return c.at}
-function slimState(){const c=JSON.parse(JSON.stringify(S));delete c.cloud;c.friends=(c.friends||[]).filter(f=>!f.cu);if(c.user)delete c.user.pw;if(c.pref)delete c.pref.apiKey;(c.classes||[]).forEach(k=>(k.docs||[]).forEach(d=>{d.text=String(d.text||'').slice(0,1500)}));if(JSON.stringify(c).length>900000)(c.classes||[]).forEach(k=>{(k.docs||[]).forEach(d=>{d.text=''});(k.sessions||[]).forEach(x=>{x.lines=(x.lines||[]).slice(-60)})});return c}
+function slimState(){const c=JSON.parse(JSON.stringify(S));delete c.cloud;delete c.room;c.friends=(c.friends||[]).filter(f=>!f.cu);if(c.user)delete c.user.pw;if(c.pref)delete c.pref.apiKey;(c.classes||[]).forEach(k=>(k.docs||[]).forEach(d=>{d.text=String(d.text||'').slice(0,1500)}));if(JSON.stringify(c).length>900000)(c.classes||[]).forEach(k=>{(k.docs||[]).forEach(d=>{d.text=''});(k.sessions||[]).forEach(x=>{x.lines=(x.lines||[]).slice(-60)})});return c}
 var _cq=null,_cbusy=false;
 const _hs=t=>{let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return h};
 const cloudHash=()=>{const c=slimState();delete c.tick;delete c.nextCheck;c.happy=Math.round(c.happy||0);if(c.days)for(const k of Object.keys(c.days))if(!Object.keys(c.days[k]||{}).length)delete c.days[k];return _hs(JSON.stringify(c))};
@@ -2397,6 +2426,38 @@ function applyWPos(){const w=S.pref.wpos,el=WEL;if(!el||!w||W.popped||(typeof DE
  document.addEventListener('pointermove',e=>{if(!d)return;if(!d.moved&&Math.abs(e.clientX-d.sx)+Math.abs(e.clientY-d.sy)<6)return;d.moved=true;e.preventDefault();const r=WEL.getBoundingClientRect(),x=Math.min(Math.max(0,e.clientX-d.ox),innerWidth-r.width),y=Math.min(Math.max(0,e.clientY-d.oy),innerHeight-r.height);WEL.style.left=x+'px';WEL.style.top=y+'px';WEL.style.right='auto';WEL.style.bottom='auto'},{capture:true,passive:false});
  document.addEventListener('pointerup',()=>{if(!d)return;if(d.moved){const r=WEL.getBoundingClientRect();S.pref.wpos={x:r.left/innerWidth,y:r.top/innerHeight};save();W.dragged=Date.now()}d=null},true);
  addEventListener('resize',applyWPos)})();
+
+/* ======= group study / class sessions (Study Park) ======= */
+S.room=S.room||null;var roomMem=[],roomIv=null,roomBusy=false,roomMsg='';
+const roomLeft=()=>S.room?Math.max(0,Math.ceil((S.room.startAt+S.room.minutes*60000-Date.now())/1000)):0;
+const roomLink=c=>`${/^https?:/.test(location.protocol)?location.origin+location.pathname:'https://studypaws.app/app/'}#room=${c}`;
+async function roomPoll(){if(!S.room||!S.cloud||roomBusy)return;roomBusy=true;try{
+ const st=S.timer?'Studying':(typeof live!=='undefined'&&live?'In class':((S.park.breakUntil||0)>Date.now()?'On a break':'In the room'));
+ const j=await cloudRpc('winston_room_join',{p_code:S.room.code,p_status:st});
+ if(j===null&&!fsetup){roomMsg='This session has ended.';roomEnd(true);return}
+ const m=await cloudRpc('winston_room_members',{p_code:S.room.code});if(Array.isArray(m)){roomMem=m;if(tab==='social'&&view.ssub==='park')roomPaint()}
+ if(roomLeft()<=0&&S.room){roomEnd(false)}}finally{roomBusy=false}}
+function roomStart(room){S.room=room;save();clearInterval(roomIv);roomIv=setInterval(roomPoll,10000);roomPoll();
+ const c=S.classes.find(x=>x.id===room.cls)||S.classes[0],left=Math.ceil(roomLeft()/60);if(c&&!S.timer&&left>0)startTimer(c.id,left)}
+function roomEnd(quiet){const r=S.room;if(!r)return;clearInterval(roomIv);roomIv=null;if(S.cloud)cloudRpc('winston_room_leave',{p_code:r.code});S.room=null;roomMem=[];save();
+ if(!quiet){const o=Math.max(1,roomMem.length||1);earn(5,'group session complete 🎉');toast(`Session complete! +5 coins`)}else if(roomMsg)toast(roomMsg);if(tab==='social')render()}
+function roomPaint(){const el=$('#roomcrew');if(el)el.innerHTML=crewHtml();const n=$('#roomn');if(n)n.textContent=roomMem.length||1}
+function crewHtml(){const me={me:1,n:S.user.name,d:DN(),b:petBreed(),e:S.eq,h:S.happy,st:'You'};const others=roomMem.filter(x=>!x.me).map(x=>({n:x.name||x.username,d:x.dog||'Pup',b:x.breed,e:x.e||{},h:80,st:x.status||''}));
+ return [me,...others].map((x,i)=>`<div class="ppet ${x.me?'me':''}" style="--d:${(i%4)*.3}s;--o:${i%3}"><div class="pbub">${esc(x.me?(S.timer?'Studying now':'In the room'):x.st)}</div>${dog(x.e||{},'happy','0 0 200 200',x.b)}<div class="ptag">${esc(x.d||'')}${x.me?' · You':''}</div><div class="psub">${esc(x.n)}</div></div>`).join('')}
+Object.assign(ACTIONS,{
+ roomkind(d){view.rk=d.k;render()},
+ async roomcreate(){if(!S.cloud)return toast('Create a cloud account to host group sessions');const title=(($('#rtitle')||{}).value||'').trim()||(view.rk==='class'?'Class session':'Study session'),mins=+(($('#rmin')||{}).value||45),cls=($('#rcls')||{}).value||'';
+  const code=await cloudRpc('winston_room_create',{p_kind:view.rk==='class'?'class':'study',p_title:title,p_minutes:mins});if(!code||typeof code!=='string')return toast(fsetup?'Group sessions need the one-time server setup (supabase-rooms.sql)':"Couldn't start the session. Try again.");
+  roomStart({code,kind:view.rk==='class'?'class':'study',title,minutes:mins,startAt:Date.now(),cls,host:1});render();toast(`Session started! Share code ${code} 🎉`)},
+ async roomjoin(d){const code=String(d&&d.k||(($('#rcode')||{}).value)||'').trim().toUpperCase();if(!/^[A-Z0-9]{6}$/.test(code))return toast('Enter the 6 letter session code');if(!S.cloud)return toast('Create a cloud account to join a group session');
+  const j=await cloudRpc('winston_room_join',{p_code:code,p_status:'Studying'});if(!j||!j.code)return toast(fsetup?'Group sessions need the one-time server setup':'No active session with that code');
+  roomStart({code:j.code,kind:j.kind,title:j.title,minutes:j.minutes,startAt:Date.parse(j.started_at)||Date.now(),cls:'',host:0});tab='social';view.ssub='park';render();toast(`Joined "${j.title}"! 🐾`)},
+ roomleave(){roomEnd(true);roomMsg='';toast('You left the session')},
+ async roomshare(){const t=`Join my ${S.room.kind==='class'?'class':'study'} session on Study Paws: ${roomLink(S.room.code)} (code ${S.room.code})`;try{if(navigator.share){await navigator.share({text:t});return}}catch(e){if(e&&e.name==='AbortError')return}try{await navigator.clipboard.writeText(t)}catch(e){}toast('Invite copied! Send it to your group 📨')},
+ roomcopy(){try{navigator.clipboard.writeText(S.room.code)}catch(e){}toast('Code copied')}});
+if(S.room){if(roomLeft()<=0){S.room=null}else if(S.cloud){roomIv=setInterval(roomPoll,10000);setTimeout(roomPoll,2500)}else S.room=null}
+(function(){const m=/[#&]room=([A-Za-z0-9]{6})/.exec(location.hash||'');if(m){S.pref.pendingRoom=m[1].toUpperCase();try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}})();
+setInterval(()=>{const e=$('#roomtm');if(e&&S.room){e.textContent=fmtClock(roomLeft());if(roomLeft()<=0)roomPoll()}},1000);
 
 /* ======= v7: desktop widget mode ======= */
 function setDeskMode(m){if(!DESK)return;deskMode=m;if(m==='full'&&needLock())setTimeout(showLock,0);winstonDesktop.setMode(m);const w=m==='widget'||m==='orb';document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',!w);
@@ -2474,7 +2535,7 @@ function introPets(hero){const ks=Object.keys(BREEDS).filter(k=>k!==hero).slice(
 const logoHtml=()=>{const row=(w,x)=>`<span class="trow">${[...w].map((c,i)=>`<span class="tl" style="--r:${[-5,3,-2,5,-3][i%5]}deg;--d:${(x+i)*.07}s">${c}</span>`).join('')}</span>`;return `<span class="logo" aria-label="Study Paws">${row('STUDY',0)}<span class="trow">${[...'PAWS'].map((c,i)=>`<span class="tl" style="--r:${[3,-4,2,-5][i]}deg;--d:${(5+i)*.07}s">${c}</span>`).join('')}<span class="tl tpaw" style="--d:.65s">🐾</span></span></span>`};
 function showIntro(){const el=$('#intro'),u=S.user;let title,sub;
  if(u){const wk=S.classes.reduce((a,c)=>a+weekSecs(c),0),up=upcoming(1,14)[0];title=`<small>Welcome Back, ${esc(u.name)}!</small>${logoHtml()}`;sub=`${esc(DN())} missed you! ${wk>60?`You've studied ${fmtDur(wk)} this week. `:''}${up?`Next up: ${esc(up.title)} (${esc(up.cls)}) ${when(up)}.`:'Ready to learn something fun today?'}`}
- else{title=`<small>Meet</small>${logoHtml()}`;sub='Your study buddy for class. Pick a pet, join the pack and make studying fun.'}
+ else{title=`<small>Meet</small>${logoHtml()}`;sub='Your study buddy for class. Pick a pet and make studying fun.'}
  const hero=petBreed();
  el.innerHTML=`${introScene()}<div class="iburst"></div><h1 class="ititle">${title}</h1><p class="isub">${sub}</p><div class="ichips"><span>📝 Live Notes</span><span>🎯 Daily Quests</span><span>👥 Friends</span><span>🌳 Dog Park</span><span>✏️ Practice</span></div>
  <div class="istage">${introPets(hero)}<div class="ipet ihero" style="--x:50%;--b:-1%;--w:min(44vw,200px);--dl:.05s">${dog(u?S.eq:{},'cheer','0 0 200 200',hero)}</div></div>
@@ -2604,6 +2665,7 @@ S.classes.forEach(ensure);
 if(!inFrame&&/^https?:/.test(location.protocol)){const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest';document.head.append(l);if('serviceWorker' in navigator){const had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!window.__rl){window.__rl=1;location.reload()}});navigator.serviceWorker.register('sw.js').catch(()=>{})}}
 if(DESK){const w=(deskMode==='widget'||deskMode==='orb')&&!!S.user;if(!S.user)deskMode='full';winstonDesktop.setMode(deskMode);document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',deskMode==='full')}
 window.__ret=cloudReturn();
+if(S.pref.pendingRoom&&S.user)setTimeout(()=>{const c=S.pref.pendingRoom;delete S.pref.pendingRoom;save();if(S.cloud)ACTIONS.roomjoin({k:c});else{toast('Create a cloud account to join that session');tab='social';view.ssub='park';render()}},2500);
 applyTheme();
 render();drawWidget();iconInit();setTimeout(maybeName,2600);if(needLock())showLock();if(window.__ret)setTimeout(()=>cloudAfterReturn(window.__ret),300);else if(S.cloud)setTimeout(cloudPull,1200);tickTimer();if(DESK&&deskMode!=='full'&&S.user)$('#intro').style.display='none';else showIntro();
 </script>
