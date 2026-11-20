@@ -440,6 +440,10 @@ html[data-theme=dark] .cmb,html[data-theme=dark] .cmtimer,html[data-theme=dark] 
 html[data-theme=dark] .breed.on{background:#2f4a26;border-color:#58c632}
 html[data-theme=dark] .sign{color:#fff}
 .hero{background:none!important;border:0!important;box-shadow:none!important;padding:0 0 4px}.hero h1{color:#fff;text-shadow:-2px -2px 0 #5a3414,2px -2px 0 #5a3414,-2px 2px 0 #5a3414,2px 2px 0 #5a3414,0 4px 0 #5a3414;font-size:30px}.hero p{color:#fff;font-weight:600;text-shadow:0 2px 6px rgba(20,60,110,.7)}
+.iosSteps,.iosteps,.iosSteps li{}
+.iosSteps{}
+.instban .iosteps{}
+.instban ol{margin:0;padding-left:22px}.instban li{margin:5px 0}.instban .shareic{display:inline-block;background:#fff;border:2px solid #b27a35;border-radius:6px;padding:0 5px;font-size:13px}
 #widget.desk{position:fixed;left:8px;top:8px;right:8px;bottom:8px;width:auto;max-height:none;overflow:auto;display:block;border-radius:26px}
 .whead.drag{-webkit-app-region:drag;cursor:grab}.whead.drag button{-webkit-app-region:no-drag}
 .dwbtns{display:flex;gap:4px;align-self:flex-start;flex:none}
@@ -709,6 +713,7 @@ function rHome(){
  <p class="bubble">${esc(mood()==='sad'?'I miss you! Studying together makes me happy 🥺':smartMsg())}</p></div>
  <div class="row" style="margin-bottom:14px">${t?'':'<button class="s grow" data-a="openfocus">⏱ Focus</button>'}<button class="p ${t?'':'purple '}grow" data-a="tab" data-k="class">🎙 Start class</button></div>
  <div class="row" style="margin:-4px 0 14px"><button class="s grow" data-a="agent">💬 Ask ${esc(DN())}</button><button class="s grow" data-a="cm">📱 Class Mode</button></div>
+ ${installBanner()}
  ${peerCard()}
  ${questsCard()}
  <div class="card"><h3>How are you feeling?</h3><div class="moods">${MOODS.map(m=>`<button class="mood" data-a="feel" data-k="${m[1]}"><b>${m[0]}</b><span>${m[1]}</span></button>`).join('')}</div><div id="feelout"></div></div>
@@ -813,7 +818,7 @@ Object.assign(ACTIONS,{
 /* ======= LIVE CLASS ======= */
 let live=null,rec=null,pawT=null,pawCount=null;
 const MIC_MSG={'not-allowed':'Your browser blocked the microphone for this page.','service-not-allowed':'Speech recognition is blocked here.','audio-capture':'No microphone was found.','network':'Speech recognition needs an internet connection.','language-not-supported':"That language isn't supported for dictation."};
-const APP_VERSION='2026-11-20.20 (create account, name your pet)';
+const APP_VERSION='2026-11-20.21 (free iPhone install prompt)';
 const DESK=/[?&]desktop=1/.test(location.search)&&!!window.winstonDesktop;let deskMode=((/[?&]mode=(\w+)/.exec(location.search)||[])[1])||'widget';
 const SRC=DESK?null:(window.SpeechRecognition||window.webkitSpeechRecognition);
 const NOSR=DESK?"Live listening isn't available in the desktop widget — type or dictate below, or use the web app for the mic.":'This browser has no speech recognition — type or dictate below.';
@@ -1224,7 +1229,7 @@ Object.assign(ACTIONS,{
 
 /* ======= shop ======= */
 
-let deferredInstall=null;addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;const b=$('#instbtn');if(b)b.textContent='⬇ Install Winston'});
+let deferredInstall=null;addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;const b=$('#instbtn');if(b)b.textContent='⬇ Install Winston';if(typeof tab!=='undefined'&&tab==='home'&&S.user)render()});
 const isStandalone=()=>{try{return !!window.__NATIVE_APP||!!window.ReactNativeWebView||matchMedia('(display-mode: standalone)').matches||navigator.standalone}catch(e){return false}};
 function installCard(){if(DESK||isStandalone())return '';const site='https://miyagagne.github.io/Miya-s-Sandbox/winston/';
  return `<label style="display:block;margin-top:6px">Get The App</label><div class="instcard">${inFrame?`<p class="mute" style="margin:0">To put ${esc(DN())} on your phone or computer, open the Winston website and install it from there:<br><b>${site}</b></p>`:`<button class="p" id="instbtn" data-a="install" style="width:100%">⬇ Install ${esc(DN())}</button><p class="mute" style="margin:8px 0 0"><b>iPhone:</b> Safari → Share → Add To Home Screen<br><b>Android:</b> Chrome ⋮ → Install App<br><b>Computer:</b> Chrome or Edge → install icon in the address bar</p>`}</div>`}
@@ -1915,6 +1920,17 @@ function accountCard(){const u=S.user;return `<label style="display:block;margin
 Object.assign(ACTIONS,{
  restore(){const f=$('#rf');if(f){f.value='';f.click()}},
  async exportacct(){const b=JSON.parse(JSON.stringify(S));if(b.pref)delete b.pref.apiKey;const nm=`winston-account-${(S.user.username||'me')}.json`;await saveBlob(nm,new Blob([JSON.stringify(b)],{type:'application/json'}));toast('Backup saved 💾 Keep it somewhere safe')}});
+
+
+/* ---- install prompt (free: home-screen app on iPhone / Android) ---- */
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function installBanner(){if(DESK||inFrame||!/^https?:/.test(location.protocol)||isStandalone()||!S.pref.tourDone)return '';if(S.pref.instHide&&Date.now()-S.pref.instHide<14*864e5)return '';
+ if(isIOS())return `<div class="card instban"><h3>📲 Put ${esc(DN())} On Your Home Screen</h3><p class="mute" style="margin:0 0 8px">Free, no app store. Open ${esc(DN())} like a real app, full screen, and it updates itself.</p>
+  <ol class="iossteps"><li>Tap the <b>Share</b> button <span class="shareic">⬆️</span> at the bottom of Safari</li><li>Scroll down and tap <b>Add to Home Screen</b></li><li>Tap <b>Add</b> — then open ${esc(DN())} from your home screen</li></ol>
+  <p class="mute" style="font-size:12px;margin:6px 0 8px">Not seeing the Share button? Open this page in <b>Safari</b> first.</p><button class="s" data-a="insthide" style="width:100%">Got It</button></div>`;
+ if(deferredInstall)return `<div class="card instban"><h3>📲 Install ${esc(DN())}</h3><p class="mute" style="margin:0 0 8px">Add ${esc(DN())} to your home screen — free, full screen, and it updates itself.</p><div class="row"><button class="p grow" data-a="install">⬇ Install</button><button class="s grow" data-a="insthide">Not Now</button></div></div>`;
+ return ''}
+ACTIONS.insthide=()=>{S.pref.instHide=Date.now();save();render()};
 
 /* ======= v7: desktop widget mode ======= */
 function setDeskMode(m){if(!DESK)return;deskMode=m;winstonDesktop.setMode(m);const w=m==='widget'||m==='orb';document.documentElement.classList.toggle('wm',w);document.body.classList.toggle('wm',w);document.body.classList.toggle('fullbar',!w);

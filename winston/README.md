@@ -75,3 +75,11 @@ Winston opens your laptop's real microphone: pick the device, watch the live lev
 ## Pick your pet
 
 At the start you choose a **Dog** (Pomeranian, Golden Retriever, Corgi, German Shepherd) or a **Cat** (Persian, Orange Tabby, Maine Coon), then name them. Each breed has its own colors, ears, face and markings, and works with every accessory and mood. Switch any time in My Pet → Settings → *My Pet*.
+
+## Using Winston on your phone and your laptop (free)
+
+- **iPhone (free, no App Store):** open the site in **Safari**, tap **Share → Add to Home Screen**. It opens full screen like an app and updates itself every time the site is updated. (TestFlight/App Store need Apple's $99/year developer program.)
+- **Android:** open in Chrome and tap **Install**, or use the Install button in Settings.
+- **Laptop:** the Windows/Mac desktop app (built by the *Build Winston Desktop* GitHub Action) floats Winston as an always-on-top pet over any app. In Chrome/Edge the 🪟 button floats him in a small window.
+- **In class:** use **Class Mode** on your phone (screen stays awake) and the floating pet on your laptop.
+- **Limits:** iPhones can't float an app over other apps or keep a web app running in the background, so notes and check-ins pause when you switch apps on a phone.
